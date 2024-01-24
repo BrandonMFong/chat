@@ -2,6 +2,8 @@
 # date: 7/29/22
 #
 
+include external/libs/makefiles/libpaths.mk 
+
 ### Global
 BUILD_PATH = build
 FILES = server client
@@ -12,7 +14,7 @@ R_CXXFLAGS += -Isrc/
 R_BIN_NAME = chat
 R_BUILD_PATH = $(BUILD_PATH)/release
 R_MAIN_FILE = src/main.cpp
-R_LIBRARIES =
+R_LIBRARIES = external/libs/$(BF_LIB_RPATH_RELEASE_CPP)
 R_OBJECTS = $(patsubst %, $(R_BUILD_PATH)/%.o, $(FILES))
 
 ### Debug settings
@@ -20,7 +22,7 @@ D_CXXFLAGS = -DDEBUG -g -Isrc/
 D_BIN_NAME = $(R_BIN_NAME)-debug
 D_BUILD_PATH = $(BUILD_PATH)/debug
 D_MAIN_FILE = $(R_MAIN_FILE)
-D_LIBRARIES =
+D_LIBRARIES = external/libs/$(BF_LIB_RPATH_DEBUG_CPP)
 D_OBJECTS = $(patsubst %, $(D_BUILD_PATH)/%.o, $(FILES))
 
 ### Test settings
