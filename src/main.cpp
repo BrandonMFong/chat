@@ -10,6 +10,7 @@
 #include <stdlib.h> 
 #include <sys/socket.h> //for socket APIs 
 #include <sys/types.h> 
+#include <unistd.h>
 
 #define ARGUMENT_SERVER "server"
 #define ARGUMENT_CLIENT "client"
@@ -87,11 +88,17 @@ int ClientRun() {
     }
 
     else {
-        char strData[255];
-
-        recv(sockD, strData, sizeof(strData), 0);
-
-        printf("Message: %s\n", strData);
+		int i = 0;
+		while (i < 10) {
+			char buf[255];
+			recv(sockD, buf, sizeof(buf), 0);
+			printf("recv: %s\n", buf);
+			snprintf(buf, 255, "client %d", i);
+			send(sockD, buf, sizeof(buf), 0);
+			printf("send: %s\n", buf);
+			sleep(1);
+			i++;
+		}
     }
 
 	return 0;
@@ -102,10 +109,6 @@ int ServerRun() {
 	// create server socket similar to what was done in
     // client program
     int servSockD = socket(AF_INET, SOCK_STREAM, 0);
-
-    // string store data to send to client
-    char serMsg[255] = "Message from the server to the "
-                       "client \'Hello Client\' ";
 
     // define server address
     struct sockaddr_in servAddr;
@@ -124,8 +127,18 @@ int ServerRun() {
     // integer to hold client socket.
     int clientSocket = accept(servSockD, NULL, NULL);
 
-    // send's messages to client socket
-    send(clientSocket, serMsg, sizeof(serMsg), 0);
+	int i = 0;
+	while (i < 10) {
+		char buf[255];
+		snprintf(buf, 255, "server %d", i);
+		// send's messages to client socket
+		send(clientSocket, buf, sizeof(buf), 0);
+		printf("send: %s\n", buf);
+        recv(clientSocket, buf, sizeof(buf), 0);
+		printf("recv: %s\n", buf);
+		sleep(1);
+		i++;
+	}
 
 	return 0;
 }
