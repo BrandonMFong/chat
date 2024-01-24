@@ -52,7 +52,7 @@ release-setup:
 bin/$(R_BIN_NAME): $(R_MAIN_FILE) $(R_OBJECTS) $(R_LIBRARIES)
 	g++ -o $@ $^ $(R_CXXFLAGS) $(CXXLINKS) 
 
-$(R_BUILD_PATH)/%.o: src/%.cpp src/%.hpp
+$(R_BUILD_PATH)/%.o: src/%.cpp src/%.hpp src/*.h
 	g++ -c $< -o $@ $(R_CXXFLAGS)
 
 ## Debug build instructions
@@ -65,7 +65,7 @@ debug-setup:
 bin/$(D_BIN_NAME): $(D_MAIN_FILE) $(D_OBJECTS) $(D_LIBRARIES)
 	g++ -o $@ $^ $(D_CXXFLAGS) $(CXXLINKS) 
 
-$(D_BUILD_PATH)/%.o: src/%.cpp src/%.hpp
+$(D_BUILD_PATH)/%.o: src/%.cpp src/%.hpp src/*.h
 	g++ -c $< -o $@ $(D_CXXFLAGS)
 
 ## Test build instructions
@@ -79,6 +79,6 @@ test-setup:
 bin/$(T_BIN_NAME): $(T_MAIN_FILE) $(T_OBJECTS) $(T_LIBRARIES)
 	g++ -o $@ $^ $(T_CXXFLAGS) $(CXXLINKS) 
 
-$(T_BUILD_PATH)/%.o: src/%.cpp src/%.hpp
+$(T_BUILD_PATH)/%.o: src/%.cpp src/%.hpp src/*.h
 	g++ -c $< -o $@ $(T_CXXFLAGS)
 
