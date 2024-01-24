@@ -4,7 +4,7 @@
 
 ### Global
 BUILD_PATH = build
-FILES =
+FILES = server client
 CXXLINKS =
 
 ### Release settings
