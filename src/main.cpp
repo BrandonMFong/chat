@@ -4,98 +4,58 @@
  */
 
 #include <stdio.h>
-#include <netdb.h>
-#include <netinet/in.h>
-#include <stdlib.h>
 #include <string.h>
-#include <sys/socket.h>
-#include <sys/types.h>
-#include <unistd.h> // read(), write(), close()
-#define MAX 80
-#define PORT 8080
-#define SA struct sockaddr
 
-// Function designed for chat between client and server.
-void func(int connfd)
-{
-	char buff[MAX];
-	int n;
-	// infinite loop for chat
-	for (;;) {
-		bzero(buff, MAX);
+#define ARGUMENT_SERVER "server"
+#define ARGUMENT_CLIENT "client"
 
-		// read the message from client and copy it in buffer
-		read(connfd, buff, sizeof(buff));
-		// print buffer which contains the client contents
-		printf("From client: %s\t To client : ", buff);
-		bzero(buff, MAX);
-		n = 0;
-		// copy server message in the buffer
-		while ((buff[n++] = getchar()) != '\n')
-			;
+#define CHAT_MODE_SERVER 's'
+#define CHAT_MODE_CLIENT 'c'
 
-		// and send that buffer to client
-		write(connfd, buff, sizeof(buff));
-
-		// if msg contains "Exit" then server exit and chat ended.
-		if (strncmp("exit", buff, 4) == 0) {
-			printf("Server Exit...\n");
-			break;
-		}
-	}
+void Help(const char * toolname) {
+	printf("usage: %s\n", toolname);
 }
 
-// Driver function
-int main()
-{
-	int sockfd, connfd, len;
-	struct sockaddr_in servaddr, cli;
+int ArgumentsRead(int argc, char * argv[], char * mode) {
+	if (!argv || !mode) return -2;
+	else if (argc < 2) return -2;
 
-	// socket create and verification
-	sockfd = socket(AF_INET, SOCK_STREAM, 0);
-	if (sockfd == -1) {
-		printf("socket creation failed...\n");
-		exit(0);
+	bool modereqclient = false;
+	bool modereqserver = false;
+	for (int i = 1; i < argc; i++) {
+		if (!strcmp(argv[i], ARGUMENT_SERVER)) {
+			modereqserver = true;
+		} else if (!strcmp(argv[i], ARGUMENT_CLIENT)) {
+			modereqclient = true;
+		}
 	}
-	else
-		printf("Socket successfully created..\n");
-	bzero(&servaddr, sizeof(servaddr));
 
-	// assign IP, PORT
-	servaddr.sin_family = AF_INET;
-	servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
-	servaddr.sin_port = htons(PORT);
-
-	// Binding newly created socket to given IP and verification
-	if ((bind(sockfd, (SA*)&servaddr, sizeof(servaddr))) != 0) {
-		printf("socket bind failed...\n");
-		exit(0);
+	if (modereqclient && modereqserver) {
+		return -2;
+	} else if (modereqclient) {
+		*mode = CHAT_MODE_CLIENT;
+	} else if (modereqserver) {
+		*mode = CHAT_MODE_SERVER;
 	}
-	else
-		printf("Socket successfully binded..\n");
 
-	// Now server is ready to listen and verification
-	if ((listen(sockfd, 5)) != 0) {
-		printf("Listen failed...\n");
-		exit(0);
+	return 0;
+}
+
+int main(int argc, char * argv[]) {
+	int result = 0;
+	char mode = 0;
+
+	result = ArgumentsRead(argc, argv, &mode);
+	if (result) {
+		Help(argv[0]);
+	} else {
+		if (mode == CHAT_MODE_SERVER) {
+			printf("server\n");
+		} else if (mode == CHAT_MODE_CLIENT) {
+			printf("client\n");
+		}
 	}
-	else
-		printf("Server listening..\n");
-	len = sizeof(cli);
 
-	// Accept the data packet from client and verification
-	connfd = accept(sockfd, (SA*)&cli, &len);
-	if (connfd < 0) {
-		printf("server accept failed...\n");
-		exit(0);
-	}
-	else
-		printf("server accept the client...\n");
-
-	// Function for chatting between client and server
-	func(connfd);
-
-	// After chatting close the socket
-	close(sockfd);
+	return result;
 }
 
