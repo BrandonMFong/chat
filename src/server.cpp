@@ -11,8 +11,7 @@
 #include <unistd.h>
 #include <bflibcpp/bflibcpp.hpp>
 
-int ServerRun() {
-	printf("server\n");
+void ServerThreadCallback(void * in) {
 	// create server socket similar to what was done in
     // client program
     int servSockD = socket(AF_INET, SOCK_STREAM, 0);
@@ -46,7 +45,12 @@ int ServerRun() {
 		sleep(1);
 		i++;
 	}
+}
 
+int ServerRun() {
+	printf("server\n");
+	BFThreadAsyncID tid = BFThreadAsync(ServerThreadCallback, 0);
+	while (1) {}
 	return 0;
 }
 

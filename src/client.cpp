@@ -9,9 +9,9 @@
 #include <sys/socket.h> //for socket APIs 
 #include <sys/types.h> 
 #include <unistd.h>
+#include <bflibcpp/bflibcpp.hpp>
 
-int ClientRun() {
-	printf("client\n");
+void ClientThreadCallback(void * in) {
 	int sockD = socket(AF_INET, SOCK_STREAM, 0);
 
     struct sockaddr_in servAddr;
@@ -42,7 +42,12 @@ int ClientRun() {
 			i++;
 		}
     }
+}
 
+int ClientRun() {
+	printf("client\n");
+	BFThreadAsyncID tid = BFThreadAsync(ClientThreadCallback, 0);
+	while (1) {}
 	return 0;
 }
 

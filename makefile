@@ -7,7 +7,7 @@ include external/libs/makefiles/libpaths.mk
 ### Global
 BUILD_PATH = build
 FILES = server client
-CXXLINKS =
+CXXLINKS = -lpthread
 
 ### Release settings
 R_CXXFLAGS += -Isrc/ -Iexternal/libs/$(BF_LIB_RPATH_RELEASE)
