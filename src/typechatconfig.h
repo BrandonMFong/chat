@@ -10,9 +10,8 @@
 #include <bflibcpp/atomic.hpp>
 
 typedef struct {
-	Atomic<Queue<char *> msgIn;
-	Atomic<Queue<char *> msgOut;
-
+	BF::Atomic<BF::Queue<char *>> msgIn;
+	BF::Atomic<BF::Queue<char *>> msgOut;
 } ChatConfig;
 
 #endif // TYPE_CHAT_CONFIG_H

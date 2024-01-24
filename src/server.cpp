@@ -3,6 +3,7 @@
  * date: 1/24/24
  */
 
+#include <server.hpp>
 #include <netinet/in.h> //structure for storing address information 
 #include <stdio.h> 
 #include <stdlib.h> 
@@ -12,6 +13,8 @@
 #include <bflibcpp/bflibcpp.hpp>
 
 void ServerThreadCallback(void * in) {
+	const ChatConfig * config = (const ChatConfig *) in;
+
 	// create server socket similar to what was done in
     // client program
     int servSockD = socket(AF_INET, SOCK_STREAM, 0);
@@ -47,9 +50,9 @@ void ServerThreadCallback(void * in) {
 	}
 }
 
-int ServerRun() {
+int ServerRun(const ChatConfig * config) {
 	printf("server\n");
-	BFThreadAsyncID tid = BFThreadAsync(ServerThreadCallback, 0);
+	BFThreadAsyncID tid = BFThreadAsync(ServerThreadCallback, (void *) config);
 	while (1) {}
 	return 0;
 }

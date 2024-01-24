@@ -7,6 +7,7 @@
 #include <string.h>
 #include <server.hpp>
 #include <client.hpp>
+#include <typechatconfig.h>
 
 #define ARGUMENT_SERVER "server"
 #define ARGUMENT_CLIENT "client"
@@ -46,15 +47,16 @@ int ArgumentsRead(int argc, char * argv[], char * mode) {
 int main(int argc, char * argv[]) {
 	int result = 0;
 	char mode = 0;
+	ChatConfig config;
 
 	result = ArgumentsRead(argc, argv, &mode);
 	if (result) {
 		Help(argv[0]);
 	} else {
 		if (mode == CHAT_MODE_SERVER) {
-			result = ServerRun();
+			result = ServerRun(&config);
 		} else if (mode == CHAT_MODE_CLIENT) {
-			result = ClientRun();
+			result = ClientRun(&config);
 		}
 	}
 

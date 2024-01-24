@@ -6,7 +6,9 @@
 #ifndef CLIENT_HPP
 #define CLIENT_HPP
 
-int ClientRun();
+#include <typechatconfig.h>
+
+int ClientRun(const ChatConfig * config);
 
 #endif // CLIENT_HPP
 

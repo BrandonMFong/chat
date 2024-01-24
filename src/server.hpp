@@ -6,7 +6,9 @@
 #ifndef SERVER_HPP
 #define SERVER_HPP
 
-int ServerRun();
+#include <typechatconfig.h>
+
+int ServerRun(const ChatConfig * config);
 
 #endif // SERVER_HPP
 
