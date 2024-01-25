@@ -17,10 +17,15 @@
 typedef struct {
 	int cd; // client socket descriptor
 	ChatConfig * config;
-} ServerThreadTools;
+} ServerThreadIOTools;
+
+typedef struct {
+	BFLock lock;
+	ChatConfig * config;
+} ServerThreadInitTools;
 
 void ServerThreadCallbackMessageIn(void * in) {
-	ServerThreadTools * tools = (ServerThreadTools *) in;
+	ServerThreadIOTools * tools = (ServerThreadIOTools *) in;
 	
 	int i = 0;
 	while (i < 10) {
@@ -33,7 +38,7 @@ void ServerThreadCallbackMessageIn(void * in) {
 }
 
 void ServerThreadCallbackMessageOut(void * in) {
-	ServerThreadTools * tools = (ServerThreadTools *) in;
+	ServerThreadIOTools * tools = (ServerThreadIOTools *) in;
 
 	while (1) {
 		// if queue is not empty, send the next message
@@ -53,7 +58,7 @@ void ServerThreadCallbackMessageOut(void * in) {
 }
 
 void ServerThreadCallbackInit(void * in) {
-	ChatConfig * config = (ChatConfig *) in;
+	ServerThreadInitTools * tools = (ServerThreadInitTools *) in;
 
 	// create server socket similar to what was done in
     // client program
@@ -73,19 +78,24 @@ void ServerThreadCallbackInit(void * in) {
 	const int allowedConnections = 1;
     listen(serverSocket, allowedConnections);
 
-	ServerThreadTools tools[allowedConnections];
+	ServerThreadIOTools iotools[allowedConnections];
 
     // integer to hold client socket.
-	tools[0].cd = accept(serverSocket, NULL, NULL);
-	tools[0].config = config;
+	iotools[0].config = tools->config;
+	iotools[0].cd = accept(serverSocket, NULL, NULL);
+	BFLockRelease(&tools->lock);
 
-	//BFThreadAsyncID tid0 = BFThreadAsync(ServerThreadCallbackMessageIn, (void *) &tools[0]);
-	BFThreadAsyncID tid1 = BFThreadAsync(ServerThreadCallbackMessageOut, (void *) &tools[0]);
+	//BFThreadAsyncID tid0 = BFThreadAsync(ServerThreadCallbackMessageIn, (void *) &iotools[0]);
+	BFThreadAsyncID tid1 = BFThreadAsync(ServerThreadCallbackMessageOut, (void *) &iotools[0]);
 }
 
 int ServerRun(ChatConfig * config) {
 	printf("server\n");
-	BFThreadAsyncID tid = BFThreadAsync(ServerThreadCallbackInit, (void *) config);
+	ServerThreadInitTools initTool;
+	initTool.config = config;
+	BFLockCreate(&initTool.lock);
+	BFThreadAsyncID tid = BFThreadAsync(ServerThreadCallbackInit, (void *) &initTool);
+	BFLockWait(&initTool.lock);
 	return MessengerRun(config);
 }
 

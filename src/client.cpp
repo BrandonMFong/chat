@@ -49,6 +49,7 @@ void ClientThreadCallback(void * in) {
 int ClientRun(ChatConfig * config) {
 	printf("client\n");
 	BFThreadAsyncID tid = BFThreadAsync(ClientThreadCallback, (void *) config);
-	return MessengerRun(config);
+	while (1) {}
+	return 0;
 }
 
