@@ -8,10 +8,16 @@
 
 #include <bflibcpp/queue.hpp>
 #include <bflibcpp/atomic.hpp>
+#include <typemessage.h>
 
 typedef struct {
-	BF::Atomic<BF::Queue<char *>> msgIn;
-	BF::Atomic<BF::Queue<char *>> msgOut;
+	// Each queue will be responsible for managing
+	// their message memory
+	//
+	// Each message in the queues are dynamically allocated
+	// by malloc
+	BF::Atomic<BF::Queue<Message *>> in;
+	BF::Atomic<BF::Queue<Message *>> out;
 } ChatConfig;
 
 #endif // TYPE_CHAT_CONFIG_H

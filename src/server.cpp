@@ -35,15 +35,20 @@ void ServerThreadCallbackMessageIn(void * in) {
 void ServerThreadCallbackMessageOut(void * in) {
 	ServerThreadTools * tools = (ServerThreadTools *) in;
 
-	int i = 0;
-	while (i < 10) {
-		char buf[MESSAGE_BUFFER_SIZE];
-		snprintf(buf, MESSAGE_BUFFER_SIZE, "server %d", i);
-		// send's messages to client socket
-		send(tools->cd, buf, sizeof(buf), 0);
-		printf("send: %s\n", buf);
+	while (1) {
+		// if queue is not empty, send the next message
+		if (!tools->config->out.get().empty()) {
+			// get first message
+			Message * msg = tools->config->out.get().front();
+
+			// pop queue
+			tools->config->out.get().pop();
+
+			// send buf from message
+			send(tools->cd, msg->buf, sizeof(msg->buf), 0);
+			printf("send: %s\n", msg->buf);
+		}
 		sleep(1);
-		i++;
 	}
 }
 
@@ -71,13 +76,11 @@ void ServerThreadCallbackInit(void * in) {
 	ServerThreadTools tools[allowedConnections];
 
     // integer to hold client socket.
-    tools[0].cd = accept(serverSocket, NULL, NULL);
+	tools[0].cd = accept(serverSocket, NULL, NULL);
 	tools[0].config = config;
 
 	//BFThreadAsyncID tid0 = BFThreadAsync(ServerThreadCallbackMessageIn, (void *) &tools[0]);
 	BFThreadAsyncID tid1 = BFThreadAsync(ServerThreadCallbackMessageOut, (void *) &tools[0]);
-
-	while (1) {}
 }
 
 int ServerRun(ChatConfig * config) {
