@@ -13,13 +13,18 @@
 #include <unistd.h>
 #include <bflibcpp/bflibcpp.hpp>
 
+typedef struct {
+	int cd; // client socket descriptor
+	ChatConfig * config;
+} ServerThreadTools;
+
 void ServerThreadCallbackMessageIn(void * in) {
-	const ChatConfig * config = (const ChatConfig *) in;
+	ServerThreadTools * tools = (ServerThreadTools *) in;
 	
 	int i = 0;
 	while (i < 10) {
 		char buf[MESSAGE_BUFFER_SIZE];
-        recv(config->sd, buf, sizeof(buf), 0);
+        recv(tools->cd, buf, sizeof(buf), 0);
 		printf("recv: %s\n", buf);
 		sleep(1);
 		i++;
@@ -27,14 +32,14 @@ void ServerThreadCallbackMessageIn(void * in) {
 }
 
 void ServerThreadCallbackMessageOut(void * in) {
-	const ChatConfig * config = (const ChatConfig *) in;
+	ServerThreadTools * tools = (ServerThreadTools *) in;
 
 	int i = 0;
 	while (i < 10) {
 		char buf[MESSAGE_BUFFER_SIZE];
 		snprintf(buf, MESSAGE_BUFFER_SIZE, "server %d", i);
 		// send's messages to client socket
-		send(config->sd, buf, sizeof(buf), 0);
+		send(tools->cd, buf, sizeof(buf), 0);
 		printf("send: %s\n", buf);
 		sleep(1);
 		i++;
@@ -59,13 +64,17 @@ void ServerThreadCallbackInit(void * in) {
     bind(serverSocket, (struct sockaddr *) &servAddr, sizeof(servAddr));
 
     // listen for connections
-    listen(serverSocket, 1);
+	const int allowedConnections = 1;
+    listen(serverSocket, allowedConnections);
+
+	ServerThreadTools tools[allowedConnections];
 
     // integer to hold client socket.
-    config->sd = accept(serverSocket, NULL, NULL);
+    tools[0].cd = accept(serverSocket, NULL, NULL);
+	tools[0].config = config;
 
-	//BFThreadAsyncID tid0 = BFThreadAsync(ServerThreadCallbackMessageIn, (void *) config);
-	BFThreadAsyncID tid1 = BFThreadAsync(ServerThreadCallbackMessageOut, (void *) config);
+	//BFThreadAsyncID tid0 = BFThreadAsync(ServerThreadCallbackMessageIn, (void *) &tools[0]);
+	BFThreadAsyncID tid1 = BFThreadAsync(ServerThreadCallbackMessageOut, (void *) &tools[0]);
 
 	while (1) {}
 }

@@ -6,7 +6,7 @@ include external/libs/makefiles/libpaths.mk
 
 ### Global
 BUILD_PATH = build
-FILES = server client
+FILES = server client messenger
 CXXLINKS = -lpthread
 
 ### Release settings
