@@ -3,6 +3,7 @@
  * date: 1/24/24
  */
 
+#include <chat.h>
 #include <server.hpp>
 #include <netinet/in.h> //structure for storing address information 
 #include <stdio.h> 
@@ -12,12 +13,40 @@
 #include <unistd.h>
 #include <bflibcpp/bflibcpp.hpp>
 
-void ServerThreadCallback(void * in) {
+void ServerThreadCallbackMessageIn(void * in) {
 	const ChatConfig * config = (const ChatConfig *) in;
+	
+	int i = 0;
+	while (i < 10) {
+		char buf[MESSAGE_BUFFER_SIZE];
+        recv(config->sd, buf, sizeof(buf), 0);
+		printf("recv: %s\n", buf);
+		sleep(1);
+		i++;
+	}
+}
+
+void ServerThreadCallbackMessageOut(void * in) {
+	const ChatConfig * config = (const ChatConfig *) in;
+
+	int i = 0;
+	while (i < 10) {
+		char buf[MESSAGE_BUFFER_SIZE];
+		snprintf(buf, MESSAGE_BUFFER_SIZE, "server %d", i);
+		// send's messages to client socket
+		send(config->sd, buf, sizeof(buf), 0);
+		printf("send: %s\n", buf);
+		sleep(1);
+		i++;
+	}
+}
+
+void ServerThreadCallbackInit(void * in) {
+	ChatConfig * config = (ChatConfig *) in;
 
 	// create server socket similar to what was done in
     // client program
-    int servSockD = socket(AF_INET, SOCK_STREAM, 0);
+    int serverSocket = socket(AF_INET, SOCK_STREAM, 0);
 
     // define server address
     struct sockaddr_in servAddr;
@@ -27,32 +56,23 @@ void ServerThreadCallback(void * in) {
     servAddr.sin_addr.s_addr = INADDR_ANY;
 
     // bind socket to the specified IP and port
-    bind(servSockD, (struct sockaddr*)&servAddr,
-         sizeof(servAddr));
+    bind(serverSocket, (struct sockaddr *) &servAddr, sizeof(servAddr));
 
     // listen for connections
-    listen(servSockD, 1);
+    listen(serverSocket, 1);
 
     // integer to hold client socket.
-    int clientSocket = accept(servSockD, NULL, NULL);
+    config->sd = accept(serverSocket, NULL, NULL);
 
-	int i = 0;
-	while (i < 10) {
-		char buf[255];
-		snprintf(buf, 255, "server %d", i);
-		// send's messages to client socket
-		send(clientSocket, buf, sizeof(buf), 0);
-		printf("send: %s\n", buf);
-        recv(clientSocket, buf, sizeof(buf), 0);
-		printf("recv: %s\n", buf);
-		sleep(1);
-		i++;
-	}
+	//BFThreadAsyncID tid0 = BFThreadAsync(ServerThreadCallbackMessageIn, (void *) config);
+	BFThreadAsyncID tid1 = BFThreadAsync(ServerThreadCallbackMessageOut, (void *) config);
+
+	while (1) {}
 }
 
-int ServerRun(const ChatConfig * config) {
+int ServerRun(ChatConfig * config) {
 	printf("server\n");
-	BFThreadAsyncID tid = BFThreadAsync(ServerThreadCallback, (void *) config);
+	BFThreadAsyncID tid = BFThreadAsync(ServerThreadCallbackInit, (void *) config);
 	while (1) {}
 	return 0;
 }

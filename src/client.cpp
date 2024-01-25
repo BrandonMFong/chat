@@ -3,6 +3,7 @@
  * date: 1/24/24
  */
 
+#include <chat.h>
 #include <client.hpp>
 #include <netinet/in.h> //structure for storing address information 
 #include <stdio.h> 
@@ -35,12 +36,9 @@ void ClientThreadCallback(void * in) {
     else {
 		int i = 0;
 		while (i < 10) {
-			char buf[255];
+			char buf[MESSAGE_BUFFER_SIZE];
 			recv(sockD, buf, sizeof(buf), 0);
 			printf("recv: %s\n", buf);
-			snprintf(buf, 255, "client %d", i);
-			send(sockD, buf, sizeof(buf), 0);
-			printf("send: %s\n", buf);
 			sleep(1);
 			i++;
 		}

@@ -12,6 +12,7 @@
 typedef struct {
 	BF::Atomic<BF::Queue<char *>> msgIn;
 	BF::Atomic<BF::Queue<char *>> msgOut;
+	int sd; // socket descriptor
 } ChatConfig;
 
 #endif // TYPE_CHAT_CONFIG_H

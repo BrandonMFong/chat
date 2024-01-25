@@ -8,7 +8,7 @@
 
 #include <typechatconfig.h>
 
-int ServerRun(const ChatConfig * config);
+int ServerRun(ChatConfig * config);
 
 #endif // SERVER_HPP
 
