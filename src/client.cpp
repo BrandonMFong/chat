@@ -5,6 +5,7 @@
 
 #include <chat.h>
 #include <client.hpp>
+#include <messenger.hpp>
 #include <netinet/in.h> //structure for storing address information 
 #include <stdio.h> 
 #include <stdlib.h> 
@@ -45,10 +46,9 @@ void ClientThreadCallback(void * in) {
     }
 }
 
-int ClientRun(const ChatConfig * config) {
+int ClientRun(ChatConfig * config) {
 	printf("client\n");
 	BFThreadAsyncID tid = BFThreadAsync(ClientThreadCallback, (void *) config);
-	while (1) {}
-	return 0;
+	return MessengerRun(config);
 }
 
