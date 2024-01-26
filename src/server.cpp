@@ -26,7 +26,6 @@ void ServerThreadCallbackMessageIn(void * in) {
 	while (i < 10) {
 		char buf[MESSAGE_BUFFER_SIZE];
         recv(tools->cd, buf, sizeof(buf), 0);
-		printf("recv: %s\n", buf);
 		i++;
 	}
 }
@@ -46,7 +45,6 @@ void ServerThreadCallbackMessageOut(void * in) {
 
 			// send buf from message
 			send(tools->cd, msg->buf, sizeof(msg->buf), 0);
-			printf("send: %s\n", msg->buf);
 		}
 		tools->config->out.unlock();
 	}
@@ -79,10 +77,13 @@ void ServerThreadCallbackInit(void * in) {
 	iotools[0].config = config;
 	iotools[0].cd = accept(serverSocket, NULL, NULL);
 
-	//BFThreadAsync(ServerThreadCallbackMessageIn, (void *) &iotools[0]);
-	BFThreadAsync(ServerThreadCallbackMessageOut, (void *) &iotools[0]);
+	//BFThreadAsyncID inid = BFThreadAsync(ServerThreadCallbackMessageIn, (void *) &iotools[0]);
+	BFThreadAsyncID outid = BFThreadAsync(ServerThreadCallbackMessageOut, (void *) &iotools[0]);
 
 	while (1) {}
+
+	//BFThreadAsyncIDDestroy(inid);
+	BFThreadAsyncIDDestroy(outid);
 }
 
 int ServerRun(ChatConfig * config) {
@@ -90,6 +91,10 @@ int ServerRun(ChatConfig * config) {
 
 	BFThreadAsyncID tid = BFThreadAsync(ServerThreadCallbackInit, (void *) config);
 
-	return MessengerRun(config);
+	int error = MessengerRun(config);
+
+	BFThreadAsyncIDDestroy(tid);
+
+	return error;
 }
 

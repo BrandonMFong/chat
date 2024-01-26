@@ -28,18 +28,19 @@ int MessengerRun(ChatConfig * config) {
 	int error = 0;
 	while (!error) {
 		Message msg;
-		printf("making buf\n");
-		snprintf(msg.buf, sizeof(msg.buf), "server %d", i);
 
-		printf("adding message to q\n");
+		printf("> ");
+		fgets(msg.buf, sizeof(msg.buf), stdin);
+
+		if (strlen(msg.buf) && msg.buf[strlen(msg.buf) - 1] == '\n') {
+			msg.buf[strlen(msg.buf) - 1] = '\0';
+		}
+
 		error = MessengerAddMessageToQueue(&config->out, &msg);
 
-		printf("sleeping\n");
-		sleep(1);
-
-		printf("waking up\n");
 		i++;
 	}
+
 	return error;
 }
 
