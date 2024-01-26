@@ -12,6 +12,7 @@
 #define MESSAGE_FREE(...) free(__VA_ARGS__)
 
 typedef struct {
+	char username[255];
 	char buf[MESSAGE_BUFFER_SIZE];
 } Message;
 

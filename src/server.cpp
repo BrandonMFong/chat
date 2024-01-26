@@ -45,6 +45,8 @@ void ServerThreadCallbackMessageOut(void * in) {
 
 			// send buf from message
 			send(tools->cd, msg->buf, sizeof(msg->buf), 0);
+
+			MESSAGE_FREE(msg);
 		}
 		tools->config->out.unlock();
 	}
