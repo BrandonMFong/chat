@@ -19,11 +19,6 @@ typedef struct {
 	ChatConfig * config;
 } ServerThreadIOTools;
 
-typedef struct {
-	BFLock lock;
-	ChatConfig * config;
-} ServerThreadInitTools;
-
 void ServerThreadCallbackMessageIn(void * in) {
 	ServerThreadIOTools * tools = (ServerThreadIOTools *) in;
 	
@@ -32,7 +27,6 @@ void ServerThreadCallbackMessageIn(void * in) {
 		char buf[MESSAGE_BUFFER_SIZE];
         recv(tools->cd, buf, sizeof(buf), 0);
 		printf("recv: %s\n", buf);
-		sleep(1);
 		i++;
 	}
 }
@@ -41,6 +35,7 @@ void ServerThreadCallbackMessageOut(void * in) {
 	ServerThreadIOTools * tools = (ServerThreadIOTools *) in;
 
 	while (1) {
+		tools->config->out.lock();
 		// if queue is not empty, send the next message
 		if (!tools->config->out.get().empty()) {
 			// get first message
@@ -53,12 +48,12 @@ void ServerThreadCallbackMessageOut(void * in) {
 			send(tools->cd, msg->buf, sizeof(msg->buf), 0);
 			printf("send: %s\n", msg->buf);
 		}
-		sleep(1);
+		tools->config->out.unlock();
 	}
 }
 
 void ServerThreadCallbackInit(void * in) {
-	ServerThreadInitTools * tools = (ServerThreadInitTools *) in;
+	ChatConfig * config = (ChatConfig *) in;
 
 	// create server socket similar to what was done in
     // client program
@@ -81,9 +76,8 @@ void ServerThreadCallbackInit(void * in) {
 	ServerThreadIOTools iotools[allowedConnections];
 
     // integer to hold client socket.
-	iotools[0].config = tools->config;
+	iotools[0].config = config;
 	iotools[0].cd = accept(serverSocket, NULL, NULL);
-	BFLockRelease(&tools->lock);
 
 	//BFThreadAsyncID tid0 = BFThreadAsync(ServerThreadCallbackMessageIn, (void *) &iotools[0]);
 	BFThreadAsyncID tid1 = BFThreadAsync(ServerThreadCallbackMessageOut, (void *) &iotools[0]);
@@ -91,11 +85,9 @@ void ServerThreadCallbackInit(void * in) {
 
 int ServerRun(ChatConfig * config) {
 	printf("server\n");
-	ServerThreadInitTools initTool;
-	initTool.config = config;
-	BFLockCreate(&initTool.lock);
-	BFThreadAsyncID tid = BFThreadAsync(ServerThreadCallbackInit, (void *) &initTool);
-	BFLockWait(&initTool.lock);
+
+	BFThreadAsyncID tid = BFThreadAsync(ServerThreadCallbackInit, (void *) config);
+
 	return MessengerRun(config);
 }
 

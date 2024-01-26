@@ -16,7 +16,11 @@ int MessengerAddMessageToQueue(Atomic<Queue<Message *>> * q, const Message * msg
 	if (!m) return -2;
 
 	memcpy(m, msg, sizeof(Message));
-	return q->get().push(m);
+
+	q->lock();
+	int error = q->get().push(m);
+	q->unlock();
+	return error;
 }
 
 int MessengerRun(ChatConfig * config) {
@@ -24,9 +28,16 @@ int MessengerRun(ChatConfig * config) {
 	int error = 0;
 	while (!error) {
 		Message msg;
+		printf("making buf\n");
 		snprintf(msg.buf, sizeof(msg.buf), "server %d", i);
+
+		printf("adding message to q\n");
 		error = MessengerAddMessageToQueue(&config->out, &msg);
+
+		printf("sleeping\n");
 		sleep(1);
+
+		printf("waking up\n");
 		i++;
 	}
 	return error;
