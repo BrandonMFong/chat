@@ -81,6 +81,8 @@ void ServerThreadCallbackInit(void * in) {
 
 	//BFThreadAsyncID tid0 = BFThreadAsync(ServerThreadCallbackMessageIn, (void *) &iotools[0]);
 	BFThreadAsyncID tid1 = BFThreadAsync(ServerThreadCallbackMessageOut, (void *) &iotools[0]);
+
+	while (1) {}
 }
 
 int ServerRun(ChatConfig * config) {

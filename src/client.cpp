@@ -31,7 +31,7 @@ void ClientThreadCallback(void * in) {
                   sizeof(servAddr));
 
     if (connectStatus == -1) {
-        printf("Error...\n");
+        printf("Error... %d\n", errno);
     }
 
     else {
