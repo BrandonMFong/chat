@@ -35,20 +35,17 @@ void ClientThreadCallback(void * in) {
     }
 
     else {
-		int i = 0;
-		while (i < 10) {
+		while (1) {
 			char buf[MESSAGE_BUFFER_SIZE];
 			recv(sockD, buf, sizeof(buf), 0);
 			printf("recv: %s\n", buf);
-			sleep(1);
-			i++;
 		}
     }
 }
 
 int ClientRun(ChatConfig * config) {
 	printf("client\n");
-	BFThreadAsyncID tid = BFThreadAsync(ClientThreadCallback, (void *) config);
+	BFThreadAsync(ClientThreadCallback, (void *) config);
 	while (1) {}
 	return 0;
 }

@@ -79,8 +79,8 @@ void ServerThreadCallbackInit(void * in) {
 	iotools[0].config = config;
 	iotools[0].cd = accept(serverSocket, NULL, NULL);
 
-	//BFThreadAsyncID tid0 = BFThreadAsync(ServerThreadCallbackMessageIn, (void *) &iotools[0]);
-	BFThreadAsyncID tid1 = BFThreadAsync(ServerThreadCallbackMessageOut, (void *) &iotools[0]);
+	//BFThreadAsync(ServerThreadCallbackMessageIn, (void *) &iotools[0]);
+	BFThreadAsync(ServerThreadCallbackMessageOut, (void *) &iotools[0]);
 
 	while (1) {}
 }
