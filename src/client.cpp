@@ -6,6 +6,7 @@
 #include <chat.h>
 #include <client.hpp>
 #include <messenger.hpp>
+#include <io.hpp>
 #include <netinet/in.h> //structure for storing address information 
 #include <stdio.h> 
 #include <stdlib.h> 
@@ -15,7 +16,7 @@
 #include <bflibcpp/bflibcpp.hpp>
 
 void ClientThreadCallback(void * in) {
-	const ChatConfig * config = (const ChatConfig *) in;
+	ChatConfig * config = (ChatConfig *) in;
 
 	int sockD = socket(AF_INET, SOCK_STREAM, 0);
 
@@ -32,21 +33,37 @@ void ClientThreadCallback(void * in) {
 
     if (connectStatus == -1) {
         printf("Error... %d\n", errno);
-    }
-
-    else {
+    } else {
+		/*
 		while (1) {
 			char buf[MESSAGE_BUFFER_SIZE];
 			recv(sockD, buf, sizeof(buf), 0);
 			printf("recv: %s\n", buf);
 		}
+		*/
+
+		IOTools iotool;
+		iotool.config = config;
+		iotool.cd = sockD;
+
+		//BFThreadAsyncID inid = BFThreadAsync(ServerThreadCallbackMessageIn, (void *) &iotool);
+		BFThreadAsyncID outid = BFThreadAsync(IOOut, (void *) &iotool);
+
+		while (1) {}
+
+		//BFThreadAsyncIDDestroy(inid);
+		BFThreadAsyncIDDestroy(outid);
     }
 }
 
 int ClientRun(ChatConfig * config) {
 	printf("client\n");
-	BFThreadAsync(ClientThreadCallback, (void *) config);
-	while (1) {}
-	return 0;
+	BFThreadAsyncID tid = BFThreadAsync(ClientThreadCallback, (void *) config);
+
+	int error = MessengerRun(config);
+
+	BFThreadAsyncIDDestroy(tid);
+
+	return error;
 }
 
