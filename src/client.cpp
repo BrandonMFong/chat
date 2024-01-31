@@ -46,13 +46,13 @@ void ClientThreadCallback(void * in) {
 		iotool.config = config;
 		iotool.cd = sockD;
 
-		//BFThreadAsyncID inid = BFThreadAsync(ServerThreadCallbackMessageIn, (void *) &iotool);
-		BFThreadAsyncID outid = BFThreadAsync(IOOut, (void *) &iotool);
+		BFThreadAsyncID inid = BFThreadAsync(IOIn, (void *) &iotool);
+		//BFThreadAsyncID outid = BFThreadAsync(IOOut, (void *) &iotool);
 
 		while (1) {}
 
-		//BFThreadAsyncIDDestroy(inid);
-		BFThreadAsyncIDDestroy(outid);
+		BFThreadAsyncIDDestroy(inid);
+		//BFThreadAsyncIDDestroy(outid);
     }
 }
 

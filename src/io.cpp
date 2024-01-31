@@ -13,7 +13,6 @@
 #include <unistd.h>
 #include <bflibcpp/bflibcpp.hpp>
 
-
 void IOIn(void * in) {
 	IOTools * tools = (IOTools *) in;
 	
@@ -46,5 +45,4 @@ void IOOut(void * in) {
 		tools->config->out.unlock();
 	}
 }
-
 
