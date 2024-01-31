@@ -17,8 +17,6 @@ int MessengerOutStreamAddMessage(ChatConfig * config, const Message * msg) {
 
 	memcpy(m, msg, sizeof(Message));
 
-
-	Atomic<Queue<Message *>> * q = &config->out;
 	config->out.lock();
 	int error = config->out.get().push(m);
 	config->out.unlock();
