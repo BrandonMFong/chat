@@ -33,14 +33,6 @@ void ClientThreadCallback(void * in) {
     if (connectStatus == -1) {
         printf("Error... %d\n", errno);
     } else {
-		/*
-		while (1) {
-			char buf[MESSAGE_BUFFER_SIZE];
-			recv(sockD, buf, sizeof(buf), 0);
-			printf("recv: %s\n", buf);
-		}
-		*/
-
 		IOTools iotool;
 		iotool.config = config;
 		iotool.cd = sockD;

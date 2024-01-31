@@ -10,7 +10,7 @@
 #include <server.hpp>
 #include <client.hpp>
 #include <typechatconfig.h>
-#include <messenger.hpp>
+#include <interface.hpp>
 
 #define ARGUMENT_SERVER "server"
 #define ARGUMENT_CLIENT "client"
@@ -62,7 +62,7 @@ int main(int argc, char * argv[]) {
 	}
 
 	if (!result) {
-		result = MessengerRun(&config);
+		result = InterfaceRun(&config);
 	}
 
 	if (result) {

@@ -3,13 +3,13 @@
  * date: 1/25/24
  */
 
-#include <messenger.hpp>
+#include <interface.hpp>
 #include <bflibcpp/bflibcpp.hpp>
 #include <unistd.h>
 
 using namespace BF;
 
-int MessengerOutStreamAddMessage(ChatConfig * config, Packet * pkt) {
+int InterfaceOutStreamAddMessage(ChatConfig * config, Packet * pkt) {
 	if (!config || !pkt) return -2;
 
 	Packet * p = PACKET_ALLOC;
@@ -23,7 +23,7 @@ int MessengerOutStreamAddMessage(ChatConfig * config, Packet * pkt) {
 	return error;
 }
 
-void MessengerInStreamThread(void * in) {
+void InterfaceInStreamThread(void * in) {
 	ChatConfig * config = (ChatConfig *) in;
 
 	while (1) {
@@ -45,12 +45,12 @@ void MessengerInStreamThread(void * in) {
 	}
 }
 
-int MessengerRun(ChatConfig * config) {
+int InterfaceRun(ChatConfig * config) {
 	int i = 0;
 	int error = 0;
 
 	// this thread will monitor incoming messages from the in q
-	BFThreadAsyncID tid = BFThreadAsync(MessengerInStreamThread, (void *) config);
+	BFThreadAsyncID tid = BFThreadAsync(InterfaceInStreamThread, (void *) config);
 
 	while (!error) {
 		Packet p;
@@ -62,7 +62,7 @@ int MessengerRun(ChatConfig * config) {
 			p.payload.message.buf[strlen(p.payload.message.buf) - 1] = '\0';
 		}
 
-		error = MessengerOutStreamAddMessage(config, &p);
+		error = InterfaceOutStreamAddMessage(config, &p);
 
 		i++;
 	}
