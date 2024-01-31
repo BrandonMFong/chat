@@ -10,6 +10,7 @@
 #include <server.hpp>
 #include <client.hpp>
 #include <typechatconfig.h>
+#include <messenger.hpp>
 
 #define ARGUMENT_SERVER "server"
 #define ARGUMENT_CLIENT "client"
@@ -52,14 +53,20 @@ int main(int argc, char * argv[]) {
 	ChatConfig config;
 
 	result = ArgumentsRead(argc, argv, &mode);
-	if (result) {
-		Help(argv[0]);
-	} else {
+	if (!result) {
 		if (mode == CHAT_MODE_SERVER) {
 			result = ServerRun(&config);
 		} else if (mode == CHAT_MODE_CLIENT) {
 			result = ClientRun(&config);
 		}
+	}
+
+	if (!result) {
+		result = MessengerRun(&config);
+	}
+
+	if (result) {
+		Help(argv[0]);
 	}
 
 	return result;
