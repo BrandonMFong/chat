@@ -46,7 +46,7 @@ void ClientThreadCallback(void * in) {
 		iotool.cd = sockD;
 
 		BFThreadAsync(IOIn, (void *) &iotool);
-		//BFThreadAsync(IOOut, (void *) &iotool);
+		BFThreadAsync(IOOut, (void *) &iotool);
 
 		while (1) {}
     }

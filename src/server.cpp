@@ -41,7 +41,7 @@ void ServerThreadCallbackInit(void * in) {
 	iotools[0].config = config;
 	iotools[0].cd = accept(serverSocket, NULL, NULL);
 
-	//BFThreadAsync(IOIn, (void *) &iotools[0]);
+	BFThreadAsync(IOIn, (void *) &iotools[0]);
 	BFThreadAsync(IOOut, (void *) &iotools[0]);
 
 	while (1) {}
