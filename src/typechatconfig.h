@@ -8,7 +8,7 @@
 
 #include <bflibcpp/queue.hpp>
 #include <bflibcpp/atomic.hpp>
-#include <typemessage.h>
+#include <typepacket.h>
 
 typedef struct {
 	// Each queue will be responsible for managing
@@ -16,8 +16,8 @@ typedef struct {
 	//
 	// Each message in the queues are dynamically allocated
 	// by malloc
-	BF::Atomic<BF::Queue<Message *>> in;
-	BF::Atomic<BF::Queue<Message *>> out;
+	BF::Atomic<BF::Queue<Packet *>> in;
+	BF::Atomic<BF::Queue<Packet *>> out;
 
 	char username[255];
 

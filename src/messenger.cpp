@@ -9,13 +9,13 @@
 
 using namespace BF;
 
-int MessengerOutStreamAddMessage(ChatConfig * config, const Message * msg) {
+int MessengerOutStreamAddMessage(ChatConfig * config, Packet * msg) {
 	if (!config || !msg) return -2;
 
-	Message * m = (Message *) MESSAGE_ALLOC;
+	Packet * m = PACKET_ALLOC;
 	if (!m) return -2;
 
-	memcpy(m, msg, sizeof(Message));
+	memcpy(m, msg, sizeof(Packet));
 
 	config->out.lock();
 	int error = config->out.get().push(m);
@@ -31,15 +31,15 @@ void MessengerInStreamThread(void * in) {
 		// if queue is not empty, send the next message
 		if (!config->in.get().empty()) {
 			// get first message
-			Message * msg = config->in.get().front();
+			Packet * p = config->in.get().front();
 
-			printf("> %s", msg->buf);
+			printf("> %s", p->buf);
 			fflush(stdout);
 
 			// pop queue
 			config->in.get().pop();
 
-			MESSAGE_FREE(msg);
+			PACKET_FREE(p);
 		}
 		config->in.unlock();
 	}
@@ -53,16 +53,16 @@ int MessengerRun(ChatConfig * config) {
 	BFThreadAsyncID tid = BFThreadAsync(MessengerInStreamThread, (void *) config);
 
 	while (!error) {
-		Message msg;
+		Packet p;
 
 		printf("> ");
-		fgets(msg.buf, sizeof(msg.buf), stdin);
+		fgets(p.buf, sizeof(p.buf), stdin);
 
-		if (strlen(msg.buf) && msg.buf[strlen(msg.buf) - 1] == '\n') {
-			msg.buf[strlen(msg.buf) - 1] = '\0';
+		if (strlen(p.buf) && p.buf[strlen(p.buf) - 1] == '\n') {
+			p.buf[strlen(p.buf) - 1] = '\0';
 		}
 
-		error = MessengerOutStreamAddMessage(config, &msg);
+		error = MessengerOutStreamAddMessage(config, &p);
 
 		i++;
 	}

@@ -24,11 +24,11 @@ void IOIn(void * in) {
 			break;
 		}
 
-		Message * msg = MESSAGE_ALLOC;
-		memcpy(msg->buf, buf, MESSAGE_BUFFER_SIZE);
+		Packet * p = PACKET_ALLOC;
+		memcpy(p->buf, buf, MESSAGE_BUFFER_SIZE);
 
 		tools->config->in.lock();
-		tools->config->in.get().push(msg);
+		tools->config->in.get().push(p);
 		tools->config->in.unlock();
 	}
 }
@@ -41,15 +41,15 @@ void IOOut(void * in) {
 		// if queue is not empty, send the next message
 		if (!tools->config->out.get().empty()) {
 			// get first message
-			Message * msg = tools->config->out.get().front();
+			Packet * p = tools->config->out.get().front();
 
 			// pop queue
 			tools->config->out.get().pop();
 
 			// send buf from message
-			send(tools->cd, msg->buf, sizeof(msg->buf), 0);
+			send(tools->cd, p->buf, sizeof(p->buf), 0);
 
-			MESSAGE_FREE(msg);
+			PACKET_FREE(p);
 		}
 		tools->config->out.unlock();
 	}
