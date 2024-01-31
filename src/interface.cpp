@@ -45,6 +45,23 @@ void InterfaceInStreamThread(void * in) {
 	}
 }
 
+int InterfaceReadInput(Packet * p) {
+	if (!p) return -30;
+	printf("> ");
+	fgets(
+		p->payload.message.buf,
+		sizeof(p->payload.message.buf),
+		stdin
+	);
+
+	if (strlen(p->payload.message.buf)
+	&& p->payload.message.buf[strlen(p->payload.message.buf) - 1] == '\n') {
+		p->payload.message.buf[strlen(p->payload.message.buf) - 1] = '\0';
+	}
+
+	return 0;
+}
+
 int InterfaceRun(ChatConfig * config) {
 	int i = 0;
 	int error = 0;
@@ -55,14 +72,10 @@ int InterfaceRun(ChatConfig * config) {
 	while (!error) {
 		Packet p;
 
-		printf("> ");
-		fgets(p.payload.message.buf, sizeof(p.payload.message.buf), stdin);
+		error = InterfaceReadInput(&p);
 
-		if (strlen(p.payload.message.buf) && p.payload.message.buf[strlen(p.payload.message.buf) - 1] == '\n') {
-			p.payload.message.buf[strlen(p.payload.message.buf) - 1] = '\0';
-		}
-
-		error = InterfaceOutStreamAddMessage(config, &p);
+		if (!error)
+			error = InterfaceOutStreamAddMessage(config, &p);
 
 		i++;
 	}
