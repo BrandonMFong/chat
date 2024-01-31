@@ -5,6 +5,7 @@
 
 #include "io.hpp"
 #include "chat.h"
+#include "log.h"
 #include <netinet/in.h> //structure for storing address information 
 #include <stdio.h> 
 #include <stdlib.h> 
@@ -18,7 +19,10 @@ void IOIn(void * in) {
 	
 	while (1) {
 		char buf[MESSAGE_BUFFER_SIZE];
-        recv(tools->cd, buf, sizeof(buf), 0);
+        if (recv(tools->cd, buf, sizeof(buf), 0) == -1) {
+			ELog("%d\n", errno);
+			break;
+		}
 
 		Message * msg = MESSAGE_ALLOC;
 		memcpy(msg->buf, buf, MESSAGE_BUFFER_SIZE);
