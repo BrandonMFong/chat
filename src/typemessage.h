@@ -8,7 +8,7 @@
 
 #include <chat.h>
 
-#define MESSAGE_ALLOC(...) malloc(__VA_ARGS__)
+#define MESSAGE_ALLOC (Message *) malloc(sizeof(Message))
 #define MESSAGE_FREE(...) free(__VA_ARGS__)
 
 typedef struct {
