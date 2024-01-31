@@ -9,17 +9,19 @@
 
 using namespace BF;
 
-int MessengerAddMessageToQueue(Atomic<Queue<Message *>> * q, const Message * msg) {
-	if (!q || !msg) return -2;
+int MessengerOutStreamAddMessage(ChatConfig * config, const Message * msg) {
+	if (!config || !msg) return -2;
 
 	Message * m = (Message *) MESSAGE_ALLOC;
 	if (!m) return -2;
 
 	memcpy(m, msg, sizeof(Message));
 
-	q->lock();
-	int error = q->get().push(m);
-	q->unlock();
+
+	Atomic<Queue<Message *>> * q = &config->out;
+	config->out.lock();
+	int error = config->out.get().push(m);
+	config->out.unlock();
 	return error;
 }
 
@@ -62,7 +64,7 @@ int MessengerRun(ChatConfig * config) {
 			msg.buf[strlen(msg.buf) - 1] = '\0';
 		}
 
-		error = MessengerAddMessageToQueue(&config->out, &msg);
+		error = MessengerOutStreamAddMessage(config, &msg);
 
 		i++;
 	}
