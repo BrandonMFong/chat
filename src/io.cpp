@@ -25,7 +25,7 @@ void IOIn(void * in) {
 		}
 
 		Packet * p = PACKET_ALLOC;
-		memcpy(p->buf, buf, MESSAGE_BUFFER_SIZE);
+		memcpy(p->payload.message.buf, buf, MESSAGE_BUFFER_SIZE);
 
 		tools->config->in.lock();
 		tools->config->in.get().push(p);
@@ -47,7 +47,7 @@ void IOOut(void * in) {
 			tools->config->out.get().pop();
 
 			// send buf from message
-			send(tools->cd, p->buf, sizeof(p->buf), 0);
+			send(tools->cd, p->payload.message.buf, sizeof(p->payload.message.buf), 0);
 
 			PACKET_FREE(p);
 		}

@@ -9,16 +9,16 @@
 
 using namespace BF;
 
-int MessengerOutStreamAddMessage(ChatConfig * config, Packet * msg) {
-	if (!config || !msg) return -2;
+int MessengerOutStreamAddMessage(ChatConfig * config, Packet * pkt) {
+	if (!config || !pkt) return -2;
 
-	Packet * m = PACKET_ALLOC;
-	if (!m) return -2;
+	Packet * p = PACKET_ALLOC;
+	if (!p) return -2;
 
-	memcpy(m, msg, sizeof(Packet));
+	memcpy(p, pkt, sizeof(Packet));
 
 	config->out.lock();
-	int error = config->out.get().push(m);
+	int error = config->out.get().push(p);
 	config->out.unlock();
 	return error;
 }
@@ -33,7 +33,7 @@ void MessengerInStreamThread(void * in) {
 			// get first message
 			Packet * p = config->in.get().front();
 
-			printf("> %s", p->buf);
+			printf("> %s", p->payload.message.buf);
 			fflush(stdout);
 
 			// pop queue
@@ -56,10 +56,10 @@ int MessengerRun(ChatConfig * config) {
 		Packet p;
 
 		printf("> ");
-		fgets(p.buf, sizeof(p.buf), stdin);
+		fgets(p.payload.message.buf, sizeof(p.payload.message.buf), stdin);
 
-		if (strlen(p.buf) && p.buf[strlen(p.buf) - 1] == '\n') {
-			p.buf[strlen(p.buf) - 1] = '\0';
+		if (strlen(p.payload.message.buf) && p.payload.message.buf[strlen(p.payload.message.buf) - 1] == '\n') {
+			p.payload.message.buf[strlen(p.payload.message.buf) - 1] = '\0';
 		}
 
 		error = MessengerOutStreamAddMessage(config, &p);

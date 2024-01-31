@@ -9,8 +9,12 @@
 #include <chat.h>
 
 typedef struct {
-	char username[255];
-	char buf[MESSAGE_BUFFER_SIZE];
+	union {
+		struct {
+			char username[255];
+			char buf[MESSAGE_BUFFER_SIZE];
+		} message;
+	} payload;
 } Packet;
 
 #define PACKET_ALLOC (Packet *) malloc(sizeof(Packet))
