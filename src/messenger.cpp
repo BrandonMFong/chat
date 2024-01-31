@@ -12,7 +12,7 @@ using namespace BF;
 int MessengerAddMessageToQueue(Atomic<Queue<Message *>> * q, const Message * msg) {
 	if (!q || !msg) return -2;
 
-	Message * m = (Message *) MESSAGE_ALLOC(sizeof(Message));
+	Message * m = (Message *) MESSAGE_ALLOC;
 	if (!m) return -2;
 
 	memcpy(m, msg, sizeof(Message));

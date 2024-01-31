@@ -16,11 +16,16 @@
 void IOIn(void * in) {
 	IOTools * tools = (IOTools *) in;
 	
-	int i = 0;
-	while (i < 10) {
+	while (1) {
 		char buf[MESSAGE_BUFFER_SIZE];
         recv(tools->cd, buf, sizeof(buf), 0);
-		i++;
+
+		Message * msg = MESSAGE_ALLOC;
+		memcpy(msg->buf, buf, MESSAGE_BUFFER_SIZE);
+
+		tools->config->in.lock();
+		tools->config->in.get().push(msg);
+		tools->config->in.unlock();
 	}
 }
 
