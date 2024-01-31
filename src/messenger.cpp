@@ -23,9 +23,35 @@ int MessengerAddMessageToQueue(Atomic<Queue<Message *>> * q, const Message * msg
 	return error;
 }
 
+void MessengerInStreamThread(void * in) {
+	ChatConfig * config = (ChatConfig *) in;
+
+	while (1) {
+		config->in.lock();
+		// if queue is not empty, send the next message
+		if (!config->in.get().empty()) {
+			// get first message
+			Message * msg = config->in.get().front();
+
+			printf("> %s", msg->buf);
+			fflush(stdout);
+
+			// pop queue
+			config->in.get().pop();
+
+			MESSAGE_FREE(msg);
+		}
+		config->in.unlock();
+	}
+}
+
 int MessengerRun(ChatConfig * config) {
 	int i = 0;
 	int error = 0;
+
+	// this thread will monitor incoming messages from the in q
+	BFThreadAsyncID tid = BFThreadAsync(MessengerInStreamThread, (void *) config);
+
 	while (!error) {
 		Message msg;
 
@@ -40,6 +66,8 @@ int MessengerRun(ChatConfig * config) {
 
 		i++;
 	}
+
+	BFThreadAsyncIDDestroy(tid);
 
 	return error;
 }
