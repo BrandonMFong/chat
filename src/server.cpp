@@ -42,13 +42,10 @@ void ServerThreadCallbackInit(void * in) {
 	iotools[0].config = config;
 	iotools[0].cd = accept(serverSocket, NULL, NULL);
 
-	//BFThreadAsyncID inid = BFThreadAsync(IOIn, (void *) &iotools[0]);
-	BFThreadAsyncID outid = BFThreadAsync(IOOut, (void *) &iotools[0]);
+	//BFThreadAsync(IOIn, (void *) &iotools[0]);
+	BFThreadAsync(IOOut, (void *) &iotools[0]);
 
 	while (1) {}
-
-	//BFThreadAsyncIDDestroy(inid);
-	BFThreadAsyncIDDestroy(outid);
 }
 
 int ServerRun(ChatConfig * config) {
@@ -57,8 +54,6 @@ int ServerRun(ChatConfig * config) {
 	BFThreadAsyncID tid = BFThreadAsync(ServerThreadCallbackInit, (void *) config);
 
 	int error = MessengerRun(config);
-
-	BFThreadAsyncIDDestroy(tid);
 
 	return error;
 }

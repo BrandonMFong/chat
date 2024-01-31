@@ -20,6 +20,8 @@ typedef struct {
 	BF::Atomic<BF::Queue<Message *>> out;
 
 	char username[255];
+
+
 } ChatConfig;
 
 #endif // TYPE_CHAT_CONFIG_H

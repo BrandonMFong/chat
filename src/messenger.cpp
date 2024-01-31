@@ -67,8 +67,6 @@ int MessengerRun(ChatConfig * config) {
 		i++;
 	}
 
-	BFThreadAsyncIDDestroy(tid);
-
 	return error;
 }
 

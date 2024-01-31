@@ -46,24 +46,18 @@ void ClientThreadCallback(void * in) {
 		iotool.config = config;
 		iotool.cd = sockD;
 
-		BFThreadAsyncID inid = BFThreadAsync(IOIn, (void *) &iotool);
-		//BFThreadAsyncID outid = BFThreadAsync(IOOut, (void *) &iotool);
+		BFThreadAsync(IOIn, (void *) &iotool);
+		//BFThreadAsync(IOOut, (void *) &iotool);
 
 		while (1) {}
-
-		BFThreadAsyncIDDestroy(inid);
-		//BFThreadAsyncIDDestroy(outid);
     }
 }
 
 int ClientRun(ChatConfig * config) {
 	printf("client\n");
-	BFThreadAsyncID tid = BFThreadAsync(ClientThreadCallback, (void *) config);
+	BFThreadAsync(ClientThreadCallback, (void *) config);
 
 	int error = MessengerRun(config);
-
-	BFThreadAsyncIDDestroy(tid);
-
 	return error;
 }
 
