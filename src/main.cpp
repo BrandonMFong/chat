@@ -9,7 +9,6 @@
 #include <string.h>
 #include <server.hpp>
 #include <client.hpp>
-#include <typechatconfig.h>
 #include <interface.hpp>
 
 #define ARGUMENT_SERVER "server"
@@ -48,7 +47,6 @@ int ArgumentsRead(int argc, char * argv[], char * mode) {
 int main(int argc, char * argv[]) {
 	int result = 0;
 	char mode = 0;
-	ChatConfig config;
 	Socket * skt = NULL;
 
 	result = ArgumentsRead(argc, argv, &mode);

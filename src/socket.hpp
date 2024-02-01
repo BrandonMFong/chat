@@ -6,7 +6,6 @@
 #ifndef SOCKET_HPP
 #define SOCKET_HPP
 
-#include "typechatconfig.h"
 #include <bflibcpp/queue.hpp>
 #include <bflibcpp/atomic.hpp>
 #include <typepacket.h>

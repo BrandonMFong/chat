@@ -63,7 +63,7 @@ int InterfaceReadInput(Packet * p) {
 	return 0;
 }
 
-int InterfaceWindowLoop(ChatConfig * config) {
+int InterfaceWindowLoop() {
 	initscr(); // Initialize the library
     cbreak();  // Line buffering disabled, pass on everything to me
     noecho();  // Don't echo user input
