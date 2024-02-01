@@ -91,7 +91,7 @@ int InterfaceRun(ChatConfig * config) {
     WINDOW *displayWin = newwin(LINES - 3, COLS, 0, 0);
 
     box(inputWin, 0, 0); // Add a box around the input window
-    box(displayWin, 0, 0); // Add a box around the display window
+    box(displayWin, 1, 1); // Add a box around the display window
 
     refresh(); // Refresh the main window to show the boxes
     wrefresh(inputWin); // Refresh the input window
@@ -124,8 +124,6 @@ int InterfaceRun(ChatConfig * config) {
     }
 
     endwin(); // End curses mode
-
- 
 
 	return 0;
 }
