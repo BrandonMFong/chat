@@ -82,7 +82,6 @@ int InterfaceRun(ChatConfig * config) {
 		i++;
 	}
 */
-
     initscr(); // Initialize the library
     cbreak();  // Line buffering disabled, pass on everything to me
 
@@ -91,31 +90,43 @@ int InterfaceRun(ChatConfig * config) {
     WINDOW *displayWin = newwin(LINES - 3, COLS, 0, 0);
 
     box(inputWin, 0, 0); // Add a box around the input window
-    box(displayWin, 1, 1); // Add a box around the display window
+    box(displayWin, 0, 0); // Add a box around the display window
 
     refresh(); // Refresh the main window to show the boxes
     wrefresh(inputWin); // Refresh the input window
     wrefresh(displayWin); // Refresh the display window
 
     keypad(inputWin, true); // Enable special keys in input window
-    nodelay(inputWin, true); // Set non-blocking input for input window
+    nodelay(inputWin, false); // Set blocking input for input window
 
-	wmove(inputWin, 1, 1);
     std::string userInput;
-    int ch;
 
     while (true) {
-        ch = wgetch(inputWin); // Get user input
+        int ch = wgetch(inputWin); // Get user input
 
         if (ch != ERR) {
             // If a key is pressed, add it to the userInput string
             userInput.push_back(ch);
+
+            // If Enter is pressed, display the input in the display window
+            if (ch == '\n') {
+                werase(displayWin);
+                box(displayWin, 0, 0); // Redraw the box
+                mvwprintw(displayWin, 1, 1, userInput.c_str());
+                wrefresh(displayWin);
+
+                // Clear the input and reset the cursor
+                userInput.clear();
+                wmove(inputWin, 1, 1);
+                wclrtoeol(inputWin);
+            }
         }
 
-        // Display user input in the display window
-        werase(displayWin);
-        mvwprintw(displayWin, 1, 1, userInput.c_str());
-        wrefresh(displayWin);
+        // Display user input in the input window
+        werase(inputWin);
+        box(inputWin, 0, 0); // Redraw the box
+        mvwprintw(inputWin, 1, 1, userInput.c_str());
+        wrefresh(inputWin);
 
         // Exit the loop if 'q' key is pressed
         if (ch == 'q') {
