@@ -15,6 +15,7 @@
 #include <sys/types.h> 
 #include <unistd.h>
 #include <bflibcpp/bflibcpp.hpp>
+#include <bflibc/bflibc.h>
 
 Socket::Socket() {
 
@@ -83,11 +84,42 @@ void Socket::outStream(void * in) {
 			skt->out.get().pop();
 
 			// send buf from message
+			printf("\nsending: '%s'\n", p->payload.message.buf);
 			send(skt->descriptor(), p->payload.message.buf, sizeof(p->payload.message.buf), 0);
 
 			PACKET_FREE(p);
 		}
 		skt->out.unlock();
 	}
+}
+
+int Socket::startIOStreams() {
+	this->_tidin = BFThreadAsync(Socket::inStream, (void *) this);
+	this->_tidout = BFThreadAsync(Socket::outStream, (void *) this);
+
+	return 0;
+}
+
+int Socket::start() {
+	this->_start();
+
+	return 0;
+}
+
+int Socket::stop() {
+	int error = this->_stop();
+
+	if (!error)
+		error = BFThreadAsyncCancel(this->_tidin);
+
+	if (!error) 
+		error = BFThreadAsyncCancel(this->_tidout);
+
+	if (!error) {
+		BFThreadAsyncIDDestroy(this->_tidin);
+		BFThreadAsyncIDDestroy(this->_tidout);
+	}
+
+	return error;
 }
 

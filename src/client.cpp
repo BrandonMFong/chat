@@ -45,8 +45,7 @@ void Client::init(void * in) {
     if (connectStatus == -1) {
         printf("Error... %d\n", errno);
     } else {
-		BFThreadAsync(Socket::inStream, (void *) client);
-		BFThreadAsync(Socket::outStream, (void *) client);
+		client->startIOStreams();
     }
 }
 
@@ -54,15 +53,17 @@ const int Client::descriptor() const {
 	return this->_mainSocket;
 }
 
-int Client::start() {
-	printf("client\n");
+int Client::_start() {
+	printf("client start\n");
 	BFThreadAsync(Client::init, (void *) this);
 
 	int error = 0;
 	return error;
 }
 
-int Client::stop() {
+int Client::_stop() {
+	printf("client stop\n");
+	close(this->_mainSocket);
 	return 0;
 }
 

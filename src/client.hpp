@@ -13,10 +13,11 @@ public:
 	Client();
 	virtual ~Client();
 	static void init(void * in);
-	int start();
-	int stop();
 	const int descriptor() const;
 	const char mode() const;
+protected:
+	int _start();
+	int _stop();
 private:
 	int _mainSocket;
 };

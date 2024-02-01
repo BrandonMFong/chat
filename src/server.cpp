@@ -49,16 +49,17 @@ void Server::init(void * in) {
 
 	server->_clientSocket = accept(server->_mainSocket, NULL, NULL);
 
-	BFThreadAsync(Socket::inStream, (void *) server);
-	BFThreadAsync(Socket::outStream, (void *) server);
+	server->startIOStreams();
+	//BFThreadAsync(Socket::inStream, (void *) server);
+	//BFThreadAsync(Socket::outStream, (void *) server);
 }
 
 const int Server::descriptor() const {
 	return this->_clientSocket;
 }
 
-int Server::start() {
-	printf("server\n");
+int Server::_start() {
+	printf("server start\n");
 
 	BFThreadAsync(Server::init, (void *) this);
 
@@ -67,7 +68,8 @@ int Server::start() {
 	return error;
 }
 
-int Server::stop() {
+int Server::_stop() {
+	printf("server stop\n");
 	return 0;
 }
 

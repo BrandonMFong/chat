@@ -10,6 +10,10 @@
 #include <bflibcpp/atomic.hpp>
 #include <typepacket.h>
 
+extern "C" {
+#include <bflibc/thread.h>
+}
+
 #define SOCKET_MODE_SERVER 's'
 #define SOCKET_MODE_CLIENT 'c'
 
@@ -18,10 +22,10 @@ public:
 	static Socket * create(const char mode, int * err);
 	virtual ~Socket();
 
-	virtual int start() = 0;
-	virtual int stop() = 0;
-
 	virtual const char mode() const = 0;
+
+	int start();
+	int stop();
 	
 	static void inStream(void * in);
 	static void outStream(void * in);
@@ -33,6 +37,17 @@ public:
 
 protected:
 	Socket();
+
+	// _start & _stop gets called at the start
+	// of the start() and stop() respectively
+	virtual int _start() = 0;
+	virtual int _stop() = 0;
+
+	int startIOStreams();
+
+private:
+	BFThreadAsyncID _tidin;
+	BFThreadAsyncID _tidout;
 };
 
 #endif // SOCKET_HPP
