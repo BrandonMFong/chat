@@ -82,8 +82,9 @@ int InterfaceRun(ChatConfig * config) {
 		i++;
 	}
 */
-    initscr(); // Initialize the library
+	initscr(); // Initialize the library
     cbreak();  // Line buffering disabled, pass on everything to me
+    noecho();  // Don't echo user input
 
     // Create two windows
     WINDOW *inputWin = newwin(3, COLS, LINES - 3, 0);
@@ -104,27 +105,24 @@ int InterfaceRun(ChatConfig * config) {
     while (true) {
         int ch = wgetch(inputWin); // Get user input
 
-        if (ch != ERR) {
-            // If a key is pressed, add it to the userInput string
+        if (ch == '\n') {
+            // If Enter key is pressed, display user input in the display window
+            werase(displayWin);
+            box(displayWin, 0, 0);
+            mvwprintw(displayWin, 1, 1, userInput.c_str());
+            wrefresh(displayWin);
+
+            // Clear the input window and userInput
+            werase(inputWin);
+            box(inputWin, 0, 0);
+            wrefresh(inputWin);
+            userInput.clear();
+        } else if (ch != ERR) {
+            // If a key is pressed (excluding Enter), add it to the userInput string
             userInput.push_back(ch);
-
-            // If Enter is pressed, display the input in the display window
-            if (ch == '\n') {
-                werase(displayWin);
-                box(displayWin, 0, 0); // Redraw the box
-                mvwprintw(displayWin, 1, 1, userInput.c_str());
-                wrefresh(displayWin);
-
-                // Clear the input and reset the cursor
-                userInput.clear();
-                wmove(inputWin, 1, 1);
-                wclrtoeol(inputWin);
-            }
         }
 
         // Display user input in the input window
-        werase(inputWin);
-        box(inputWin, 0, 0); // Redraw the box
         mvwprintw(inputWin, 1, 1, userInput.c_str());
         wrefresh(inputWin);
 
