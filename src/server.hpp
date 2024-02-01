@@ -16,6 +16,11 @@ public:
 	int start();
 	int stop();
 	const char mode() const;
+	const int descriptor() const;
+
+private:
+	int _mainSocket;
+	int _clientSocket;
 };
 
 #endif // SERVER_HPP

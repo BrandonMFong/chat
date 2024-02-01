@@ -14,7 +14,7 @@
 #include <bflibcpp/bflibcpp.hpp>
 
 Client::Client() {
-
+	this->_mainSocket = 0;
 }
 
 Client::~Client() {
@@ -28,7 +28,7 @@ const char Client::mode() const {
 void Client::init(void * in) {
 	Client * client = (Client *) in;
 
-	int sockD = socket(AF_INET, SOCK_STREAM, 0);
+	client->_mainSocket = socket(AF_INET, SOCK_STREAM, 0);
 
     struct sockaddr_in servAddr;
 
@@ -37,7 +37,7 @@ void Client::init(void * in) {
     servAddr.sin_addr.s_addr = INADDR_ANY;
 
     int connectStatus = connect(
-		sockD,
+		client->_mainSocket,
 		(struct sockaddr *) &servAddr,
 		sizeof(servAddr)
 	);
@@ -45,12 +45,15 @@ void Client::init(void * in) {
     if (connectStatus == -1) {
         printf("Error... %d\n", errno);
     } else {
-		client->sockd = sockD;
 		BFThreadAsync(Socket::inStream, (void *) client);
 		BFThreadAsync(Socket::outStream, (void *) client);
 
 		while (1) {}
     }
+}
+
+const int Client::descriptor() const {
+	return this->_mainSocket;
 }
 
 int Client::start() {

@@ -13,8 +13,9 @@
 #include <unistd.h>
 #include <bflibcpp/bflibcpp.hpp>
 
-Server::Server() {
-
+Server::Server() : Socket() {
+	this->_mainSocket = 0;
+	this->_clientSocket = 0;
 }
 
 Server::~Server() {
@@ -30,7 +31,7 @@ void Server::init(void * in) {
 
 	// create server socket similar to what was done in
     // client program
-    int serverSocket = socket(AF_INET, SOCK_STREAM, 0);
+    server->_mainSocket = socket(AF_INET, SOCK_STREAM, 0);
 
     // define server address
     struct sockaddr_in servAddr;
@@ -40,18 +41,22 @@ void Server::init(void * in) {
     servAddr.sin_addr.s_addr = INADDR_ANY;
 
     // bind socket to the specified IP and port
-    bind(serverSocket, (struct sockaddr *) &servAddr, sizeof(servAddr));
+    bind(server->_mainSocket, (struct sockaddr *) &servAddr, sizeof(servAddr));
 
     // listen for connections
 	const int allowedConnections = 1;
-    listen(serverSocket, allowedConnections);
+    listen(server->_mainSocket, allowedConnections);
 
-	server->sockd = accept(serverSocket, NULL, NULL);
+	server->_clientSocket = accept(server->_mainSocket, NULL, NULL);
 
 	BFThreadAsync(Socket::inStream, (void *) server);
 	BFThreadAsync(Socket::outStream, (void *) server);
 
 	while (1) {}
+}
+
+const int Server::descriptor() const {
+	return this->_clientSocket;
 }
 
 int Server::start() {

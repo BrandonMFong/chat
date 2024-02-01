@@ -29,7 +29,7 @@ public:
 	BF::Atomic<BF::Queue<Packet *>> in;
 	BF::Atomic<BF::Queue<Packet *>> out;
 
-	int sockd;
+	virtual const int descriptor() const = 0;
 
 protected:
 	Socket();

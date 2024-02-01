@@ -55,7 +55,7 @@ void Socket::inStream(void * in) {
 	
 	while (1) {
 		char buf[MESSAGE_BUFFER_SIZE];
-        if (recv(skt->sockd, buf, sizeof(buf), 0) == -1) {
+        if (recv(skt->descriptor(), buf, sizeof(buf), 0) == -1) {
 			ELog("%d\n", errno);
 			break;
 		}
@@ -83,7 +83,7 @@ void Socket::outStream(void * in) {
 			skt->out.get().pop();
 
 			// send buf from message
-			send(skt->sockd, p->payload.message.buf, sizeof(p->payload.message.buf), 0);
+			send(skt->descriptor(), p->payload.message.buf, sizeof(p->payload.message.buf), 0);
 
 			PACKET_FREE(p);
 		}

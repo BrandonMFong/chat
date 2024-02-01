@@ -15,8 +15,10 @@ public:
 	static void init(void * in);
 	int start();
 	int stop();
-
+	const int descriptor() const;
 	const char mode() const;
+private:
+	int _mainSocket;
 };
 
 #endif // CLIENT_HPP
