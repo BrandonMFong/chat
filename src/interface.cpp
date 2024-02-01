@@ -6,6 +6,7 @@
 #include <interface.hpp>
 #include <bflibcpp/bflibcpp.hpp>
 #include <unistd.h>
+#include <ncurses.h>
 
 using namespace BF;
 
@@ -63,6 +64,7 @@ int InterfaceReadInput(Packet * p) {
 }
 
 int InterfaceRun(ChatConfig * config) {
+	/*
 	int i = 0;
 	int error = 0;
 
@@ -79,7 +81,51 @@ int InterfaceRun(ChatConfig * config) {
 
 		i++;
 	}
+*/
 
-	return error;
+    initscr(); // Initialize the library
+    cbreak();  // Line buffering disabled, pass on everything to me
+
+    // Create two windows
+    WINDOW *inputWin = newwin(3, COLS, LINES - 3, 0);
+    WINDOW *displayWin = newwin(LINES - 3, COLS, 0, 0);
+
+    box(inputWin, 0, 0); // Add a box around the input window
+    box(displayWin, 0, 0); // Add a box around the display window
+
+    refresh(); // Refresh the main window to show the boxes
+    wrefresh(inputWin); // Refresh the input window
+    wrefresh(displayWin); // Refresh the display window
+
+    keypad(inputWin, true); // Enable special keys in input window
+    nodelay(inputWin, true); // Set non-blocking input for input window
+
+    std::string userInput;
+    int ch;
+
+    while (true) {
+        ch = wgetch(inputWin); // Get user input
+
+        if (ch != ERR) {
+            // If a key is pressed, add it to the userInput string
+            userInput.push_back(ch);
+        }
+
+        // Display user input in the display window
+        werase(displayWin);
+        mvwprintw(displayWin, 1, 1, userInput.c_str());
+        wrefresh(displayWin);
+
+        // Exit the loop if 'q' key is pressed
+        if (ch == 'q') {
+            break;
+        }
+    }
+
+    endwin(); // End curses mode
+
+ 
+
+	return 0;
 }
 
