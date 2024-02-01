@@ -6,9 +6,9 @@
 #ifndef INTERFACE_HPP
 #define INTERFACE_HPP
 
-#include <typechatconfig.h>
+#include "socket.hpp"
 
-int InterfaceRun(ChatConfig * config);
+int InterfaceRun(Socket * skt);
 
 #endif // INTERFACE_HPP
 

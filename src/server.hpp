@@ -12,8 +12,9 @@ class Server : public Socket {
 public:
 	Server();
 	virtual ~Server();
-	int start(ChatConfig * config);
-	int stop(ChatConfig * config);
+	static void init(void * in);
+	int start();
+	int stop();
 	const char mode() const;
 };
 

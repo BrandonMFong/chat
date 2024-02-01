@@ -10,39 +10,39 @@
 
 using namespace BF;
 
-int InterfaceOutStreamAddMessage(ChatConfig * config, Packet * pkt) {
-	if (!config || !pkt) return -2;
+int InterfaceOutStreamAddMessage(Socket * s, Packet * pkt) {
+	if (!s || !pkt) return -2;
 
 	Packet * p = PACKET_ALLOC;
 	if (!p) return -2;
 
 	memcpy(p, pkt, sizeof(Packet));
 
-	config->out.lock();
-	int error = config->out.get().push(p);
-	config->out.unlock();
+	s->out.lock();
+	int error = s->out.get().push(p);
+	s->out.unlock();
 	return error;
 }
 
 void InterfaceInStreamThread(void * in) {
-	ChatConfig * config = (ChatConfig *) in;
+	Socket * s = (Socket *) in;
 
 	while (1) {
-		config->in.lock();
+		s->in.lock();
 		// if queue is not empty, send the next message
-		if (!config->in.get().empty()) {
+		if (!s->in.get().empty()) {
 			// get first message
-			Packet * p = config->in.get().front();
+			Packet * p = s->in.get().front();
 
 			printf("> %s", p->payload.message.buf);
 			fflush(stdout);
 
 			// pop queue
-			config->in.get().pop();
+			s->in.get().pop();
 
 			PACKET_FREE(p);
 		}
-		config->in.unlock();
+		s->in.unlock();
 	}
 }
 
@@ -119,16 +119,16 @@ int InterfaceWindowLoop(ChatConfig * config) {
 	return 0;
 }
 
-int InterfaceRun(ChatConfig * config) {
+int InterfaceRun(Socket * skt) {
 	// this thread will monitor incoming messages from the in q
-	BFThreadAsync(InterfaceInStreamThread, (void *) config);
+	BFThreadAsync(InterfaceInStreamThread, (void *) skt);
 
 	int error = 0;
 	while (!error) {
 		Packet p;
 		error = InterfaceReadInput(&p);
 		if (!error)
-			InterfaceOutStreamAddMessage(config, &p);
+			InterfaceOutStreamAddMessage(skt, &p);
 	}
 
 	// Packet p;

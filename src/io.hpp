@@ -8,11 +8,6 @@
 
 #include <typechatconfig.h>
 
-typedef struct {
-	int cd; // client socket descriptor
-	ChatConfig * config;
-} IOTools;
-
 void IOIn(void * in);
 void IOOut(void * in);
 

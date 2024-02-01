@@ -12,9 +12,9 @@ class Client : public Socket {
 public:
 	Client();
 	virtual ~Client();
-	
-	int start(ChatConfig * config);
-	int stop(ChatConfig * config);
+	static void init(void * in);
+	int start();
+	int stop();
 
 	const char mode() const;
 };

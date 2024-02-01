@@ -26,45 +26,43 @@ const char Client::mode() const {
 	return SOCKET_MODE_CLIENT;
 }
 
-void ClientThreadCallback(void * in) {
-	ChatConfig * config = (ChatConfig *) in;
+void Client::init(void * in) {
+	Client * client = (Client *) in;
 
 	int sockD = socket(AF_INET, SOCK_STREAM, 0);
 
     struct sockaddr_in servAddr;
 
     servAddr.sin_family = AF_INET;
-    servAddr.sin_port
-        = htons(9001); // use some unused port number
+    servAddr.sin_port = htons(9001); // use some unused port number
     servAddr.sin_addr.s_addr = INADDR_ANY;
 
-    int connectStatus
-        = connect(sockD, (struct sockaddr*)&servAddr,
-                  sizeof(servAddr));
+    int connectStatus = connect(
+		sockD,
+		(struct sockaddr *) &servAddr,
+		sizeof(servAddr)
+	);
 
     if (connectStatus == -1) {
         printf("Error... %d\n", errno);
     } else {
-		IOTools iotool;
-		iotool.config = config;
-		iotool.cd = sockD;
-
-		BFThreadAsync(IOIn, (void *) &iotool);
-		BFThreadAsync(IOOut, (void *) &iotool);
+		client->sockd = sockD;
+		BFThreadAsync(Socket::inStream, (void *) client);
+		BFThreadAsync(Socket::outStream, (void *) client);
 
 		while (1) {}
     }
 }
 
-int Client::start(ChatConfig * config) {
+int Client::start() {
 	printf("client\n");
-	BFThreadAsync(ClientThreadCallback, (void *) config);
+	BFThreadAsync(Client::init, (void *) this);
 
 	int error = 0;
 	return error;
 }
 
-int Client::stop(ChatConfig * config) {
+int Client::stop() {
 	return 0;
 }
 

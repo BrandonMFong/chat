@@ -57,15 +57,15 @@ int main(int argc, char * argv[]) {
 	}
 
 	if (!result) {
-		result = skt->start(&config);
+		result = skt->start();
 	}
 
 	if (!result) {
-		result = InterfaceRun(&config);
+		result = InterfaceRun(skt);
 	}
 
 	if (!result) {
-		result = skt->stop(&config);
+		result = skt->stop();
 	}
 
 	if (result) {

@@ -26,8 +26,8 @@ const char Server::mode() const {
 	return SOCKET_MODE_SERVER;
 }
 
-void ServerThreadCallbackInit(void * in) {
-	ChatConfig * config = (ChatConfig *) in;
+void Server::init(void * in) {
+	Server * server = (Server *) in;
 
 	// create server socket similar to what was done in
     // client program
@@ -47,29 +47,25 @@ void ServerThreadCallbackInit(void * in) {
 	const int allowedConnections = 1;
     listen(serverSocket, allowedConnections);
 
-	IOTools iotools[allowedConnections];
+	server->sockd = accept(serverSocket, NULL, NULL);
 
-    // integer to hold client socket.
-	iotools[0].config = config;
-	iotools[0].cd = accept(serverSocket, NULL, NULL);
-
-	BFThreadAsync(IOIn, (void *) &iotools[0]);
-	BFThreadAsync(IOOut, (void *) &iotools[0]);
+	BFThreadAsync(Socket::inStream, (void *) server);
+	BFThreadAsync(Socket::outStream, (void *) server);
 
 	while (1) {}
 }
 
-int Server::start(ChatConfig * config) {
+int Server::start() {
 	printf("server\n");
 
-	BFThreadAsync(ServerThreadCallbackInit, (void *) config);
+	BFThreadAsync(Server::init, (void *) this);
 
 	int error = 0;
 
 	return error;
 }
 
-int Server::stop(ChatConfig * config) {
+int Server::stop() {
 	return 0;
 }
 
