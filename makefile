@@ -18,7 +18,7 @@ R_LIBRARIES = external/libs/$(BF_LIB_RPATH_RELEASE_CPP)
 R_OBJECTS = $(patsubst %, $(R_BUILD_PATH)/%.o, $(FILES))
 
 ### Debug settings
-D_CXXFLAGS = -DDEBUG -g -Isrc/ -Iexternal/libs/$(BF_LIB_RPATH_DEBUG)
+D_CXXFLAGS = -DDEBUG -g -fsanitize=address -Isrc/ -Iexternal/libs/$(BF_LIB_RPATH_DEBUG)
 D_BIN_NAME = $(R_BIN_NAME)-debug
 D_BUILD_PATH = $(BUILD_PATH)/debug
 D_MAIN_FILE = $(R_MAIN_FILE)

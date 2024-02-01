@@ -55,14 +55,22 @@ int main(int argc, char * argv[]) {
 	result = ArgumentsRead(argc, argv, &mode);
 	if (!result) {
 		if (mode == CHAT_MODE_SERVER) {
-			result = ServerRun(&config);
+			result = ServerStart(&config);
 		} else if (mode == CHAT_MODE_CLIENT) {
-			result = ClientRun(&config);
+			result = ClientStart(&config);
 		}
 	}
 
 	if (!result) {
 		result = InterfaceRun(&config);
+	}
+
+	if (!result) {
+		if (mode == CHAT_MODE_SERVER) {
+			result = ServerStop(&config);
+		} else if (mode == CHAT_MODE_CLIENT) {
+			result = ClientStop(&config);
+		}
 	}
 
 	if (result) {

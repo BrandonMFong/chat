@@ -63,25 +63,7 @@ int InterfaceReadInput(Packet * p) {
 	return 0;
 }
 
-int InterfaceRun(ChatConfig * config) {
-	/*
-	int i = 0;
-	int error = 0;
-
-	// this thread will monitor incoming messages from the in q
-	BFThreadAsyncID tid = BFThreadAsync(InterfaceInStreamThread, (void *) config);
-
-	while (!error) {
-		Packet p;
-
-		error = InterfaceReadInput(&p);
-
-		if (!error)
-			error = InterfaceOutStreamAddMessage(config, &p);
-
-		i++;
-	}
-*/
+int InterfaceWindowLoop(ChatConfig * config) {
 	initscr(); // Initialize the library
     cbreak();  // Line buffering disabled, pass on everything to me
     noecho();  // Don't echo user input
@@ -134,6 +116,19 @@ int InterfaceRun(ChatConfig * config) {
 
     endwin(); // End curses mode
 
+	return 0;
+}
+
+int InterfaceRun(ChatConfig * config) {
+	// this thread will monitor incoming messages from the in q
+	BFThreadAsync(InterfaceInStreamThread, (void *) config);
+
+	// Packet p;
+	// error = InterfaceOutStreamAddMessage(config, &p);
+	InterfaceWindowLoop(config);
+	
+	//while(1) {}
+	
 	return 0;
 }
 

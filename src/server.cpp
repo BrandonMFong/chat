@@ -47,13 +47,17 @@ void ServerThreadCallbackInit(void * in) {
 	while (1) {}
 }
 
-int ServerRun(ChatConfig * config) {
+int ServerStart(ChatConfig * config) {
 	printf("server\n");
 
-	BFThreadAsyncID tid = BFThreadAsync(ServerThreadCallbackInit, (void *) config);
+	BFThreadAsync(ServerThreadCallbackInit, (void *) config);
 
 	int error = 0;
 
 	return error;
+}
+
+int ServerStop(ChatConfig * config) {
+	return 0;
 }
 

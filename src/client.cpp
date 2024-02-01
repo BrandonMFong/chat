@@ -44,11 +44,15 @@ void ClientThreadCallback(void * in) {
     }
 }
 
-int ClientRun(ChatConfig * config) {
+int ClientStart(ChatConfig * config) {
 	printf("client\n");
 	BFThreadAsync(ClientThreadCallback, (void *) config);
 
 	int error = 0;
 	return error;
+}
+
+int ClientStop(ChatConfig * config) {
+	return 0;
 }
 
