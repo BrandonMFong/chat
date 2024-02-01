@@ -51,8 +51,6 @@ void Server::init(void * in) {
 
 	BFThreadAsync(Socket::inStream, (void *) server);
 	BFThreadAsync(Socket::outStream, (void *) server);
-
-	while (1) {}
 }
 
 const int Server::descriptor() const {

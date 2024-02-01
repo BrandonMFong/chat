@@ -47,8 +47,6 @@ void Client::init(void * in) {
     } else {
 		BFThreadAsync(Socket::inStream, (void *) client);
 		BFThreadAsync(Socket::outStream, (void *) client);
-
-		while (1) {}
     }
 }
 
