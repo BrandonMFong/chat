@@ -127,8 +127,10 @@ int InterfaceRun(Socket * skt) {
 	while (!error) {
 		Packet p;
 		error = InterfaceReadInput(&p);
-		if (!error)
+		if (!error) {
+			if (!strcmp(p.payload.message.buf, "q")) break;
 			InterfaceOutStreamAddMessage(skt, &p);
+		}
 	}
 
 	// Packet p;
