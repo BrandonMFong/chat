@@ -10,6 +10,7 @@
 #include <server.hpp>
 #include <client.hpp>
 #include <interface.hpp>
+#include <bflibcpp/bflibcpp.hpp>
 
 #define ARGUMENT_SERVER "server"
 #define ARGUMENT_CLIENT "client"
@@ -69,6 +70,8 @@ int main(int argc, char * argv[]) {
 	if (result) {
 		Help(argv[0]);
 	}
+
+	Delete(skt);
 
 	return result;
 }
