@@ -100,6 +100,7 @@ int InterfaceRun(ChatConfig * config) {
     keypad(inputWin, true); // Enable special keys in input window
     nodelay(inputWin, true); // Set non-blocking input for input window
 
+	wmove(inputWin, 1, 1);
     std::string userInput;
     int ch;
 
