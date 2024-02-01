@@ -17,13 +17,9 @@
 #include <bflibcpp/bflibcpp.hpp>
 #include <bflibc/bflibc.h>
 
-Socket::Socket() {
+Socket::Socket() { }
 
-}
-
-Socket::~Socket() {
-
-}
+Socket::~Socket() { }
 
 Socket * Socket::create(const char mode, int * err) {
 	Socket * result = NULL;
@@ -56,8 +52,11 @@ void Socket::inStream(void * in) {
 	
 	while (1) {
 		char buf[MESSAGE_BUFFER_SIZE];
-        if (recv(skt->descriptor(), buf, sizeof(buf), 0) == -1) {
+		size_t bufsize = recv(skt->descriptor(), buf, sizeof(buf), 0);
+        if (bufsize == -1) {
 			ELog("%d\n", errno);
+			break;
+		} else if (bufsize == 0) {
 			break;
 		}
 
@@ -84,7 +83,6 @@ void Socket::outStream(void * in) {
 			skt->out.get().pop();
 
 			// send buf from message
-			printf("\nsending: '%s'\n", p->payload.message.buf);
 			send(skt->descriptor(), p->payload.message.buf, sizeof(p->payload.message.buf), 0);
 
 			PACKET_FREE(p);
