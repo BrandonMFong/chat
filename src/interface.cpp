@@ -100,7 +100,7 @@ int InterfaceRun(ChatConfig * config) {
     keypad(inputWin, true); // Enable special keys in input window
     nodelay(inputWin, false); // Set blocking input for input window
 
-    std::string userInput;
+    String userInput;
 
     while (true) {
         int ch = wgetch(inputWin); // Get user input
@@ -109,21 +109,21 @@ int InterfaceRun(ChatConfig * config) {
             // If Enter key is pressed, display user input in the display window
             werase(displayWin);
             box(displayWin, 0, 0);
-            mvwprintw(displayWin, 1, 1, userInput.c_str());
+            mvwprintw(displayWin, 1, 1, userInput.cString());
             wrefresh(displayWin);
 
             // Clear the input window and userInput
             werase(inputWin);
             box(inputWin, 0, 0);
             wrefresh(inputWin);
-            userInput.clear();
+            userInput = "";
         } else if (ch != ERR) {
             // If a key is pressed (excluding Enter), add it to the userInput string
-            userInput.push_back(ch);
+            userInput.addChar(ch);
         }
 
         // Display user input in the input window
-        mvwprintw(inputWin, 1, 1, userInput.c_str());
+        mvwprintw(inputWin, 1, 1, userInput.cString());
         wrefresh(inputWin);
 
         // Exit the loop if 'q' key is pressed
