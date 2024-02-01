@@ -6,11 +6,16 @@
 #ifndef SERVER_HPP
 #define SERVER_HPP
 
-#include <typechatconfig.h>
+#include "socket.hpp"
 
-int ServerStart(ChatConfig * config);
-
-int ServerStop(ChatConfig * config);
+class Server : public Socket {
+public:
+	Server();
+	virtual ~Server();
+	int start(ChatConfig * config);
+	int stop(ChatConfig * config);
+	const char mode() const;
+};
 
 #endif // SERVER_HPP
 

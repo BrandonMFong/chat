@@ -15,8 +15,6 @@
 #define ARGUMENT_SERVER "server"
 #define ARGUMENT_CLIENT "client"
 
-#define CHAT_MODE_SERVER 's'
-#define CHAT_MODE_CLIENT 'c'
 
 void Help(const char * toolname) {
 	printf("usage: %s\n", toolname);
@@ -39,9 +37,9 @@ int ArgumentsRead(int argc, char * argv[], char * mode) {
 	if (modereqclient && modereqserver) {
 		return -2;
 	} else if (modereqclient) {
-		*mode = CHAT_MODE_CLIENT;
+		*mode = SOCKET_MODE_CLIENT;
 	} else if (modereqserver) {
-		*mode = CHAT_MODE_SERVER;
+		*mode = SOCKET_MODE_SERVER;
 	}
 
 	return 0;
@@ -51,14 +49,15 @@ int main(int argc, char * argv[]) {
 	int result = 0;
 	char mode = 0;
 	ChatConfig config;
+	Socket * skt = NULL;
 
 	result = ArgumentsRead(argc, argv, &mode);
 	if (!result) {
-		if (mode == CHAT_MODE_SERVER) {
-			result = ServerStart(&config);
-		} else if (mode == CHAT_MODE_CLIENT) {
-			result = ClientStart(&config);
-		}
+		skt = Socket::create(mode, &result);
+	}
+
+	if (!result) {
+		result = skt->start(&config);
 	}
 
 	if (!result) {
@@ -66,11 +65,7 @@ int main(int argc, char * argv[]) {
 	}
 
 	if (!result) {
-		if (mode == CHAT_MODE_SERVER) {
-			result = ServerStop(&config);
-		} else if (mode == CHAT_MODE_CLIENT) {
-			result = ClientStop(&config);
-		}
+		result = skt->stop(&config);
 	}
 
 	if (result) {

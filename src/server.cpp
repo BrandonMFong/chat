@@ -14,6 +14,18 @@
 #include <unistd.h>
 #include <bflibcpp/bflibcpp.hpp>
 
+Server::Server() {
+
+}
+
+Server::~Server() {
+
+}
+
+const char Server::mode() const {
+	return SOCKET_MODE_SERVER;
+}
+
 void ServerThreadCallbackInit(void * in) {
 	ChatConfig * config = (ChatConfig *) in;
 
@@ -47,7 +59,7 @@ void ServerThreadCallbackInit(void * in) {
 	while (1) {}
 }
 
-int ServerStart(ChatConfig * config) {
+int Server::start(ChatConfig * config) {
 	printf("server\n");
 
 	BFThreadAsync(ServerThreadCallbackInit, (void *) config);
@@ -57,7 +69,7 @@ int ServerStart(ChatConfig * config) {
 	return error;
 }
 
-int ServerStop(ChatConfig * config) {
+int Server::stop(ChatConfig * config) {
 	return 0;
 }
 

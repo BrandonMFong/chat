@@ -6,7 +6,7 @@ include external/libs/makefiles/libpaths.mk
 
 ### Global
 BUILD_PATH = build
-FILES = server client interface io
+FILES = server client interface io socket
 CXXLINKS = -lpthread -lncurses
 
 ### Release settings

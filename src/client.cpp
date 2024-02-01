@@ -14,6 +14,18 @@
 #include <unistd.h>
 #include <bflibcpp/bflibcpp.hpp>
 
+Client::Client() {
+
+}
+
+Client::~Client() {
+
+}
+
+const char Client::mode() const {
+	return SOCKET_MODE_CLIENT;
+}
+
 void ClientThreadCallback(void * in) {
 	ChatConfig * config = (ChatConfig *) in;
 
@@ -44,7 +56,7 @@ void ClientThreadCallback(void * in) {
     }
 }
 
-int ClientStart(ChatConfig * config) {
+int Client::start(ChatConfig * config) {
 	printf("client\n");
 	BFThreadAsync(ClientThreadCallback, (void *) config);
 
@@ -52,7 +64,7 @@ int ClientStart(ChatConfig * config) {
 	return error;
 }
 
-int ClientStop(ChatConfig * config) {
+int Client::stop(ChatConfig * config) {
 	return 0;
 }
 

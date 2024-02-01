@@ -123,9 +123,17 @@ int InterfaceRun(ChatConfig * config) {
 	// this thread will monitor incoming messages from the in q
 	BFThreadAsync(InterfaceInStreamThread, (void *) config);
 
+	int error = 0;
+	while (!error) {
+		Packet p;
+		error = InterfaceReadInput(&p);
+		if (!error)
+			InterfaceOutStreamAddMessage(config, &p);
+	}
+
 	// Packet p;
 	// error = InterfaceOutStreamAddMessage(config, &p);
-	InterfaceWindowLoop(config);
+	//InterfaceWindowLoop(config);
 	
 	//while(1) {}
 	

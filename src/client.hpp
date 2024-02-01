@@ -6,11 +6,18 @@
 #ifndef CLIENT_HPP
 #define CLIENT_HPP
 
-#include <typechatconfig.h>
+#include "socket.hpp"
 
-int ClientStart(ChatConfig * config);
+class Client : public Socket {
+public:
+	Client();
+	virtual ~Client();
+	
+	int start(ChatConfig * config);
+	int stop(ChatConfig * config);
 
-int ClientStop(ChatConfig * config);
+	const char mode() const;
+};
 
 #endif // CLIENT_HPP
 
