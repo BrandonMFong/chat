@@ -70,6 +70,9 @@ int Server::_start() {
 
 int Server::_stop() {
 	printf("server stop\n");
+	shutdown(this->_clientSocket, SHUT_RDWR);
+	close(this->_clientSocket);
+	close(this->_mainSocket);
 	return 0;
 }
 

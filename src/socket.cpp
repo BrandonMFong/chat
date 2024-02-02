@@ -57,6 +57,7 @@ void Socket::inStream(void * in) {
 			ELog("%d\n", errno);
 			break;
 		} else if (bufsize == 0) {
+			DLog("recv received 0\n");
 			break;
 		}
 
@@ -107,11 +108,13 @@ int Socket::start() {
 int Socket::stop() {
 	int error = this->_stop();
 
-	if (!error)
+	if (!error) {
 		error = BFThreadAsyncCancel(this->_tidin);
+	}
 
-	if (!error) 
+	if (!error) {
 		error = BFThreadAsyncCancel(this->_tidout);
+	}
 
 	if (!error) {
 		BFThreadAsyncIDDestroy(this->_tidin);

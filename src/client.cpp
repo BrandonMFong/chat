@@ -63,6 +63,7 @@ int Client::_start() {
 
 int Client::_stop() {
 	printf("client stop\n");
+	shutdown(this->_mainSocket, SHUT_RDWR);
 	close(this->_mainSocket);
 	return 0;
 }
