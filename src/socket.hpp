@@ -8,6 +8,7 @@
 
 #include <bflibcpp/queue.hpp>
 #include <bflibcpp/atomic.hpp>
+#include <bflibcpp/object.hpp>
 #include <typepacket.h>
 
 extern "C" {
@@ -17,7 +18,7 @@ extern "C" {
 #define SOCKET_MODE_SERVER 's'
 #define SOCKET_MODE_CLIENT 'c'
 
-class Socket {
+class Socket : public BF::Object {
 public: 
 	static Socket * create(const char mode, int * err);
 	virtual ~Socket();

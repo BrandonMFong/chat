@@ -71,7 +71,7 @@ int main(int argc, char * argv[]) {
 		Help(argv[0]);
 	}
 
-	Delete(skt);
+	BFRelease(skt);
 
 	return result;
 }
