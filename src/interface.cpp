@@ -18,24 +18,9 @@ void InterfaceInStreamQueueCallback(const Packet & p) {
 	werase(displayWin);
 	box(displayWin, 0, 0);
 	mvwprintw(displayWin, 1, 1, p.payload.message.buf);
+	mvwprintw(displayWin, 2, 1, p.payload.message.buf);
+	mvwprintw(displayWin, 3, 1, p.payload.message.buf);
 	wrefresh(displayWin);
-}
-
-int InterfaceReadInput(Packet * p) {
-	if (!p) return -30;
-	printf("> ");
-	fgets(
-		p->payload.message.buf,
-		sizeof(p->payload.message.buf),
-		stdin
-	);
-
-	if (strlen(p->payload.message.buf)
-	&& p->payload.message.buf[strlen(p->payload.message.buf) - 1] == '\n') {
-		p->payload.message.buf[strlen(p->payload.message.buf) - 1] = '\0';
-	}
-
-	return 0;
 }
 
 int InterfaceWindowLoop(Socket * skt) {
@@ -95,21 +80,7 @@ int InterfaceWindowLoop(Socket * skt) {
 }
 
 int InterfaceRun(Socket * skt) {
-	int error = 0;
-	/*
-	while (!error) {
-		Packet p;
-		error = InterfaceReadInput(&p);
-		if (!error) {
-			if (!strcmp(p.payload.message.buf, "q")) break;
-			skt->sendPacket(&p);
-		}
-	}
-	*/
-
-	Packet p;
-	InterfaceWindowLoop(skt);
-	
-	return 0;
+	int error = InterfaceWindowLoop(skt);
+	return error;
 }
 

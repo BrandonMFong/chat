@@ -6,7 +6,6 @@
 #ifndef CHAT_H
 #define CHAT_H
 
-#define MESSAGE_BUFFER_SIZE 255
 
 #endif // CHAT_H
 

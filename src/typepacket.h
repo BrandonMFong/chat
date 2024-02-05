@@ -6,14 +6,11 @@
 #ifndef TYPE_PACKET_H
 #define TYPE_PACKET_H
 
-#include <chat.h>
+#include "typemessage.h"
 
 typedef struct {
 	union {
-		struct {
-			char username[255];
-			char buf[MESSAGE_BUFFER_SIZE];
-		} message;
+		Message message;
 	} payload;
 } Packet;
 
