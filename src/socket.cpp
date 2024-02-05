@@ -19,8 +19,10 @@
 #include <bflibc/bflibc.h>
 
 Socket::Socket() { 
-	this->_tidin = NULL;
+	this->_tidinpush = NULL;
+	this->_tidinpop = NULL;
 	this->_tidout = NULL;
+	this->_callback = NULL;
 }
 
 Socket::~Socket() { }
@@ -51,7 +53,7 @@ Socket * Socket::create(const char mode, int * err) {
 	return result;
 }
 
-void Socket::inStream(void * in) {
+void Socket::inStreamQueuePush(void * in) {
 	Socket * skt = (Socket *) in;
 
 	BFRetain(skt);
@@ -76,6 +78,29 @@ void Socket::inStream(void * in) {
 	}
 
 	BFRelease(skt);
+}
+
+void Socket::inStreamQueuePop(void * in) {
+	Socket * skt = (Socket *) in;
+
+	while (1) {
+		skt->in.lock();
+		// if queue is not empty, send the next message
+		if (!skt->in.get().empty()) {
+			// get first message
+			Packet * p = skt->in.get().front();
+
+			if (p) {
+				skt->_callback(*p);
+			}
+
+			// pop queue
+			skt->in.get().pop();
+
+			PACKET_FREE(p);
+		}
+		skt->in.unlock();
+	}
 }
 
 void Socket::outStream(void * in) {
@@ -105,7 +130,8 @@ void Socket::outStream(void * in) {
 }
 
 int Socket::startIOStreams() {
-	this->_tidin = BFThreadAsync(Socket::inStream, (void *) this);
+	this->_tidinpush = BFThreadAsync(Socket::inStreamQueuePush, (void *) this);
+	this->_tidinpop = BFThreadAsync(Socket::inStreamQueuePop, (void *) this);
 	this->_tidout = BFThreadAsync(Socket::outStream, (void *) this);
 
 	return 0;
@@ -113,17 +139,20 @@ int Socket::startIOStreams() {
 
 int Socket::start() {
 	this->_start();
-
-
 	return 0;
 }
 
 int Socket::stop() {
 	int error = this->_stop();
 
-	if (!error && this->_tidin) {
-		error = BFThreadAsyncCancel(this->_tidin);
-		BFThreadAsyncIDDestroy(this->_tidin);
+	if (!error && this->_tidinpush) {
+		error = BFThreadAsyncCancel(this->_tidinpush);
+		BFThreadAsyncIDDestroy(this->_tidinpush);
+	}
+
+	if (!error && this->_tidinpop) {
+		error = BFThreadAsyncCancel(this->_tidinpop);
+		BFThreadAsyncIDDestroy(this->_tidinpop);
 	}
 
 	if (!error && this->_tidout) {
@@ -149,6 +178,6 @@ int Socket::sendPacket(const Packet * pkt) {
 }
 
 void Socket::setInStreamCallback(void (* callback)(const Packet &)) {
-
+	this->_callback = callback;
 }
 

@@ -28,12 +28,18 @@ public:
 	int start();
 	int stop();
 	
-	static void inStream(void * in);
+	static void inStreamQueuePush(void * in);
+	static void inStreamQueuePop(void * in);
 	static void outStream(void * in);
 
 	BF::Atomic<BF::Queue<Packet *>> in;
 	BF::Atomic<BF::Queue<Packet *>> out;
 	int sendPacket(const Packet * packet);
+
+	/**
+	 * sets the callback that will be in charge of observing
+	 * the top the of the in stream packet queue when available
+	 */
 	void setInStreamCallback(void (* callback)(const Packet &));
 
 	virtual const int descriptor() const = 0;
@@ -52,8 +58,15 @@ protected:
 	int startIOStreams();
 
 private:
-	BFThreadAsyncID _tidin;
+	BFThreadAsyncID _tidinpush;
+	BFThreadAsyncID _tidinpop;
 	BFThreadAsyncID _tidout;
+
+	/**
+	 * callback that will observe packet from
+	 * top of the in stream queue	
+	 */
+	void (* _callback)(const Packet &);
 };
 
 #endif // SOCKET_HPP

@@ -10,26 +10,9 @@
 
 using namespace BF;
 
-void InterfaceInStreamThread(void * in) {
-	Socket * s = (Socket *) in;
-
-	while (1) {
-		s->in.lock();
-		// if queue is not empty, send the next message
-		if (!s->in.get().empty()) {
-			// get first message
-			Packet * p = s->in.get().front();
-
-			printf("> %s", p->payload.message.buf);
-			fflush(stdout);
-
-			// pop queue
-			s->in.get().pop();
-
-			PACKET_FREE(p);
-		}
-		s->in.unlock();
-	}
+void InterfaceInStreamQueueCallback(const Packet & p) {
+	printf("> %s", p.payload.message.buf);
+	fflush(stdout);
 }
 
 int InterfaceReadInput(Packet * p) {
@@ -106,9 +89,6 @@ int InterfaceWindowLoop() {
 }
 
 int InterfaceRun(Socket * skt) {
-	// this thread will monitor incoming messages from the in q
-	BFThreadAsync(InterfaceInStreamThread, (void *) skt);
-
 	int error = 0;
 	while (!error) {
 		Packet p;
