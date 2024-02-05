@@ -69,12 +69,12 @@ private:
 	/**
 	 * queues incoming data from recv
 	 */	
-	BF::Atomic<BF::Queue<Packet *>> in;
+	BF::Atomic<BF::Queue<Packet *>> _inq;
 
 	/**
 	 * queues outgoing data using send
 	 */
-	BF::Atomic<BF::Queue<Packet *>> out;
+	BF::Atomic<BF::Queue<Packet *>> _outq;
 };
 
 #endif // SOCKET_HPP

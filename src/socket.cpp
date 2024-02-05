@@ -72,9 +72,9 @@ void Socket::inStreamQueuePush(void * in) {
 		Packet * p = PACKET_ALLOC;
 		memcpy(p->payload.message.buf, buf, MESSAGE_BUFFER_SIZE);
 
-		skt->in.lock();
-		skt->in.get().push(p);
-		skt->in.unlock();
+		skt->_inq.lock();
+		skt->_inq.get().push(p);
+		skt->_inq.unlock();
 	}
 
 	BFRelease(skt);
@@ -84,22 +84,22 @@ void Socket::inStreamQueuePop(void * in) {
 	Socket * skt = (Socket *) in;
 
 	while (1) {
-		skt->in.lock();
+		skt->_inq.lock();
 		// if queue is not empty, send the next message
-		if (!skt->in.get().empty()) {
+		if (!skt->_inq.get().empty()) {
 			// get first message
-			Packet * p = skt->in.get().front();
+			Packet * p = skt->_inq.get().front();
 
 			if (p) {
 				skt->_callback(*p);
 			}
 
 			// pop queue
-			skt->in.get().pop();
+			skt->_inq.get().pop();
 
 			PACKET_FREE(p);
 		}
-		skt->in.unlock();
+		skt->_inq.unlock();
 	}
 }
 
@@ -109,21 +109,21 @@ void Socket::outStream(void * in) {
 	BFRetain(skt);
 
 	while (1) {
-		skt->out.lock();
+		skt->_outq.lock();
 		// if queue is not empty, send the next message
-		if (!skt->out.get().empty()) {
+		if (!skt->_outq.get().empty()) {
 			// get first message
-			Packet * p = skt->out.get().front();
+			Packet * p = skt->_outq.get().front();
 
 			// pop queue
-			skt->out.get().pop();
+			skt->_outq.get().pop();
 
 			// send buf from message
 			send(skt->descriptor(), p->payload.message.buf, sizeof(p->payload.message.buf), 0);
 
 			PACKET_FREE(p);
 		}
-		skt->out.unlock();
+		skt->_outq.unlock();
 	}
 
 	BFRelease(skt);
@@ -171,9 +171,9 @@ int Socket::sendPacket(const Packet * pkt) {
 
 	memcpy(p, pkt, sizeof(Packet));
 
-	this->out.lock();
-	int error = this->out.get().push(p);
-	this->out.unlock();
+	this->_outq.lock();
+	int error = this->_outq.get().push(p);
+	this->_outq.unlock();
 	return error;
 }
 
