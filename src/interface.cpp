@@ -10,9 +10,15 @@
 
 using namespace BF;
 
+WINDOW * inputWin = NULL;
+WINDOW * displayWin = NULL;
+
 void InterfaceInStreamQueueCallback(const Packet & p) {
-	printf("> %s", p.payload.message.buf);
-	fflush(stdout);
+	// If Enter key is pressed, display user input in the display window
+	werase(displayWin);
+	box(displayWin, 0, 0);
+	mvwprintw(displayWin, 1, 1, p.payload.message.buf);
+	wrefresh(displayWin);
 }
 
 int InterfaceReadInput(Packet * p) {
@@ -38,8 +44,8 @@ int InterfaceWindowLoop(Socket * skt) {
     noecho();  // Don't echo user input
 
     // Create two windows
-    WINDOW *inputWin = newwin(3, COLS, LINES - 3, 0);
-    WINDOW *displayWin = newwin(LINES - 3, COLS, 0, 0);
+    inputWin = newwin(3, COLS, LINES - 3, 0);
+    displayWin = newwin(LINES - 3, COLS, 0, 0);
 
     box(inputWin, 0, 0); // Add a box around the input window
     box(displayWin, 0, 0); // Add a box around the display window
@@ -53,16 +59,16 @@ int InterfaceWindowLoop(Socket * skt) {
 
     String userInput;
 
-    while (true) {
+    while (1) {
+		Packet p;
         int ch = wgetch(inputWin); // Get user input
 
         if (ch == '\n') {
-            // If Enter key is pressed, display user input in the display window
-            werase(displayWin);
-            box(displayWin, 0, 0);
-            mvwprintw(displayWin, 1, 1, userInput.cString());
-            wrefresh(displayWin);
+			// load packet
+			strncpy(p.payload.message.buf, userInput.cString(), sizeof(p.payload.message.buf));
 
+			skt->sendPacket(&p);
+			
             // Clear the input window and userInput
             werase(inputWin);
             box(inputWin, 0, 0);
