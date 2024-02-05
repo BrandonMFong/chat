@@ -20,11 +20,9 @@ void InterfaceMessageFree(Message * m) {
 }
 
 void InterfaceInStreamQueueCallback(const Packet & p) {
-	/*
 	Message * m = MESSAGE_ALLOC;
 	memcpy(m, &p.payload.message, sizeof(Message));
 	conversation.get().add(m);
-	*/
 
 	werase(displayWin);
 	box(displayWin, 0, 0);
