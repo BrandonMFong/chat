@@ -31,7 +31,10 @@ public:
 	static void inStreamQueuePush(void * in);
 	static void inStreamQueuePop(void * in);
 	static void outStream(void * in);
-
+	
+	/**
+	 * queues up packet to be sent
+	 */
 	int sendPacket(const Packet * packet);
 
 	/**
