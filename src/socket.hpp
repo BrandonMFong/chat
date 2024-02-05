@@ -33,6 +33,8 @@ public:
 
 	BF::Atomic<BF::Queue<Packet *>> in;
 	BF::Atomic<BF::Queue<Packet *>> out;
+	int sendPacket(const Packet * packet);
+	void setInStreamCallback(void (* callback)(const Packet &));
 
 	virtual const int descriptor() const = 0;
 

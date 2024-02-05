@@ -10,20 +10,6 @@
 
 using namespace BF;
 
-int InterfaceOutStreamAddMessage(Socket * s, Packet * pkt) {
-	if (!s || !pkt) return -2;
-
-	Packet * p = PACKET_ALLOC;
-	if (!p) return -2;
-
-	memcpy(p, pkt, sizeof(Packet));
-
-	s->out.lock();
-	int error = s->out.get().push(p);
-	s->out.unlock();
-	return error;
-}
-
 void InterfaceInStreamThread(void * in) {
 	Socket * s = (Socket *) in;
 
@@ -129,7 +115,7 @@ int InterfaceRun(Socket * skt) {
 		error = InterfaceReadInput(&p);
 		if (!error) {
 			if (!strcmp(p.payload.message.buf, "q")) break;
-			InterfaceOutStreamAddMessage(skt, &p);
+			skt->sendPacket(&p);
 		}
 	}
 

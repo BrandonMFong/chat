@@ -132,3 +132,21 @@ int Socket::stop() {
 	return error;
 }
 
+int Socket::sendPacket(const Packet * pkt) {
+	if (!pkt) return -2;
+
+	Packet * p = PACKET_ALLOC;
+	if (!p) return -2;
+
+	memcpy(p, pkt, sizeof(Packet));
+
+	this->out.lock();
+	int error = this->out.get().push(p);
+	this->out.unlock();
+	return error;
+}
+
+void Socket::setInStreamCallback(void (* callback)(const Packet &)) {
+
+}
+
