@@ -13,14 +13,27 @@ using namespace BF;
 WINDOW * inputWin = NULL;
 WINDOW * displayWin = NULL;
 
+Atomic<List<Message *>> conversation;
+
+void InterfaceMessageFree(Message * m) {
+	MESSAGE_FREE(m);
+}
+
 void InterfaceInStreamQueueCallback(const Packet & p) {
+	Message * m = MESSAGE_ALLOC;
+	memcpy(m, &p.payload.message, sizeof(Message));
+	conversation.get().add(m);
+
 	// If Enter key is pressed, display user input in the display window
 	werase(displayWin);
 	box(displayWin, 0, 0);
-	mvwprintw(displayWin, 1, 1, p.payload.message.buf);
-	mvwprintw(displayWin, 2, 1, p.payload.message.buf);
-	mvwprintw(displayWin, 3, 1, p.payload.message.buf);
+	const int line = 1;
+	mvwprintw(displayWin, line, 1, p.payload.message.buf);
 	wrefresh(displayWin);
+}
+
+void InterfaceDisplayWindowUpdateThread(void * in) {
+
 }
 
 int InterfaceWindowLoop(Socket * skt) {
@@ -41,6 +54,10 @@ int InterfaceWindowLoop(Socket * skt) {
 
     keypad(inputWin, true); // Enable special keys in input window
     nodelay(inputWin, false); // Set blocking input for input window
+
+	// setup conversation thread
+	conversation.get().setDeallocateCallback(InterfaceMessageFree);
+	//BFThreadAsyncID tid = BFThreadAsync(InterfaceDisplayWindowUpdateThread, NULL);
 
     String userInput;
 
@@ -73,6 +90,9 @@ int InterfaceWindowLoop(Socket * skt) {
             break;
         }
     }
+
+	//BFThreadAsyncCancel(tid);
+	//BFThreadAsyncIDDestroy(tid);
 
     endwin(); // End curses mode
 
