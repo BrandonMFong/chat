@@ -46,6 +46,9 @@ protected:
 	virtual int _start() = 0;
 	virtual int _stop() = 0;
 
+	/**
+	 * clients must call this function at the end of _start()
+	 */
 	int startIOStreams();
 
 private:

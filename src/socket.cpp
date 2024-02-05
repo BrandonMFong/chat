@@ -11,13 +11,17 @@
 #include <netinet/in.h> //structure for storing address information 
 #include <stdio.h> 
 #include <stdlib.h> 
+#include <unistd.h> 
 #include <sys/socket.h> //for socket APIs 
 #include <sys/types.h> 
 #include <unistd.h>
 #include <bflibcpp/bflibcpp.hpp>
 #include <bflibc/bflibc.h>
 
-Socket::Socket() { }
+Socket::Socket() { 
+	this->_tidin = NULL;
+	this->_tidout = NULL;
+}
 
 Socket::~Socket() { }
 
@@ -110,22 +114,30 @@ int Socket::startIOStreams() {
 int Socket::start() {
 	this->_start();
 
+	int maxattempts = 2 << 16;
+	while (maxattempts && !this->_tidin && !this->_tidout) {
+		usleep(500);
+		maxattempts--;
+	}
+
+	if (!this->_tidin && !this->_tidout) {
+		DLog("Socket mode (%d) must call startIOStreams at the end of their _start method\n", this->mode());
+		return -1;
+	}
+	
 	return 0;
 }
 
 int Socket::stop() {
 	int error = this->_stop();
 
-	if (!error) {
+	if (!error && this->_tidin) {
 		error = BFThreadAsyncCancel(this->_tidin);
-	}
-
-	if (!error) {
-		error = BFThreadAsyncCancel(this->_tidout);
-	}
-
-	if (!error) {
 		BFThreadAsyncIDDestroy(this->_tidin);
+	}
+
+	if (!error && this->_tidout) {
+		error = BFThreadAsyncCancel(this->_tidout);
 		BFThreadAsyncIDDestroy(this->_tidout);
 	}
 
