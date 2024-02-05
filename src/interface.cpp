@@ -57,7 +57,7 @@ int InterfaceWindowLoop(Socket * skt) {
 
 	// setup conversation thread
 	conversation.get().setDeallocateCallback(InterfaceMessageFree);
-	//BFThreadAsyncID tid = BFThreadAsync(InterfaceDisplayWindowUpdateThread, NULL);
+	BFThreadAsyncID tid = BFThreadAsync(InterfaceDisplayWindowUpdateThread, NULL);
 
     String userInput;
 
@@ -91,8 +91,8 @@ int InterfaceWindowLoop(Socket * skt) {
         }
     }
 
-	//BFThreadAsyncCancel(tid);
-	//BFThreadAsyncIDDestroy(tid);
+	BFThreadAsyncCancel(tid);
+	BFThreadAsyncIDDestroy(tid);
 
     endwin(); // End curses mode
 
