@@ -32,8 +32,6 @@ public:
 	static void inStreamQueuePop(void * in);
 	static void outStream(void * in);
 
-	BF::Atomic<BF::Queue<Packet *>> in;
-	BF::Atomic<BF::Queue<Packet *>> out;
 	int sendPacket(const Packet * packet);
 
 	/**
@@ -67,6 +65,16 @@ private:
 	 * top of the in stream queue	
 	 */
 	void (* _callback)(const Packet &);
+
+	/**
+	 * queues incoming data from recv
+	 */	
+	BF::Atomic<BF::Queue<Packet *>> in;
+
+	/**
+	 * queues outgoing data using send
+	 */
+	BF::Atomic<BF::Queue<Packet *>> out;
 };
 
 #endif // SOCKET_HPP
