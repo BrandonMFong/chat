@@ -114,17 +114,7 @@ int Socket::startIOStreams() {
 int Socket::start() {
 	this->_start();
 
-	int maxattempts = 2 << 16;
-	while (maxattempts && !this->_tidin && !this->_tidout) {
-		usleep(500);
-		maxattempts--;
-	}
 
-	if (!this->_tidin && !this->_tidout) {
-		DLog("Socket mode (%d) must call startIOStreams at the end of their _start method\n", this->mode());
-		return -1;
-	}
-	
 	return 0;
 }
 
