@@ -24,11 +24,13 @@ void InterfaceInStreamQueueCallback(const Packet & p) {
 	memcpy(m, &p.payload.message, sizeof(Message));
 	conversation.get().add(m);
 
+	/*
 	werase(displayWin);
 	box(displayWin, 0, 0);
 	const int line = 1;
 	mvwprintw(displayWin, line, 1, p.payload.message.buf);
 	wrefresh(displayWin);
+	*/
 }
 
 void InterfaceDisplayWindowUpdateThread(void * in) {
@@ -38,19 +40,17 @@ void InterfaceDisplayWindowUpdateThread(void * in) {
 	while (1) {
 		conversation.lock();
 		if (conversation.get().count() != messagecount) {
-			/*
 			werase(displayWin);
 			box(displayWin, 0, 0);
 
 			// write messages
-			for (int l = 1; l <= conversation.get().count(); l++) {
-				Message * m = conversation.get().objectAtIndex(l - 1);
+			for (int i = 0; i <= conversation.get().count(); i++) {
+				Message * m = conversation.get().objectAtIndex(i);
 				if (m)
-					mvwprintw(displayWin, l, 1, m->buf);
+					mvwprintw(displayWin, i+1, 1, m->buf);
 			}
 
 			wrefresh(displayWin);
-			*/
 		
 			messagecount = conversation.get().count(); // update count
 		}
