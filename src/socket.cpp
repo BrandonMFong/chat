@@ -49,6 +49,8 @@ Socket * Socket::create(const char mode, int * err) {
 
 void Socket::inStream(void * in) {
 	Socket * skt = (Socket *) in;
+
+	BFRetain(skt);
 	
 	while (1) {
 		char buf[MESSAGE_BUFFER_SIZE];
@@ -68,10 +70,14 @@ void Socket::inStream(void * in) {
 		skt->in.get().push(p);
 		skt->in.unlock();
 	}
+
+	BFRelease(skt);
 }
 
 void Socket::outStream(void * in) {
 	Socket * skt = (Socket *) in;
+
+	BFRetain(skt);
 
 	while (1) {
 		skt->out.lock();
@@ -90,6 +96,8 @@ void Socket::outStream(void * in) {
 		}
 		skt->out.unlock();
 	}
+
+	BFRelease(skt);
 }
 
 int Socket::startIOStreams() {

@@ -8,6 +8,10 @@
 
 #include "socket.hpp"
 
+extern "C" {
+#include <bflibc/typethreadid.h>
+}
+
 class Server : public Socket {
 public:
 	Server();
@@ -23,6 +27,7 @@ protected:
 private:
 	int _mainSocket;
 	int _clientSocket;
+	BFThreadAsyncID _initthreadid;
 };
 
 #endif // SERVER_HPP

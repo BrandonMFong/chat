@@ -15,6 +15,7 @@
 
 Client::Client() {
 	this->_mainSocket = 0;
+	this->_initthreadid = 0;
 }
 
 Client::~Client() {
@@ -27,6 +28,8 @@ const char Client::mode() const {
 
 void Client::init(void * in) {
 	Client * client = (Client *) in;
+
+	BFRetain(client);
 
 	client->_mainSocket = socket(AF_INET, SOCK_STREAM, 0);
 
@@ -47,6 +50,7 @@ void Client::init(void * in) {
     } else {
 		client->startIOStreams();
     }
+	BFRelease(client);
 }
 
 const int Client::descriptor() const {
@@ -55,7 +59,7 @@ const int Client::descriptor() const {
 
 int Client::_start() {
 	printf("client start\n");
-	BFThreadAsync(Client::init, (void *) this);
+	this->_initthreadid = BFThreadAsync(Client::init, (void *) this);
 
 	int error = 0;
 	return error;
@@ -63,6 +67,8 @@ int Client::_start() {
 
 int Client::_stop() {
 	printf("client stop\n");
+	BFThreadAsyncCancel(this->_initthreadid);
+	BFThreadAsyncIDDestroy(this->_initthreadid);
 	shutdown(this->_mainSocket, SHUT_RDWR);
 	close(this->_mainSocket);
 	return 0;

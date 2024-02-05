@@ -16,6 +16,7 @@
 Server::Server() : Socket() {
 	this->_mainSocket = 0;
 	this->_clientSocket = 0;
+	this->_initthreadid = 0;
 }
 
 Server::~Server() {
@@ -28,6 +29,8 @@ const char Server::mode() const {
 
 void Server::init(void * in) {
 	Server * server = (Server *) in;
+
+	BFRetain(server);
 
 	// create server socket similar to what was done in
     // client program
@@ -50,8 +53,8 @@ void Server::init(void * in) {
 	server->_clientSocket = accept(server->_mainSocket, NULL, NULL);
 
 	server->startIOStreams();
-	//BFThreadAsync(Socket::inStream, (void *) server);
-	//BFThreadAsync(Socket::outStream, (void *) server);
+
+	BFRelease(server);
 }
 
 const int Server::descriptor() const {
@@ -61,7 +64,7 @@ const int Server::descriptor() const {
 int Server::_start() {
 	printf("server start\n");
 
-	BFThreadAsync(Server::init, (void *) this);
+	this->_initthreadid = BFThreadAsync(Server::init, (void *) this);
 
 	int error = 0;
 
@@ -70,6 +73,8 @@ int Server::_start() {
 
 int Server::_stop() {
 	printf("server stop\n");
+	BFThreadAsyncCancel(this->_initthreadid);
+	BFThreadAsyncIDDestroy(this->_initthreadid);
 	shutdown(this->_clientSocket, SHUT_RDWR);
 	close(this->_clientSocket);
 	close(this->_mainSocket);
