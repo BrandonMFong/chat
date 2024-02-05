@@ -32,7 +32,7 @@ int InterfaceReadInput(Packet * p) {
 	return 0;
 }
 
-int InterfaceWindowLoop() {
+int InterfaceWindowLoop(Socket * skt) {
 	initscr(); // Initialize the library
     cbreak();  // Line buffering disabled, pass on everything to me
     noecho();  // Don't echo user input
@@ -90,6 +90,7 @@ int InterfaceWindowLoop() {
 
 int InterfaceRun(Socket * skt) {
 	int error = 0;
+	/*
 	while (!error) {
 		Packet p;
 		error = InterfaceReadInput(&p);
@@ -98,12 +99,10 @@ int InterfaceRun(Socket * skt) {
 			skt->sendPacket(&p);
 		}
 	}
+	*/
 
-	// Packet p;
-	// error = InterfaceOutStreamAddMessage(config, &p);
-	//InterfaceWindowLoop(config);
-	
-	//while(1) {}
+	Packet p;
+	InterfaceWindowLoop(skt);
 	
 	return 0;
 }
