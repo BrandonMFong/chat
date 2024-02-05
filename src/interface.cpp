@@ -20,11 +20,12 @@ void InterfaceMessageFree(Message * m) {
 }
 
 void InterfaceInStreamQueueCallback(const Packet & p) {
+	/*
 	Message * m = MESSAGE_ALLOC;
 	memcpy(m, &p.payload.message, sizeof(Message));
 	conversation.get().add(m);
+	*/
 
-	// If Enter key is pressed, display user input in the display window
 	werase(displayWin);
 	box(displayWin, 0, 0);
 	const int line = 1;
@@ -33,7 +34,28 @@ void InterfaceInStreamQueueCallback(const Packet & p) {
 }
 
 void InterfaceDisplayWindowUpdateThread(void * in) {
+	int error = 0;
+	int messagecount = conversation.get().count();
 
+	while (1) {
+		conversation.lock();
+		if (conversation.get().count() != messagecount) {
+			werase(displayWin);
+			box(displayWin, 0, 0);
+
+			// write messages
+			for (int l = 1; l <= conversation.get().count(); l++) {
+				Message * m = conversation.get().objectAtIndex(l - 1);
+				if (m)
+					mvwprintw(displayWin, l, 1, m->buf);
+			}
+
+			wrefresh(displayWin);
+		
+			messagecount = conversation.get().count(); // update count
+		}
+		conversation.unlock();
+	}
 }
 
 int InterfaceWindowLoop(Socket * skt) {
@@ -57,7 +79,7 @@ int InterfaceWindowLoop(Socket * skt) {
 
 	// setup conversation thread
 	conversation.get().setDeallocateCallback(InterfaceMessageFree);
-	BFThreadAsyncID tid = BFThreadAsync(InterfaceDisplayWindowUpdateThread, NULL);
+	//BFThreadAsyncID tid = BFThreadAsync(InterfaceDisplayWindowUpdateThread, NULL);
 
     String userInput;
 
@@ -91,8 +113,8 @@ int InterfaceWindowLoop(Socket * skt) {
         }
     }
 
-	BFThreadAsyncCancel(tid);
-	BFThreadAsyncIDDestroy(tid);
+	//BFThreadAsyncCancel(tid);
+	//BFThreadAsyncIDDestroy(tid);
 
     endwin(); // End curses mode
 

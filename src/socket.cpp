@@ -72,9 +72,7 @@ void Socket::inStreamQueuePush(void * in) {
 		Packet * p = PACKET_ALLOC;
 		memcpy(p->payload.message.buf, buf, MESSAGE_BUFFER_SIZE);
 
-		skt->_inq.lock();
 		skt->_inq.get().push(p);
-		skt->_inq.unlock();
 	}
 
 	BFRelease(skt);
@@ -175,9 +173,7 @@ int Socket::sendPacket(const Packet * pkt) {
 
 	memcpy(p, pkt, sizeof(Packet));
 
-	this->_outq.lock();
 	int error = this->_outq.get().push(p);
-	this->_outq.unlock();
 	return error;
 }
 
