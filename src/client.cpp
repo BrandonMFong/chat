@@ -5,7 +5,6 @@
 
 #include <chat.h>
 #include <client.hpp>
-#include <io.hpp>
 #include <netinet/in.h> //structure for storing address information 
 #include <stdio.h> 
 #include <stdlib.h> 
@@ -14,41 +13,64 @@
 #include <unistd.h>
 #include <bflibcpp/bflibcpp.hpp>
 
-void ClientThreadCallback(void * in) {
-	ChatConfig * config = (ChatConfig *) in;
+Client::Client() {
+	this->_mainSocket = 0;
+	this->_initthreadid = 0;
+}
 
-	int sockD = socket(AF_INET, SOCK_STREAM, 0);
+Client::~Client() {
+
+}
+
+const char Client::mode() const {
+	return SOCKET_MODE_CLIENT;
+}
+
+void Client::init(void * in) {
+	Client * client = (Client *) in;
+
+	BFRetain(client);
+
+	client->_mainSocket = socket(AF_INET, SOCK_STREAM, 0);
 
     struct sockaddr_in servAddr;
 
     servAddr.sin_family = AF_INET;
-    servAddr.sin_port
-        = htons(9001); // use some unused port number
+    servAddr.sin_port = htons(9001); // use some unused port number
     servAddr.sin_addr.s_addr = INADDR_ANY;
 
-    int connectStatus
-        = connect(sockD, (struct sockaddr*)&servAddr,
-                  sizeof(servAddr));
+    int connectStatus = connect(
+		client->_mainSocket,
+		(struct sockaddr *) &servAddr,
+		sizeof(servAddr)
+	);
 
     if (connectStatus == -1) {
         printf("Error... %d\n", errno);
     } else {
-		IOTools iotool;
-		iotool.config = config;
-		iotool.cd = sockD;
-
-		BFThreadAsync(IOIn, (void *) &iotool);
-		BFThreadAsync(IOOut, (void *) &iotool);
-
-		while (1) {}
+		client->startIOStreams();
     }
+	BFRelease(client);
 }
 
-int ClientRun(ChatConfig * config) {
-	printf("client\n");
-	BFThreadAsync(ClientThreadCallback, (void *) config);
+const int Client::descriptor() const {
+	return this->_mainSocket;
+}
+
+int Client::_start() {
+	printf("client start\n");
+	this->_initthreadid = BFThreadAsync(Client::init, (void *) this);
 
 	int error = 0;
 	return error;
+}
+
+int Client::_stop() {
+	printf("client stop\n");
+	BFThreadAsyncCancel(this->_initthreadid);
+	BFThreadAsyncIDDestroy(this->_initthreadid);
+	shutdown(this->_mainSocket, SHUT_RDWR);
+	close(this->_mainSocket);
+	return 0;
 }
 

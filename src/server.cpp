@@ -5,7 +5,6 @@
 
 #include <chat.h>
 #include <server.hpp>
-#include <io.hpp>
 #include <netinet/in.h> //structure for storing address information 
 #include <stdio.h> 
 #include <stdlib.h> 
@@ -14,12 +13,28 @@
 #include <unistd.h>
 #include <bflibcpp/bflibcpp.hpp>
 
-void ServerThreadCallbackInit(void * in) {
-	ChatConfig * config = (ChatConfig *) in;
+Server::Server() : Socket() {
+	this->_mainSocket = 0;
+	this->_clientSocket = 0;
+	this->_initthreadid = 0;
+}
+
+Server::~Server() {
+
+}
+
+const char Server::mode() const {
+	return SOCKET_MODE_SERVER;
+}
+
+void Server::init(void * in) {
+	Server * server = (Server *) in;
+
+	BFRetain(server);
 
 	// create server socket similar to what was done in
     // client program
-    int serverSocket = socket(AF_INET, SOCK_STREAM, 0);
+    server->_mainSocket = socket(AF_INET, SOCK_STREAM, 0);
 
     // define server address
     struct sockaddr_in servAddr;
@@ -29,31 +44,40 @@ void ServerThreadCallbackInit(void * in) {
     servAddr.sin_addr.s_addr = INADDR_ANY;
 
     // bind socket to the specified IP and port
-    bind(serverSocket, (struct sockaddr *) &servAddr, sizeof(servAddr));
+    bind(server->_mainSocket, (struct sockaddr *) &servAddr, sizeof(servAddr));
 
     // listen for connections
 	const int allowedConnections = 1;
-    listen(serverSocket, allowedConnections);
+    listen(server->_mainSocket, allowedConnections);
 
-	IOTools iotools[allowedConnections];
+	server->_clientSocket = accept(server->_mainSocket, NULL, NULL);
 
-    // integer to hold client socket.
-	iotools[0].config = config;
-	iotools[0].cd = accept(serverSocket, NULL, NULL);
+	server->startIOStreams();
 
-	BFThreadAsync(IOIn, (void *) &iotools[0]);
-	BFThreadAsync(IOOut, (void *) &iotools[0]);
-
-	while (1) {}
+	BFRelease(server);
 }
 
-int ServerRun(ChatConfig * config) {
-	printf("server\n");
+const int Server::descriptor() const {
+	return this->_clientSocket;
+}
 
-	BFThreadAsyncID tid = BFThreadAsync(ServerThreadCallbackInit, (void *) config);
+int Server::_start() {
+	printf("server start\n");
+
+	this->_initthreadid = BFThreadAsync(Server::init, (void *) this);
 
 	int error = 0;
 
 	return error;
+}
+
+int Server::_stop() {
+	printf("server stop\n");
+	BFThreadAsyncCancel(this->_initthreadid);
+	BFThreadAsyncIDDestroy(this->_initthreadid);
+	shutdown(this->_clientSocket, SHUT_RDWR);
+	close(this->_clientSocket);
+	close(this->_mainSocket);
+	return 0;
 }
 
