@@ -15,7 +15,6 @@
 #define ARGUMENT_SERVER "server"
 #define ARGUMENT_CLIENT "client"
 
-
 void Help(const char * toolname) {
 	printf("usage: %s\n", toolname);
 }

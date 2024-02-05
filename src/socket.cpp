@@ -138,6 +138,10 @@ int Socket::startIOStreams() {
 }
 
 int Socket::start() {
+	if (this->_callback == NULL) {
+		DLog("please set callback for instream before starting socket\n");
+		return -1;
+	}
 	this->_start();
 	return 0;
 }
