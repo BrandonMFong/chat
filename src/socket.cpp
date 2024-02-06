@@ -7,7 +7,7 @@
 #include "server.hpp"
 #include "client.hpp"
 #include "chat.h"
-#include "log.h"
+#include "log.hpp"
 #include <netinet/in.h> //structure for storing address information 
 #include <stdio.h> 
 #include <stdlib.h> 

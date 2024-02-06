@@ -10,7 +10,10 @@
 #include <server.hpp>
 #include <client.hpp>
 #include <interface.hpp>
+#include <log.hpp>
 #include <bflibcpp/bflibcpp.hpp>
+
+LOG_INIT
 
 #define ARGUMENT_SERVER "server"
 #define ARGUMENT_CLIENT "client"
@@ -54,6 +57,10 @@ int main(int argc, char * argv[]) {
 		skt = Socket::create(mode, &result);
 	}
 
+	int logerr = LOG_OPEN;
+	if (logerr)
+		printf("error opening log\n");
+
 	if (!result) {
 		skt->setInStreamCallback(InterfaceInStreamQueueCallback);
 		result = skt->start();
@@ -70,6 +77,8 @@ int main(int argc, char * argv[]) {
 	if (result) {
 		Help(argv[0]);
 	}
+
+	LOG_CLOSE;
 
 	BFRelease(skt);
 
