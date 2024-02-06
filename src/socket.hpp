@@ -64,6 +64,12 @@ private:
 	BFThreadAsyncID _tidout;
 
 	/**
+	 * flags to all the stream threads whether
+	 * the caller wants it to stop running
+	 */
+	BF::Atomic<bool> _stopStreams;
+
+	/**
 	 * callback that will observe packet from
 	 * top of the in stream queue	
 	 */

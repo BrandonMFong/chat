@@ -23,6 +23,7 @@ Socket::Socket() {
 	this->_tidinpop = NULL;
 	this->_tidout = NULL;
 	this->_callback = NULL;
+	this->_stopStreams = false;
 }
 
 Socket::~Socket() { }
@@ -59,6 +60,9 @@ void Socket::inStreamQueuePush(void * in) {
 	BFRetain(skt);
 	
 	while (1) {
+		if (skt->_stopStreams.get())
+			break;
+
 		char buf[MESSAGE_BUFFER_SIZE];
 		size_t bufsize = recv(skt->descriptor(), buf, sizeof(buf), 0);
         if (bufsize == -1) {
@@ -82,6 +86,9 @@ void Socket::inStreamQueuePop(void * in) {
 	Socket * skt = (Socket *) in;
 
 	while (1) {
+		if (skt->_stopStreams.get())
+			break;
+
 		skt->_inq.lock();
 		// if queue is not empty, send the next message
 		if (!skt->_inq.get().empty()) {
@@ -107,6 +114,9 @@ void Socket::outStream(void * in) {
 	BFRetain(skt);
 
 	while (1) {
+		if (skt->_stopStreams.get())
+			break;
+
 		skt->_outq.lock();
 		// if queue is not empty, send the next message
 		if (!skt->_outq.get().empty()) {

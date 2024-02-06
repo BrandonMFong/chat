@@ -23,14 +23,6 @@ void InterfaceInStreamQueueCallback(const Packet & p) {
 	Message * m = MESSAGE_ALLOC;
 	memcpy(m, &p.payload.message, sizeof(Message));
 	conversation.get().add(m);
-
-	/*
-	werase(displayWin);
-	box(displayWin, 0, 0);
-	const int line = 1;
-	mvwprintw(displayWin, line, 1, p.payload.message.buf);
-	wrefresh(displayWin);
-	*/
 }
 
 void InterfaceDisplayWindowUpdateThread(void * in) {
@@ -44,7 +36,7 @@ void InterfaceDisplayWindowUpdateThread(void * in) {
 			box(displayWin, 0, 0);
 
 			// write messages
-			for (int i = 0; i <= conversation.get().count(); i++) {
+			for (int i = 0; i < conversation.get().count(); i++) {
 				Message * m = conversation.get().objectAtIndex(i);
 				if (m)
 					mvwprintw(displayWin, i+1, 1, m->buf);
