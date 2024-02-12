@@ -7,10 +7,10 @@
 #include <stdarg.h>
 #include <bflibcpp/bflibcpp.hpp>
 
-void _LogWriteEntry(BFFileWriter * filewriter, ...) {
+void _LogWriteEntry(BFFileWriter * filewriter, int mode, ...) {
 	va_list arg0, arg1;
-	va_start(arg0, filewriter);
-	va_start(arg1, filewriter);
+	va_start(arg0, mode);
+	va_start(arg1, mode);
 
 	const char * format = va_arg(arg0, const char *);
 	if (!format) return;
@@ -21,9 +21,20 @@ void _LogWriteEntry(BFFileWriter * filewriter, ...) {
 	BFDateTime dt = {0};
 	if (BFTimeGetCurrentDateTime(&dt)) return;
 
+	switch (mode) {
+		case 'd': // debug
+			format = "[%02d/%02d/%04d, %02d:%02d:%02d] DEBUG - %s";
+			break;
+		case 'e': // error
+			format = "[%02d/%02d/%04d, %02d:%02d:%02d] ERROR - %s";
+			break;
+		default: // normal
+			format = "[%02d/%02d/%04d, %02d:%02d:%02d] - %s";
+			break;
+	}
 	BFFileWriterQueueFormatLine(
 		filewriter,
-		"[%02d/%02d/%04d, %02d:%02d:%02d] %s",
+		format,
 		dt.month,
 		dt.day,
 		dt.year,

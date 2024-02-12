@@ -24,17 +24,20 @@ extern BFFileWriter gFileWriter;
  */
 #define LOG_OPEN BFFileWriterCreate(&gFileWriter, CHAT_LOG_PATH)
 
-void _LogWriteEntry(BFFileWriter * filewriter, ...);
+/**
+ * `mode`: 'd' for debug, 'e' for error, or 0 for normal
+ */
+void _LogWriteEntry(BFFileWriter * filewriter, int mode, ...);
 
 /**
  * writes ent (line) to log file
  */
-#define LOG_WRITE(...) _LogWriteEntry(&gFileWriter, __VA_ARGS__)
+#define LOG_WRITE(...) _LogWriteEntry(&gFileWriter, 0, __VA_ARGS__)
 
-#define LOG_ERROR(...)
+#define LOG_ERROR(...) _LogWriteEntry(&gFileWriter, 'e', __VA_ARGS__)
 
 #ifdef DEBUG
-#define LOG_DEBUG(...) _LogWriteEntry(&gFileWriter, __VA_ARGS__)
+#define LOG_DEBUG(...) _LogWriteEntry(&gFileWriter, 'd', __VA_ARGS__)
 #else // DEBUG
 #define LOG_DEBUG(...)
 #endif // DEBUG

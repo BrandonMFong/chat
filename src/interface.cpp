@@ -43,7 +43,7 @@ void InterfaceDisplayWindowUpdateThread(void * in) {
 			}
 
 			wrefresh(displayWin);
-		
+			
 			messagecount = conversation.get().count(); // update count
 		}
 		conversation.unlock();
@@ -114,7 +114,6 @@ int InterfaceWindowLoop(Socket * skt) {
 }
 
 int InterfaceRun(Socket * skt) {
-	int error = InterfaceWindowLoop(skt);
-	return error;
+	return InterfaceWindowLoop(skt);
 }
 
