@@ -12,6 +12,7 @@
 #include <sys/types.h> 
 #include <unistd.h>
 #include <bflibcpp/bflibcpp.hpp>
+#include <log.hpp>
 
 Client::Client() {
 	this->_mainSocket = 0;
@@ -58,7 +59,7 @@ const int Client::descriptor() const {
 }
 
 int Client::_start() {
-	printf("client start\n");
+	LOG_WRITE("client start");
 	this->_initthreadid = BFThreadAsync(Client::init, (void *) this);
 
 	int error = 0;
@@ -66,7 +67,7 @@ int Client::_start() {
 }
 
 int Client::_stop() {
-	printf("client stop\n");
+	LOG_WRITE("client stop");
 	BFThreadAsyncCancel(this->_initthreadid);
 	BFThreadAsyncIDDestroy(this->_initthreadid);
 	shutdown(this->_mainSocket, SHUT_RDWR);

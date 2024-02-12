@@ -12,6 +12,7 @@
 #include <sys/types.h> 
 #include <unistd.h>
 #include <bflibcpp/bflibcpp.hpp>
+#include <log.hpp>
 
 Server::Server() : Socket() {
 	this->_mainSocket = 0;
@@ -62,7 +63,7 @@ const int Server::descriptor() const {
 }
 
 int Server::_start() {
-	printf("server start\n");
+	LOG_WRITE("server start");
 
 	this->_initthreadid = BFThreadAsync(Server::init, (void *) this);
 
@@ -72,7 +73,7 @@ int Server::_start() {
 }
 
 int Server::_stop() {
-	printf("server stop\n");
+	LOG_WRITE("server stop");
 	BFThreadAsyncCancel(this->_initthreadid);
 	BFThreadAsyncIDDestroy(this->_initthreadid);
 	shutdown(this->_clientSocket, SHUT_RDWR);
