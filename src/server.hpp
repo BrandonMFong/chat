@@ -16,18 +16,17 @@ class Server : public Socket {
 public:
 	Server();
 	virtual ~Server();
-	static void init(void * in);
 	const char mode() const;
 	const int descriptor() const;
 
 protected:
+	void init();
 	int _start();
 	int _stop();
 
 private:
 	int _mainSocket;
 	int _clientSocket;
-	BFThreadAsyncID _initthreadid;
 };
 
 #endif // SERVER_HPP

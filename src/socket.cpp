@@ -22,11 +22,17 @@ Socket::Socket() {
 	this->_tidinpush = NULL;
 	this->_tidinpop = NULL;
 	this->_tidout = NULL;
+	this->_doworkinpush = true;
+	this->_doworkinpop = true;
+	this->_doworkout = true;
+
 	this->_callback = NULL;
 	this->_stopStreams = false;
 }
 
-Socket::~Socket() { }
+Socket::~Socket() {
+	LOG_DEBUG("socket destroyed");
+}
 
 Socket * Socket::create(const char mode, int * err) {
 	Socket * result = NULL;
@@ -55,11 +61,12 @@ Socket * Socket::create(const char mode, int * err) {
 }
 
 void Socket::inStreamQueuePush(void * in) {
+	LOG_DEBUG("> %s", __func__);
 	Socket * skt = (Socket *) in;
 
 	BFRetain(skt);
 	
-	while (1) {
+	while (skt->_doworkinpush.get()) {
 		if (skt->_stopStreams.get())
 			break;
 
@@ -80,12 +87,14 @@ void Socket::inStreamQueuePush(void * in) {
 	}
 
 	BFRelease(skt);
+	LOG_DEBUG("< %s", __func__);
 }
 
 void Socket::inStreamQueuePop(void * in) {
+	LOG_DEBUG("> %s", __func__);
 	Socket * skt = (Socket *) in;
 
-	while (1) {
+	while (skt->_doworkinpop.get()) {
 		if (skt->_stopStreams.get())
 			break;
 
@@ -106,14 +115,17 @@ void Socket::inStreamQueuePop(void * in) {
 		}
 		skt->_inq.unlock();
 	}
+
+	LOG_DEBUG("< %s", __func__);
 }
 
 void Socket::outStream(void * in) {
+	LOG_DEBUG("> %s", __func__);
 	Socket * skt = (Socket *) in;
 
 	BFRetain(skt);
 
-	while (1) {
+	while (skt->_doworkout.get()) {
 		if (skt->_stopStreams.get())
 			break;
 
@@ -135,6 +147,7 @@ void Socket::outStream(void * in) {
 	}
 
 	BFRelease(skt);
+	LOG_DEBUG("< %s", __func__);
 }
 
 int Socket::startIOStreams() {
@@ -158,16 +171,22 @@ int Socket::stop() {
 	int error = this->_stop();
 
 	if (!error && this->_tidinpush) {
+		this->_doworkinpush = false;
+		while (BFThreadAsyncIDIsRunning(this->_tidinpush)) { }
 		error = BFThreadAsyncCancel(this->_tidinpush);
 		BFThreadAsyncIDDestroy(this->_tidinpush);
 	}
 
 	if (!error && this->_tidinpop) {
+		this->_doworkinpop = false;
+		while (BFThreadAsyncIDIsRunning(this->_tidinpop)) { }
 		error = BFThreadAsyncCancel(this->_tidinpop);
 		BFThreadAsyncIDDestroy(this->_tidinpop);
 	}
 
 	if (!error && this->_tidout) {
+		this->_doworkout = false;
+		while (BFThreadAsyncIDIsRunning(this->_tidout)) { }
 		error = BFThreadAsyncCancel(this->_tidout);
 		BFThreadAsyncIDDestroy(this->_tidout);
 	}

@@ -52,14 +52,14 @@ int main(int argc, char * argv[]) {
 	char mode = 0;
 	Socket * skt = NULL;
 
+	//LOG_OPEN;
+
+	LOG_DEBUG("> %s", argv[0]);
+
 	result = ArgumentsRead(argc, argv, &mode);
 	if (!result) {
 		skt = Socket::create(mode, &result);
 	}
-
-	int logerr = LOG_OPEN;
-	if (logerr)
-		printf("error opening log\n");
 
 	if (!result) {
 		skt->setInStreamCallback(InterfaceInStreamQueueCallback);
@@ -78,9 +78,10 @@ int main(int argc, char * argv[]) {
 		Help(argv[0]);
 	}
 
-	LOG_CLOSE;
-
 	BFRelease(skt);
+
+	LOG_DEBUG("< %s", argv[0]);
+	LOG_CLOSE;
 
 	return result;
 }

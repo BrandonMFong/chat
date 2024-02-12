@@ -16,7 +16,6 @@
 
 Client::Client() {
 	this->_mainSocket = 0;
-	this->_initthreadid = 0;
 }
 
 Client::~Client() {
@@ -27,12 +26,8 @@ const char Client::mode() const {
 	return SOCKET_MODE_CLIENT;
 }
 
-void Client::init(void * in) {
-	Client * client = (Client *) in;
-
-	BFRetain(client);
-
-	client->_mainSocket = socket(AF_INET, SOCK_STREAM, 0);
+void Client::init() {
+	this->_mainSocket = socket(AF_INET, SOCK_STREAM, 0);
 
     struct sockaddr_in servAddr;
 
@@ -41,7 +36,7 @@ void Client::init(void * in) {
     servAddr.sin_addr.s_addr = INADDR_ANY;
 
     int connectStatus = connect(
-		client->_mainSocket,
+		this->_mainSocket,
 		(struct sockaddr *) &servAddr,
 		sizeof(servAddr)
 	);
@@ -49,9 +44,8 @@ void Client::init(void * in) {
     if (connectStatus == -1) {
         printf("Error... %d\n", errno);
     } else {
-		client->startIOStreams();
+		this->startIOStreams();
     }
-	BFRelease(client);
 }
 
 const int Client::descriptor() const {
@@ -60,7 +54,7 @@ const int Client::descriptor() const {
 
 int Client::_start() {
 	LOG_WRITE("client start");
-	this->_initthreadid = BFThreadAsync(Client::init, (void *) this);
+	this->init();
 
 	int error = 0;
 	return error;
@@ -68,8 +62,6 @@ int Client::_start() {
 
 int Client::_stop() {
 	LOG_WRITE("client stop");
-	BFThreadAsyncCancel(this->_initthreadid);
-	BFThreadAsyncIDDestroy(this->_initthreadid);
 	shutdown(this->_mainSocket, SHUT_RDWR);
 	close(this->_mainSocket);
 	return 0;

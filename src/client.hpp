@@ -16,15 +16,14 @@ class Client : public Socket {
 public:
 	Client();
 	virtual ~Client();
-	static void init(void * in);
 	const int descriptor() const;
 	const char mode() const;
 protected:
+	void init();
 	int _start();
 	int _stop();
 private:
 	int _mainSocket;
-	BFThreadAsyncID _initthreadid;
 };
 
 #endif // CLIENT_HPP

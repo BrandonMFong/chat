@@ -19,10 +19,14 @@ void InterfaceMessageFree(Message * m) {
 	MESSAGE_FREE(m);
 }
 
-void InterfaceInStreamQueueCallback(const Packet & p) {
+void InterfaceConversationAddMessage(const Message * msg) {
 	Message * m = MESSAGE_ALLOC;
-	memcpy(m, &p.payload.message, sizeof(Message));
+	memcpy(m, msg, sizeof(Message));
 	conversation.get().add(m);
+}
+
+void InterfaceInStreamQueueCallback(const Packet & p) {
+	InterfaceConversationAddMessage(&p.payload.message);
 }
 
 void InterfaceDisplayWindowUpdateThread(void * in) {
@@ -82,6 +86,8 @@ int InterfaceWindowLoop(Socket * skt) {
         if (ch == '\n') {
 			// load packet
 			strncpy(p.payload.message.buf, userInput.cString(), sizeof(p.payload.message.buf));
+			
+			InterfaceConversationAddMessage(&p.payload.message);
 
 			skt->sendPacket(&p);
 			

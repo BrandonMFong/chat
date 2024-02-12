@@ -52,6 +52,5 @@ void _LogWriteEntry(BFFileWriter * filewriter, int mode, ...);
  */
 #define LOG_CLOSE BFFileWriterClose(&gFileWriter)
 
-
 #endif // LOG_HPP
 
