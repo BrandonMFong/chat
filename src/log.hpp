@@ -31,6 +31,14 @@ void _LogWriteEntry(BFFileWriter * filewriter, ...);
  */
 #define LOG_WRITE(...) _LogWriteEntry(&gFileWriter, __VA_ARGS__)
 
+#define LOG_ERROR(...)
+
+#ifdef DEBUG
+#define LOG_DEBUG(...) _LogWriteEntry(&gFileWriter, __VA_ARGS__)
+#else // DEBUG
+#define LOG_DEBUG(...)
+#endif // DEBUG
+
 /**
  * flushes write buffers
  */
@@ -41,13 +49,6 @@ void _LogWriteEntry(BFFileWriter * filewriter, ...);
  */
 #define LOG_CLOSE BFFileWriterClose(&gFileWriter)
 
-#define ELog(...) printf("error: "); printf(__VA_ARGS__)
-
-#ifdef DEBUG
-#define DLog(...) printf("debug: "); printf(__VA_ARGS__)
-#else // DEBUG
-#define DLog(...)
-#endif // DEBUG
 
 #endif // LOG_HPP
 

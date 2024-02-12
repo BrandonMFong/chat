@@ -66,10 +66,10 @@ void Socket::inStreamQueuePush(void * in) {
 		char buf[MESSAGE_BUFFER_SIZE];
 		size_t bufsize = recv(skt->descriptor(), buf, sizeof(buf), 0);
         if (bufsize == -1) {
-			ELog("%d\n", errno);
+			LOG_ERROR("%d\n", errno);
 			break;
 		} else if (bufsize == 0) {
-			DLog("recv received 0\n");
+			LOG_DEBUG("recv received 0\n");
 			break;
 		}
 
@@ -147,7 +147,7 @@ int Socket::startIOStreams() {
 
 int Socket::start() {
 	if (this->_callback == NULL) {
-		DLog("please set callback for instream before starting socket\n");
+		LOG_DEBUG("please set callback for instream before starting socket\n");
 		return -1;
 	}
 	this->_start();
