@@ -24,10 +24,12 @@ extern BFFileWriter gFileWriter;
  */
 #define LOG_OPEN BFFileWriterCreate(&gFileWriter, CHAT_LOG_PATH)
 
+void _LogWriteEntry(BFFileWriter * filewriter, ...);
+
 /**
  * writes ent (line) to log file
  */
-#define LOG_WRITE(ent) BFFileWriterQueueLine(&gFileWriter, ent)
+#define LOG_WRITE(...) _LogWriteEntry(&gFileWriter, __VA_ARGS__)
 
 /**
  * flushes write buffers
