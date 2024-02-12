@@ -21,14 +21,17 @@ void _LogWriteEntry(BFFileWriter * filewriter, ...) {
 	BFDateTime dt = {0};
 	if (BFTimeGetCurrentDateTime(&dt)) return;
 
-	BFFileWriterQueueFormatLine(filewriter, "[%02d/%02d/%04d, %02d:%02d:%02d] %s",
-			dt.month,
-			dt.day,
-			dt.year,
-			dt.hour,
-			dt.minute,
-			dt.second,
-			logstr);
+	BFFileWriterQueueFormatLine(
+		filewriter,
+		"[%02d/%02d/%04d, %02d:%02d:%02d] %s",
+		dt.month,
+		dt.day,
+		dt.year,
+		dt.hour,
+		dt.minute,
+		dt.second,
+		logstr
+	);
 
 	va_end(arg0);
 	va_end(arg1);
