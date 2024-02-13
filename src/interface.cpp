@@ -13,6 +13,8 @@ using namespace BF;
 WINDOW * inputWin = NULL;
 WINDOW * displayWin = NULL;
 
+BFLock winlock = 0;
+
 Atomic<List<Message *>> conversation;
 
 void InterfaceMessageFree(Message * m) {
@@ -30,12 +32,14 @@ void InterfaceInStreamQueueCallback(const Packet & p) {
 }
 
 void InterfaceDisplayWindowUpdateThread(void * in) {
+	Atomic<bool> * dowork = (Atomic<bool> *) in;
 	int error = 0;
 	int messagecount = conversation.get().count();
 
-	while (1) {
+	while (dowork->get()) {
 		conversation.lock();
 		if (conversation.get().count() != messagecount) {
+			BFLockLock(&winlock);
 			werase(displayWin);
 			box(displayWin, 0, 0);
 
@@ -49,12 +53,16 @@ void InterfaceDisplayWindowUpdateThread(void * in) {
 			wrefresh(displayWin);
 			
 			messagecount = conversation.get().count(); // update count
+			
+			BFLockUnlock(&winlock);
 		}
 		conversation.unlock();
 	}
 }
 
 int InterfaceWindowLoop(Socket * skt) {
+	BFLockCreate(&winlock);
+
 	initscr(); // Initialize the library
     cbreak();  // Line buffering disabled, pass on everything to me
     noecho();  // Don't echo user input
@@ -75,7 +83,9 @@ int InterfaceWindowLoop(Socket * skt) {
 
 	// setup conversation thread
 	conversation.get().setDeallocateCallback(InterfaceMessageFree);
-	BFThreadAsyncID tid = BFThreadAsync(InterfaceDisplayWindowUpdateThread, NULL);
+
+	Atomic<bool> dowork(true);
+	BFThreadAsyncID tid = BFThreadAsync(InterfaceDisplayWindowUpdateThread, &dowork);
 
     String userInput;
 
@@ -92,18 +102,22 @@ int InterfaceWindowLoop(Socket * skt) {
 			skt->sendPacket(&p);
 			
             // Clear the input window and userInput
+			BFLockLock(&winlock);
             werase(inputWin);
             box(inputWin, 0, 0);
             wrefresh(inputWin);
             userInput = "";
+			BFLockUnlock(&winlock);
         } else if (ch != ERR) {
             // If a key is pressed (excluding Enter), add it to the userInput string
             userInput.addChar(ch);
         }
 
         // Display user input in the input window
+		BFLockLock(&winlock);
         mvwprintw(inputWin, 1, 1, userInput.cString());
         wrefresh(inputWin);
+		BFLockUnlock(&winlock);
 
         // Exit the loop if 'q' key is pressed
         if (ch == 'q') {
@@ -111,10 +125,16 @@ int InterfaceWindowLoop(Socket * skt) {
         }
     }
 
+	dowork = false;
+	while (BFThreadAsyncIDIsRunning(tid)) { }
 	BFThreadAsyncCancel(tid);
 	BFThreadAsyncIDDestroy(tid);
 
+	delwin(inputWin);
+	delwin(displayWin);
     endwin(); // End curses mode
+
+	BFLockDestroy(&winlock);
 
 	return 0;
 }
