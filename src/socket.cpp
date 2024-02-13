@@ -94,6 +94,8 @@ void Socket::inStreamQueuePop(void * in) {
 	LOG_DEBUG("> %s", __func__);
 	Socket * skt = (Socket *) in;
 
+	BFRetain(skt);
+
 	while (!BFThreadAsyncIsCanceled(skt->_tidinpop)) {
 		if (skt->_stopStreams.get())
 			break;
@@ -115,6 +117,8 @@ void Socket::inStreamQueuePop(void * in) {
 		}
 		skt->_inq.unlock();
 	}
+
+	BFRelease(skt);
 
 	LOG_DEBUG("< %s", __func__);
 }
