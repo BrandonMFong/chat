@@ -32,11 +32,11 @@ void InterfaceInStreamQueueCallback(const Packet & p) {
 }
 
 void InterfaceDisplayWindowUpdateThread(void * in) {
-	Atomic<bool> * dowork = (Atomic<bool> *) in;
 	int error = 0;
 	int messagecount = conversation.get().count();
+	const BFThreadAsyncID tid = BFThreadAsyncGetID();
 
-	while (dowork->get()) {
+	while (BFThreadAsyncIDIsValid(tid) && !BFThreadAsyncIsCanceled(tid)) {
 		conversation.lock();
 		if (conversation.get().count() != messagecount) {
 			BFLockLock(&winlock);
@@ -84,8 +84,7 @@ int InterfaceWindowLoop(Socket * skt) {
 	// setup conversation thread
 	conversation.get().setDeallocateCallback(InterfaceMessageFree);
 
-	Atomic<bool> dowork(true);
-	BFThreadAsyncID tid = BFThreadAsync(InterfaceDisplayWindowUpdateThread, &dowork);
+	BFThreadAsyncID tid = BFThreadAsync(InterfaceDisplayWindowUpdateThread, 0);
 
     String userInput;
 
@@ -125,10 +124,9 @@ int InterfaceWindowLoop(Socket * skt) {
         }
     }
 
-	dowork = false;
-	while (BFThreadAsyncIDIsRunning(tid)) { }
 	BFThreadAsyncCancel(tid);
-	BFThreadAsyncIDDestroy(tid);
+	BFThreadAsyncWait(tid);
+	BFThreadAsyncDestroy(tid);
 
 	delwin(inputWin);
 	delwin(displayWin);

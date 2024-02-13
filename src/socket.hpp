@@ -63,10 +63,6 @@ private:
 	BFThreadAsyncID _tidinpop;
 	BFThreadAsyncID _tidout;
 
-	BF::Atomic<bool> _doworkinpush;
-	BF::Atomic<bool> _doworkinpop;
-	BF::Atomic<bool> _doworkout;
-
 	/**
 	 * flags to all the stream threads whether
 	 * the caller wants it to stop running

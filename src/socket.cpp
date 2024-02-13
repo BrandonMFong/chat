@@ -22,9 +22,6 @@ Socket::Socket() {
 	this->_tidinpush = NULL;
 	this->_tidinpop = NULL;
 	this->_tidout = NULL;
-	this->_doworkinpush = true;
-	this->_doworkinpop = true;
-	this->_doworkout = true;
 
 	this->_callback = NULL;
 	this->_stopStreams = false;
@@ -32,9 +29,9 @@ Socket::Socket() {
 
 Socket::~Socket() {
 	LOG_DEBUG("socket destroyed");
-	BFThreadAsyncIDDestroy(this->_tidinpush);
-	BFThreadAsyncIDDestroy(this->_tidinpop);
-	BFThreadAsyncIDDestroy(this->_tidout);
+	BFThreadAsyncDestroy(this->_tidinpush);
+	BFThreadAsyncDestroy(this->_tidinpop);
+	BFThreadAsyncDestroy(this->_tidout);
 }
 
 Socket * Socket::create(const char mode, int * err) {
@@ -69,7 +66,7 @@ void Socket::inStreamQueuePush(void * in) {
 
 	BFRetain(skt);
 	
-	while (skt->_doworkinpush.get()) {
+	while (!BFThreadAsyncIsCanceled(skt->_tidinpush)) {
 		if (skt->_stopStreams.get())
 			break;
 
@@ -97,7 +94,7 @@ void Socket::inStreamQueuePop(void * in) {
 	LOG_DEBUG("> %s", __func__);
 	Socket * skt = (Socket *) in;
 
-	while (skt->_doworkinpop.get()) {
+	while (!BFThreadAsyncIsCanceled(skt->_tidinpop)) {
 		if (skt->_stopStreams.get())
 			break;
 
@@ -128,7 +125,7 @@ void Socket::outStream(void * in) {
 
 	BFRetain(skt);
 
-	while (skt->_doworkout.get()) {
+	while (!BFThreadAsyncIsCanceled(skt->_tidinpop)) {
 		if (skt->_stopStreams.get())
 			break;
 
@@ -174,21 +171,18 @@ int Socket::stop() {
 	int error = this->_stop();
 
 	if (!error && this->_tidinpush) {
-		this->_doworkinpush = false;
-		while (BFThreadAsyncIDIsRunning(this->_tidinpush)) { }
 		error = BFThreadAsyncCancel(this->_tidinpush);
+		BFThreadAsyncWait(this->_tidinpush);
 	}
 
 	if (!error && this->_tidinpop) {
-		this->_doworkinpop = false;
-		while (BFThreadAsyncIDIsRunning(this->_tidinpop)) { }
 		error = BFThreadAsyncCancel(this->_tidinpop);
+		BFThreadAsyncWait(this->_tidinpop);
 	}
 
 	if (!error && this->_tidout) {
-		this->_doworkout = false;
-		while (BFThreadAsyncIDIsRunning(this->_tidout)) { }
 		error = BFThreadAsyncCancel(this->_tidout);
+		BFThreadAsyncWait(this->_tidout);
 	}
 
 	return error;
