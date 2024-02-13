@@ -32,6 +32,9 @@ Socket::Socket() {
 
 Socket::~Socket() {
 	LOG_DEBUG("socket destroyed");
+	BFThreadAsyncIDDestroy(this->_tidinpush);
+	BFThreadAsyncIDDestroy(this->_tidinpop);
+	BFThreadAsyncIDDestroy(this->_tidout);
 }
 
 Socket * Socket::create(const char mode, int * err) {
@@ -174,21 +177,18 @@ int Socket::stop() {
 		this->_doworkinpush = false;
 		while (BFThreadAsyncIDIsRunning(this->_tidinpush)) { }
 		error = BFThreadAsyncCancel(this->_tidinpush);
-		BFThreadAsyncIDDestroy(this->_tidinpush);
 	}
 
 	if (!error && this->_tidinpop) {
 		this->_doworkinpop = false;
 		while (BFThreadAsyncIDIsRunning(this->_tidinpop)) { }
 		error = BFThreadAsyncCancel(this->_tidinpop);
-		BFThreadAsyncIDDestroy(this->_tidinpop);
 	}
 
 	if (!error && this->_tidout) {
 		this->_doworkout = false;
 		while (BFThreadAsyncIDIsRunning(this->_tidout)) { }
 		error = BFThreadAsyncCancel(this->_tidout);
-		BFThreadAsyncIDDestroy(this->_tidout);
 	}
 
 	return error;

@@ -52,7 +52,7 @@ int main(int argc, char * argv[]) {
 	char mode = 0;
 	Socket * skt = NULL;
 
-	//LOG_OPEN;
+	LOG_OPEN;
 
 	LOG_DEBUG("> %s", argv[0]);
 
