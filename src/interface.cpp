@@ -4,16 +4,16 @@
  */
 
 #include <interface.hpp>
+#include <user.hpp>
 #include <bflibcpp/bflibcpp.hpp>
 #include <unistd.h>
 #include <ncurses.h>
 
 using namespace BF;
 
+BFLock winlock = 0;
 WINDOW * inputWin = NULL;
 WINDOW * displayWin = NULL;
-
-BFLock winlock = 0;
 
 Atomic<List<Message *>> conversation;
 
@@ -137,7 +137,19 @@ int InterfaceWindowLoop(Socket * skt) {
 	return 0;
 }
 
+int InterfaceGatherUserData() {
+	User * currentuser = User::current();
+	char username[1024];
+	printf("username: ");
+	fgets(username, sizeof(username), stdin);
+	currentuser->setUsername(username);
+	
+	return 0;
+}
+
 int InterfaceRun(Socket * skt) {
+	int error = InterfaceGatherUserData();
+
 	return InterfaceWindowLoop(skt);
 }
 

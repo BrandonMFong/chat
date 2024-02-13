@@ -6,7 +6,7 @@ include external/libs/makefiles/libpaths.mk
 
 ### Global
 BUILD_PATH = build
-FILES = server client interface socket log
+FILES = server client interface socket log user
 CXXLINKS = -lpthread -lncurses -luuid
 
 ### Release settings

@@ -11,12 +11,15 @@
 #include <client.hpp>
 #include <interface.hpp>
 #include <log.hpp>
+#include <user.hpp>
 #include <bflibcpp/bflibcpp.hpp>
 
 LOG_INIT
 
 #define ARGUMENT_SERVER "server"
 #define ARGUMENT_CLIENT "client"
+
+User * curruser = 0;
 
 void Help(const char * toolname) {
 	printf("usage: %s\n", toolname);
@@ -47,6 +50,11 @@ int ArgumentsRead(int argc, char * argv[], char * mode) {
 	return 0;
 }
 
+int InitializeUser() {
+	curruser = new User;
+	return 0;
+}
+
 int main(int argc, char * argv[]) {
 	int result = 0;
 	char mode = 0;
@@ -59,6 +67,10 @@ int main(int argc, char * argv[]) {
 	result = ArgumentsRead(argc, argv, &mode);
 	if (!result) {
 		skt = Socket::create(mode, &result);
+	}
+
+	if (!result) {
+		result = InitializeUser();
 	}
 
 	if (!result) {
