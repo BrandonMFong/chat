@@ -19,7 +19,7 @@
 #include <bflibc/bflibc.h>
 
 Socket::Socket() { 
-	this->_tidinpush = NULL;
+	this->_tidin = NULL;
 	this->_tidinpop = NULL;
 	this->_tidout = NULL;
 
@@ -29,7 +29,7 @@ Socket::Socket() {
 
 Socket::~Socket() {
 	LOG_DEBUG("socket destroyed");
-	BFThreadAsyncDestroy(this->_tidinpush);
+	BFThreadAsyncDestroy(this->_tidin);
 	BFThreadAsyncDestroy(this->_tidinpop);
 	BFThreadAsyncDestroy(this->_tidout);
 }
@@ -99,7 +99,7 @@ void Socket::inStream(void * in) {
 
 	BFRetain(skt);
 	
-	while (!BFThreadAsyncIsCanceled(skt->_tidinpush)) {
+	while (!BFThreadAsyncIsCanceled(skt->_tidin)) {
 		if (skt->_stopStreams.get())
 			break;
 
@@ -115,6 +115,12 @@ void Socket::inStream(void * in) {
 
 		Packet * p = PACKET_ALLOC;
 		memcpy(p, &buf, sizeof(Packet));
+		
+		LOG_DEBUG("incoming {packet = {message = {%f, \"%s\", \"%s\"}}}",
+			p->payload.message.time,
+			p->payload.message.username,
+			p->payload.message.buf
+		);
 
 		skt->_inq.get().push(p);
 	}
@@ -139,7 +145,7 @@ void Socket::outStream(void * in) {
 			// get first message
 			Packet * p = skt->_outq.get().front();
 
-			LOG_DEBUG("outgoing {packet = {message = {%f, %s, %s}}}",
+			LOG_DEBUG("outgoing {packet = {message = {%f, \"%s\", \"%s\"}}}",
 				p->payload.message.time,
 				p->payload.message.username,
 				p->payload.message.buf
@@ -162,7 +168,7 @@ void Socket::outStream(void * in) {
 
 int Socket::startIOStreams() {
 	this->_tidinpop = BFThreadAsync(Socket::queueCallback, (void *) this);
-	this->_tidinpush = BFThreadAsync(Socket::inStream, (void *) this);
+	this->_tidin = BFThreadAsync(Socket::inStream, (void *) this);
 	this->_tidout = BFThreadAsync(Socket::outStream, (void *) this);
 
 	return 0;
@@ -180,9 +186,9 @@ int Socket::start() {
 int Socket::stop() {
 	int error = this->_stop();
 
-	if (!error && this->_tidinpush) {
-		error = BFThreadAsyncCancel(this->_tidinpush);
-		BFThreadAsyncWait(this->_tidinpush);
+	if (!error && this->_tidin) {
+		error = BFThreadAsyncCancel(this->_tidin);
+		BFThreadAsyncWait(this->_tidin);
 	}
 
 	if (!error && this->_tidinpop) {

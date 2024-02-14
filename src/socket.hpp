@@ -59,7 +59,7 @@ private:
 	static void inStream(void * in);
 	static void outStream(void * in);
 
-	BFThreadAsyncID _tidinpush;
+	BFThreadAsyncID _tidin;
 	BFThreadAsyncID _tidinpop;
 	BFThreadAsyncID _tidout;
 

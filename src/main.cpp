@@ -62,7 +62,7 @@ int main(int argc, char * argv[]) {
 
 	LOG_OPEN;
 
-	LOG_DEBUG("> %s", argv[0]);
+	LOG_DEBUG("============ App started ============");
 
 	result = ArgumentsRead(argc, argv, &mode);
 	if (!result) {
@@ -92,7 +92,7 @@ int main(int argc, char * argv[]) {
 
 	BFRelease(skt);
 
-	LOG_DEBUG("< %s", argv[0]);
+	LOG_DEBUG("============ App ended ============");
 	LOG_CLOSE;
 
 	return result;
