@@ -60,37 +60,7 @@ Socket * Socket::create(const char mode, int * err) {
 	return result;
 }
 
-void Socket::inStreamQueuePush(void * in) {
-	LOG_DEBUG("> %s", __func__);
-	Socket * skt = (Socket *) in;
-
-	BFRetain(skt);
-	
-	while (!BFThreadAsyncIsCanceled(skt->_tidinpush)) {
-		if (skt->_stopStreams.get())
-			break;
-
-		Packet buf;
-		size_t bufsize = recv(skt->descriptor(), &buf, sizeof(Packet), 0);
-        if (bufsize == -1) {
-			LOG_ERROR("%d", errno);
-			break;
-		} else if (bufsize == 0) {
-			LOG_DEBUG("recv received 0");
-			break;
-		}
-
-		Packet * p = PACKET_ALLOC;
-		memcpy(p, &buf, sizeof(Packet));
-
-		skt->_inq.get().push(p);
-	}
-
-	BFRelease(skt);
-	LOG_DEBUG("< %s", __func__);
-}
-
-void Socket::inStreamQueuePop(void * in) {
+void Socket::queueCallback(void * in) {
 	LOG_DEBUG("> %s", __func__);
 	Socket * skt = (Socket *) in;
 
@@ -123,6 +93,36 @@ void Socket::inStreamQueuePop(void * in) {
 	LOG_DEBUG("< %s", __func__);
 }
 
+void Socket::inStream(void * in) {
+	LOG_DEBUG("> %s", __func__);
+	Socket * skt = (Socket *) in;
+
+	BFRetain(skt);
+	
+	while (!BFThreadAsyncIsCanceled(skt->_tidinpush)) {
+		if (skt->_stopStreams.get())
+			break;
+
+		Packet buf;
+		size_t bufsize = recv(skt->descriptor(), &buf, sizeof(Packet), 0);
+        if (bufsize == -1) {
+			LOG_ERROR("%d", errno);
+			break;
+		} else if (bufsize == 0) {
+			LOG_DEBUG("recv received 0");
+			break;
+		}
+
+		Packet * p = PACKET_ALLOC;
+		memcpy(p, &buf, sizeof(Packet));
+
+		skt->_inq.get().push(p);
+	}
+
+	BFRelease(skt);
+	LOG_DEBUG("< %s", __func__);
+}
+
 void Socket::outStream(void * in) {
 	LOG_DEBUG("> %s", __func__);
 	Socket * skt = (Socket *) in;
@@ -139,7 +139,11 @@ void Socket::outStream(void * in) {
 			// get first message
 			Packet * p = skt->_outq.get().front();
 
-			LOG_DEBUG("outgoing {packet = {message = {%f, %s, %s}}}", p->payload.message.time, p->payload.message.username, p->payload.message.buf);
+			LOG_DEBUG("outgoing {packet = {message = {%f, %s, %s}}}",
+				p->payload.message.time,
+				p->payload.message.username,
+				p->payload.message.buf
+			);
 
 			// pop queue
 			skt->_outq.get().pop();
@@ -157,8 +161,8 @@ void Socket::outStream(void * in) {
 }
 
 int Socket::startIOStreams() {
-	this->_tidinpush = BFThreadAsync(Socket::inStreamQueuePush, (void *) this);
-	this->_tidinpop = BFThreadAsync(Socket::inStreamQueuePop, (void *) this);
+	this->_tidinpop = BFThreadAsync(Socket::queueCallback, (void *) this);
+	this->_tidinpush = BFThreadAsync(Socket::inStream, (void *) this);
 	this->_tidout = BFThreadAsync(Socket::outStream, (void *) this);
 
 	return 0;
@@ -206,7 +210,7 @@ int Socket::sendPacket(const Packet * pkt) {
 	return error;
 }
 
-void Socket::setInStreamCallback(void (* callback)(const Packet &)) {
+void Socket::setQueueCallback(void (* callback)(const Packet &)) {
 	this->_callback = callback;
 }
 

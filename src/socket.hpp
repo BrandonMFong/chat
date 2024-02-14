@@ -28,10 +28,6 @@ public:
 	int start();
 	int stop();
 	
-	static void inStreamQueuePush(void * in);
-	static void inStreamQueuePop(void * in);
-	static void outStream(void * in);
-	
 	/**
 	 * queues up packet to be sent
 	 */
@@ -41,7 +37,7 @@ public:
 	 * sets the callback that will be in charge of observing
 	 * the top the of the in stream packet queue when available
 	 */
-	void setInStreamCallback(void (* callback)(const Packet &));
+	void setQueueCallback(void (* callback)(const Packet &));
 
 	virtual const int descriptor() const = 0;
 
@@ -59,6 +55,10 @@ protected:
 	int startIOStreams();
 
 private:
+	static void queueCallback(void * in);
+	static void inStream(void * in);
+	static void outStream(void * in);
+
 	BFThreadAsyncID _tidinpush;
 	BFThreadAsyncID _tidinpop;
 	BFThreadAsyncID _tidout;

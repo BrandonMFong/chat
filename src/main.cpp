@@ -74,7 +74,7 @@ int main(int argc, char * argv[]) {
 	}
 
 	if (!result) {
-		skt->setInStreamCallback(InterfaceInStreamQueueCallback);
+		skt->setQueueCallback(InterfaceInStreamQueueCallback);
 		result = skt->start();
 	}
 
