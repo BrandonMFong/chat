@@ -95,7 +95,9 @@ int InterfaceWindowLoop(Socket * skt) {
         if (ch == '\n') {
 			// load packet
 			strncpy(p.payload.message.buf, userInput.cString(), sizeof(p.payload.message.buf));
-			
+			strncpy(p.payload.message.username, User::current()->username(), sizeof(p.payload.message.username));
+			//p.payload.message.time = BFTimeGetCurrentTime();
+
 			InterfaceConversationAddMessage(&p.payload.message);
 
 			skt->sendPacket(&p);

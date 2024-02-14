@@ -7,6 +7,7 @@
 #define USER_HPP
 
 #include <bflibcpp/object.hpp>
+#include "typemessage.h"
 
 class User : public BF::Object {
 public:
@@ -16,7 +17,7 @@ public:
 	void setUsername(const char * username);
 	const char * username();
 private:
-	char _username[1024];
+	char _username[USER_NAME_SIZE];
 };
 
 #endif // USER_HPP

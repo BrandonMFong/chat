@@ -9,9 +9,11 @@
 #include <bflibc/bftime.h>
 
 #define MESSAGE_BUFFER_SIZE 255
+#define USER_NAME_SIZE 1024
 
 typedef struct {
 	char buf[MESSAGE_BUFFER_SIZE];
+	char username[USER_NAME_SIZE];
 	BFTime time;
 } Message;
 
