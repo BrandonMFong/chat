@@ -3,13 +3,14 @@
  * date: 1/25/24
  */
 
-#include <interface.hpp>
-#include <user.hpp>
+#include "interface.hpp"
+#include "user.hpp"
 #include <bflibcpp/bflibcpp.hpp>
 #include <unistd.h>
 #include <ncurses.h>
 #include <string.h>
 #include "log.hpp"
+#include "inputbuffer.hpp"
 
 using namespace BF;
 
@@ -101,7 +102,7 @@ int InterfaceWindowLoop(Socket * skt) {
 
 	BFThreadAsyncID tid = BFThreadAsync(InterfaceDisplayWindowUpdateThread, 0);
 
-    String userInput;
+    InputBuffer userInput;
 
     while (1) {
 		Packet p;
@@ -126,7 +127,7 @@ int InterfaceWindowLoop(Socket * skt) {
             werase(inputWin);
             box(inputWin, 0, 0);
             wrefresh(inputWin);
-            userInput = "";
+            userInput.clear();
 			BFLockUnlock(&winlock);
         } else if (ch != ERR) {
             // If a key is pressed (excluding Enter), add it to the userInput string
