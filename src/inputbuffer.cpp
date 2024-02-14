@@ -6,10 +6,11 @@
 #include "inputbuffer.hpp"
 #include <bflibcpp/bflibcpp.hpp>
 #include "user.hpp"
+#include <ncurses.h>
 
 using namespace BF;
 
-int InputBuffer::loadPacketWithBuffer(Packet * pkt) {
+int InputBuffer::unload(Packet * pkt) {
 	if (!pkt) return 50;
 
 	strncpy(pkt->payload.message.buf, this->cString(), sizeof(pkt->payload.message.buf));
@@ -18,6 +19,23 @@ int InputBuffer::loadPacketWithBuffer(Packet * pkt) {
 	pkt->payload.message.time = t->epoch();
 	Delete(t);
 
+	this->_isready = false;
+
 	return 0;
+}
+
+int InputBuffer::addChar(char ch) {
+	if (ch == '\n') {
+		this->_isready = true;
+	} else if (ch != ERR) {
+		// If a key is pressed (excluding Enter), add it to the userInput string
+		this->String::addChar(ch);
+	}
+
+	return 0;
+}
+
+bool InputBuffer::isready() {
+	return this->_isready;
 }
 

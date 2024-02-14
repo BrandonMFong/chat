@@ -11,7 +11,21 @@
 
 class InputBuffer : public BF::String {
 public:
-	int loadPacketWithBuffer(Packet * pkt);
+	/**
+	 * unloads buffer to the packet
+	 */
+	int unload(Packet * pkt);
+
+	virtual int addChar(char c);
+
+	/**
+	 * when the buffer is ready to be sent
+	 */
+	bool isready();
+
+private:
+
+	bool _isready = false;
 };
 
 #endif // INPUT_BUFFER_HPP
