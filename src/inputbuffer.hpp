@@ -7,11 +7,11 @@
 #define INPUT_BUFFER_HPP
 
 #include <bflibcpp/string.hpp>
-#include "typemessage.h"
+#include "typepacket.h"
 
 class InputBuffer : public BF::String {
 public:
-	int loadMessage(Message * msg);
+	int loadPacket(Packet * pkt);
 };
 
 #endif // INPUT_BUFFER_HPP

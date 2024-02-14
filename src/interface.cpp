@@ -110,11 +110,14 @@ int InterfaceWindowLoop(Socket * skt) {
 
         if (ch == '\n') {
 			// load packet
+			/*
 			strncpy(p.payload.message.buf, userInput.cString(), sizeof(p.payload.message.buf));
 			strncpy(p.payload.message.username, User::current()->username(), sizeof(p.payload.message.username));
 			Time * t = Time::createCurrent();
 			p.payload.message.time = t->epoch();
 			Delete(t);
+			*/
+			userInput.loadPacket(&p);
 
 			// Add message to our display
 			InterfaceConversationAddMessage(&p.payload.message);
