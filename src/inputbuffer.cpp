@@ -9,7 +9,7 @@
 
 using namespace BF;
 
-int InputBuffer::loadPacket(Packet * pkt) {
+int InputBuffer::loadPacketWithBuffer(Packet * pkt) {
 	if (!pkt) return 50;
 
 	strncpy(pkt->payload.message.buf, this->cString(), sizeof(pkt->payload.message.buf));

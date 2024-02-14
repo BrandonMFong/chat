@@ -11,7 +11,7 @@
 
 class InputBuffer : public BF::String {
 public:
-	int loadPacket(Packet * pkt);
+	int loadPacketWithBuffer(Packet * pkt);
 };
 
 #endif // INPUT_BUFFER_HPP
