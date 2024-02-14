@@ -8,8 +8,12 @@
 #include <bflibcpp/bflibcpp.hpp>
 #include <unistd.h>
 #include <ncurses.h>
+#include <string.h>
+#include "log.hpp"
 
 using namespace BF;
+
+const size_t linelen = MESSAGE_BUFFER_SIZE + USER_NAME_SIZE;
 
 BFLock winlock = 0;
 WINDOW * inputWin = NULL;
@@ -31,6 +35,13 @@ void InterfaceInStreamQueueCallback(const Packet & p) {
 	InterfaceConversationAddMessage(&p.payload.message);
 }
 
+int InterfaceCraftChatLineFromMessage(const Message * msg, char * line) {
+	if (!msg || !line) return 30;
+
+	snprintf(line, linelen, "%s> %s", msg->username, msg->buf);
+	return 0;
+}
+
 void InterfaceDisplayWindowUpdateThread(void * in) {
 	int error = 0;
 	int messagecount = conversation.get().count();
@@ -46,8 +57,12 @@ void InterfaceDisplayWindowUpdateThread(void * in) {
 			// write messages
 			for (int i = 0; i < conversation.get().count(); i++) {
 				Message * m = conversation.get().objectAtIndex(i);
-				if (m)
-					mvwprintw(displayWin, i+1, 1, m->buf);
+
+				if (m) {
+					char line[linelen];
+					InterfaceCraftChatLineFromMessage(m, line);
+					mvwprintw(displayWin, i+1, 1, line);
+				}
 			}
 
 			wrefresh(displayWin);
@@ -96,10 +111,14 @@ int InterfaceWindowLoop(Socket * skt) {
 			// load packet
 			strncpy(p.payload.message.buf, userInput.cString(), sizeof(p.payload.message.buf));
 			strncpy(p.payload.message.username, User::current()->username(), sizeof(p.payload.message.username));
-			//p.payload.message.time = BFTimeGetCurrentTime();
+			Time * t = Time::createCurrent();
+			p.payload.message.time = t->epoch();
+			Delete(t);
 
+			// Add message to our display
 			InterfaceConversationAddMessage(&p.payload.message);
 
+			// Send packet
 			skt->sendPacket(&p);
 			
             // Clear the input window and userInput
@@ -141,9 +160,14 @@ int InterfaceWindowLoop(Socket * skt) {
 
 int InterfaceGatherUserData() {
 	User * currentuser = User::current();
-	char username[1024];
+	char username[USER_NAME_SIZE];
 	printf("username: ");
 	fgets(username, sizeof(username), stdin);
+
+	if (username[strlen(username) - 1] == '\n') {
+		username[strlen(username)- 1] = '\0';
+	}
+
 	currentuser->setUsername(username);
 	
 	return 0;

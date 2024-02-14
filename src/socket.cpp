@@ -70,8 +70,8 @@ void Socket::inStreamQueuePush(void * in) {
 		if (skt->_stopStreams.get())
 			break;
 
-		char buf[MESSAGE_BUFFER_SIZE];
-		size_t bufsize = recv(skt->descriptor(), buf, sizeof(buf), 0);
+		Packet buf;
+		size_t bufsize = recv(skt->descriptor(), &buf, sizeof(Packet), 0);
         if (bufsize == -1) {
 			LOG_ERROR("%d", errno);
 			break;
@@ -81,7 +81,7 @@ void Socket::inStreamQueuePush(void * in) {
 		}
 
 		Packet * p = PACKET_ALLOC;
-		memcpy(p->payload.message.buf, buf, MESSAGE_BUFFER_SIZE);
+		memcpy(p, &buf, sizeof(Packet));
 
 		skt->_inq.get().push(p);
 	}
@@ -139,11 +139,13 @@ void Socket::outStream(void * in) {
 			// get first message
 			Packet * p = skt->_outq.get().front();
 
+			LOG_DEBUG("outgoing {packet = {message = {%f, %s, %s}}}", p->payload.message.time, p->payload.message.username, p->payload.message.buf);
+
 			// pop queue
 			skt->_outq.get().pop();
 
 			// send buf from message
-			send(skt->descriptor(), p->payload.message.buf, sizeof(p->payload.message.buf), 0);
+			send(skt->descriptor(), p, sizeof(Packet), 0);
 
 			PACKET_FREE(p);
 		}
