@@ -136,41 +136,6 @@ int InterfaceWindowLoop(Socket * skt) {
         mvwprintw(inputWin, 1, 1, userInput.cString());
         wrefresh(inputWin);
 		BFLockUnlock(&winlock);
-
-		/*
-        if (ch == '\n') {
-			// load packet
-			userInput.loadPacketWithBuffer(&p);
-
-			// Add message to our display
-			InterfaceConversationAddMessage(&p.payload.message);
-
-			// Send packet
-			skt->sendPacket(&p);
-			
-            // Clear the input window and userInput
-			BFLockLock(&winlock);
-            werase(inputWin);
-            box(inputWin, 0, 0);
-            wrefresh(inputWin);
-            userInput.clear();
-			BFLockUnlock(&winlock);
-        } else if (ch != ERR) {
-            // If a key is pressed (excluding Enter), add it to the userInput string
-            userInput.addChar(ch);
-        }
-
-        // Display user input in the input window
-		BFLockLock(&winlock);
-        mvwprintw(inputWin, 1, 1, userInput.cString());
-        wrefresh(inputWin);
-		BFLockUnlock(&winlock);
-
-        // Exit the loop if 'q' key is pressed
-        if (ch == 'q') {
-            break;
-        }
-		*/
     }
 
 	BFThreadAsyncCancel(tid);

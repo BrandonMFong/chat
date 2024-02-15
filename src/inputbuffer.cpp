@@ -6,6 +6,7 @@
 #include "inputbuffer.hpp"
 #include <bflibcpp/bflibcpp.hpp>
 #include "user.hpp"
+#include "log.hpp"
 #include <ncurses.h>
 
 using namespace BF;
@@ -25,11 +26,21 @@ int InputBuffer::unload(Packet * pkt) {
 }
 
 int InputBuffer::addChar(char ch) {
-	if (ch == '\n') {
+	switch (ch) {
+	case '\n':
 		this->_isready = true;
-	} else if (ch != ERR) {
+		break;
+	case '\b':
+	case '\a':
+		this->String::remChar();
+		break;
+	case ERR:
+		break;
+	default:
 		// If a key is pressed (excluding Enter), add it to the userInput string
+		LOG_DEBUG("user input char: %d", ch);
 		this->String::addChar(ch);
+		break;
 	}
 
 	return 0;
