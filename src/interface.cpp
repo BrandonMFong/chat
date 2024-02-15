@@ -125,7 +125,6 @@ int InterfaceWindowLoop(Socket * skt) {
             // Clear the input window and userInput
 			BFLockLock(&winlock);
             werase(inputWin);
-            box(inputWin, 0, 0);
             wrefresh(inputWin);
             userInput.clear();
 			BFLockUnlock(&winlock);
@@ -133,6 +132,8 @@ int InterfaceWindowLoop(Socket * skt) {
 
         // Display user input in the input window
 		BFLockLock(&winlock);
+		werase(inputWin);
+		box(inputWin, 0, 0);
         mvwprintw(inputWin, 1, 1, userInput.cString());
         wrefresh(inputWin);
 		BFLockUnlock(&winlock);
