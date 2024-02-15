@@ -30,7 +30,7 @@ D_OBJECTS = $(patsubst %, $(D_BUILD_PATH)/%.o, $(FILES))
 T_CXXFLAGS = $(D_CXXFLAGS) -DTESTING
 T_BIN_NAME = $(R_BIN_NAME)-test
 T_BUILD_PATH = $(BUILD_PATH)/test
-T_MAIN_FILE = src/testbench/tests.cpp
+T_MAIN_FILE = testbench/tests.cpp
 T_LIBRARIES = $(D_LIBRARIES)
 T_OBJECTS = $(patsubst %, $(T_BUILD_PATH)/%.o, $(FILES))
 

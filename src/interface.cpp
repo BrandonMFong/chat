@@ -135,6 +135,7 @@ int InterfaceWindowLoop(Socket * skt) {
 		werase(inputWin);
 		box(inputWin, 0, 0);
         mvwprintw(inputWin, 1, 1, userInput.cString());
+		wmove(inputWin, 1, userInput.cursorPosition() + 1);
         wrefresh(inputWin);
 		BFLockUnlock(&winlock);
     }

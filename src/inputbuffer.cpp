@@ -32,18 +32,29 @@ int InputBuffer::addChar(char ch) {
 		break;
 	case '\b':
 	case '\a':
-		this->String::remChar();
+		this->String::remCharAtIndex(this->_cursorpos - 1);
+		this->_cursorpos--;
 		break;
 	case ERR:
 		break;
 	default:
 		// If a key is pressed (excluding Enter), add it to the userInput string
-		LOG_DEBUG("user input char: %d", ch);
-		this->String::addChar(ch);
+		LOG_DEBUG("user input char: %c", ch);
+		this->String::addCharAtIndex(ch, this->_cursorpos);
+		this->_cursorpos++;
 		break;
 	}
 
 	return 0;
+}
+
+int InputBuffer::clear() {
+	this->_cursorpos = 0;
+	return this->String::clear();
+}
+
+size_t InputBuffer::cursorPosition() {
+	return this->_cursorpos;
 }
 
 bool InputBuffer::isready() {

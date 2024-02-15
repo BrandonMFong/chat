@@ -23,9 +23,24 @@ public:
 	 */
 	bool isready();
 
+	/**
+	 * clears buffer and resets the cursor position
+	 */	
+	virtual int clear();
+
+	/**
+	 * returns cursor position
+	 */
+	size_t cursorPosition();
+
 private:
 
 	bool _isready = false;
+
+	/**
+	 * current cursor position
+	 */
+	size_t _cursorpos = 0;
 };
 
 #endif // INPUT_BUFFER_HPP
