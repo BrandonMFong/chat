@@ -84,10 +84,10 @@ int InterfaceWindowLoop(Socket * skt) {
     noecho();  // Don't echo user input
 
     // Create two windows
-    inputWin = newwin(3, COLS, LINES - 3, 0);
-    displayWin = newwin(LINES - 3, COLS, 0, 0);
+    inputWin = newwin(1, COLS, LINES - 1, 0);
+    displayWin = newwin(LINES - 1, COLS, 0, 0);
 
-    box(inputWin, 0, 0); // Add a box around the input window
+    //box(inputWin, 0, 0); // Add a box around the input window
     box(displayWin, 0, 0); // Add a box around the display window
 
     refresh(); // Refresh the main window to show the boxes
@@ -132,9 +132,8 @@ int InterfaceWindowLoop(Socket * skt) {
         // Display user input in the input window
 		BFLockLock(&winlock);
 		werase(inputWin);
-		box(inputWin, 0, 0);
-        mvwprintw(inputWin, 1, 1, userInput.cString());
-		wmove(inputWin, 1, userInput.cursorPosition() + 1);
+        mvwprintw(inputWin, 0, 0, userInput.cString());
+		wmove(inputWin, 0, userInput.cursorPosition());
         wrefresh(inputWin);
 		BFLockUnlock(&winlock);
     }
