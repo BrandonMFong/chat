@@ -9,6 +9,7 @@
 #define ASSERT_PUBLIC_MEMBER_ACCESS
 
 #include "inputbuffer.hpp"
+#include <ncurses.h>
 
 extern "C" {
 #include <bflibc/bflibc.h>
@@ -40,15 +41,15 @@ int test_inputbuffermodifiers() {
 		}
 
 		if (buf.compareString(str)) {
-			result = 1;
+			result = max * 100 + 1;
 		}
 
 		if (!result) {
-			buf.addChar('\a');
+			buf.addChar(KEY_BACKSPACE);
 			str = "hello world";
 			if (buf.compareString(str)) {
 				printf("\n%s != %s\n", buf.cString(), str);
-				result = 2;
+				result = max * 100 + 2;
 			}
 		}
 

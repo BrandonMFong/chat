@@ -14,7 +14,7 @@ using namespace BF;
 InputBuffer::InputBuffer() : String("") {
 	this->_isready = false;
 	this->_cursorpos = 0;
-	this->_mode = 0;
+	this->_mode = INPUT_BUFFER_MODE_COMMAND;
 }
 
 InputBuffer::~InputBuffer() {
