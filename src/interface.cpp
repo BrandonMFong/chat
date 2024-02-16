@@ -76,6 +76,94 @@ void InterfaceDisplayWindowUpdateThread(void * in) {
 	}
 }
 
+int _InterfaceWindowLoop(Socket * skt) {
+	BFLockCreate(&winlock);
+
+	initscr(); // Initialize the library
+    cbreak();  // Line buffering disabled, pass on everything to me
+    noecho();  // Don't echo user input
+
+    // Create two windows
+    inputWin = newwin(1, COLS, LINES - 1, 0);
+    displayWin = newwin(LINES - 1, COLS, 0, 0);
+
+    //box(inputWin, 0, 0); // Add a box around the input window
+    box(displayWin, 0, 0); // Add a box around the display window
+
+    refresh(); // Refresh the main window to show the boxes
+    wrefresh(inputWin); // Refresh the input window
+    wrefresh(displayWin); // Refresh the display window
+
+    keypad(inputWin, true); // Enable special keys in input window
+    nodelay(inputWin, false); // Set blocking input for input window
+
+	// setup conversation thread
+	conversation.get().setDeallocateCallback(InterfaceMessageFree);
+
+	BFThreadAsyncID tid = BFThreadAsync(InterfaceDisplayWindowUpdateThread, 0);
+
+    InputBuffer userInput;
+
+	int state = 0; // 0 = normal, 1 = edit
+    while (1) {
+		Packet p;
+        int ch = wgetch(inputWin); // Get user input
+		userInput.addChar(ch);
+
+		if (ch == 'q') {
+			break;
+		} else if (userInput.isready()) {
+			if (state == 0) { // normal
+				if (!userInput.compareString(":edit")) {
+					LOG_DEBUG("state changed to edit");
+					state = 1;
+				} else {
+					LOG_DEBUG("unknown: '%s'", userInput.cString());
+				}
+			} else if (state == 1) { // edit
+				// load packet
+				userInput.unload(&p);
+
+				// Add message to our display
+				InterfaceConversationAddMessage(&p.payload.message);
+
+				// Send packet
+				skt->sendPacket(&p);
+
+				state = 0;
+			}
+		
+            // Clear the input window and userInput
+			BFLockLock(&winlock);
+            werase(inputWin);
+            wrefresh(inputWin);
+			BFLockUnlock(&winlock);
+            
+			userInput.reset();
+		}
+
+        // Display user input in the input window
+		BFLockLock(&winlock);
+		werase(inputWin);
+        mvwprintw(inputWin, 0, 0, userInput.cString());
+		wmove(inputWin, 0, userInput.cursorPosition());
+        wrefresh(inputWin);
+		BFLockUnlock(&winlock);
+    }
+
+	BFThreadAsyncCancel(tid);
+	BFThreadAsyncWait(tid);
+	BFThreadAsyncDestroy(tid);
+
+	delwin(inputWin);
+	delwin(displayWin);
+    endwin(); // End curses mode
+
+	BFLockDestroy(&winlock);
+
+	return 0;
+}
+/*
 int InterfaceWindowLoop(Socket * skt) {
 	BFLockCreate(&winlock);
 
@@ -150,7 +238,7 @@ int InterfaceWindowLoop(Socket * skt) {
 
 	return 0;
 }
-
+*/
 int InterfaceGatherUserData() {
 	User * currentuser = User::current();
 	char username[USER_NAME_SIZE];
@@ -169,6 +257,6 @@ int InterfaceGatherUserData() {
 int InterfaceRun(Socket * skt) {
 	int error = InterfaceGatherUserData();
 
-	return InterfaceWindowLoop(skt);
+	return _InterfaceWindowLoop(skt);
 }
 

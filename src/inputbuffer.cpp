@@ -29,7 +29,6 @@ int InputBuffer::unload(Packet * pkt) {
 	pkt->payload.message.time = t->epoch();
 	Delete(t);
 
-	this->_isready = false;
 
 	return 0;
 }
@@ -62,8 +61,9 @@ int InputBuffer::addChar(int ch) {
 	return 0;
 }
 
-int InputBuffer::clear() {
+int InputBuffer::reset() {
 	this->_cursorpos = 0;
+	this->_isready = false;
 	return this->String::clear();
 }
 

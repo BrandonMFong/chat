@@ -33,7 +33,7 @@ public:
 	/**
 	 * clears buffer and resets the cursor position
 	 */	
-	virtual int clear();
+	int reset();
 
 	/**
 	 * returns cursor position
