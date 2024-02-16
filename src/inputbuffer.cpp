@@ -25,15 +25,20 @@ int InputBuffer::unload(Packet * pkt) {
 	return 0;
 }
 
-int InputBuffer::addChar(char ch) {
+int InputBuffer::addChar(int ch) {
 	switch (ch) {
 	case '\n':
 		this->_isready = true;
 		break;
-	case '\b':
-	case '\a':
+	case KEY_BACKSPACE:
 		this->String::remCharAtIndex(this->_cursorpos - 1);
 		this->_cursorpos--;
+		break;
+	case KEY_LEFT:
+		this->_cursorpos--;
+		break;
+	case KEY_RIGHT:
+		this->_cursorpos++;
 		break;
 	case ERR:
 		break;

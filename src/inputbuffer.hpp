@@ -16,7 +16,11 @@ public:
 	 */
 	int unload(Packet * pkt);
 
-	virtual int addChar(char c);
+	/**
+	 * Adds appends char to our buffer
+	 * Adjusts the cursor position accordingly
+	 */
+	virtual int addChar(int c);
 
 	/**
 	 * when the buffer is ready to be sent
