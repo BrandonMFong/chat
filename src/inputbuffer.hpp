@@ -9,8 +9,26 @@
 #include <bflibcpp/string.hpp>
 #include "typepacket.h"
 
+/**
+ * where user can give commands to app
+ */
+#define INPUT_BUFFER_MODE_COMMAND 0
+
+/**
+ * crafting messages
+ */
+#define INPUT_BUFFER_MODE_PROMPT 1
+
 class InputBuffer : public BF::String {
 public:
+	InputBuffer();
+	virtual ~InputBuffer();
+
+	/**
+	 * options: see macros above `INPUT_BUFFER_MODE...`
+	 */
+	int mode();
+
 	/**
 	 * unloads buffer to the packet
 	 */
@@ -39,12 +57,17 @@ public:
 
 private:
 
-	bool _isready = false;
+	bool _isready;
 
 	/**
 	 * current cursor position
 	 */
-	size_t _cursorpos = 0;
+	size_t _cursorpos;
+
+	/**
+	 * type of input we are in
+	 */
+	int _mode;
 };
 
 #endif // INPUT_BUFFER_HPP

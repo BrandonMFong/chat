@@ -107,7 +107,6 @@ int InterfaceWindowLoop(Socket * skt) {
     while (1) {
 		Packet p;
         int ch = wgetch(inputWin); // Get user input
-
 		userInput.addChar(ch);
 
 		if (ch == 'q') {

@@ -11,6 +11,16 @@
 
 using namespace BF;
 
+InputBuffer::InputBuffer() : String("") {
+	this->_isready = false;
+	this->_cursorpos = 0;
+	this->_mode = 0;
+}
+
+InputBuffer::~InputBuffer() {
+
+}
+
 int InputBuffer::unload(Packet * pkt) {
 	if (!pkt) return 50;
 
