@@ -50,10 +50,11 @@ void InterfaceDisplayWindowUpdateThread(void * in) {
 	const BFThreadAsyncID tid = BFThreadAsyncGetID();
 
 	while (BFThreadAsyncIDIsValid(tid) && !BFThreadAsyncIsCanceled(tid)) {
-		conversation.lock();
 		updateConversation.lock();
 		if (updateConversation.get()) {
 			BFLockLock(&winlock);
+			conversation.lock();
+			
 			werase(displayWin);
 			box(displayWin, 0, 0);
 
@@ -71,11 +72,68 @@ void InterfaceDisplayWindowUpdateThread(void * in) {
 			wrefresh(displayWin);
 		
 			updateConversation = false;	
+			
+			conversation.unlock();
 			BFLockUnlock(&winlock);
 		}
 		updateConversation.unlock();
-		conversation.unlock();
 	}
+}
+
+int InterfaceWindowCreateModeCommand() {
+	// change to normal mode
+	BFLockLock(&winlock);
+
+	if (inputWin)
+		delwin(inputWin);
+	if (displayWin)
+		delwin(displayWin);
+	
+	// Create two windows
+	inputWin = newwin(1, COLS, LINES - 1, 0);
+	displayWin = newwin(LINES - 1, COLS, 0, 0);
+
+	box(displayWin, 0, 0); // Add a box around the display window
+
+	refresh(); // Refresh the main window to show the boxes
+	wrefresh(inputWin); // Refresh the input window
+	wrefresh(displayWin); // Refresh the display window
+
+	keypad(inputWin, true); // Enable special keys in input window
+	nodelay(inputWin, false); // Set blocking input for input window
+
+	updateConversation = true;
+
+	BFLockUnlock(&winlock);
+
+	return 0;
+}
+
+int InterfaceWindowCreateModeEdit() {
+	BFLockLock(&winlock);
+
+	if (inputWin)
+		delwin(inputWin);
+	if (displayWin)
+		delwin(displayWin);
+	
+	// Create two windows
+	inputWin = newwin(3, COLS, LINES - 3, 0);
+	displayWin = newwin(LINES - 3, COLS, 0, 0);
+
+	box(inputWin, 0, 0); // Add a box around the input window
+	box(displayWin, 0, 0); // Add a box around the display window
+
+	refresh(); // Refresh the main window to show the boxes
+	wrefresh(inputWin); // Refresh the input window
+	wrefresh(displayWin); // Refresh the display window
+
+	keypad(inputWin, true); // Enable special keys in input window
+	nodelay(inputWin, false); // Set blocking input for input window
+
+	BFLockUnlock(&winlock);
+
+	return 0;
 }
 
 int _InterfaceWindowLoop(Socket * skt) {
@@ -85,19 +143,7 @@ int _InterfaceWindowLoop(Socket * skt) {
     cbreak();  // Line buffering disabled, pass on everything to me
     noecho();  // Don't echo user input
 
-    // Create two windows
-    inputWin = newwin(1, COLS, LINES - 1, 0);
-    displayWin = newwin(LINES - 1, COLS, 0, 0);
-
-    //box(inputWin, 0, 0); // Add a box around the input window
-    box(displayWin, 0, 0); // Add a box around the display window
-
-    refresh(); // Refresh the main window to show the boxes
-    wrefresh(inputWin); // Refresh the input window
-    wrefresh(displayWin); // Refresh the display window
-
-    keypad(inputWin, true); // Enable special keys in input window
-    nodelay(inputWin, false); // Set blocking input for input window
+	InterfaceWindowCreateModeCommand();
 
 	// setup conversation thread
 	conversation.get().setDeallocateCallback(InterfaceMessageFree);
@@ -126,26 +172,8 @@ int _InterfaceWindowLoop(Socket * skt) {
 					state = 1;
 
 					// change to edit mode
-					BFLockLock(&winlock);
-					delwin(inputWin);
-					delwin(displayWin);
-					
-					// Create two windows
-					inputWin = newwin(3, COLS, LINES - 3, 0);
-					displayWin = newwin(LINES - 3, COLS, 0, 0);
-
-					box(inputWin, 0, 0); // Add a box around the input window
-					box(displayWin, 0, 0); // Add a box around the display window
-
-					refresh(); // Refresh the main window to show the boxes
-					wrefresh(inputWin); // Refresh the input window
-					wrefresh(displayWin); // Refresh the display window
-
-					keypad(inputWin, true); // Enable special keys in input window
-					nodelay(inputWin, false); // Set blocking input for input window
-
+					InterfaceWindowCreateModeEdit();
 					updateConversation = true;
-					BFLockUnlock(&winlock);
 				} else {
 					LOG_DEBUG("unknown: '%s'", userInput.cString());
 				}
@@ -174,27 +202,7 @@ int _InterfaceWindowLoop(Socket * skt) {
 
 				state = 0;
 
-				// change to normal mode
-				BFLockLock(&winlock);
-				delwin(inputWin);
-				delwin(displayWin);
-				
-				// Create two windows
-				inputWin = newwin(1, COLS, LINES - 1, 0);
-				displayWin = newwin(LINES - 1, COLS, 0, 0);
-
-				box(displayWin, 0, 0); // Add a box around the display window
-
-				refresh(); // Refresh the main window to show the boxes
-				wrefresh(inputWin); // Refresh the input window
-				wrefresh(displayWin); // Refresh the display window
-
-				keypad(inputWin, true); // Enable special keys in input window
-				nodelay(inputWin, false); // Set blocking input for input window
-				
-				updateConversation = true;
-
-				BFLockUnlock(&winlock);
+				InterfaceWindowCreateModeCommand();
 
 				userInput.reset();
 			}
