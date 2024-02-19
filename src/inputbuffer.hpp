@@ -11,6 +11,9 @@
 
 class InputBuffer : public BF::String {
 public:
+	InputBuffer();
+	virtual ~InputBuffer();
+
 	/**
 	 * unloads buffer to the packet
 	 */
@@ -30,7 +33,7 @@ public:
 	/**
 	 * clears buffer and resets the cursor position
 	 */	
-	virtual int clear();
+	int reset();
 
 	/**
 	 * returns cursor position
@@ -39,12 +42,12 @@ public:
 
 private:
 
-	bool _isready = false;
+	bool _isready;
 
 	/**
 	 * current cursor position
 	 */
-	size_t _cursorpos = 0;
+	size_t _cursorpos;
 };
 
 #endif // INPUT_BUFFER_HPP

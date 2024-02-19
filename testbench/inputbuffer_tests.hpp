@@ -9,6 +9,7 @@
 #define ASSERT_PUBLIC_MEMBER_ACCESS
 
 #include "inputbuffer.hpp"
+#include <ncurses.h>
 
 extern "C" {
 #include <bflibc/bflibc.h>
@@ -40,16 +41,40 @@ int test_inputbuffermodifiers() {
 		}
 
 		if (buf.compareString(str)) {
-			result = 1;
+			result = max * 100 + 1;
 		}
 
 		if (!result) {
-			buf.addChar('\a');
+			buf.addChar(KEY_BACKSPACE);
 			str = "hello world";
 			if (buf.compareString(str)) {
 				printf("\n%s != %s\n", buf.cString(), str);
-				result = 2;
+				result = max * 100 + 2;
 			}
+		}
+
+		max--;
+	}
+
+	UNIT_TEST_END(!result, result);
+	return result;
+}
+
+int test_inputbufferbackspacechar() {
+	UNIT_TEST_START;
+	int result = 0;
+
+	InputBuffer buf;
+	int max = 2 << 8;
+	while (!result && max) {
+		int size = 2 << 10;
+		for (int i = 0; i < size; i++) {
+			buf.addChar('.');
+		}
+
+		// test the buffer underflow management
+		for (int i = 0; i < (size * 2); i++) {
+			buf.addChar(KEY_BACKSPACE);
 		}
 
 		max--;
@@ -66,6 +91,7 @@ void inputbuffer_tests(int * pass, int * fail) {
 
 	LAUNCH_TEST(test_inputbufferinit, p, f);
 	LAUNCH_TEST(test_inputbuffermodifiers, p, f);
+	LAUNCH_TEST(test_inputbufferbackspacechar, p, f);
 
 	if (pass) *pass += p;
 	if (fail) *fail += f;

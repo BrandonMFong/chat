@@ -15,12 +15,17 @@
 using namespace BF;
 
 const size_t linelen = MESSAGE_BUFFER_SIZE + USER_NAME_SIZE;
+const int stateNormal = 0;
+const int stateEdit = 1;
+const int stateHelp = 2;
 
 BFLock winlock = 0;
 WINDOW * inputWin = NULL;
 WINDOW * displayWin = NULL;
+WINDOW * helpWin = NULL;
 
 Atomic<List<Message *>> conversation;
+Atomic<bool> updateConversation;
 
 void InterfaceMessageFree(Message * m) {
 	MESSAGE_FREE(m);
@@ -30,6 +35,7 @@ void InterfaceConversationAddMessage(const Message * msg) {
 	Message * m = MESSAGE_ALLOC;
 	memcpy(m, msg, sizeof(Message));
 	conversation.get().add(m);
+	updateConversation = true;
 }
 
 void InterfaceInStreamQueueCallback(const Packet & p) {
@@ -45,13 +51,14 @@ int InterfaceCraftChatLineFromMessage(const Message * msg, char * line) {
 
 void InterfaceDisplayWindowUpdateThread(void * in) {
 	int error = 0;
-	int messagecount = conversation.get().count();
 	const BFThreadAsyncID tid = BFThreadAsyncGetID();
 
 	while (BFThreadAsyncIDIsValid(tid) && !BFThreadAsyncIsCanceled(tid)) {
-		conversation.lock();
-		if (conversation.get().count() != messagecount) {
+		updateConversation.lock();
+		if (updateConversation.get()) {
 			BFLockLock(&winlock);
+			conversation.lock();
+			
 			werase(displayWin);
 			box(displayWin, 0, 0);
 
@@ -67,13 +74,111 @@ void InterfaceDisplayWindowUpdateThread(void * in) {
 			}
 
 			wrefresh(displayWin);
+		
+			updateConversation = false;	
 			
-			messagecount = conversation.get().count(); // update count
-			
+			conversation.unlock();
 			BFLockUnlock(&winlock);
 		}
-		conversation.unlock();
+		updateConversation.unlock();
 	}
+}
+
+int InterfaceWindowCreateModeCommand() {
+	// change to normal mode
+	BFLockLock(&winlock);
+
+	if (inputWin)
+		delwin(inputWin);
+	if (displayWin)
+		delwin(displayWin);
+	
+	// Create two windows
+	inputWin = newwin(1, COLS, LINES - 1, 0);
+	displayWin = newwin(LINES - 1, COLS, 0, 0);
+
+	box(displayWin, 0, 0); // Add a box around the display window
+
+	refresh(); // Refresh the main window to show the boxes
+	wrefresh(inputWin); // Refresh the input window
+	wrefresh(displayWin); // Refresh the display window
+
+	keypad(inputWin, true); // Enable special keys in input window
+	nodelay(inputWin, false); // Set blocking input for input window
+
+	updateConversation = true;
+
+	BFLockUnlock(&winlock);
+
+	return 0;
+}
+
+int InterfaceWindowCreateModeHelp() {
+	BFLockLock(&winlock);
+	helpWin = newwin(LINES - 10, COLS - 10, 5, 5);
+	box(helpWin, 0, 0); // Draw a box around the sub-window
+
+	// dialog
+	mvwprintw(helpWin, LINES - 12, 3, "Press any key to close...");
+
+	refresh(); // Refresh the main window to show the boxes
+	wrefresh(inputWin); // Refresh the input window
+	wrefresh(displayWin); // Refresh the display window
+	wrefresh(helpWin); // Refresh the help window
+
+	keypad(inputWin, true); // Enable special keys in input window
+	nodelay(inputWin, false); // Set blocking input for input window
+
+	BFLockUnlock(&winlock);
+	return 0;
+}
+
+int InterfaceWindowCreateModeEdit() {
+	BFLockLock(&winlock);
+
+	if (helpWin)
+		delwin(helpWin);
+	if (inputWin)
+		delwin(inputWin);
+	if (displayWin)
+		delwin(displayWin);
+	
+	// Create two windows
+	inputWin = newwin(3, COLS, LINES - 3, 0);
+	displayWin = newwin(LINES - 3, COLS, 0, 0);
+
+	box(inputWin, 0, 0); // Add a box around the input window
+	box(displayWin, 0, 0); // Add a box around the display window
+
+	refresh(); // Refresh the main window to show the boxes
+	wrefresh(inputWin); // Refresh the input window
+	wrefresh(displayWin); // Refresh the display window
+
+	keypad(inputWin, true); // Enable special keys in input window
+	nodelay(inputWin, false); // Set blocking input for input window
+
+	BFLockUnlock(&winlock);
+
+	return 0;
+}
+
+int InterfaceWindowUpdateInputWindowText(InputBuffer & userInput, const int state) {
+	BFLockLock(&winlock);
+	if (state == stateNormal) {
+		werase(inputWin);
+		mvwprintw(inputWin, 0, 0, userInput.cString());
+		wmove(inputWin, 0, userInput.cursorPosition());
+		wrefresh(inputWin);
+	} else if (state == stateEdit) {
+		werase(inputWin);
+		box(inputWin, 0, 0); // Add a box around the display window
+		mvwprintw(inputWin, 1, 1, userInput.cString());
+		wmove(inputWin, 1, userInput.cursorPosition() + 1);
+		wrefresh(inputWin);
+	}
+	BFLockUnlock(&winlock);
+
+	return 0;
 }
 
 int InterfaceWindowLoop(Socket * skt) {
@@ -83,61 +188,64 @@ int InterfaceWindowLoop(Socket * skt) {
     cbreak();  // Line buffering disabled, pass on everything to me
     noecho();  // Don't echo user input
 
-    // Create two windows
-    inputWin = newwin(3, COLS, LINES - 3, 0);
-    displayWin = newwin(LINES - 3, COLS, 0, 0);
-
-    box(inputWin, 0, 0); // Add a box around the input window
-    box(displayWin, 0, 0); // Add a box around the display window
-
-    refresh(); // Refresh the main window to show the boxes
-    wrefresh(inputWin); // Refresh the input window
-    wrefresh(displayWin); // Refresh the display window
-
-    keypad(inputWin, true); // Enable special keys in input window
-    nodelay(inputWin, false); // Set blocking input for input window
+	InterfaceWindowCreateModeCommand();
 
 	// setup conversation thread
 	conversation.get().setDeallocateCallback(InterfaceMessageFree);
 
 	BFThreadAsyncID tid = BFThreadAsync(InterfaceDisplayWindowUpdateThread, 0);
-
     InputBuffer userInput;
-
+	int state = stateNormal; // 0 = normal, 1 = edit
     while (1) {
 		Packet p;
         int ch = wgetch(inputWin); // Get user input
-
 		userInput.addChar(ch);
+		if (state == stateNormal) { // normal
+			if (!userInput.isready()) { 
+				InterfaceWindowUpdateInputWindowText(userInput, state);
+			} else {
+				if (!userInput.compareString("quit")) {
+					break; // exit loop
+				} else if (!userInput.compareString("help")) {
+					state = stateHelp;
+					InterfaceWindowCreateModeHelp();
+				} else if (!userInput.compareString("edit")) {
+					LOG_DEBUG("state changed to edit");
+					state = stateEdit;
 
-		if (ch == 'q') {
-			break;
-		} else if (userInput.isready()) {
-			// load packet
-			userInput.unload(&p);
+					// change to edit mode
+					InterfaceWindowCreateModeEdit();
+					updateConversation = true;
+				} else {
+					LOG_DEBUG("unknown: '%s'", userInput.cString());
+				}
 
-			// Add message to our display
-			InterfaceConversationAddMessage(&p.payload.message);
+				userInput.reset();
+			}
+		} else if (state == stateEdit) { // edit
+			if (!userInput.isready()) {
+				InterfaceWindowUpdateInputWindowText(userInput, state);
+			} else {
+				// load packet
+				userInput.unload(&p);
 
-			// Send packet
-			skt->sendPacket(&p);
-			
-            // Clear the input window and userInput
-			BFLockLock(&winlock);
-            werase(inputWin);
-            wrefresh(inputWin);
-            userInput.clear();
-			BFLockUnlock(&winlock);
+				// Add message to our display
+				InterfaceConversationAddMessage(&p.payload.message);
+
+				// Send packet
+				skt->sendPacket(&p);
+
+				state = stateNormal;
+
+				InterfaceWindowCreateModeCommand();
+
+				userInput.reset();
+			}
+		} else if (state == stateHelp) { // modal window
+			InterfaceWindowCreateModeCommand();
+			state = stateNormal;
+			userInput.reset();
 		}
-
-        // Display user input in the input window
-		BFLockLock(&winlock);
-		werase(inputWin);
-		box(inputWin, 0, 0);
-        mvwprintw(inputWin, 1, 1, userInput.cString());
-		wmove(inputWin, 1, userInput.cursorPosition() + 1);
-        wrefresh(inputWin);
-		BFLockUnlock(&winlock);
     }
 
 	BFThreadAsyncCancel(tid);

@@ -11,6 +11,15 @@
 
 using namespace BF;
 
+InputBuffer::InputBuffer() : String("") {
+	this->_isready = false;
+	this->_cursorpos = 0;
+}
+
+InputBuffer::~InputBuffer() {
+
+}
+
 int InputBuffer::unload(Packet * pkt) {
 	if (!pkt) return 50;
 
@@ -20,7 +29,6 @@ int InputBuffer::unload(Packet * pkt) {
 	pkt->payload.message.time = t->epoch();
 	Delete(t);
 
-	this->_isready = false;
 
 	return 0;
 }
@@ -31,8 +39,10 @@ int InputBuffer::addChar(int ch) {
 		this->_isready = true;
 		break;
 	case KEY_BACKSPACE:
-		this->String::remCharAtIndex(this->_cursorpos - 1);
-		this->_cursorpos--;
+		if (this->_cursorpos > 0) {
+			this->String::remCharAtIndex(this->_cursorpos - 1);
+			this->_cursorpos--;
+		}
 		break;
 	case KEY_LEFT:
 		this->_cursorpos--;
@@ -53,8 +63,9 @@ int InputBuffer::addChar(int ch) {
 	return 0;
 }
 
-int InputBuffer::clear() {
+int InputBuffer::reset() {
 	this->_cursorpos = 0;
+	this->_isready = false;
 	return this->String::clear();
 }
 
