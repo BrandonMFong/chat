@@ -15,10 +15,14 @@
 using namespace BF;
 
 const size_t linelen = MESSAGE_BUFFER_SIZE + USER_NAME_SIZE;
+const int stateNormal = 0;
+const int stateEdit = 1;
+const int stateHelp = 2;
 
 BFLock winlock = 0;
 WINDOW * inputWin = NULL;
 WINDOW * displayWin = NULL;
+WINDOW * helpWin = NULL;
 
 Atomic<List<Message *>> conversation;
 Atomic<bool> updateConversation;
@@ -109,9 +113,30 @@ int InterfaceWindowCreateModeCommand() {
 	return 0;
 }
 
+int InterfaceWindowCreateModeHelp() {
+	BFLockLock(&winlock);
+	helpWin = newwin(LINES - 10, COLS - 10, 5, 5);
+	box(helpWin, 0, 0); // Draw a box around the sub-window
+	mvwprintw(helpWin, 1, 1, "This is a modal sub-window.");
+	mvwprintw(helpWin, 2, 1, "Press any key to close.");
+
+	refresh(); // Refresh the main window to show the boxes
+	wrefresh(inputWin); // Refresh the input window
+	wrefresh(displayWin); // Refresh the display window
+	wrefresh(helpWin); // Refresh the help window
+
+	keypad(inputWin, true); // Enable special keys in input window
+	nodelay(inputWin, false); // Set blocking input for input window
+
+	BFLockUnlock(&winlock);
+	return 0;
+}
+
 int InterfaceWindowCreateModeEdit() {
 	BFLockLock(&winlock);
 
+	if (helpWin)
+		delwin(helpWin);
 	if (inputWin)
 		delwin(inputWin);
 	if (displayWin)
@@ -136,6 +161,25 @@ int InterfaceWindowCreateModeEdit() {
 	return 0;
 }
 
+int InterfaceWindowUpdateInputWindowText(InputBuffer & userInput, const int state) {
+	BFLockLock(&winlock);
+	if (state == stateNormal) {
+		werase(inputWin);
+		mvwprintw(inputWin, 0, 0, userInput.cString());
+		wmove(inputWin, 0, userInput.cursorPosition());
+		wrefresh(inputWin);
+	} else if (state == stateEdit) {
+		werase(inputWin);
+		box(inputWin, 0, 0); // Add a box around the display window
+		mvwprintw(inputWin, 1, 1, userInput.cString());
+		wmove(inputWin, 1, userInput.cursorPosition() + 1);
+		wrefresh(inputWin);
+	}
+	BFLockUnlock(&winlock);
+
+	return 0;
+}
+
 int _InterfaceWindowLoop(Socket * skt) {
 	BFLockCreate(&winlock);
 
@@ -150,26 +194,23 @@ int _InterfaceWindowLoop(Socket * skt) {
 
 	BFThreadAsyncID tid = BFThreadAsync(InterfaceDisplayWindowUpdateThread, 0);
     InputBuffer userInput;
-	int state = 0; // 0 = normal, 1 = edit
+	int state = stateNormal; // 0 = normal, 1 = edit
     while (1) {
 		Packet p;
         int ch = wgetch(inputWin); // Get user input
 		userInput.addChar(ch);
-		if (state == 0) { // normal
+		if (state == stateNormal) { // normal
 			if (!userInput.isready()) { 
-				// Display user input in the input window
-				BFLockLock(&winlock);
-				werase(inputWin);
-				mvwprintw(inputWin, 0, 0, userInput.cString());
-				wmove(inputWin, 0, userInput.cursorPosition());
-				wrefresh(inputWin);
-				BFLockUnlock(&winlock);
+				InterfaceWindowUpdateInputWindowText(userInput, state);
 			} else {
 				if (!userInput.compareString(":quit")) {
 					break; // exit loop
+				} else if (!userInput.compareString(":help")) {
+					state = stateHelp;
+					InterfaceWindowCreateModeHelp();
 				} else if (!userInput.compareString(":edit")) {
 					LOG_DEBUG("state changed to edit");
-					state = 1;
+					state = stateEdit;
 
 					// change to edit mode
 					InterfaceWindowCreateModeEdit();
@@ -180,16 +221,9 @@ int _InterfaceWindowLoop(Socket * skt) {
 
 				userInput.reset();
 			}
-		} else if (state == 1) { // edit
+		} else if (state == stateEdit) { // edit
 			if (!userInput.isready()) {
-				// Display user input in the input window
-				BFLockLock(&winlock);
-				werase(inputWin);
-				box(inputWin, 0, 0); // Add a box around the display window
-				mvwprintw(inputWin, 1, 1, userInput.cString());
-				wmove(inputWin, 1, userInput.cursorPosition() + 1);
-				wrefresh(inputWin);
-				BFLockUnlock(&winlock);
+				InterfaceWindowUpdateInputWindowText(userInput, state);
 			} else {
 				// load packet
 				userInput.unload(&p);
@@ -200,12 +234,16 @@ int _InterfaceWindowLoop(Socket * skt) {
 				// Send packet
 				skt->sendPacket(&p);
 
-				state = 0;
+				state = stateNormal;
 
 				InterfaceWindowCreateModeCommand();
 
 				userInput.reset();
 			}
+		} else if (state == stateHelp) { // modal window
+			InterfaceWindowCreateModeCommand();
+			state = stateNormal;
+			userInput.reset();
 		}
     }
 
