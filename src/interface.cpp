@@ -117,8 +117,9 @@ int InterfaceWindowCreateModeHelp() {
 	BFLockLock(&winlock);
 	helpWin = newwin(LINES - 10, COLS - 10, 5, 5);
 	box(helpWin, 0, 0); // Draw a box around the sub-window
-	mvwprintw(helpWin, 1, 1, "This is a modal sub-window.");
-	mvwprintw(helpWin, 2, 1, "Press any key to close.");
+
+	// dialog
+	mvwprintw(helpWin, LINES - 12, 3, "Press any key to close...");
 
 	refresh(); // Refresh the main window to show the boxes
 	wrefresh(inputWin); // Refresh the input window
@@ -203,12 +204,12 @@ int InterfaceWindowLoop(Socket * skt) {
 			if (!userInput.isready()) { 
 				InterfaceWindowUpdateInputWindowText(userInput, state);
 			} else {
-				if (!userInput.compareString(":quit")) {
+				if (!userInput.compareString("quit")) {
 					break; // exit loop
-				} else if (!userInput.compareString(":help")) {
+				} else if (!userInput.compareString("help")) {
 					state = stateHelp;
 					InterfaceWindowCreateModeHelp();
-				} else if (!userInput.compareString(":edit")) {
+				} else if (!userInput.compareString("edit")) {
 					LOG_DEBUG("state changed to edit");
 					state = stateEdit;
 
