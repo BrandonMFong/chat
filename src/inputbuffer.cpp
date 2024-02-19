@@ -39,8 +39,10 @@ int InputBuffer::addChar(int ch) {
 		this->_isready = true;
 		break;
 	case KEY_BACKSPACE:
-		this->String::remCharAtIndex(this->_cursorpos - 1);
-		this->_cursorpos--;
+		if (this->_cursorpos > 0) {
+			this->String::remCharAtIndex(this->_cursorpos - 1);
+			this->_cursorpos--;
+		}
 		break;
 	case KEY_LEFT:
 		this->_cursorpos--;

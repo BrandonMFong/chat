@@ -60,6 +60,30 @@ int test_inputbuffermodifiers() {
 	return result;
 }
 
+int test_inputbufferbackspacechar() {
+	UNIT_TEST_START;
+	int result = 0;
+
+	InputBuffer buf;
+	int max = 2 << 8;
+	while (!result && max) {
+		int size = 2 << 10;
+		for (int i = 0; i < size; i++) {
+			buf.addChar('.');
+		}
+
+		// test the buffer underflow management
+		for (int i = 0; i < (size * 2); i++) {
+			buf.addChar(KEY_BACKSPACE);
+		}
+
+		max--;
+	}
+
+	UNIT_TEST_END(!result, result);
+	return result;
+}
+
 void inputbuffer_tests(int * pass, int * fail) {
 	int p = 0, f = 0;
 	
@@ -67,6 +91,7 @@ void inputbuffer_tests(int * pass, int * fail) {
 
 	LAUNCH_TEST(test_inputbufferinit, p, f);
 	LAUNCH_TEST(test_inputbuffermodifiers, p, f);
+	LAUNCH_TEST(test_inputbufferbackspacechar, p, f);
 
 	if (pass) *pass += p;
 	if (fail) *fail += f;
