@@ -27,24 +27,12 @@ WINDOW * displayWin = NULL;
 WINDOW * helpWin = NULL;
 
 Chatroom chatroom;
-//Atomic<List<Message *>> conversation;
-//Atomic<bool> updateConversation;
 
 void InterfaceMessageFree(Message * m) {
 	MESSAGE_FREE(m);
 }
 
-/*
-void InterfaceConversationAddMessage(const Message * msg) {
-	Message * m = MESSAGE_ALLOC;
-	memcpy(m, msg, sizeof(Message));
-	conversation.get().add(m);
-	updateConversation = true;
-}
-*/
-
 void InterfaceInStreamQueueCallback(const Packet & p) {
-	//InterfaceConversationAddMessage(&p.payload.message);
 	chatroom.addMessage(&p.payload.message);
 }
 
