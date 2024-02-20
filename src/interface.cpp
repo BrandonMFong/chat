@@ -119,6 +119,7 @@ int InterfaceWindowCreateModeHelp() {
 	box(helpWin, 0, 0); // Draw a box around the sub-window
 
 	// dialog
+	mvwprintw(helpWin, 1, 3, " 'edit' : Draft message. To send hit enter key.");
 	mvwprintw(helpWin, LINES - 12, 3, "Press any key to close...");
 
 	refresh(); // Refresh the main window to show the boxes
