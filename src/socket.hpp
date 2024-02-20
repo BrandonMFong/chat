@@ -55,8 +55,20 @@ protected:
 	int startIOStreams();
 
 private:
+
+	/**
+	 * handles received packets from queue
+	 */
 	static void queueCallback(void * in);
+
+	/**
+	 * receives packets
+	 */
 	static void inStream(void * in);
+
+	/**
+	 * sends packets out
+	 */
 	static void outStream(void * in);
 
 	BFThreadAsyncID _tidin;

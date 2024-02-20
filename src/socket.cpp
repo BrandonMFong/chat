@@ -8,6 +8,7 @@
 #include "client.hpp"
 #include "chat.h"
 #include "log.hpp"
+#include "office.hpp"
 #include <netinet/in.h> //structure for storing address information 
 #include <stdio.h> 
 #include <stdlib.h> 
@@ -78,6 +79,7 @@ void Socket::queueCallback(void * in) {
 
 			if (p) {
 				skt->_callback(*p);
+				Office::PacketReceive(p);
 			}
 
 			// pop queue
