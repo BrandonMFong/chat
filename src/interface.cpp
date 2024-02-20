@@ -199,7 +199,6 @@ int InterfaceWindowLoop(Socket * skt) {
     InputBuffer userInput;
 	int state = stateNormal; // 0 = normal, 1 = edit
     while (1) {
-		Packet p;
         int ch = wgetch(inputWin); // Get user input
 		userInput.addChar(ch);
 		if (state == stateNormal) { // normal
@@ -228,17 +227,18 @@ int InterfaceWindowLoop(Socket * skt) {
 			if (!userInput.isready()) {
 				InterfaceWindowUpdateInputWindowText(userInput, state);
 			} else {
+				Message m;
 				// reset packet
-				memset(&p, 0, sizeof(p));
+				memset(&m, 0, sizeof(m));
 
 				// load packet
-				userInput.unload(&p.payload.message);
+				userInput.unload(&m);
 
 				// Add message to our display
-				InterfaceConversationAddMessage(&p.payload.message);
+				InterfaceConversationAddMessage(&m);
 
 				// Send packet
-				Office::MessageSend(&p.payload.message);
+				Office::MessageSend(&m);
 
 				state = stateNormal;
 
