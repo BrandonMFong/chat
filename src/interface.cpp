@@ -13,6 +13,7 @@
 #include "inputbuffer.hpp"
 #include "office.hpp"
 #include "chatroom.hpp"
+#include "chatdirectory.hpp"
 
 using namespace BF;
 
@@ -220,18 +221,8 @@ int InterfaceWindowLoop(Socket * skt) {
 			if (!userInput.isready()) {
 				InterfaceWindowUpdateInputWindowText(userInput, state);
 			} else {
-				Message m;
-				// reset packet
-				memset(&m, 0, sizeof(m));
-
-				// load packet
-				userInput.unload(&m);
-
-				// Add message to our display
-				chatroom.addMessage(&m);
-
-				// Send packet
-				Office::MessageSend(&m);
+				// send buf
+				Office::BufferSend(&userInput);
 
 				state = stateNormal;
 
@@ -260,6 +251,7 @@ int InterfaceWindowLoop(Socket * skt) {
 }
 
 int InterfaceGatherUserData() {
+	// set up user
 	User * currentuser = User::current();
 	char username[USER_NAME_SIZE];
 	printf("username: ");
@@ -270,6 +262,10 @@ int InterfaceGatherUserData() {
 	}
 
 	currentuser->setUsername(username);
+
+	// set up chat room name
+	chatroom.setName("mychatroom");
+	ChatDirectory::shared()->addChatroom(&chatroom);
 	
 	return 0;
 }

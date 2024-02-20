@@ -25,3 +25,7 @@ int Chatroom::addMessage(const Message * msg) {
 	return 0;
 }
 
+void Chatroom::setName(const char * name) {
+	strncpy(this->_name, name, sizeof(this->_name));
+}
+

@@ -7,19 +7,20 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <server.hpp>
-#include <client.hpp>
-#include <interface.hpp>
-#include <log.hpp>
-#include <user.hpp>
+#include "server.hpp"
+#include "chatdirectory.hpp"
+#include "client.hpp"
+#include "interface.hpp"
+#include "log.hpp"
+#include "user.hpp"
 #include <bflibcpp/bflibcpp.hpp>
-
-LOG_INIT
 
 #define ARGUMENT_SERVER "server"
 #define ARGUMENT_CLIENT "client"
 
+LOG_INIT
 User * curruser = 0;
+ChatDirectory chatDirectory;
 
 void Help(const char * toolname) {
 	printf("usage: %s\n", toolname);

@@ -14,8 +14,12 @@ class Chatroom;
 
 class ChatDirectory : public BF::Object {
 public:
+	static ChatDirectory * shared();
 	ChatDirectory();
 	virtual ~ChatDirectory();
+
+	Chatroom * getChatroom();
+	void addChatroom(Chatroom * room);
 
 private:
 	BF::Atomic<BF::List<Chatroom *>> _chatrooms;

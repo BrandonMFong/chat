@@ -8,6 +8,7 @@
 
 #include "typepacket.h"
 #include "typemessage.h"
+#include "inputbuffer.hpp"
 
 namespace Office {
 
@@ -19,10 +20,8 @@ namespace Office {
 int PacketReceive(const Packet * pkt);
 
 /**
- * takes message and creates a packet to 
- * be sent by socket to our receivers
  */
-int MessageSend(const Message * msg);
+int BufferSend(const InputBuffer * buf);
 
 }
 

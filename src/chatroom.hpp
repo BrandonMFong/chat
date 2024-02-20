@@ -23,6 +23,8 @@ public:
 	 */
 	int addMessage(const Message * msg);
 
+	void setName(const char * name);
+
 	BF::Atomic<BF::List<Message *>> conversation;
 	BF::Atomic<bool> updateConversation;
 
