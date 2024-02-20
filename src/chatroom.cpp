@@ -8,6 +8,8 @@
 
 Chatroom::Chatroom() : Object() {
 	this->updateConversation = false;
+	BFStringGetRandomUUIDString(this->_uuid);
+	memset(this->_name, 0, sizeof(this->_name));
 }
 
 Chatroom::~Chatroom() {

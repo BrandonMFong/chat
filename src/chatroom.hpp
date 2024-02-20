@@ -11,6 +11,8 @@
 #include <bflibcpp/list.hpp>
 #include "typemessage.h"
 
+#define CHAT_ROOM_NAME_SIZE 255
+
 class Chatroom : public BF::Object {
 public:
 	Chatroom();
@@ -25,6 +27,8 @@ public:
 	BF::Atomic<bool> updateConversation;
 
 private:
+	char _uuid[kBFStringUUIDStringLength];
+	char _name[CHAT_ROOM_NAME_SIZE];
 };
 
 #endif // CHATROOM_HPP

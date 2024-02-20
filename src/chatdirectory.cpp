@@ -5,7 +5,7 @@
 
 #include "chatdirectory.hpp"
 
-ChatDirectory::ChatDirectory() {
+ChatDirectory::ChatDirectory() : Object() {
 
 }
 
