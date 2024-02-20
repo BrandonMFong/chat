@@ -4,6 +4,7 @@
  */
 
 #include "inputbuffer_tests.hpp"
+#include "chatroom_tests.hpp"
 #include "log.hpp"
 
 LOG_INIT
@@ -15,6 +16,11 @@ int main() {
 	printf("\n---------------------------\n");
 
 	inputbuffer_tests(&pass, &fail);
+	printf("[+ %d, - %d]\n", pass, fail);
+	tp += pass; tf += fail;
+	pass = 0; fail = 0;
+
+	chatroom_tests(&pass, &fail);
 	printf("[+ %d, - %d]\n", pass, fail);
 	tp += pass; tf += fail;
 	pass = 0; fail = 0;
