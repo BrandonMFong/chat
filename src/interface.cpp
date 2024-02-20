@@ -12,6 +12,7 @@
 #include "log.hpp"
 #include "inputbuffer.hpp"
 #include "office.hpp"
+#include "chatroom.hpp"
 
 using namespace BF;
 
@@ -25,22 +26,26 @@ WINDOW * inputWin = NULL;
 WINDOW * displayWin = NULL;
 WINDOW * helpWin = NULL;
 
-Atomic<List<Message *>> conversation;
-Atomic<bool> updateConversation;
+Chatroom chatroom;
+//Atomic<List<Message *>> conversation;
+//Atomic<bool> updateConversation;
 
 void InterfaceMessageFree(Message * m) {
 	MESSAGE_FREE(m);
 }
 
+/*
 void InterfaceConversationAddMessage(const Message * msg) {
 	Message * m = MESSAGE_ALLOC;
 	memcpy(m, msg, sizeof(Message));
 	conversation.get().add(m);
 	updateConversation = true;
 }
+*/
 
 void InterfaceInStreamQueueCallback(const Packet & p) {
-	InterfaceConversationAddMessage(&p.payload.message);
+	//InterfaceConversationAddMessage(&p.payload.message);
+	chatroom.addMessage(&p.payload.message);
 }
 
 int InterfaceCraftChatLineFromMessage(const Message * msg, char * line) {
@@ -55,17 +60,17 @@ void InterfaceDisplayWindowUpdateThread(void * in) {
 	const BFThreadAsyncID tid = BFThreadAsyncGetID();
 
 	while (BFThreadAsyncIDIsValid(tid) && !BFThreadAsyncIsCanceled(tid)) {
-		updateConversation.lock();
-		if (updateConversation.get()) {
+		chatroom.updateConversation.lock();
+		if (chatroom.updateConversation.get()) {
+			chatroom.conversation.lock();
 			BFLockLock(&winlock);
-			conversation.lock();
 			
 			werase(displayWin);
 			box(displayWin, 0, 0);
 
 			// write messages
-			for (int i = 0; i < conversation.get().count(); i++) {
-				Message * m = conversation.get().objectAtIndex(i);
+			for (int i = 0; i < chatroom.conversation.get().count(); i++) {
+				Message * m = chatroom.conversation.get().objectAtIndex(i);
 
 				if (m) {
 					char line[linelen];
@@ -75,13 +80,13 @@ void InterfaceDisplayWindowUpdateThread(void * in) {
 			}
 
 			wrefresh(displayWin);
-		
-			updateConversation = false;	
 			
-			conversation.unlock();
+			chatroom.updateConversation = false;
+
 			BFLockUnlock(&winlock);
+			chatroom.conversation.unlock();
 		}
-		updateConversation.unlock();
+		chatroom.updateConversation.unlock();
 	}
 }
 
@@ -107,7 +112,7 @@ int InterfaceWindowCreateModeCommand() {
 	keypad(inputWin, true); // Enable special keys in input window
 	nodelay(inputWin, false); // Set blocking input for input window
 
-	updateConversation = true;
+	chatroom.updateConversation = true;
 
 	BFLockUnlock(&winlock);
 
@@ -193,7 +198,7 @@ int InterfaceWindowLoop(Socket * skt) {
 	InterfaceWindowCreateModeCommand();
 
 	// setup conversation thread
-	conversation.get().setDeallocateCallback(InterfaceMessageFree);
+	chatroom.conversation.get().setDeallocateCallback(InterfaceMessageFree);
 
 	BFThreadAsyncID tid = BFThreadAsync(InterfaceDisplayWindowUpdateThread, 0);
     InputBuffer userInput;
@@ -216,7 +221,7 @@ int InterfaceWindowLoop(Socket * skt) {
 
 					// change to edit mode
 					InterfaceWindowCreateModeEdit();
-					updateConversation = true;
+					chatroom.updateConversation = true;
 				} else {
 					LOG_DEBUG("unknown: '%s'", userInput.cString());
 				}
@@ -235,7 +240,7 @@ int InterfaceWindowLoop(Socket * skt) {
 				userInput.unload(&m);
 
 				// Add message to our display
-				InterfaceConversationAddMessage(&m);
+				chatroom.addMessage(&m);
 
 				// Send packet
 				Office::MessageSend(&m);

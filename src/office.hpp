@@ -18,7 +18,11 @@ namespace Office {
  */
 int PacketReceive(const Packet * pkt);
 
-int MessageSend(const Message * pkt);
+/**
+ * takes message and creates a packet to 
+ * be sent by socket to our receivers
+ */
+int MessageSend(const Message * msg);
 
 }
 

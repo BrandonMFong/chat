@@ -16,8 +16,15 @@ public:
 	Chatroom();
 	virtual ~Chatroom();
 
+	/**
+	 * adds message and flags an update
+	 */
+	int addMessage(const Message * msg);
+
+	BF::Atomic<BF::List<Message *>> conversation;
+	BF::Atomic<bool> updateConversation;
+
 private:
-	BF::Atomic<BF::List<Message *>> _conversation;
 };
 
 #endif // CHATROOM_HPP
