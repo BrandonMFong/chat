@@ -11,6 +11,7 @@
 #include <string.h>
 #include "log.hpp"
 #include "inputbuffer.hpp"
+#include "office.hpp"
 
 using namespace BF;
 
@@ -227,14 +228,17 @@ int InterfaceWindowLoop(Socket * skt) {
 			if (!userInput.isready()) {
 				InterfaceWindowUpdateInputWindowText(userInput, state);
 			} else {
+				// reset packet
+				memset(&p, 0, sizeof(p));
+
 				// load packet
-				userInput.unload(&p);
+				userInput.unload(&p.payload.message);
 
 				// Add message to our display
 				InterfaceConversationAddMessage(&p.payload.message);
 
 				// Send packet
-				skt->sendPacket(&p);
+				Office::MessageSend(&p.payload.message);
 
 				state = stateNormal;
 

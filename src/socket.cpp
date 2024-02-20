@@ -19,6 +19,12 @@
 #include <bflibcpp/bflibcpp.hpp>
 #include <bflibc/bflibc.h>
 
+Socket * _sharedSocket = NULL;
+
+Socket * Socket::shared() {
+	return _sharedSocket;
+}
+
 Socket::Socket() { 
 	this->_tidin = NULL;
 	this->_tidinpop = NULL;
@@ -26,6 +32,8 @@ Socket::Socket() {
 
 	this->_callback = NULL;
 	this->_stopStreams = false;
+
+	_sharedSocket = this;
 }
 
 Socket::~Socket() {

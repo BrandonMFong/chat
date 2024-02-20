@@ -7,6 +7,7 @@
 #define OFFICE_HPP
 
 #include "typepacket.h"
+#include "typemessage.h"
 
 namespace Office {
 
@@ -16,6 +17,8 @@ namespace Office {
  * packet gets passed from socket to us
  */
 int PacketReceive(const Packet * pkt);
+
+int MessageSend(const Message * pkt);
 
 }
 

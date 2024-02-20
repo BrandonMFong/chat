@@ -20,6 +20,8 @@ extern "C" {
 
 class Socket : public BF::Object {
 public: 
+	static Socket * shared();
+
 	static Socket * create(const char mode, int * err);
 	virtual ~Socket();
 

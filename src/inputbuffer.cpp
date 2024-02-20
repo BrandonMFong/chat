@@ -20,15 +20,14 @@ InputBuffer::~InputBuffer() {
 
 }
 
-int InputBuffer::unload(Packet * pkt) {
-	if (!pkt) return 50;
+int InputBuffer::unload(Message * msg) {
+	if (!msg) return 50;
 
-	strncpy(pkt->payload.message.buf, this->cString(), sizeof(pkt->payload.message.buf));
-	strncpy(pkt->payload.message.username, User::current()->username(), sizeof(pkt->payload.message.username));
+	strncpy(msg->buf, this->cString(), sizeof(msg->buf));
+	strncpy(msg->username, User::current()->username(), sizeof(msg->username));
 	Time * t = Time::createCurrent();
-	pkt->payload.message.time = t->epoch();
+	msg->time = t->epoch();
 	Delete(t);
-
 
 	return 0;
 }
