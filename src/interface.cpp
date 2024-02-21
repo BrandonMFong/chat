@@ -192,7 +192,6 @@ int InterfaceWindowEnd() {
 }
 
 int InterfaceWindowLoop() {
-	InterfaceWindowStart();
 
 	InterfaceWindowCreateModeCommand();
 
@@ -251,8 +250,6 @@ int InterfaceWindowLoop() {
 	delwin(inputWin);
 	delwin(displayWin);
 
-	InterfaceWindowEnd();
-
 	return 0;
 }
 
@@ -280,8 +277,12 @@ int InterfaceGatherUserData() {
 int InterfaceRun() {
 	int error = InterfaceGatherUserData();
 
+	InterfaceWindowStart();
+
 	if (!error)
 		error = InterfaceWindowLoop();
+
+	InterfaceWindowEnd();
 
 	Delete(chatroom);
 
