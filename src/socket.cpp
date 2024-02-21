@@ -80,16 +80,16 @@ void Socket::queueCallback(void * in) {
 
 		skt->_inq.lock();
 		// if queue is not empty, send the next message
-		if (!skt->_inq.get().empty()) {
+		if (!skt->_inq.unsafeget().empty()) {
 			// get first message
-			Packet * p = skt->_inq.get().front();
+			Packet * p = skt->_inq.unsafeget().front();
 
 			if (p) {
 				Office::PacketReceive(p);
 			}
 
 			// pop queue
-			skt->_inq.get().pop();
+			skt->_inq.unsafeget().pop();
 
 			PACKET_FREE(p);
 		}
@@ -124,9 +124,10 @@ void Socket::inStream(void * in) {
 		Packet * p = PACKET_ALLOC;
 		memcpy(p, &buf, sizeof(Packet));
 		
-		LOG_DEBUG("incoming {packet = {message = {%f, \"%s\", \"%s\"}}}",
+		LOG_DEBUG("incoming {packet = {message = {%f, \"%s\", \"%s\", \"%s\"}}}",
 			p->payload.message.time,
 			p->payload.message.username,
+			p->payload.message.chatuuid,
 			p->payload.message.buf
 		);
 
@@ -149,9 +150,9 @@ void Socket::outStream(void * in) {
 
 		skt->_outq.lock();
 		// if queue is not empty, send the next message
-		if (!skt->_outq.get().empty()) {
+		if (!skt->_outq.unsafeget().empty()) {
 			// get first message
-			Packet * p = skt->_outq.get().front();
+			Packet * p = skt->_outq.unsafeget().front();
 
 			LOG_DEBUG("outgoing {packet = {message = {%f, \"%s\", \"%s\", \"%s\"}}}",
 				p->payload.message.time,
@@ -161,7 +162,7 @@ void Socket::outStream(void * in) {
 			);
 
 			// pop queue
-			skt->_outq.get().pop();
+			skt->_outq.unsafeget().pop();
 
 			// send buf from message
 			send(skt->descriptor(), p, sizeof(Packet), 0);

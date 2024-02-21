@@ -46,27 +46,31 @@ void InterfaceDisplayWindowUpdateThread(void * in) {
 
 	while (BFThreadAsyncIDIsValid(tid) && !BFThreadAsyncIsCanceled(tid)) {
 		chatroom->updateConversation.lock();
-		if (chatroom->updateConversation.get()) {
+		if (chatroom->updateConversation.unsafeget()) {
 			chatroom->conversation.lock();
 			BFLockLock(&winlock);
-			
+
 			werase(displayWin);
 			box(displayWin, 0, 0);
 
+			LOG_DEBUG("updating display window");
+			LOG_DEBUG("conversation message count: %d", chatroom->conversation.unsafeget().count());
 			// write messages
-			for (int i = 0; i < chatroom->conversation.get().count(); i++) {
-				Message * m = chatroom->conversation.get().objectAtIndex(i);
+			for (int i = 0; i < chatroom->conversation.unsafeget().count(); i++) {
+				Message * m = chatroom->conversation.unsafeget().objectAtIndex(i);
 
 				if (m) {
 					char line[linelen];
 					InterfaceCraftChatLineFromMessage(m, line);
+					LOG_DEBUG("adding line to display: '%s'", line);
 					mvwprintw(displayWin, i+1, 1, line);
 				}
 			}
+			LOG_DEBUG("updating display window done");
 
 			wrefresh(displayWin);
 			
-			chatroom->updateConversation = false;
+			chatroom->updateConversation.unsafeset(false);
 
 			BFLockUnlock(&winlock);
 			chatroom->conversation.unlock();
@@ -275,8 +279,17 @@ int InterfaceGatherUserData() {
 
 int InterfaceLobbyRun() {
 	// set up chat room name
+	char chatroomname[CHAT_ROOM_NAME_SIZE];
 	chatroom = new Chatroom("ea46019c-4c39-4838-b44d-6a990bbb4ae9");
-	chatroom->setName("mychatroom");
+
+	printf("chat room name: ");
+	fgets(chatroomname, sizeof(chatroomname), stdin);
+
+	if (chatroomname[strlen(chatroomname) - 1] == '\n') {
+		chatroomname[strlen(chatroomname)- 1] = '\0';
+	}
+	
+	chatroom->setName(chatroomname);
 	ChatDirectory::shared()->addChatroom(chatroom);
 	
 	return 0;

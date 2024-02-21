@@ -6,6 +6,7 @@
 #include "chatroom.hpp"
 #include "office.hpp"
 #include "user.hpp"
+#include "log.hpp"
 #include <string.h>
 
 void _ChatroomMessageFree(Message * m) {
@@ -29,6 +30,7 @@ Chatroom::~Chatroom() {
 int Chatroom::addMessage(const Message * msg) {
 	Message * m = MESSAGE_ALLOC;
 	memcpy(m, msg, sizeof(Message));
+	LOG_DEBUG("adding message: %s", m->buf);
 	this->conversation.get().add(m);
 
 	this->updateConversation = true;

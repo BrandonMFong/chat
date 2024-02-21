@@ -27,11 +27,12 @@ ChatDirectory::~ChatDirectory() {
 Chatroom * ChatDirectory::getChatroom(const char * chatroomuuid) {
 	Chatroom * room = NULL;
 	this->_chatrooms.lock();
-	List<Chatroom *>::Node * n = this->_chatrooms.get().first();
+	List<Chatroom *>::Node * n = this->_chatrooms.unsafeget().first();
 	for (; n != NULL; n = n->next()) {
 		Chatroom * troom = n->object();
 		LOG_DEBUG("%s ?= %s", troom->uuid(), chatroomuuid);
 		if (!BFStringCompareUUID(troom->uuid(), chatroomuuid)) {
+			LOG_DEBUG("found chat room: %s", troom->uuid());
 			room = troom;
 			break;
 		}
