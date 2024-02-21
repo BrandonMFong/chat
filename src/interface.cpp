@@ -273,9 +273,22 @@ int InterfaceGatherUserData() {
 	return 0;
 }
 
+int InterfaceLobbyRun() {
+	// set up chat room name
+	chatroom = new Chatroom("ea46019c-4c39-4838-b44d-6a990bbb4ae9");
+	chatroom->setName("mychatroom");
+	ChatDirectory::shared()->addChatroom(chatroom);
+	
+	return 0;
+}
+
 int InterfaceRun() {
 	LOG_DEBUG("> %s", __func__);
+
 	int error = InterfaceGatherUserData();
+
+	if (!error)
+		error = InterfaceLobbyRun();
 
 	InterfaceWindowStart();
 
