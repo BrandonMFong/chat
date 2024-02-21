@@ -4,6 +4,11 @@
  */
 
 #include "chatdirectory.hpp"
+#include "chatroom.hpp"
+#include "log.hpp"
+#include <string.h>
+
+using namespace BF;
 
 ChatDirectory * _sharedChatDir = NULL;
 
@@ -19,8 +24,21 @@ ChatDirectory::~ChatDirectory() {
 
 }
 
-Chatroom * ChatDirectory::getChatroom() {
-	return this->_chatrooms.get().first()->object();
+Chatroom * ChatDirectory::getChatroom(const char * chatroomuuid) {
+	Chatroom * room = NULL;
+	this->_chatrooms.lock();
+	List<Chatroom *>::Node * n = this->_chatrooms.get().first();
+	for (; n != NULL; n = n->next()) {
+		Chatroom * troom = n->object();
+		LOG_DEBUG("%s ?= %s", troom->uuid(), chatroomuuid);
+		if (!memcmp(troom->uuid(), chatroomuuid, kBFStringUUIDStringLength)) {
+			room = troom;
+			break;
+		}
+	}
+	this->_chatrooms.unlock();
+
+	return room;
 }
 
 void ChatDirectory::addChatroom(Chatroom * room) {

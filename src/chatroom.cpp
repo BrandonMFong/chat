@@ -11,7 +11,7 @@
 Chatroom::Chatroom() : Object() {
 	this->updateConversation = false;
 	BFStringGetRandomUUIDString(this->_uuid);
-	strncpy(this->_uuid, "ea46019c-4c39-4838-b44d-6a990bbb4ae9", kBFStringUUIDStringLength);
+	memcpy(this->_uuid, "ea46019c-4c39-4838-b44d-6a990bbb4ae9", sizeof(this->_uuid));
 	memset(this->_name, 0, sizeof(this->_name));
 }
 
@@ -30,6 +30,10 @@ int Chatroom::addMessage(const Message * msg) {
 
 void Chatroom::setName(const char * name) {
 	strncpy(this->_name, name, sizeof(this->_name));
+}
+
+const char * Chatroom::uuid() {
+	return this->_uuid;
 }
 
 int Chatroom::sendBuffer(const InputBuffer * buf) {

@@ -10,10 +10,16 @@
 #include "chatdirectory.hpp"
 #include <string.h>
 
-int Office::PacketReceive(const Packet * pkt) {
-	Chatroom * chatroom = ChatDirectory::shared()->getChatroom();
-	chatroom->addMessage(&pkt->payload.message);
-	return 0;
+using namespace BF;
+
+int Office::PacketReceive(const Packet * p) {
+	if (!p) return 1;
+	const Message * m = &p->payload.message;
+
+	Chatroom * chatroom = ChatDirectory::shared()->getChatroom(m->chatuuid);
+	if (!chatroom) return 2;
+
+	return chatroom->addMessage(m);
 }
 
 int Office::MessageSend(const Message * m) {

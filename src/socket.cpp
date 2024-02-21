@@ -153,9 +153,10 @@ void Socket::outStream(void * in) {
 			// get first message
 			Packet * p = skt->_outq.get().front();
 
-			LOG_DEBUG("outgoing {packet = {message = {%f, \"%s\", \"%s\"}}}",
+			LOG_DEBUG("outgoing {packet = {message = {%f, \"%s\", \"%s\", \"%s\"}}}",
 				p->payload.message.time,
 				p->payload.message.username,
+				p->payload.message.chatuuid,
 				p->payload.message.buf
 			);
 

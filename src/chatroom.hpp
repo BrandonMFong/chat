@@ -31,6 +31,8 @@ public:
 
 	int sendBuffer(const InputBuffer * buf);
 
+	const char * uuid();
+
 	BF::Atomic<BF::List<Message *>> conversation;
 	BF::Atomic<bool> updateConversation;
 

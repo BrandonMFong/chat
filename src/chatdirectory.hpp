@@ -18,7 +18,7 @@ public:
 	ChatDirectory();
 	virtual ~ChatDirectory();
 
-	Chatroom * getChatroom();
+	Chatroom * getChatroom(const char * chatroomuuid);
 	void addChatroom(Chatroom * room);
 
 private:
