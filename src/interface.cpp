@@ -174,12 +174,25 @@ int InterfaceWindowUpdateInputWindowText(InputBuffer & userInput, const int stat
 	return 0;
 }
 
-int InterfaceWindowLoop() {
+int InterfaceWindowStart() {
 	BFLockCreate(&winlock);
 
 	initscr(); // Initialize the library
     cbreak();  // Line buffering disabled, pass on everything to me
     noecho();  // Don't echo user input
+
+	return 0;
+}
+
+int InterfaceWindowEnd() {
+    endwin(); // End curses mode
+
+	BFLockDestroy(&winlock);
+	return 0;
+}
+
+int InterfaceWindowLoop() {
+	InterfaceWindowStart();
 
 	InterfaceWindowCreateModeCommand();
 
@@ -237,9 +250,8 @@ int InterfaceWindowLoop() {
 
 	delwin(inputWin);
 	delwin(displayWin);
-    endwin(); // End curses mode
 
-	BFLockDestroy(&winlock);
+	InterfaceWindowEnd();
 
 	return 0;
 }
