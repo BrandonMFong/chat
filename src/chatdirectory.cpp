@@ -31,7 +31,7 @@ Chatroom * ChatDirectory::getChatroom(const char * chatroomuuid) {
 	for (; n != NULL; n = n->next()) {
 		Chatroom * troom = n->object();
 		LOG_DEBUG("%s ?= %s", troom->uuid(), chatroomuuid);
-		if (!memcmp(troom->uuid(), chatroomuuid, kBFStringUUIDStringLength)) {
+		if (!BFStringCompareUUID(troom->uuid(), chatroomuuid)) {
 			room = troom;
 			break;
 		}
