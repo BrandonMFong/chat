@@ -35,12 +35,6 @@ public:
 	 */
 	int sendPacket(const Packet * packet);
 
-	/**
-	 * sets the callback that will be in charge of observing
-	 * the top the of the in stream packet queue when available
-	 */
-	void setQueueCallback(void (* callback)(const Packet &));
-
 	virtual const int descriptor() const = 0;
 
 protected:
@@ -64,7 +58,7 @@ private:
 	static void queueCallback(void * in);
 
 	/**
-	 * receives packets
+	 * receives packets and puts them in a queue
 	 */
 	static void inStream(void * in);
 
@@ -82,12 +76,6 @@ private:
 	 * the caller wants it to stop running
 	 */
 	BF::Atomic<bool> _stopStreams;
-
-	/**
-	 * callback that will observe packet from
-	 * top of the in stream queue	
-	 */
-	void (* _callback)(const Packet &);
 
 	/**
 	 * queues incoming data from recv

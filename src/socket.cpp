@@ -30,7 +30,6 @@ Socket::Socket() {
 	this->_tidinpop = NULL;
 	this->_tidout = NULL;
 
-	this->_callback = NULL;
 	this->_stopStreams = false;
 
 	_sharedSocket = this;
@@ -86,7 +85,6 @@ void Socket::queueCallback(void * in) {
 			Packet * p = skt->_inq.get().front();
 
 			if (p) {
-				//skt->_callback(*p);
 				Office::PacketReceive(p);
 			}
 
@@ -185,10 +183,6 @@ int Socket::startIOStreams() {
 }
 
 int Socket::start() {
-	if (this->_callback == NULL) {
-		LOG_DEBUG("please set callback for instream before starting socket\n");
-		return -1;
-	}
 	this->_start();
 	return 0;
 }
@@ -224,9 +218,5 @@ int Socket::sendPacket(const Packet * pkt) {
 
 	int error = this->_outq.get().push(p);
 	return error;
-}
-
-void Socket::setQueueCallback(void (* callback)(const Packet &)) {
-	this->_callback = callback;
 }
 
