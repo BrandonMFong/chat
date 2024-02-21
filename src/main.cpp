@@ -79,7 +79,7 @@ int main(int argc, char * argv[]) {
 	}
 
 	if (!result) {
-		result = InterfaceRun(skt);
+		result = InterfaceRun();
 	}
 
 	if (!result) {

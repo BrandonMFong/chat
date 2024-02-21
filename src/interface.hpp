@@ -9,9 +9,7 @@
 #include "socket.hpp"
 #include <typepacket.h>
 
-int InterfaceRun(Socket * skt);
-
-void InterfaceInStreamQueueCallback(const Packet & p);
+int InterfaceRun();
 
 #endif // INTERFACE_HPP
 

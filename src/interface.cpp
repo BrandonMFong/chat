@@ -33,10 +33,6 @@ void InterfaceMessageFree(Message * m) {
 	MESSAGE_FREE(m);
 }
 
-void InterfaceInStreamQueueCallback(const Packet & p) {
-	chatroom->addMessage(&p.payload.message);
-}
-
 int InterfaceCraftChatLineFromMessage(const Message * msg, char * line) {
 	if (!msg || !line) return 30;
 
@@ -178,7 +174,7 @@ int InterfaceWindowUpdateInputWindowText(InputBuffer & userInput, const int stat
 	return 0;
 }
 
-int InterfaceWindowLoop(Socket * skt) {
+int InterfaceWindowLoop() {
 	BFLockCreate(&winlock);
 
 	initscr(); // Initialize the library
@@ -269,11 +265,11 @@ int InterfaceGatherUserData() {
 	return 0;
 }
 
-int InterfaceRun(Socket * skt) {
+int InterfaceRun() {
 	int error = InterfaceGatherUserData();
 
 	if (!error)
-		error = InterfaceWindowLoop(skt);
+		error = InterfaceWindowLoop();
 
 	Delete(chatroom);
 
