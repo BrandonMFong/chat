@@ -21,7 +21,7 @@ int PacketReceive(const Packet * pkt);
 
 /**
  */
-int BufferSend(const InputBuffer * buf);
+int MessageSend(const Message * msg);
 
 }
 

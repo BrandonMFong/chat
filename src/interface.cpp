@@ -222,7 +222,7 @@ int InterfaceWindowLoop(Socket * skt) {
 				InterfaceWindowUpdateInputWindowText(userInput, state);
 			} else {
 				// send buf
-				Office::BufferSend(&userInput);
+				chatroom.sendBuffer(&userInput);
 
 				state = stateNormal;
 

@@ -10,6 +10,7 @@
 #include <bflibcpp/atomic.hpp>
 #include <bflibcpp/list.hpp>
 #include "typemessage.h"
+#include "inputbuffer.hpp"
 
 #define CHAT_ROOM_NAME_SIZE 255
 
@@ -24,6 +25,8 @@ public:
 	int addMessage(const Message * msg);
 
 	void setName(const char * name);
+
+	int sendBuffer(const InputBuffer * buf);
 
 	BF::Atomic<BF::List<Message *>> conversation;
 	BF::Atomic<bool> updateConversation;
