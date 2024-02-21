@@ -10,6 +10,9 @@
 #include "typemessage.h"
 #include "inputbuffer.hpp"
 
+/**
+ * in charge of making packet
+ */
 namespace Office {
 
 /**

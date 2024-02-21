@@ -43,6 +43,9 @@ int Chatroom::sendBuffer(const InputBuffer * buf) {
 	// username
 	strncpy(m.username, User::current()->username(), sizeof(m.username));
 
+	// chatroom uuid
+	strncpy(m.chatuuid, this->_uuid, kBFStringUUIDStringLength);
+
 	// time
 	m.time = BFTimeGetCurrentTime();
 

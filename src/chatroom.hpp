@@ -14,6 +14,9 @@
 
 #define CHAT_ROOM_NAME_SIZE 255
 
+/**
+ * In charge of creating message
+ */
 class Chatroom : public BF::Object {
 public:
 	Chatroom();
