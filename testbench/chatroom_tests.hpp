@@ -27,12 +27,31 @@ int test_chatroominit() {
 	return result;
 }
 
+int test_chatroomUUIDs() {
+	UNIT_TEST_START;
+	int result = 0;
+
+	int max = 2 << 18;
+	while (!result && max) {
+		Chatroom a, b;
+		if (!strcmp(a._uuid, b._uuid)) {
+			result = max;
+		}
+
+		max--;
+	}
+
+	UNIT_TEST_END(!result, result);
+	return result;
+}
+
 void chatroom_tests(int * pass, int * fail) {
 	int p = 0, f = 0;
 	
 	INTRO_TEST_FUNCTION;
 
 	LAUNCH_TEST(test_chatroominit, p, f);
+	LAUNCH_TEST(test_chatroomUUIDs, p, f);
 
 	if (pass) *pass += p;
 	if (fail) *fail += f;
