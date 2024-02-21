@@ -53,7 +53,6 @@ int InputBuffer::addChar(int ch) {
 		break;
 	default:
 		// If a key is pressed (excluding Enter), add it to the userInput string
-		LOG_DEBUG("user input char: %c", ch);
 		this->String::addCharAtIndex(ch, this->_cursorpos);
 		this->_cursorpos++;
 		break;

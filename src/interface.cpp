@@ -206,6 +206,8 @@ int InterfaceWindowLoop() {
 				InterfaceWindowUpdateInputWindowText(userInput, state);
 			} else {
 				if (!userInput.compareString("quit")) {
+					delwin(inputWin);
+					delwin(displayWin);
 					break; // exit loop
 				} else if (!userInput.compareString("help")) {
 					state = stateHelp;
@@ -246,10 +248,7 @@ int InterfaceWindowLoop() {
 	BFThreadAsyncCancel(tid);
 	BFThreadAsyncWait(tid);
 	BFThreadAsyncDestroy(tid);
-
-	delwin(inputWin);
-	delwin(displayWin);
-
+	
 	return 0;
 }
 
@@ -275,6 +274,7 @@ int InterfaceGatherUserData() {
 }
 
 int InterfaceRun() {
+	LOG_DEBUG("> %s", __func__);
 	int error = InterfaceGatherUserData();
 
 	InterfaceWindowStart();
@@ -286,6 +286,7 @@ int InterfaceRun() {
 
 	Delete(chatroom);
 
+	LOG_DEBUG("< %s", __func__);
 	return error;
 }
 
