@@ -27,14 +27,14 @@ WINDOW * inputWin = NULL;
 WINDOW * displayWin = NULL;
 WINDOW * helpWin = NULL;
 
-Chatroom chatroom;
+Chatroom * chatroom;
 
 void InterfaceMessageFree(Message * m) {
 	MESSAGE_FREE(m);
 }
 
 void InterfaceInStreamQueueCallback(const Packet & p) {
-	chatroom.addMessage(&p.payload.message);
+	chatroom->addMessage(&p.payload.message);
 }
 
 int InterfaceCraftChatLineFromMessage(const Message * msg, char * line) {
@@ -49,17 +49,17 @@ void InterfaceDisplayWindowUpdateThread(void * in) {
 	const BFThreadAsyncID tid = BFThreadAsyncGetID();
 
 	while (BFThreadAsyncIDIsValid(tid) && !BFThreadAsyncIsCanceled(tid)) {
-		chatroom.updateConversation.lock();
-		if (chatroom.updateConversation.get()) {
-			chatroom.conversation.lock();
+		chatroom->updateConversation.lock();
+		if (chatroom->updateConversation.get()) {
+			chatroom->conversation.lock();
 			BFLockLock(&winlock);
 			
 			werase(displayWin);
 			box(displayWin, 0, 0);
 
 			// write messages
-			for (int i = 0; i < chatroom.conversation.get().count(); i++) {
-				Message * m = chatroom.conversation.get().objectAtIndex(i);
+			for (int i = 0; i < chatroom->conversation.get().count(); i++) {
+				Message * m = chatroom->conversation.get().objectAtIndex(i);
 
 				if (m) {
 					char line[linelen];
@@ -70,12 +70,12 @@ void InterfaceDisplayWindowUpdateThread(void * in) {
 
 			wrefresh(displayWin);
 			
-			chatroom.updateConversation = false;
+			chatroom->updateConversation = false;
 
 			BFLockUnlock(&winlock);
-			chatroom.conversation.unlock();
+			chatroom->conversation.unlock();
 		}
-		chatroom.updateConversation.unlock();
+		chatroom->updateConversation.unlock();
 	}
 }
 
@@ -101,7 +101,7 @@ int InterfaceWindowCreateModeCommand() {
 	keypad(inputWin, true); // Enable special keys in input window
 	nodelay(inputWin, false); // Set blocking input for input window
 
-	chatroom.updateConversation = true;
+	chatroom->updateConversation = true;
 
 	BFLockUnlock(&winlock);
 
@@ -115,6 +115,7 @@ int InterfaceWindowCreateModeHelp() {
 
 	// dialog
 	mvwprintw(helpWin, 1, 3, " 'edit' : Draft message. To send hit enter key.");
+	mvwprintw(helpWin, 2, 3, " 'quit' : Quits application.");
 	mvwprintw(helpWin, LINES - 12, 3, "Press any key to close...");
 
 	refresh(); // Refresh the main window to show the boxes
@@ -187,7 +188,7 @@ int InterfaceWindowLoop(Socket * skt) {
 	InterfaceWindowCreateModeCommand();
 
 	// setup conversation thread
-	chatroom.conversation.get().setDeallocateCallback(InterfaceMessageFree);
+	chatroom->conversation.get().setDeallocateCallback(InterfaceMessageFree);
 
 	BFThreadAsyncID tid = BFThreadAsync(InterfaceDisplayWindowUpdateThread, 0);
     InputBuffer userInput;
@@ -210,7 +211,7 @@ int InterfaceWindowLoop(Socket * skt) {
 
 					// change to edit mode
 					InterfaceWindowCreateModeEdit();
-					chatroom.updateConversation = true;
+					chatroom->updateConversation = true;
 				} else {
 					LOG_DEBUG("unknown: '%s'", userInput.cString());
 				}
@@ -222,7 +223,7 @@ int InterfaceWindowLoop(Socket * skt) {
 				InterfaceWindowUpdateInputWindowText(userInput, state);
 			} else {
 				// send buf
-				chatroom.sendBuffer(&userInput);
+				chatroom->sendBuffer(&userInput);
 
 				state = stateNormal;
 
@@ -264,8 +265,9 @@ int InterfaceGatherUserData() {
 	currentuser->setUsername(username);
 
 	// set up chat room name
-	chatroom.setName("mychatroom");
-	ChatDirectory::shared()->addChatroom(&chatroom);
+	chatroom = new Chatroom("ea46019c-4c39-4838-b44d-6a990bbb4ae9");
+	chatroom->setName("mychatroom");
+	ChatDirectory::shared()->addChatroom(chatroom);
 	
 	return 0;
 }
@@ -273,6 +275,11 @@ int InterfaceGatherUserData() {
 int InterfaceRun(Socket * skt) {
 	int error = InterfaceGatherUserData();
 
-	return InterfaceWindowLoop(skt);
+	if (!error)
+		error = InterfaceWindowLoop(skt);
+
+	Delete(chatroom);
+
+	return error;
 }
 

@@ -19,7 +19,10 @@
  */
 class Chatroom : public BF::Object {
 public:
-	Chatroom();
+	/**
+	 * inits chatroom with uuid
+	 */
+	Chatroom(const char * uuid);
 	virtual ~Chatroom();
 
 	/**

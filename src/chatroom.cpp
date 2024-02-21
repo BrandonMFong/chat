@@ -8,7 +8,7 @@
 #include "user.hpp"
 #include <string.h>
 
-Chatroom::Chatroom() : Object() {
+Chatroom::Chatroom(const char * uuid) : Object() {
 	this->updateConversation = false;
 	BFStringGetRandomUUIDString(this->_uuid);
 	memcpy(this->_uuid, "ea46019c-4c39-4838-b44d-6a990bbb4ae9", sizeof(this->_uuid));
