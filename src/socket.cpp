@@ -86,7 +86,7 @@ void Socket::queueCallback(void * in) {
 			Packet * p = skt->_inq.get().front();
 
 			if (p) {
-				skt->_callback(*p);
+				//skt->_callback(*p);
 				Office::PacketReceive(p);
 			}
 

@@ -11,6 +11,8 @@
 #include <string.h>
 
 int Office::PacketReceive(const Packet * pkt) {
+	Chatroom * chatroom = ChatDirectory::shared()->getChatroom();
+	chatroom->addMessage(&pkt->payload.message);
 	return 0;
 }
 
