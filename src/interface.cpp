@@ -187,9 +187,6 @@ int InterfaceWindowLoop(Socket * skt) {
 
 	InterfaceWindowCreateModeCommand();
 
-	// setup conversation thread
-	chatroom->conversation.get().setDeallocateCallback(InterfaceMessageFree);
-
 	BFThreadAsyncID tid = BFThreadAsync(InterfaceDisplayWindowUpdateThread, 0);
     InputBuffer userInput;
 	int state = stateNormal; // 0 = normal, 1 = edit

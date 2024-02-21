@@ -8,11 +8,18 @@
 #include "user.hpp"
 #include <string.h>
 
+void _ChatroomMessageFree(Message * m) {
+	MESSAGE_FREE(m);
+}
+
 Chatroom::Chatroom(const char * uuid) : Object() {
 	this->updateConversation = false;
 	BFStringGetRandomUUIDString(this->_uuid);
-	memcpy(this->_uuid, "ea46019c-4c39-4838-b44d-6a990bbb4ae9", sizeof(this->_uuid));
+	memcpy(this->_uuid, uuid, sizeof(this->_uuid));
 	memset(this->_name, 0, sizeof(this->_name));
+
+	// setup conversation thread
+	this->conversation.get().setDeallocateCallback(_ChatroomMessageFree);
 }
 
 Chatroom::~Chatroom() {

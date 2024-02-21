@@ -33,8 +33,14 @@ int test_findingchatroom() {
 
 	int max = 2 << 16;
 	while (!result && max) {
+		char uuid0[kBFStringUUIDStringLength];
+		char uuid1[kBFStringUUIDStringLength];
+		
+		BFStringGetRandomUUIDString(uuid0);
+		BFStringGetRandomUUIDString(uuid1);
+
 		ChatDirectory cd;
-		Chatroom r0, r1;
+		Chatroom r0(uuid0), r1(uuid1);
 		cd.addChatroom(&r0);
 		cd.addChatroom(&r1);
 

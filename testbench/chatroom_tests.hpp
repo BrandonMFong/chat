@@ -20,8 +20,12 @@ using namespace BF;
 int test_chatroominit() {
 	UNIT_TEST_START;
 	int result = 0;
+	
+	char u[kBFStringUUIDStringLength];
+	
+	BFStringGetRandomUUIDString(u);
 
-	Chatroom chat;
+	Chatroom chat(u);
 
 	UNIT_TEST_END(!result, result);
 	return result;
@@ -33,7 +37,13 @@ int test_chatroomUUIDs() {
 
 	int max = 2 << 18;
 	while (!result && max) {
-		Chatroom a, b;
+		char uuid0[kBFStringUUIDStringLength];
+		char uuid1[kBFStringUUIDStringLength];
+		
+		BFStringGetRandomUUIDString(uuid0);
+		BFStringGetRandomUUIDString(uuid1);
+
+		Chatroom a(uuid0), b(uuid1);
 		if (!strcmp(a._uuid, b._uuid)) {
 			result = max;
 		}
