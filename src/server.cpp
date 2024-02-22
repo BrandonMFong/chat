@@ -27,10 +27,14 @@ const char Server::mode() const {
 	return SOCKET_MODE_SERVER;
 }
 
-void Server::init() {
+void Server::init(void * in) {
+	Server * s = (Server *) in;
+
+	BFRetain(s);
+
 	// create server socket similar to what was done in
     // client program
-    this->_mainSocket = socket(AF_INET, SOCK_STREAM, 0);
+    s->_mainSocket = socket(AF_INET, SOCK_STREAM, 0);
 
     // define server address
     struct sockaddr_in servAddr;
@@ -40,15 +44,17 @@ void Server::init() {
     servAddr.sin_addr.s_addr = INADDR_ANY;
 
     // bind socket to the specified IP and port
-    bind(this->_mainSocket, (struct sockaddr *) &servAddr, sizeof(servAddr));
+    bind(s->_mainSocket, (struct sockaddr *) &servAddr, sizeof(servAddr));
 
     // listen for connections
 	const int allowedConnections = 1;
-    listen(this->_mainSocket, allowedConnections);
+    listen(s->_mainSocket, allowedConnections);
 
-	this->_clientSocket = accept(this->_mainSocket, NULL, NULL);
+	s->_clientSocket = accept(s->_mainSocket, NULL, NULL);
 
-	this->startIOStreams();
+	s->startIOStreams();
+	
+	BFRelease(s);
 }
 
 const int Server::descriptor() const {
@@ -58,7 +64,8 @@ const int Server::descriptor() const {
 int Server::_start() {
 	LOG_WRITE("server start");
 
-	this->init();
+	BFThreadAsyncID tid = BFThreadAsync(Server::init, this);
+	BFThreadAsyncDestroy(tid);
 	
 	int error = 0;
 

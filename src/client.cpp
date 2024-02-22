@@ -26,8 +26,12 @@ const char Client::mode() const {
 	return SOCKET_MODE_CLIENT;
 }
 
-void Client::init() {
-	this->_mainSocket = socket(AF_INET, SOCK_STREAM, 0);
+void Client::init(void * in) {
+	Client * c = (Client *) in;
+
+	BFRetain(c);
+	
+	c->_mainSocket = socket(AF_INET, SOCK_STREAM, 0);
 
     struct sockaddr_in servAddr;
 
@@ -36,7 +40,7 @@ void Client::init() {
     servAddr.sin_addr.s_addr = INADDR_ANY;
 
     int connectStatus = connect(
-		this->_mainSocket,
+		c->_mainSocket,
 		(struct sockaddr *) &servAddr,
 		sizeof(servAddr)
 	);
@@ -44,8 +48,9 @@ void Client::init() {
     if (connectStatus == -1) {
         printf("Error... %d\n", errno);
     } else {
-		this->startIOStreams();
+		c->startIOStreams();
     }
+	BFRelease(c);
 }
 
 const int Client::descriptor() const {
@@ -54,8 +59,9 @@ const int Client::descriptor() const {
 
 int Client::_start() {
 	LOG_WRITE("client start");
-	this->init();
-
+	BFThreadAsyncID tid = BFThreadAsync(Client::init, this);
+	BFThreadAsyncDestroy(tid);
+	
 	int error = 0;
 	return error;
 }

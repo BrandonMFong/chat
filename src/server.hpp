@@ -20,7 +20,7 @@ public:
 	const int descriptor() const;
 
 protected:
-	void init();
+	static void init(void * in);
 	int _start();
 	int _stop();
 
