@@ -211,20 +211,14 @@ int Socket::start() {
 int Socket::stop() {
 	int error = 0;
 
-	if (!error) {
-		LOG_DEBUG("disconnecting the connections: %d", this->_connections.get().count());
-		this->_connections.lock();
-		for (int i = 0; i < this->_connections.unsafeget().count(); i++) {
-			shutdown(this->_connections.unsafeget()[i], SHUT_RDWR);
-			close(this->_connections.unsafeget()[i]);
-		}
-		this->_connections.unlock();
+	this->_connections.lock();
+	for (int i = 0; i < this->_connections.unsafeget().count(); i++) {
+		shutdown(this->_connections.unsafeget()[i], SHUT_RDWR);
+		close(this->_connections.unsafeget()[i]);
 	}
+	this->_connections.unlock();
 
-	if (!error) {
-		LOG_DEBUG("calling sub class' stop function");
-		error = this->_stop();
-	}
+	error = this->_stop();
 
 	if (!error && this->_tidin) {
 		error = BFThreadAsyncCancel(this->_tidin);
