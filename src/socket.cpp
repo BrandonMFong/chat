@@ -74,12 +74,6 @@ Socket * Socket::create(const char mode, int * err) {
 	return result;
 }
 
-class IOStreamTools : public Object {
-public:
-	int mainConnection;
-	Socket * socket;
-};
-
 void Socket::queueCallback(void * in) {
 	LOG_DEBUG("> %s", __func__);
 	Socket * skt = (Socket *) in;
@@ -110,9 +104,20 @@ void Socket::queueCallback(void * in) {
 	LOG_DEBUG("< %s", __func__);
 }
 
+/**
+ * used for inStream
+ *
+ * allows us to run dedicated threads for each socket connection
+ */
+class InStreamTools : public Object {
+public:
+	int mainConnection;
+	Socket * socket;
+};
+
 void Socket::inStream(void * in) {
 	LOG_DEBUG("> %s", __func__);
-	IOStreamTools * tools = (IOStreamTools *) in;
+	InStreamTools * tools = (InStreamTools *) in;
 	const int sd = tools->mainConnection;
 	Socket * skt = tools->socket;
 	BFThreadAsyncID tid = BFThreadAsyncGetID();
@@ -191,7 +196,7 @@ void Socket::outStream(void * in) {
 
 // called by subclasses whenever they get a new connection
 int Socket::startInStreamForConnection(int sd) {
-	IOStreamTools * tools = new IOStreamTools;
+	InStreamTools * tools = new InStreamTools;
 	tools->mainConnection = sd;
 	tools->socket = this;
 
