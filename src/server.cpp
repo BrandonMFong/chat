@@ -3,8 +3,8 @@
  * date: 1/24/24
  */
 
-#include <chat.h>
-#include <server.hpp>
+#include "chat.h"
+#include "server.hpp"
 #include <netinet/in.h> //structure for storing address information 
 #include <stdio.h> 
 #include <stdlib.h> 
@@ -12,14 +12,15 @@
 #include <sys/types.h> 
 #include <unistd.h>
 #include <bflibcpp/bflibcpp.hpp>
-#include <log.hpp>
+#include "log.hpp"
 
 Server::Server() : Socket() {
 	this->_mainSocket = 0;
+	this->_pollt = NULL;
 }
 
 Server::~Server() {
-
+	BFThreadAsyncDestroy(this->_pollt);
 }
 
 const char Server::mode() const {
@@ -46,14 +47,26 @@ void Server::init(void * in) {
     bind(s->_mainSocket, (struct sockaddr *) &servAddr, sizeof(servAddr));
 
     // listen for connections
-	const int allowedConnections = 1;
-    listen(s->_mainSocket, allowedConnections);
+    listen(s->_mainSocket, CHAT_ROOM_MAX_SIZE);
 
-	int csock = accept(s->_mainSocket, NULL, NULL);
+	// launch thread that will constantly accept multiple connections
+	s->_pollt = BFThreadAsync(Server::pollthread, s);
 
-	s->_connections.get().add(csock);
-	s->startInStreamForConnection(csock);
-	
+	BFRelease(s);
+}
+
+void Server::pollthread(void * in) {
+	Server * s = (Server *) in;
+	BFRetain(s);
+
+	while (!BFThreadAsyncIsCanceled(s->_pollt)) {
+		int csock = accept(s->_mainSocket, NULL, NULL);
+		LOG_DEBUG("new connection: %d", csock);
+
+		s->_connections.get().add(csock);
+		s->startInStreamForConnection(csock);
+	}
+
 	BFRelease(s);
 }
 
@@ -70,7 +83,13 @@ int Server::_start() {
 
 int Server::_stop() {
 	LOG_WRITE("server stop");
+	shutdown(this->_mainSocket, SHUT_RDWR);
 	close(this->_mainSocket);
+
+	// thread break down
+	BFThreadAsyncCancel(this->_pollt);
+	BFThreadAsyncWait(this->_pollt);
+
 	return 0;
 }
 

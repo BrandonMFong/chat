@@ -74,7 +74,7 @@ private:
 	static void outStream(void * in);
 
 	BFThreadAsyncID _tidin;
-	BFThreadAsyncID _tidinpop;
+	BFThreadAsyncID _tidq;
 	BFThreadAsyncID _tidout;
 
 	/**

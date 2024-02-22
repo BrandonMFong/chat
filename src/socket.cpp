@@ -29,7 +29,7 @@ Socket * Socket::shared() {
 
 Socket::Socket() { 
 	this->_tidin = NULL;
-	this->_tidinpop = NULL;
+	this->_tidq = NULL;
 	this->_tidout = NULL;
 
 	_sharedSocket = this;
@@ -38,7 +38,7 @@ Socket::Socket() {
 Socket::~Socket() {
 	LOG_DEBUG("socket destroyed");
 	BFThreadAsyncDestroy(this->_tidin);
-	BFThreadAsyncDestroy(this->_tidinpop);
+	BFThreadAsyncDestroy(this->_tidq);
 	BFThreadAsyncDestroy(this->_tidout);
 }
 
@@ -80,7 +80,7 @@ void Socket::queueCallback(void * in) {
 
 	BFRetain(skt);
 
-	while (!BFThreadAsyncIsCanceled(skt->_tidinpop)) {
+	while (!BFThreadAsyncIsCanceled(skt->_tidq)) {
 		skt->_inq.lock();
 		// if queue is not empty, send the next message
 		if (!skt->_inq.unsafeget().empty()) {
@@ -117,7 +117,7 @@ void Socket::inStream(void * in) {
 		Packet buf;
 		size_t bufsize = recv(sd, &buf, sizeof(Packet), 0);
         if (bufsize == -1) {
-			LOG_ERROR("%d", errno);
+			LOG_DEBUG("recv returned %d", errno);
 			break;
 		} else if (bufsize == 0) {
 			LOG_DEBUG("recv received 0");
@@ -149,7 +149,7 @@ void Socket::outStream(void * in) {
 
 	BFRetain(skt);
 
-	while (!BFThreadAsyncIsCanceled(skt->_tidinpop)) {
+	while (!BFThreadAsyncIsCanceled(skt->_tidq)) {
 		skt->_outq.lock();
 		// if queue is not empty, send the next message
 		if (!skt->_outq.unsafeget().empty()) {
@@ -204,7 +204,7 @@ int Socket::startInStreamForConnection(int sd) {
 int Socket::start() {
 	this->_start();
 
-	this->_tidinpop = BFThreadAsync(Socket::queueCallback, (void *) this);
+	this->_tidq = BFThreadAsync(Socket::queueCallback, (void *) this);
 
 	// out stream uses `send`
 	//
@@ -232,9 +232,9 @@ int Socket::stop() {
 		BFThreadAsyncWait(this->_tidin);
 	}
 
-	if (!error && this->_tidinpop) {
-		error = BFThreadAsyncCancel(this->_tidinpop);
-		BFThreadAsyncWait(this->_tidinpop);
+	if (!error && this->_tidq) {
+		error = BFThreadAsyncCancel(this->_tidq);
+		BFThreadAsyncWait(this->_tidq);
 	}
 
 	if (!error && this->_tidout) {

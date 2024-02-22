@@ -23,8 +23,16 @@ protected:
 	int _start();
 	int _stop();
 
+	static void pollthread(void * in);
+
 private:
 	int _mainSocket;
+
+	/**
+	 * polling thread that handles incoming connection
+	 * requests
+	 */
+	BFThreadAsyncID _pollt;
 };
 
 #endif // SERVER_HPP
