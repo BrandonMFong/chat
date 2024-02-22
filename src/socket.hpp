@@ -7,6 +7,7 @@
 #define SOCKET_HPP
 
 #include <bflibcpp/queue.hpp>
+#include <bflibcpp/list.hpp>
 #include <bflibcpp/atomic.hpp>
 #include <bflibcpp/object.hpp>
 #include <bflibcpp/array.hpp>
@@ -73,7 +74,7 @@ private:
 	 */
 	static void outStream(void * in);
 
-	BFThreadAsyncID _tidin;
+	BF::Atomic<BF::List<BFThreadAsyncID>> _tidin;
 	BFThreadAsyncID _tidq;
 	BFThreadAsyncID _tidout;
 

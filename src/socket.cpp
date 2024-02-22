@@ -28,7 +28,6 @@ Socket * Socket::shared() {
 }
 
 Socket::Socket() { 
-	this->_tidin = NULL;
 	this->_tidq = NULL;
 	this->_tidout = NULL;
 
@@ -37,7 +36,14 @@ Socket::Socket() {
 
 Socket::~Socket() {
 	LOG_DEBUG("socket destroyed");
-	BFThreadAsyncDestroy(this->_tidin);
+	
+	this->_tidin.lock();
+	List<BFThreadAsyncID>::Node * n = this->_tidin.unsafeget().first();
+	for (; n != NULL; n = n->next()) {
+		BFThreadAsyncDestroy(n->object());
+	}
+	this->_tidin.unlock();
+
 	BFThreadAsyncDestroy(this->_tidq);
 	BFThreadAsyncDestroy(this->_tidout);
 }
@@ -109,11 +115,12 @@ void Socket::inStream(void * in) {
 	IOStreamTools * tools = (IOStreamTools *) in;
 	const int sd = tools->mainConnection;
 	Socket * skt = tools->socket;
+	BFThreadAsyncID tid = BFThreadAsyncGetID();
 
 	BFRetain(tools);
 	BFRetain(skt);
 	
-	while (!BFThreadAsyncIsCanceled(skt->_tidin)) {
+	while (!BFThreadAsyncIsCanceled(tid)) {
 		Packet buf;
 		size_t bufsize = recv(sd, &buf, sizeof(Packet), 0);
         if (bufsize == -1) {
@@ -188,7 +195,8 @@ int Socket::startInStreamForConnection(int sd) {
 	tools->mainConnection = sd;
 	tools->socket = this;
 
-	this->_tidin = BFThreadAsync(Socket::inStream, (void *) tools);
+	BFThreadAsyncID tid = BFThreadAsync(Socket::inStream, (void *) tools);
+	this->_tidin.get().add(tid);
 
 	// wait for at leat one of the threads to run
 	// so they can retain the io stream tools
@@ -227,9 +235,18 @@ int Socket::stop() {
 
 	error = this->_stop();
 
-	if (!error && this->_tidin) {
-		error = BFThreadAsyncCancel(this->_tidin);
-		BFThreadAsyncWait(this->_tidin);
+	if (!error) {
+		this->_tidin.lock();
+		List<BFThreadAsyncID>::Node * n = this->_tidin.unsafeget().first();
+		for (; n != NULL; n = n->next()) {
+			error = BFThreadAsyncCancel(n->object());
+			BFThreadAsyncWait(n->object());
+			if (error) {
+				LOG_DEBUG("error code for cancel attempt: %d", error);
+				break;
+			}
+		}
+		this->_tidin.unlock();
 	}
 
 	if (!error && this->_tidq) {
