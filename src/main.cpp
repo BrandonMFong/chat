@@ -61,11 +61,14 @@ int main(int argc, char * argv[]) {
 	char mode = 0;
 	Socket * skt = NULL;
 
-	LOG_OPEN;
+	result = ArgumentsRead(argc, argv, &mode);
+
+	if (mode == SOCKET_MODE_CLIENT) {
+		LOG_OPEN;
+	}
 
 	LOG_DEBUG("============ App started ============");
 
-	result = ArgumentsRead(argc, argv, &mode);
 	if (!result) {
 		skt = Socket::create(mode, &result);
 	}

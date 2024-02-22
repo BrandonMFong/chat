@@ -43,6 +43,8 @@ Chatroom * ChatDirectory::getChatroom(const char * chatroomuuid) {
 }
 
 void ChatDirectory::addChatroom(Chatroom * room) {
+	LOG_DEBUG("> %s", __func__);
 	this->_chatrooms.get().add(room);
+	LOG_DEBUG("< %s", __func__);
 }
 

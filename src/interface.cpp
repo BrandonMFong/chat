@@ -44,6 +44,7 @@ void InterfaceDisplayWindowUpdateThread(void * in) {
 	int error = 0;
 	const BFThreadAsyncID tid = BFThreadAsyncGetID();
 
+	LOG_DEBUG("> %s", __func__);
 	while (BFThreadAsyncIDIsValid(tid) && !BFThreadAsyncIsCanceled(tid)) {
 		chatroom->updateConversation.lock();
 		if (chatroom->updateConversation.unsafeget()) {
@@ -70,6 +71,7 @@ void InterfaceDisplayWindowUpdateThread(void * in) {
 
 			wrefresh(displayWin);
 			
+			LOG_DEBUG("%s:%d updating conversation", __func__, __LINE__);
 			chatroom->updateConversation.unsafeset(false);
 
 			BFLockUnlock(&winlock);
@@ -77,6 +79,7 @@ void InterfaceDisplayWindowUpdateThread(void * in) {
 		}
 		chatroom->updateConversation.unlock();
 	}
+	LOG_DEBUG("< %s", __func__);
 }
 
 int InterfaceWindowCreateModeCommand() {
@@ -101,6 +104,7 @@ int InterfaceWindowCreateModeCommand() {
 	keypad(inputWin, true); // Enable special keys in input window
 	nodelay(inputWin, false); // Set blocking input for input window
 
+	LOG_DEBUG("%s:%d updating conversation", __func__, __LINE__);
 	chatroom->updateConversation = true;
 
 	BFLockUnlock(&winlock);
@@ -222,6 +226,7 @@ int InterfaceWindowLoop() {
 
 					// change to edit mode
 					InterfaceWindowCreateModeEdit();
+					LOG_DEBUG("%s:%d updating conversation", __func__, __LINE__);
 					chatroom->updateConversation = true;
 				} else {
 					LOG_DEBUG("unknown: '%s'", userInput.cString());
@@ -269,15 +274,11 @@ int InterfaceGatherUserData() {
 
 	currentuser->setUsername(username);
 
-	// set up chat room name
-	chatroom = new Chatroom("ea46019c-4c39-4838-b44d-6a990bbb4ae9");
-	chatroom->setName("mychatroom");
-	ChatDirectory::shared()->addChatroom(chatroom);
-	
 	return 0;
 }
 
 int InterfaceLobbyRun() {
+	LOG_DEBUG("> %s", __func__);
 	// set up chat room name
 	char chatroomname[CHAT_ROOM_NAME_SIZE];
 	chatroom = new Chatroom("ea46019c-4c39-4838-b44d-6a990bbb4ae9");
@@ -291,6 +292,7 @@ int InterfaceLobbyRun() {
 	
 	chatroom->setName(chatroomname);
 	ChatDirectory::shared()->addChatroom(chatroom);
+	LOG_DEBUG("< %s", __func__);
 	
 	return 0;
 }

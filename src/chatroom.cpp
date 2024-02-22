@@ -14,6 +14,7 @@ void _ChatroomMessageFree(Message * m) {
 }
 
 Chatroom::Chatroom(const char * uuid) : Object() {
+	LOG_DEBUG("new chatroom");
 	this->updateConversation = false;
 	BFStringGetRandomUUIDString(this->_uuid);
 	memcpy(this->_uuid, uuid, sizeof(this->_uuid));
@@ -33,7 +34,10 @@ int Chatroom::addMessage(const Message * msg) {
 	LOG_DEBUG("adding message: %s", m->buf);
 	this->conversation.get().add(m);
 
+	LOG_DEBUG("%s:%d updating conversation", __func__, __LINE__);
 	this->updateConversation = true;
+
+	LOG_DEBUG("leaving %s, update = %d", __func__, this->updateConversation.get());
 	return 0;
 }
 
