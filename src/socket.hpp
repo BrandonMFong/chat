@@ -49,7 +49,7 @@ protected:
 	 *
 	 * 'sd' : socket descriptor
 	 */
-	int startIOStreamsForConnection(int sd);
+	int startInStreamForConnection(int sd);
 
 	/**
 	 * array of devices we are connected to

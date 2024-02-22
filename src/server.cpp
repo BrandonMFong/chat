@@ -52,8 +52,7 @@ void Server::init(void * in) {
 	int csock = accept(s->_mainSocket, NULL, NULL);
 
 	s->_connections.get().add(csock);
-	s->startIOStreamsForConnection(csock);
-
+	s->startInStreamForConnection(csock);
 	
 	BFRelease(s);
 }

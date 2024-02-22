@@ -145,11 +145,8 @@ void Socket::inStream(void * in) {
 
 void Socket::outStream(void * in) {
 	LOG_DEBUG("> %s", __func__);
-	IOStreamTools * tools = (IOStreamTools *) in;
-	const int sd = tools->mainConnection;
-	Socket * skt = tools->socket;
+	Socket * skt = (Socket *) in;
 
-	BFRetain(tools);
 	BFRetain(skt);
 
 	while (!BFThreadAsyncIsCanceled(skt->_tidinpop)) {
@@ -169,8 +166,12 @@ void Socket::outStream(void * in) {
 			// pop queue
 			skt->_outq.unsafeget().pop();
 
-			// send buf from message
-			send(sd, p, sizeof(Packet), 0);
+			// send buf from message to each connection
+			skt->_connections.lock();
+			for (int i = 0; i < skt->_connections.unsafeget().count(); i++) {
+				send(skt->_connections.unsafeget()[i], p, sizeof(Packet), 0);
+			}
+			skt->_connections.unlock();
 
 			PACKET_FREE(p);
 		}
@@ -178,16 +179,16 @@ void Socket::outStream(void * in) {
 	}
 
 	BFRelease(skt);
-	BFRelease(tools);
 	LOG_DEBUG("< %s", __func__);
 }
 
-int Socket::startIOStreamsForConnection(int sd) {
+// called by subclasses whenever they get a new connection
+int Socket::startInStreamForConnection(int sd) {
 	IOStreamTools * tools = new IOStreamTools;
 	tools->mainConnection = sd;
 	tools->socket = this;
+
 	this->_tidin = BFThreadAsync(Socket::inStream, (void *) tools);
-	this->_tidout = BFThreadAsync(Socket::outStream, (void *) tools);
 
 	// wait for at leat one of the threads to run
 	// so they can retain the io stream tools
@@ -204,6 +205,12 @@ int Socket::start() {
 	this->_start();
 
 	this->_tidinpop = BFThreadAsync(Socket::queueCallback, (void *) this);
+
+	// out stream uses `send`
+	//
+	// we can use this object and iterate through the connections
+	// array to send the same packet at the top of the queue
+	this->_tidout = BFThreadAsync(Socket::outStream, (void *) this);
 
 	return 0;
 }
