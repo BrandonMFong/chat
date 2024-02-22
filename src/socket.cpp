@@ -78,10 +78,8 @@ public:
 
 void Socket::queueCallback(void * in) {
 	LOG_DEBUG("> %s", __func__);
-	IOStreamTools * tools = (IOStreamTools *) in;
-	Socket * skt = tools->socket;
+	Socket * skt = (Socket *) in;
 
-	BFRetain(tools);
 	BFRetain(skt);
 
 	while (!BFThreadAsyncIsCanceled(skt->_tidinpop)) {
@@ -107,7 +105,6 @@ void Socket::queueCallback(void * in) {
 	}
 
 	BFRelease(skt);
-	BFRelease(tools);
 
 	LOG_DEBUG("< %s", __func__);
 }
@@ -200,7 +197,6 @@ int Socket::startIOStreamsForConnection(int sd) {
 	IOStreamTools * tools = new IOStreamTools;
 	tools->mainConnection = sd;
 	tools->socket = this;
-	this->_tidinpop = BFThreadAsync(Socket::queueCallback, (void *) tools);
 	this->_tidin = BFThreadAsync(Socket::inStream, (void *) tools);
 	this->_tidout = BFThreadAsync(Socket::outStream, (void *) tools);
 
@@ -217,6 +213,9 @@ int Socket::startIOStreamsForConnection(int sd) {
 
 int Socket::start() {
 	this->_start();
+
+	this->_tidinpop = BFThreadAsync(Socket::queueCallback, (void *) this);
+
 	return 0;
 }
 
