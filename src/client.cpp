@@ -48,7 +48,7 @@ void Client::init(void * in) {
         printf("Error... %d\n", errno);
     } else {
 		c->_connections.get().add(sock);
-		c->startIOStreams();
+		c->startIOStreamsForConnection(sock);
     }
 	BFRelease(c);
 }

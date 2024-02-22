@@ -16,7 +16,6 @@
 
 Server::Server() : Socket() {
 	this->_mainSocket = 0;
-	this->_clientSocket = 0;
 }
 
 Server::~Server() {
@@ -50,15 +49,13 @@ void Server::init(void * in) {
 	const int allowedConnections = 1;
     listen(s->_mainSocket, allowedConnections);
 
-	s->_clientSocket = accept(s->_mainSocket, NULL, NULL);
+	int csock = accept(s->_mainSocket, NULL, NULL);
 
-	s->startIOStreams();
+	s->_connections.get().add(csock);
+	s->startIOStreamsForConnection(csock);
+
 	
 	BFRelease(s);
-}
-
-const int Server::descriptor() const {
-	return this->_clientSocket;
 }
 
 int Server::_start() {
@@ -74,8 +71,6 @@ int Server::_start() {
 
 int Server::_stop() {
 	LOG_WRITE("server stop");
-	shutdown(this->_clientSocket, SHUT_RDWR);
-	close(this->_clientSocket);
 	close(this->_mainSocket);
 	return 0;
 }

@@ -46,8 +46,10 @@ protected:
 
 	/**
 	 * clients must call this function at the end of _start()
+	 *
+	 * 'sd' : socket descriptor
 	 */
-	int startIOStreams();
+	int startIOStreamsForConnection(int sd);
 
 	/**
 	 * array of devices we are connected to

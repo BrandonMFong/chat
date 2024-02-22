@@ -70,10 +70,18 @@ Socket * Socket::create(const char mode, int * err) {
 	return result;
 }
 
+class IOStreamTools : public Object {
+public:
+	int mainConnection;
+	Socket * socket;
+};
+
 void Socket::queueCallback(void * in) {
 	LOG_DEBUG("> %s", __func__);
-	Socket * skt = (Socket *) in;
+	IOStreamTools * tools = (IOStreamTools *) in;
+	Socket * skt = tools->socket;
 
+	BFRetain(tools);
 	BFRetain(skt);
 
 	while (!BFThreadAsyncIsCanceled(skt->_tidinpop)) {
@@ -99,20 +107,18 @@ void Socket::queueCallback(void * in) {
 	}
 
 	BFRelease(skt);
+	BFRelease(tools);
 
 	LOG_DEBUG("< %s", __func__);
 }
 
-class IOStreamTools : public Object {
-public:
-	int mainConnection;
-	Socket * socket;
-};
-
 void Socket::inStream(void * in) {
 	LOG_DEBUG("> %s", __func__);
-	Socket * skt = (Socket *) in;
+	IOStreamTools * tools = (IOStreamTools *) in;
+	const int sd = tools->mainConnection;
+	Socket * skt = tools->socket;
 
+	BFRetain(tools);
 	BFRetain(skt);
 	
 	while (!BFThreadAsyncIsCanceled(skt->_tidin)) {
@@ -120,7 +126,7 @@ void Socket::inStream(void * in) {
 			break;
 
 		Packet buf;
-		size_t bufsize = recv(skt->descriptor(), &buf, sizeof(Packet), 0);
+		size_t bufsize = recv(sd, &buf, sizeof(Packet), 0);
         if (bufsize == -1) {
 			LOG_ERROR("%d", errno);
 			break;
@@ -143,13 +149,18 @@ void Socket::inStream(void * in) {
 	}
 
 	BFRelease(skt);
+	BFRelease(tools);
+
 	LOG_DEBUG("< %s", __func__);
 }
 
 void Socket::outStream(void * in) {
 	LOG_DEBUG("> %s", __func__);
-	Socket * skt = (Socket *) in;
+	IOStreamTools * tools = (IOStreamTools *) in;
+	const int sd = tools->mainConnection;
+	Socket * skt = tools->socket;
 
+	BFRetain(tools);
 	BFRetain(skt);
 
 	while (!BFThreadAsyncIsCanceled(skt->_tidinpop)) {
@@ -173,7 +184,7 @@ void Socket::outStream(void * in) {
 			skt->_outq.unsafeget().pop();
 
 			// send buf from message
-			send(skt->descriptor(), p, sizeof(Packet), 0);
+			send(sd, p, sizeof(Packet), 0);
 
 			PACKET_FREE(p);
 		}
@@ -181,16 +192,25 @@ void Socket::outStream(void * in) {
 	}
 
 	BFRelease(skt);
+	BFRelease(tools);
 	LOG_DEBUG("< %s", __func__);
 }
 
-int Socket::startIOStreams() {
+int Socket::startIOStreamsForConnection(int sd) {
 	IOStreamTools * tools = new IOStreamTools;
-	tools->mainConnection = 0;
+	tools->mainConnection = sd;
 	tools->socket = this;
-	this->_tidinpop = BFThreadAsync(Socket::queueCallback, (void *) this);
-	this->_tidin = BFThreadAsync(Socket::inStream, (void *) this);
-	this->_tidout = BFThreadAsync(Socket::outStream, (void *) this);
+	this->_tidinpop = BFThreadAsync(Socket::queueCallback, (void *) tools);
+	this->_tidin = BFThreadAsync(Socket::inStream, (void *) tools);
+	this->_tidout = BFThreadAsync(Socket::outStream, (void *) tools);
+
+	// wait for at leat one of the threads to run
+	// so they can retain the io stream tools
+	//
+	// we want to make sure we release tools 
+	// in the right time
+	while (Object::retainCount(tools) < 2) {}
+	BFRelease(tools);
 
 	return 0;
 }
@@ -201,7 +221,22 @@ int Socket::start() {
 }
 
 int Socket::stop() {
-	int error = this->_stop();
+	int error = 0;
+
+	if (!error) {
+		LOG_DEBUG("disconnecting the connections: %d", this->_connections.get().count());
+		this->_connections.lock();
+		for (int i = 0; i < this->_connections.unsafeget().count(); i++) {
+			shutdown(this->_connections.unsafeget()[i], SHUT_RDWR);
+			close(this->_connections.unsafeget()[i]);
+		}
+		this->_connections.unlock();
+	}
+
+	if (!error) {
+		LOG_DEBUG("calling sub class' stop function");
+		error = this->_stop();
+	}
 
 	if (!error && this->_tidin) {
 		error = BFThreadAsyncCancel(this->_tidin);
@@ -216,15 +251,6 @@ int Socket::stop() {
 	if (!error && this->_tidout) {
 		error = BFThreadAsyncCancel(this->_tidout);
 		BFThreadAsyncWait(this->_tidout);
-	}
-
-	if (!error) {
-		this->_connections.lock();
-		for (int i = 0; i < this->_connections.unsafeget().count(); i++) {
-			shutdown(this->_connections.unsafeget()[i], SHUT_RDWR);
-			close(this->_connections.unsafeget()[i]);
-		}
-		this->_connections.unlock();
 	}
 
 	return error;

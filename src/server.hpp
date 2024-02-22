@@ -17,7 +17,6 @@ public:
 	Server();
 	virtual ~Server();
 	const char mode() const;
-	const int descriptor() const;
 
 protected:
 	static void init(void * in);
@@ -26,7 +25,6 @@ protected:
 
 private:
 	int _mainSocket;
-	int _clientSocket;
 };
 
 #endif // SERVER_HPP
