@@ -9,6 +9,7 @@
 #include <bflibcpp/queue.hpp>
 #include <bflibcpp/atomic.hpp>
 #include <bflibcpp/object.hpp>
+#include <bflibcpp/array.hpp>
 #include <typepacket.h>
 
 extern "C" {
@@ -35,8 +36,6 @@ public:
 	 */
 	int sendPacket(const Packet * packet);
 
-	virtual const int descriptor() const = 0;
-
 protected:
 	Socket();
 
@@ -49,6 +48,11 @@ protected:
 	 * clients must call this function at the end of _start()
 	 */
 	int startIOStreams();
+
+	/**
+	 * array of devices we are connected to
+	 */
+	BF::Atomic<BF::Array<int>> _connections;
 
 private:
 

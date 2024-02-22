@@ -19,6 +19,8 @@
 #include <bflibcpp/bflibcpp.hpp>
 #include <bflibc/bflibc.h>
 
+using namespace BF;
+
 Socket * _sharedSocket = NULL;
 
 Socket * Socket::shared() {
@@ -101,6 +103,12 @@ void Socket::queueCallback(void * in) {
 	LOG_DEBUG("< %s", __func__);
 }
 
+class IOStreamTools : public Object {
+public:
+	int mainConnection;
+	Socket * socket;
+};
+
 void Socket::inStream(void * in) {
 	LOG_DEBUG("> %s", __func__);
 	Socket * skt = (Socket *) in;
@@ -177,6 +185,9 @@ void Socket::outStream(void * in) {
 }
 
 int Socket::startIOStreams() {
+	IOStreamTools * tools = new IOStreamTools;
+	tools->mainConnection = 0;
+	tools->socket = this;
 	this->_tidinpop = BFThreadAsync(Socket::queueCallback, (void *) this);
 	this->_tidin = BFThreadAsync(Socket::inStream, (void *) this);
 	this->_tidout = BFThreadAsync(Socket::outStream, (void *) this);
@@ -205,6 +216,15 @@ int Socket::stop() {
 	if (!error && this->_tidout) {
 		error = BFThreadAsyncCancel(this->_tidout);
 		BFThreadAsyncWait(this->_tidout);
+	}
+
+	if (!error) {
+		this->_connections.lock();
+		for (int i = 0; i < this->_connections.unsafeget().count(); i++) {
+			shutdown(this->_connections.unsafeget()[i], SHUT_RDWR);
+			close(this->_connections.unsafeget()[i]);
+		}
+		this->_connections.unlock();
 	}
 
 	return error;

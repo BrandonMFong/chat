@@ -15,11 +15,9 @@
 #include <log.hpp>
 
 Client::Client() {
-	this->_mainSocket = 0;
 }
 
 Client::~Client() {
-
 }
 
 const char Client::mode() const {
@@ -30,8 +28,9 @@ void Client::init(void * in) {
 	Client * c = (Client *) in;
 
 	BFRetain(c);
-	
-	c->_mainSocket = socket(AF_INET, SOCK_STREAM, 0);
+
+	int sock = 0;	
+	sock = socket(AF_INET, SOCK_STREAM, 0);
 
     struct sockaddr_in servAddr;
 
@@ -40,7 +39,7 @@ void Client::init(void * in) {
     servAddr.sin_addr.s_addr = INADDR_ANY;
 
     int connectStatus = connect(
-		c->_mainSocket,
+		sock,
 		(struct sockaddr *) &servAddr,
 		sizeof(servAddr)
 	);
@@ -48,13 +47,10 @@ void Client::init(void * in) {
     if (connectStatus == -1) {
         printf("Error... %d\n", errno);
     } else {
+		c->_connections.get().add(sock);
 		c->startIOStreams();
     }
 	BFRelease(c);
-}
-
-const int Client::descriptor() const {
-	return this->_mainSocket;
 }
 
 int Client::_start() {
@@ -68,8 +64,6 @@ int Client::_start() {
 
 int Client::_stop() {
 	LOG_WRITE("client stop");
-	shutdown(this->_mainSocket, SHUT_RDWR);
-	close(this->_mainSocket);
 	return 0;
 }
 

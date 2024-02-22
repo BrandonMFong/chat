@@ -23,7 +23,6 @@ protected:
 	int _start();
 	int _stop();
 private:
-	int _mainSocket;
 };
 
 #endif // CLIENT_HPP
