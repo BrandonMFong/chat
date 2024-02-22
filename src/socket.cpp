@@ -32,8 +32,6 @@ Socket::Socket() {
 	this->_tidinpop = NULL;
 	this->_tidout = NULL;
 
-	this->_stopStreams = false;
-
 	_sharedSocket = this;
 }
 
@@ -83,9 +81,6 @@ void Socket::queueCallback(void * in) {
 	BFRetain(skt);
 
 	while (!BFThreadAsyncIsCanceled(skt->_tidinpop)) {
-		if (skt->_stopStreams.get())
-			break;
-
 		skt->_inq.lock();
 		// if queue is not empty, send the next message
 		if (!skt->_inq.unsafeget().empty()) {
@@ -119,9 +114,6 @@ void Socket::inStream(void * in) {
 	BFRetain(skt);
 	
 	while (!BFThreadAsyncIsCanceled(skt->_tidin)) {
-		if (skt->_stopStreams.get())
-			break;
-
 		Packet buf;
 		size_t bufsize = recv(sd, &buf, sizeof(Packet), 0);
         if (bufsize == -1) {
@@ -161,9 +153,6 @@ void Socket::outStream(void * in) {
 	BFRetain(skt);
 
 	while (!BFThreadAsyncIsCanceled(skt->_tidinpop)) {
-		if (skt->_stopStreams.get())
-			break;
-
 		skt->_outq.lock();
 		// if queue is not empty, send the next message
 		if (!skt->_outq.unsafeget().empty()) {

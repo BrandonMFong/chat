@@ -78,12 +78,6 @@ private:
 	BFThreadAsyncID _tidout;
 
 	/**
-	 * flags to all the stream threads whether
-	 * the caller wants it to stop running
-	 */
-	BF::Atomic<bool> _stopStreams;
-
-	/**
 	 * queues incoming data from recv
 	 */	
 	BF::Atomic<BF::Queue<Packet *>> _inq;
