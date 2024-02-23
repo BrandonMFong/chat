@@ -44,9 +44,16 @@ void Client::init(void * in) {
 		sizeof(servAddr)
 	);
 
+	int err = 0;
     if (connectStatus == -1) {
-        printf("Error... %d\n", errno);
+		err = errno;
+        printf("Error... %d\n", err);
     } else {
+		if (c->_cbnewconn)
+			err = c->_cbnewconn(sock);
+	}
+
+	if (!err) {
 		c->_connections.get().add(sock);
 		c->startInStreamForConnection(sock);
     }
