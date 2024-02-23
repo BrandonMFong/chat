@@ -5,6 +5,7 @@
 
 #include "chat.h"
 #include "server.hpp"
+#include "investigate.hpp"
 #include <netinet/in.h> //structure for storing address information 
 #include <stdio.h> 
 #include <stdlib.h> 
@@ -63,8 +64,14 @@ void Server::pollthread(void * in) {
 		int csock = accept(s->_mainSocket, NULL, NULL);
 		LOG_DEBUG("new connection: %d", csock);
 
-		s->_connections.get().add(csock);
-		s->startInStreamForConnection(csock);
+		int err = Investigate::NewConnection(csock);
+
+		// if there are no errors with connection then
+		// we will add it to our connections list
+		if (!err) {
+			s->_connections.get().add(csock);
+			s->startInStreamForConnection(csock);
+		}
 	}
 
 	BFRelease(s);
