@@ -22,7 +22,6 @@
 
 LOG_INIT
 User * curruser = 0;
-ChatDirectory chatDirectory;
 
 void Help(const char * toolname) {
 	printf("usage: %s\n", toolname);

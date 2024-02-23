@@ -277,7 +277,7 @@ int InterfaceLobbyRun() {
 	}
 	
 	chatroom->setName(chatroomname);
-	ChatDirectory::shared()->addChatroom(chatroom);
+	ChatDirectoryAddChatroom(chatroom);
 	
 	return 0;
 }

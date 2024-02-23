@@ -28,7 +28,7 @@ void Office::PacketReceive(const void * buf, size_t size) {
 		return;
 	}
 
-	Chatroom * chatroom = ChatDirectory::shared()->getChatroom(m->chatuuid());
+	Chatroom * chatroom = ChatDirectoryGetChatroom(m->chatuuid());
 	if (!chatroom) {
 		LOG_DEBUG("chatroom not available");
 		return;

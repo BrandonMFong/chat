@@ -10,24 +10,16 @@
 
 using namespace BF;
 
-ChatDirectory * _sharedChatDir = NULL;
+Atomic<List<Chatroom *>> chatrooms;
 
-ChatDirectory * ChatDirectory::shared() {
-	return _sharedChatDir;
+int ChatDirectoryCount() {
+	return chatrooms.get().count();
 }
 
-ChatDirectory::ChatDirectory() : Object() {
-	_sharedChatDir = this;
-}
-
-ChatDirectory::~ChatDirectory() {
-
-}
-
-Chatroom * ChatDirectory::getChatroom(const char * chatroomuuid) {
+Chatroom * ChatDirectoryGetChatroom(const char * chatroomuuid) {
 	Chatroom * room = NULL;
-	this->_chatrooms.lock();
-	List<Chatroom *>::Node * n = this->_chatrooms.unsafeget().first();
+	chatrooms.lock();
+	List<Chatroom *>::Node * n = chatrooms.unsafeget().first();
 	for (; n != NULL; n = n->next()) {
 		Chatroom * troom = n->object();
 		if (!BFStringCompareUUID(troom->uuid(), chatroomuuid)) {
@@ -35,12 +27,12 @@ Chatroom * ChatDirectory::getChatroom(const char * chatroomuuid) {
 			break;
 		}
 	}
-	this->_chatrooms.unlock();
+	chatrooms.unlock();
 
 	return room;
 }
 
-void ChatDirectory::addChatroom(Chatroom * room) {
-	this->_chatrooms.get().add(room);
+void ChatDirectoryAddChatroom(Chatroom * room) {
+	chatrooms.get().add(room);
 }
 

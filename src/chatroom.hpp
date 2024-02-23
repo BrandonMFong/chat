@@ -24,6 +24,7 @@ class Message;
  */
 class Chatroom : public BF::Object {
 public:
+	
 	/**
 	 * inits chatroom with uuid
 	 */
