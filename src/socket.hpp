@@ -73,7 +73,7 @@ private:
 	 * call back that gets called in `queueCallback` when it
 	 * pops data from in q
 	 */
-	void (* _callback)(const void * buf, size_t size);
+	void (* _cbinstream)(const void * buf, size_t size);
 
 	/**
 	 * receives packets and puts them in a queue
