@@ -128,12 +128,11 @@ public:
 
 void Socket::inStream(void * in) {
 	LOG_DEBUG("> %s", __func__);
-	InStreamTools * tools = (InStreamTools *) in;
+	InStreamTools * tools = (InStreamTools *) in; // we own memory
 	const int sd = tools->mainConnection;
 	Socket * skt = tools->socket;
 	BFThreadAsyncID tid = BFThreadAsyncGetID();
 
-	BFRetain(tools);
 	BFRetain(skt);
 	
 	while (!BFThreadAsyncIsCanceled(tid)) {
@@ -161,7 +160,7 @@ void Socket::inStream(void * in) {
 	}
 
 	BFRelease(skt);
-	BFRelease(tools);
+	Delete(tools);
 
 	LOG_DEBUG("< %s", __func__);
 }
@@ -213,14 +212,6 @@ int Socket::startInStreamForConnection(int sd) {
 
 	BFThreadAsyncID tid = BFThreadAsync(Socket::inStream, (void *) tools);
 	this->_tidin.get().add(tid);
-
-	// wait for at leat one of the threads to run
-	// so they can retain the io stream tools
-	//
-	// we want to make sure we release tools 
-	// in the right time
-	while (Object::retainCount(tools) < 2) {}
-	BFRelease(tools);
 
 	return 0;
 }
