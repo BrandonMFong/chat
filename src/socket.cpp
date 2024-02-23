@@ -34,6 +34,8 @@ Socket::Socket() {
 	this->_cbinstream = NULL;
 	this->_cbnewconn = NULL;
 
+	this->_bufferSize = 0;
+
 	_sharedSocket = this;
 }
 
@@ -77,6 +79,10 @@ Socket * Socket::create(const char mode, int * err) {
 	return result;
 }
 
+void Socket::setBufferSize(size_t size) {
+	this->_bufferSize = size;
+}
+
 void Socket::setNewConnectionCallback(int (* cb)(int descriptor)) {
 	this->_cbnewconn = cb;
 }
@@ -96,16 +102,18 @@ void Socket::queueCallback(void * in) {
 		// if queue is not empty, send the next message
 		if (!skt->_inq.unsafeget().empty()) {
 			// get first message
-			Packet * p = skt->_inq.unsafeget().front();
+			struct Socket::Buffer * buf = skt->_inq.unsafeget().front();
 
-			if (p) {
-				skt->_cbinstream(p, 0);
+			if (buf) {
+				skt->_cbinstream(buf->data, buf->size);
 			}
 
 			// pop queue
 			skt->_inq.unsafeget().pop();
 
-			PACKET_FREE(p);
+			BFFree(buf->data);
+			LOG_DEBUG("deleting memory at %x", buf);
+			BFFree(buf);
 		}
 		skt->_inq.unlock();
 	}
@@ -136,27 +144,30 @@ void Socket::inStream(void * in) {
 	BFRetain(skt);
 	
 	while (!BFThreadAsyncIsCanceled(tid)) {
-		Packet buf;
-		size_t bufsize = recv(sd, &buf, sizeof(Packet), 0);
-        if (bufsize == -1) {
-			LOG_DEBUG("recv returned %d", errno);
-			break;
-		} else if (bufsize == 0) {
+		// create buffer
+		struct Socket::Buffer * buf = (struct Socket::Buffer *) malloc(sizeof(struct Socket::Buffer));
+		LOG_DEBUG("created memory at %x", buf);
+		buf->data = malloc(skt->_bufferSize);
+
+		// receive data from connections using buffer
+		buf->size = recv(sd, buf->data, skt->_bufferSize, 0);
+
+		int err = 0;
+        if (buf->size == -1) {
+			err = errno;
+			LOG_DEBUG("recv returned %d", err);
+		} else if (buf->size == 0) {
 			LOG_DEBUG("recv received 0");
-			break;
+			err = -1;
 		}
 
-		Packet * p = PACKET_ALLOC;
-		memcpy(p, &buf, sizeof(Packet));
-		
-		LOG_DEBUG("incoming {packet = {message = {%f, \"%s\", \"%s\", \"%s\"}}}",
-			p->payload.message.time,
-			p->payload.message.username,
-			p->payload.message.chatuuid,
-			p->payload.message.buf
-		);
-
-		skt->_inq.get().push(p);
+		if (!err) {
+			skt->_inq.get().push(buf);
+		} else {
+			BFFree(buf->data);
+			BFFree(buf);
+			break;
+		}
 	}
 
 	BFRelease(skt);
@@ -175,33 +186,44 @@ void Socket::outStream(void * in) {
 		skt->_outq.lock();
 		// if queue is not empty, send the next message
 		if (!skt->_outq.unsafeget().empty()) {
-			// get first message
-			Packet * p = skt->_outq.unsafeget().front();
+			// get top data
+			struct Socket::Buffer * buf = skt->_outq.unsafeget().front();
 
-			LOG_DEBUG("outgoing {packet = {message = {%f, \"%s\", \"%s\", \"%s\"}}}",
-				p->payload.message.time,
-				p->payload.message.username,
-				p->payload.message.chatuuid,
-				p->payload.message.buf
-			);
-
-			// pop queue
+			// pop data from queue
 			skt->_outq.unsafeget().pop();
 
-			// send buf from message to each connection
+			// send buf to each connection
 			skt->_connections.lock();
 			for (int i = 0; i < skt->_connections.unsafeget().count(); i++) {
-				send(skt->_connections.unsafeget()[i], p, sizeof(Packet), 0);
+				send(skt->_connections.unsafeget()[i], buf->data, buf->size, 0);
 			}
 			skt->_connections.unlock();
 
-			PACKET_FREE(p);
+			BFFree(buf->data);
+			BFFree(buf);
 		}
 		skt->_outq.unlock();
 	}
 
 	BFRelease(skt);
 	LOG_DEBUG("< %s", __func__);
+}
+
+int Socket::sendData(const void * data, size_t size) {
+	if (!data) return -2;
+
+	// make struct
+	struct Socket::Buffer * buf = (struct Socket::Buffer *) malloc(sizeof(struct Socket::Buffer));
+	if (!buf) return -2;
+
+	// make data
+	buf->data = malloc(size);
+	buf->size = size;
+	memcpy(buf->data, data, size);
+
+	// queue up buffer
+	int error = this->_outq.get().push(buf);
+	return error;
 }
 
 // called by subclasses whenever they get a new connection
@@ -270,18 +292,6 @@ int Socket::stop() {
 		BFThreadAsyncWait(this->_tidout);
 	}
 
-	return error;
-}
-
-int Socket::sendPacket(const Packet * pkt) {
-	if (!pkt) return -2;
-
-	Packet * p = PACKET_ALLOC;
-	if (!p) return -2;
-
-	memcpy(p, pkt, sizeof(Packet));
-
-	int error = this->_outq.get().push(p);
 	return error;
 }
 

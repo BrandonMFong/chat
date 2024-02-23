@@ -33,12 +33,17 @@ public:
 	int stop();
 	
 	/**
-	 * queues up packet to be sent
+	 * queues up data to be sent
+	 *
+	 * data : data to be sent
+	 * size : size of data buffer
 	 */
-	int sendPacket(const Packet * packet);
+	int sendData(const void * data, size_t size);
 
 	/**
 	 * sets callback that gets invoked when incoming data is ready to be handled
+	 *
+	 * callback owner MUST copy buffer data because the data will be lost when it returns
 	 */
 	void setInStreamCallback(void (* cb)(const void * buf, size_t size));
 
@@ -46,6 +51,13 @@ public:
 	 * see _cbnewconn
 	 */
 	void setNewConnectionCallback(int (* cb)(int descriptor));
+
+	/**
+	 * buffer length for incoming data
+	 *
+	 * this is the expected size for all incoming data
+	 */
+	void setBufferSize(size_t size);
 
 protected:
 	Socket();
@@ -106,15 +118,22 @@ private:
 	BFThreadAsyncID _tidq;
 	BFThreadAsyncID _tidout;
 
+	struct Buffer {
+		void * data;
+		size_t size;
+	};
+
+	size_t _bufferSize;
+
 	/**
 	 * queues incoming data from recv
 	 */	
-	BF::Atomic<BF::Queue<Packet *>> _inq;
+	BF::Atomic<BF::Queue<struct Buffer *>> _inq;
 
 	/**
 	 * queues outgoing data using send
 	 */
-	BF::Atomic<BF::Queue<Packet *>> _outq;
+	BF::Atomic<BF::Queue<struct Buffer *>> _outq;
 };
 
 #endif // SOCKET_HPP

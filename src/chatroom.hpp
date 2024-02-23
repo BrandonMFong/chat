@@ -27,6 +27,8 @@ public:
 
 	/**
 	 * adds message and flags an update
+	 *
+	 * msg : memory is copied
 	 */
 	int addMessage(const Message * msg);
 

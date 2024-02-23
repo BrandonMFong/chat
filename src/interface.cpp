@@ -44,7 +44,6 @@ void InterfaceDisplayWindowUpdateThread(void * in) {
 	int error = 0;
 	const BFThreadAsyncID tid = BFThreadAsyncGetID();
 
-	LOG_DEBUG("> %s", __func__);
 	while (BFThreadAsyncIDIsValid(tid) && !BFThreadAsyncIsCanceled(tid)) {
 		chatroom->updateConversation.lock();
 		if (chatroom->updateConversation.unsafeget()) {
@@ -54,8 +53,6 @@ void InterfaceDisplayWindowUpdateThread(void * in) {
 			werase(displayWin);
 			box(displayWin, 0, 0);
 
-			LOG_DEBUG("updating display window");
-			LOG_DEBUG("conversation message count: %d", chatroom->conversation.unsafeget().count());
 			// write messages
 			for (int i = 0; i < chatroom->conversation.unsafeget().count(); i++) {
 				Message * m = chatroom->conversation.unsafeget().objectAtIndex(i);
@@ -63,15 +60,12 @@ void InterfaceDisplayWindowUpdateThread(void * in) {
 				if (m) {
 					char line[linelen];
 					InterfaceCraftChatLineFromMessage(m, line);
-					LOG_DEBUG("adding line to display: '%s'", line);
 					mvwprintw(displayWin, i+1, 1, line);
 				}
 			}
-			LOG_DEBUG("updating display window done");
 
 			wrefresh(displayWin);
 			
-			LOG_DEBUG("%s:%d updating conversation", __func__, __LINE__);
 			chatroom->updateConversation.unsafeset(false);
 
 			BFLockUnlock(&winlock);
@@ -79,7 +73,6 @@ void InterfaceDisplayWindowUpdateThread(void * in) {
 		}
 		chatroom->updateConversation.unlock();
 	}
-	LOG_DEBUG("< %s", __func__);
 }
 
 int InterfaceWindowCreateModeCommand() {
@@ -104,7 +97,6 @@ int InterfaceWindowCreateModeCommand() {
 	keypad(inputWin, true); // Enable special keys in input window
 	nodelay(inputWin, false); // Set blocking input for input window
 
-	LOG_DEBUG("%s:%d updating conversation", __func__, __LINE__);
 	chatroom->updateConversation = true;
 
 	BFLockUnlock(&winlock);
@@ -221,12 +213,10 @@ int InterfaceWindowLoop() {
 					state = stateHelp;
 					InterfaceWindowCreateModeHelp();
 				} else if (!userInput.compareString("edit")) {
-					LOG_DEBUG("state changed to edit");
 					state = stateEdit;
 
 					// change to edit mode
 					InterfaceWindowCreateModeEdit();
-					LOG_DEBUG("%s:%d updating conversation", __func__, __LINE__);
 					chatroom->updateConversation = true;
 				} else {
 					LOG_DEBUG("unknown: '%s'", userInput.cString());
@@ -278,7 +268,6 @@ int InterfaceGatherUserData() {
 }
 
 int InterfaceLobbyRun() {
-	LOG_DEBUG("> %s", __func__);
 	// set up chat room name
 	char chatroomname[CHAT_ROOM_NAME_SIZE];
 	chatroom = new Chatroom("ea46019c-4c39-4838-b44d-6a990bbb4ae9");
@@ -292,13 +281,11 @@ int InterfaceLobbyRun() {
 	
 	chatroom->setName(chatroomname);
 	ChatDirectory::shared()->addChatroom(chatroom);
-	LOG_DEBUG("< %s", __func__);
 	
 	return 0;
 }
 
 int InterfaceRun() {
-	LOG_DEBUG("> %s", __func__);
 
 	int error = InterfaceGatherUserData();
 
@@ -314,7 +301,6 @@ int InterfaceRun() {
 
 	Delete(chatroom);
 
-	LOG_DEBUG("< %s", __func__);
 	return error;
 }
 

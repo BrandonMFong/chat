@@ -28,8 +28,9 @@ void Office::PacketReceive(const void * buf, size_t size) {
 		return;
 	}
 
+	LOG_DEBUG("message recv: %s", m->buf);
 	int err = chatroom->addMessage(m);
-	if (!err) {
+	if (err) {
 		LOG_DEBUG("error adding message to chatroom: %d", err);
 		return;
 	}
@@ -45,6 +46,6 @@ int Office::MessageSend(const Message * m) {
 	memcpy(&p.payload.message, m, sizeof(p.payload.message));
 
 	// send to socket
-	return Socket::shared()->sendPacket(&p);
+	return Socket::shared()->sendData(&p, sizeof(p));
 }
 

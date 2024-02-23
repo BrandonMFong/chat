@@ -30,9 +30,7 @@ Chatroom * ChatDirectory::getChatroom(const char * chatroomuuid) {
 	List<Chatroom *>::Node * n = this->_chatrooms.unsafeget().first();
 	for (; n != NULL; n = n->next()) {
 		Chatroom * troom = n->object();
-		LOG_DEBUG("%s ?= %s", troom->uuid(), chatroomuuid);
 		if (!BFStringCompareUUID(troom->uuid(), chatroomuuid)) {
-			LOG_DEBUG("found chat room: %s", troom->uuid());
 			room = troom;
 			break;
 		}
@@ -43,8 +41,6 @@ Chatroom * ChatDirectory::getChatroom(const char * chatroomuuid) {
 }
 
 void ChatDirectory::addChatroom(Chatroom * room) {
-	LOG_DEBUG("> %s", __func__);
 	this->_chatrooms.get().add(room);
-	LOG_DEBUG("< %s", __func__);
 }
 
