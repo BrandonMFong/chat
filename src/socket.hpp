@@ -37,6 +37,11 @@ public:
 	 */
 	int sendPacket(const Packet * packet);
 
+	/**
+	 * sets callback that gets invoked when incoming data is ready to be handled
+	 */
+	void setInStreamCallback(void (* cb)(const void * buf, size_t size));
+
 protected:
 	Socket();
 
@@ -63,6 +68,12 @@ private:
 	 * handles received packets from queue
 	 */
 	static void queueCallback(void * in);
+
+	/**
+	 * call back that gets called in `queueCallback` when it
+	 * pops data from in q
+	 */
+	void (* _callback)(const void * buf, size_t size);
 
 	/**
 	 * receives packets and puts them in a queue

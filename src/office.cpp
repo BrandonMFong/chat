@@ -8,18 +8,31 @@
 #include "user.hpp"
 #include "chatroom.hpp"
 #include "chatdirectory.hpp"
+#include "log.hpp"
 #include <string.h>
 
 using namespace BF;
 
-int Office::PacketReceive(const Packet * p) {
-	if (!p) return 1;
+void Office::PacketReceive(const void * buf, size_t size) {
+	const Packet * p = (const Packet *) buf;
+	if (!p) {
+		LOG_DEBUG("data is null");
+		return;
+	}
+
 	const Message * m = &p->payload.message;
 
 	Chatroom * chatroom = ChatDirectory::shared()->getChatroom(m->chatuuid);
-	if (!chatroom) return 2;
+	if (!chatroom) {
+		LOG_DEBUG("chatroom not available");
+		return;
+	}
 
-	return chatroom->addMessage(m);
+	int err = chatroom->addMessage(m);
+	if (!err) {
+		LOG_DEBUG("error adding message to chatroom: %d", err);
+		return;
+	}
 }
 
 int Office::MessageSend(const Message * m) {

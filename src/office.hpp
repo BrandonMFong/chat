@@ -20,7 +20,7 @@ namespace Office {
  *
  * packet gets passed from socket to us
  */
-int PacketReceive(const Packet * pkt);
+void PacketReceive(const void * buf, size_t size);
 
 /**
  */

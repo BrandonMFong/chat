@@ -13,6 +13,7 @@
 #include "interface.hpp"
 #include "log.hpp"
 #include "user.hpp"
+#include "office.hpp"
 #include <bflibcpp/bflibcpp.hpp>
 
 #define ARGUMENT_SERVER "server"
@@ -71,6 +72,10 @@ int main(int argc, char * argv[]) {
 
 	if (!result) {
 		skt = Socket::create(mode, &result);
+
+		if (skt) {
+			skt->setInStreamCallback(Office::PacketReceive);
+		}
 	}
 
 	if (!result) {

@@ -74,6 +74,10 @@ Socket * Socket::create(const char mode, int * err) {
 	return result;
 }
 
+void Socket::setInStreamCallback(void (* cb)(const void * buf, size_t size)) {
+	this->_callback = cb;
+}
+
 void Socket::queueCallback(void * in) {
 	LOG_DEBUG("> %s", __func__);
 	Socket * skt = (Socket *) in;
@@ -88,7 +92,8 @@ void Socket::queueCallback(void * in) {
 			Packet * p = skt->_inq.unsafeget().front();
 
 			if (p) {
-				Office::PacketReceive(p);
+				//Office::PacketReceive(p);
+				skt->_callback(p, 0);
 			}
 
 			// pop queue
