@@ -13,11 +13,12 @@
 #include "inputbuffer.hpp"
 #include "office.hpp"
 #include "chatroom.hpp"
+#include "message.hpp"
 #include "chatdirectory.hpp"
 
 using namespace BF;
 
-const size_t linelen = MESSAGE_BUFFER_SIZE + USER_NAME_SIZE;
+const size_t linelen = DATA_BUFFER_SIZE + USER_NAME_SIZE + (2 << 4);
 const int stateNormal = 0;
 const int stateEdit = 1;
 const int stateHelp = 2;
@@ -29,14 +30,10 @@ WINDOW * helpWin = NULL;
 
 Chatroom * chatroom;
 
-void InterfaceMessageFree(Message * m) {
-	MESSAGE_FREE(m);
-}
-
 int InterfaceCraftChatLineFromMessage(const Message * msg, char * line) {
 	if (!msg || !line) return 30;
 
-	snprintf(line, linelen, "%s> %s", msg->username, msg->buf);
+	snprintf(line, linelen, "%s> %s", msg->username(), msg->data());
 	return 0;
 }
 

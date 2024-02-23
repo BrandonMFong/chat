@@ -7,7 +7,6 @@
 #define OFFICE_HPP
 
 #include "typepacket.h"
-#include "typemessage.h"
 #include "inputbuffer.hpp"
 
 /**
@@ -24,7 +23,7 @@ void PacketReceive(const void * buf, size_t size);
 
 /**
  */
-int MessageSend(const Message * msg);
+int PacketSend(const Packet * pkt);
 
 }
 

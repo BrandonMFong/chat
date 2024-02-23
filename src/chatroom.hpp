@@ -9,10 +9,15 @@
 #include <bflibcpp/object.hpp>
 #include <bflibcpp/atomic.hpp>
 #include <bflibcpp/list.hpp>
-#include "typemessage.h"
 #include "inputbuffer.hpp"
 
+extern "C" {
+#include <bflibc/stringutils.h>
+}
+
 #define CHAT_ROOM_NAME_SIZE 255
+
+class Message;
 
 /**
  * In charge of creating message
@@ -28,9 +33,9 @@ public:
 	/**
 	 * adds message and flags an update
 	 *
-	 * msg : memory is copied
+	 * msg : memory must be created before calling
 	 */
-	int addMessage(const Message * msg);
+	int addMessage(Message * msg);
 
 	void setName(const char * name);
 

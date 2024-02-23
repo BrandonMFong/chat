@@ -20,6 +20,7 @@ InputBuffer::~InputBuffer() {
 
 }
 
+/*
 int InputBuffer::unload(Message * msg) {
 	if (!msg) return 50;
 
@@ -31,7 +32,7 @@ int InputBuffer::unload(Message * msg) {
 
 	return 0;
 }
-
+*/
 int InputBuffer::addChar(int ch) {
 	switch (ch) {
 	case '\n':

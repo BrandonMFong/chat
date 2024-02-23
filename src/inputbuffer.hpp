@@ -7,7 +7,6 @@
 #define INPUT_BUFFER_HPP
 
 #include <bflibcpp/string.hpp>
-#include "typemessage.h"
 
 class InputBuffer : public BF::String {
 public:
@@ -17,7 +16,7 @@ public:
 	/**
 	 * unloads buffer to the packet
 	 */
-	int unload(Message * pkt);
+	//int unload(Message * pkt);
 
 	/**
 	 * Adds appends char to our buffer

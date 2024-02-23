@@ -7,10 +7,12 @@
 #include "office.hpp"
 #include "user.hpp"
 #include "log.hpp"
+#include "message.hpp"
 #include <string.h>
+#include <bflibcpp/delete.hpp>
 
 void _ChatroomMessageFree(Message * m) {
-	MESSAGE_FREE(m);
+	Delete(m);
 }
 
 Chatroom::Chatroom(const char * uuid) : Object() {
@@ -27,11 +29,10 @@ Chatroom::~Chatroom() {
 
 }
 
-int Chatroom::addMessage(const Message * msg) {
-	Message * m = MESSAGE_ALLOC;
-	memcpy(m, msg, sizeof(Message));
-	this->conversation.get().add(m);
-
+int Chatroom::addMessage(Message * msg) {
+	if (!msg) return 2;
+	
+	this->conversation.get().add(msg);
 	this->updateConversation = true;
 
 	return 0;
@@ -46,30 +47,31 @@ const char * Chatroom::uuid() {
 }
 
 int Chatroom::sendBuffer(const InputBuffer * buf) {
-	Message m;
+	Packet p;
 
-	// clear packet
-	memset(&m, 0, sizeof(m));
+	memset(&p, 0, sizeof(p));
+
 	// load buffer 
-	strncpy(m.buf, buf->cString(), sizeof(m.buf));
+	strncpy(p.data, buf->cString(), sizeof(p.data));
 
 	// username
-	strncpy(m.username, User::current()->username(), sizeof(m.username));
+	strncpy(p.header.username, User::current()->username(), sizeof(p.header.username));
 	
 	// user uuid
-	strncpy(m.useruuid, User::current()->uuid(), sizeof(m.useruuid));
+	strncpy(p.header.useruuid, User::current()->uuid(), sizeof(p.header.useruuid));
 
 	// chatroom uuid
-	strncpy(m.chatuuid, this->_uuid, kBFStringUUIDStringLength);
+	strncpy(p.header.chatuuid, this->_uuid, kBFStringUUIDStringLength);
 
 	// time
-	m.time = BFTimeGetCurrentTime();
+	p.header.time = BFTimeGetCurrentTime();
 
 	// give chatroom this message to add to 
 	// its list
-	this->addMessage(&m);
+	this->addMessage(new Message(&p));
 
-	// send to socket
-	return Office::MessageSend(&m);
+	// send out message to the rest of the users in the 
+	// chatroom
+	return Office::PacketSend(&p);
 }
 

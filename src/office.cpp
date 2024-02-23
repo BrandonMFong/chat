@@ -8,6 +8,7 @@
 #include "user.hpp"
 #include "chatroom.hpp"
 #include "chatdirectory.hpp"
+#include "message.hpp"
 #include "log.hpp"
 #include <string.h>
 
@@ -20,15 +21,19 @@ void Office::PacketReceive(const void * buf, size_t size) {
 		return;
 	}
 
-	const Message * m = &p->payload.message;
+	// chatroom will own this memory
+	Message * m = new Message(p);
+	if (!m) {
+		LOG_DEBUG("couldn't create message object");
+		return;
+	}
 
-	Chatroom * chatroom = ChatDirectory::shared()->getChatroom(m->chatuuid);
+	Chatroom * chatroom = ChatDirectory::shared()->getChatroom(m->chatuuid());
 	if (!chatroom) {
 		LOG_DEBUG("chatroom not available");
 		return;
 	}
 
-	LOG_DEBUG("message recv: %s", m->buf);
 	int err = chatroom->addMessage(m);
 	if (err) {
 		LOG_DEBUG("error adding message to chatroom: %d", err);
@@ -36,16 +41,7 @@ void Office::PacketReceive(const void * buf, size_t size) {
 	}
 }
 
-int Office::MessageSend(const Message * m) {
-	Packet p;
-
-	// clear packet
-	memset(&p, 0, sizeof(p));
-	
-	// load message
-	memcpy(&p.payload.message, m, sizeof(p.payload.message));
-
-	// send to socket
-	return Socket::shared()->sendData(&p, sizeof(p));
+int Office::PacketSend(const Packet * p) {
+	return Socket::shared()->sendData(p, sizeof(Packet));
 }
 

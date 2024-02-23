@@ -7,7 +7,7 @@
 #define USER_HPP
 
 #include <bflibcpp/object.hpp>
-#include "typemessage.h"
+#include <typepacket.h>
 
 class User : public BF::Object {
 public:
