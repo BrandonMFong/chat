@@ -33,7 +33,7 @@ int test_packet2message() {
 	UNIT_TEST_START;
 	int result = 0;
 
-	int max = 1;
+	int max = 2 << 8;
 	while (!result && max) {
 		Packet p;
 		memset(&p, 0, sizeof(p));
@@ -50,6 +50,10 @@ int test_packet2message() {
 
 		if (!result) {
 			if (strcmp(m->data(), p.data)) {
+				result = max;
+			} else if (strcmp(m->username(), p.header.username)) {
+				result = max;
+			} else if (strcmp(m->chatuuid(), p.header.chatuuid)) {
 				result = max;
 			}
 		}
