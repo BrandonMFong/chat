@@ -16,8 +16,10 @@ public:
 	virtual ~User();
 	void setUsername(const char * username);
 	const char * username();
+	const char * uuid();
 private:
 	char _username[USER_NAME_SIZE];
+	char _uuid[kBFStringUUIDStringLength];
 };
 
 #endif // USER_HPP

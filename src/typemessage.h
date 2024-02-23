@@ -31,6 +31,11 @@ typedef struct {
 	char username[USER_NAME_SIZE];
 
 	/**
+	 * sender's user uuid
+	 */
+	char useruuid[kBFStringUUIDStringLength];
+
+	/**
 	 * the time this message was sent
 	 */
 	BFTime time;

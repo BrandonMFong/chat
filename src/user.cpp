@@ -14,7 +14,7 @@ User * User::current() {
 
 User::User() {
 	this->_username[0] = '\0';
-
+	BFStringGetRandomUUIDString(this->_uuid);
 	if (_currentuser == NULL)
 		_currentuser = this;
 }
@@ -29,5 +29,9 @@ void User::setUsername(const char * username) {
 
 const char * User::username() {
 	return this->_username;
+}
+
+const char * User::uuid() {
+	return this->_uuid;
 }
 

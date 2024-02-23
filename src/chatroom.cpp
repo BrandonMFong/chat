@@ -59,6 +59,9 @@ int Chatroom::sendBuffer(const InputBuffer * buf) {
 
 	// username
 	strncpy(m.username, User::current()->username(), sizeof(m.username));
+	
+	// user uuid
+	strncpy(m.useruuid, User::current()->uuid(), sizeof(m.useruuid));
 
 	// chatroom uuid
 	strncpy(m.chatuuid, this->_uuid, kBFStringUUIDStringLength);
