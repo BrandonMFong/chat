@@ -242,6 +242,7 @@ int Socket::start() {
 int Socket::stop() {
 	int error = 0;
 
+	// shutdown connections
 	this->_connections.lock();
 	for (int i = 0; i < this->_connections.unsafeget().count(); i++) {
 		shutdown(this->_connections.unsafeget()[i], SHUT_RDWR);
@@ -249,8 +250,11 @@ int Socket::stop() {
 	}
 	this->_connections.unlock();
 
+	// tell subclasses that they can stop too
 	error = this->_stop();
 
+	// stop our threads
+	
 	if (!error) {
 		this->_tidin.lock();
 		List<BFThreadAsyncID>::Node * n = this->_tidin.unsafeget().first();

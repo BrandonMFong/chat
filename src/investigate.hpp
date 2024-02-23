@@ -14,7 +14,7 @@
  */
 namespace Investigate {
 
-int NewConnection(int c);
+int NewConnection(int d);
 
 }
 
