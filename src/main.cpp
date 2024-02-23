@@ -14,7 +14,7 @@
 #include "log.hpp"
 #include "user.hpp"
 #include "office.hpp"
-#include "investigate.hpp"
+#include "protocol.hpp"
 #include <bflibcpp/bflibcpp.hpp>
 
 #define ARGUMENT_SERVER "server"
@@ -76,7 +76,7 @@ int main(int argc, char * argv[]) {
 
 		if (skt) {
 			skt->setInStreamCallback(Office::PacketReceive);
-			skt->setNewConnectionCallback(Investigate::NewConnection);
+			skt->setNewConnectionCallback(Protocol::Handshake);
 		}
 	}
 

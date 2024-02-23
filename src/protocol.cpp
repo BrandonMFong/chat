@@ -3,27 +3,27 @@
  * date: 2/22/24
  */
 
-#include "investigate.hpp"
+#include "protocol.hpp"
 #include "socket.hpp"
 
-int _InvestigateNewClient(int c) {
+int _ProtocolNewClient(int c) {
 	return 0;
 }
 
-int _InvestigateNewServer(int s) {
+int _ProtocolNewServer(int s) {
 	return 0;
 }
 
-int Investigate::NewConnection(int d) {
+int Protocol::Handshake(int d) {
 	Socket * skt = Socket::shared();
 	if (!skt)
 		return 1;
 
 	switch (skt->mode()) {
 	case SOCKET_MODE_SERVER:
-		return _InvestigateNewServer(d);
+		return _ProtocolNewServer(d);
 	case SOCKET_MODE_CLIENT:
-		return _InvestigateNewClient(d);
+		return _ProtocolNewClient(d);
 	default:
 		return 2;
 	}

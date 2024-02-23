@@ -5,7 +5,6 @@
 
 #include "chat.h"
 #include "server.hpp"
-#include "investigate.hpp"
 #include <netinet/in.h> //structure for storing address information 
 #include <stdio.h> 
 #include <stdlib.h> 
