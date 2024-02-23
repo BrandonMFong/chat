@@ -31,6 +31,9 @@ Socket::Socket() {
 	this->_tidq = NULL;
 	this->_tidout = NULL;
 
+	this->_cbinstream = NULL;
+	this->_cbnewconn = NULL;
+
 	_sharedSocket = this;
 }
 
@@ -72,6 +75,10 @@ Socket * Socket::create(const char mode, int * err) {
 		*err = error;
 
 	return result;
+}
+
+void Socket::setNewConnectionCallback(int (* cb)(int descriptor)) {
+	this->_cbnewconn = cb;
 }
 
 void Socket::setInStreamCallback(void (* cb)(const void * buf, size_t size)) {

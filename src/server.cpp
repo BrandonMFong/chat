@@ -64,7 +64,10 @@ void Server::pollthread(void * in) {
 		int csock = accept(s->_mainSocket, NULL, NULL);
 		LOG_DEBUG("new connection: %d", csock);
 
-		int err = Investigate::NewConnection(csock);
+		//int err = Investigate::NewConnection(csock);
+		int err = 0;
+		if (s->_cbnewconn)
+			err = s->_cbnewconn(csock);
 
 		// if there are no errors with connection then
 		// we will add it to our connections list

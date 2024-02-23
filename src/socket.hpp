@@ -42,6 +42,11 @@ public:
 	 */
 	void setInStreamCallback(void (* cb)(const void * buf, size_t size));
 
+	/**
+	 * see _cbnewconn
+	 */
+	void setNewConnectionCallback(int (* cb)(int descriptor));
+
 protected:
 	Socket();
 
@@ -61,6 +66,18 @@ protected:
 	 * array of devices we are connected to
 	 */
 	BF::Atomic<BF::Array<int>> _connections;
+
+	/**
+	 * callback used, if given, when a new connection is made
+	 *
+	 * when a new connection is made, socket will invoke callback
+	 * to ask caller if connection via socket descriptor is safe
+	 * to continue to use.
+	 *
+	 * Caller may send and recv using this active descriptor and return
+	 * nonzero value if there is a problem
+	 */
+	int (* _cbnewconn)(int sd);
 
 private:
 
