@@ -85,9 +85,7 @@ int Server::_start() {
 	BFThreadAsyncID tid = BFThreadAsync(Server::init, this);
 	BFThreadAsyncDestroy(tid);
 	
-	int error = 0;
-
-	return error;
+	return 0;
 }
 
 int Server::_stop() {

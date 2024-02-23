@@ -1,10 +1,13 @@
 /**
  * author: brando
  * date: 2/22/24
+ *
+ * https://en.wikipedia.org/wiki/Session_Initiation_Protocol
  */
 
 #include "protocol.hpp"
 #include "socket.hpp"
+#include "typepacket.h"
 
 int _ProtocolNewClient(int c) {
 	return 0;
