@@ -52,16 +52,16 @@ int Chatroom::sendBuffer(const InputBuffer * buf) {
 	memset(&p, 0, sizeof(p));
 
 	// load buffer 
-	strncpy(p.data, buf->cString(), sizeof(p.data));
+	strncpy(p.payload.message.data, buf->cString(), sizeof(p.payload.message.data));
 
 	// username
-	strncpy(p.header.username, User::current()->username(), sizeof(p.header.username));
+	strncpy(p.payload.message.username, User::current()->username(), sizeof(p.payload.message.username));
 	
 	// user uuid
-	strncpy(p.header.useruuid, User::current()->uuid(), sizeof(p.header.useruuid));
+	strncpy(p.payload.message.useruuid, User::current()->uuid(), sizeof(p.payload.message.useruuid));
 
 	// chatroom uuid
-	strncpy(p.header.chatuuid, this->_uuid, kBFStringUUIDStringLength);
+	strncpy(p.payload.message.chatuuid, this->_uuid, kBFStringUUIDStringLength);
 
 	// time
 	p.header.time = BFTimeGetCurrentTime();

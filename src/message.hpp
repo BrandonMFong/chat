@@ -18,9 +18,7 @@ public:
 	const char * data() const;
 	const char * chatuuid() const;
 private:
-	char _data[DATA_BUFFER_SIZE];
-	char _sendername[USER_NAME_SIZE];
-	char _chatroomuuid[kBFStringUUIDStringLength];
+	Packet _packet;
 };
 
 #endif // MESSAGE_HPP

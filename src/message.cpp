@@ -9,10 +9,9 @@
 using namespace BF;
 
 Message::Message(const Packet * pkt) : Object() {
-	strncpy(this->_data, pkt->data, sizeof(this->_data));
-	strncpy(this->_sendername, pkt->header.username, sizeof(this->_sendername));
-	strncpy(this->_chatroomuuid, pkt->header.chatuuid, sizeof(this->_chatroomuuid));
-
+	if (pkt) {
+		memcpy(&this->_packet, pkt, sizeof(this->_packet));
+	}
 }
 
 Message::~Message() {
@@ -20,14 +19,14 @@ Message::~Message() {
 }
 
 const char * Message::username() const {
-	return this->_sendername;
+	return this->_packet.payload.message.username;
 }
 
 const char * Message::data() const {
-	return this->_data;
+	return this->_packet.payload.message.data;
 }
 
 const char * Message::chatuuid() const {
-	return this->_chatroomuuid;
+	return this->_packet.payload.message.chatuuid;
 }
 
