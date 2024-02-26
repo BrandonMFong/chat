@@ -3,8 +3,8 @@
  * date: 1/24/24
  */
 
-#include <chat.h>
-#include <client.hpp>
+#include "chat.h"
+#include "client.hpp"
 #include <netinet/in.h> //structure for storing address information 
 #include <stdio.h> 
 #include <stdlib.h> 
@@ -12,7 +12,8 @@
 #include <sys/types.h> 
 #include <unistd.h>
 #include <bflibcpp/bflibcpp.hpp>
-#include <log.hpp>
+#include "log.hpp"
+#include "connection.hpp"
 
 Client::Client() {
 }
@@ -48,15 +49,23 @@ void Client::init(void * in) {
     if (connectStatus == -1) {
 		err = errno;
         printf("Error... %d\n", err);
-    } else {
-		if (c->_cbnewconn)
-			err = c->_cbnewconn(sock);
+	}
+
+	SocketConnection * sc = NULL;
+	if (!err) {
+		sc = new SocketConnection(sock);
 	}
 
 	if (!err) {
-		c->_connections.get().add(sock);
-		c->startInStreamForConnection(sock);
+		if (c->_cbnewconn)
+			err = c->_cbnewconn(sc);
+	}
+
+	if (!err) {
+		c->_connections.get().add(sc);
+		c->startInStreamForConnection(sc);
     }
+
 	BFRelease(c);
 }
 

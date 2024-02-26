@@ -5,6 +5,7 @@
 
 #include "socket.hpp"
 #include "server.hpp"
+#include "connection.hpp"
 #include "client.hpp"
 #include "chat.h"
 #include "log.hpp"
@@ -35,6 +36,8 @@ Socket::Socket() {
 	this->_cbnewconn = NULL;
 
 	this->_bufferSize = 0;
+
+	this->_connections.get().setDeallocateCallback(SocketConnection::ReleaseConnection);
 
 	_sharedSocket = this;
 }
@@ -83,7 +86,7 @@ void Socket::setBufferSize(size_t size) {
 	this->_bufferSize = size;
 }
 
-void Socket::setNewConnectionCallback(int (* cb)(int descriptor)) {
+void Socket::setNewConnectionCallback(int (* cb)(const SocketConnection * sc)) {
 	this->_cbnewconn = cb;
 }
 
@@ -130,14 +133,14 @@ void Socket::queueCallback(void * in) {
  */
 class InStreamTools : public Object {
 public:
-	int mainConnection;
+	SocketConnection * mainConnection;
 	Socket * socket;
 };
 
 void Socket::inStream(void * in) {
 	LOG_DEBUG("> %s", __func__);
 	InStreamTools * tools = (InStreamTools *) in; // we own memory
-	const int sd = tools->mainConnection;
+	const SocketConnection * sc = tools->mainConnection;
 	Socket * skt = tools->socket;
 	BFThreadAsyncID tid = BFThreadAsyncGetID();
 
@@ -150,7 +153,7 @@ void Socket::inStream(void * in) {
 		buf->data = malloc(skt->_bufferSize);
 
 		// receive data from connections using buffer
-		buf->size = recv(sd, buf->data, skt->_bufferSize, 0);
+		buf->size = recv(sc->descriptor(), buf->data, skt->_bufferSize, 0);
 
 		int err = 0;
         if (buf->size == -1) {
@@ -195,7 +198,7 @@ void Socket::outStream(void * in) {
 			// send buf to each connection
 			skt->_connections.lock();
 			for (int i = 0; i < skt->_connections.unsafeget().count(); i++) {
-				send(skt->_connections.unsafeget()[i], buf->data, buf->size, 0);
+				send(skt->_connections.unsafeget().objectAtIndex(i)->descriptor(), buf->data, buf->size, 0);
 			}
 			skt->_connections.unlock();
 
@@ -227,9 +230,11 @@ int Socket::sendData(const void * data, size_t size) {
 }
 
 // called by subclasses whenever they get a new connection
-int Socket::startInStreamForConnection(int sd) {
+int Socket::startInStreamForConnection(SocketConnection * sc) {
+	if (!sc) return 1;
+
 	InStreamTools * tools = new InStreamTools;
-	tools->mainConnection = sd;
+	tools->mainConnection = sc;
 	tools->socket = this;
 
 	BFThreadAsyncID tid = BFThreadAsync(Socket::inStream, (void *) tools);
@@ -258,8 +263,8 @@ int Socket::stop() {
 	// shutdown connections
 	this->_connections.lock();
 	for (int i = 0; i < this->_connections.unsafeget().count(); i++) {
-		shutdown(this->_connections.unsafeget()[i], SHUT_RDWR);
-		close(this->_connections.unsafeget()[i]);
+		shutdown(this->_connections.unsafeget().objectAtIndex(i)->descriptor(), SHUT_RDWR);
+		close(this->_connections.unsafeget().objectAtIndex(i)->descriptor());
 	}
 	this->_connections.unlock();
 

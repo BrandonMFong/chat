@@ -10,7 +10,6 @@
 #include <bflibcpp/list.hpp>
 #include <bflibcpp/atomic.hpp>
 #include <bflibcpp/object.hpp>
-#include <bflibcpp/array.hpp>
 #include <typepacket.h>
 
 extern "C" {
@@ -19,6 +18,8 @@ extern "C" {
 
 #define SOCKET_MODE_SERVER 's'
 #define SOCKET_MODE_CLIENT 'c'
+
+class SocketConnection;
 
 class Socket : public BF::Object {
 public: 
@@ -50,7 +51,7 @@ public:
 	/**
 	 * see _cbnewconn
 	 */
-	void setNewConnectionCallback(int (* cb)(int descriptor));
+	void setNewConnectionCallback(int (* cb)(const SocketConnection * sc));
 
 	/**
 	 * buffer length for incoming data
@@ -72,12 +73,12 @@ protected:
 	 *
 	 * 'sd' : socket descriptor
 	 */
-	int startInStreamForConnection(int sd);
+	int startInStreamForConnection(SocketConnection * sc);
 
 	/**
 	 * array of devices we are connected to
 	 */
-	BF::Atomic<BF::Array<int>> _connections;
+	BF::Atomic<BF::List<SocketConnection *>> _connections;
 
 	/**
 	 * callback used, if given, when a new connection is made
@@ -89,7 +90,7 @@ protected:
 	 * Caller may send and recv using this active descriptor and return
 	 * nonzero value if there is a problem
 	 */
-	int (* _cbnewconn)(int sd);
+	int (* _cbnewconn)(const SocketConnection * sc);
 
 private:
 

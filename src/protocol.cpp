@@ -9,27 +9,11 @@
 #include "socket.hpp"
 #include "typepacket.h"
 
-int _ProtocolNewClient(int c) {
-	
-	return 0;
-}
-
-int _ProtocolNewServer(int s) {
-	return 0;
-}
-
-int Protocol::Handshake(int d) {
+int Protocol::Handshake(const SocketConnection * d) {
 	Socket * skt = Socket::shared();
 	if (!skt)
 		return 1;
 
-	switch (skt->mode()) {
-	case SOCKET_MODE_SERVER:
-		return _ProtocolNewClient(d);
-	case SOCKET_MODE_CLIENT:
-		return _ProtocolNewServer(d);
-	default:
-		return 2;
-	}
+	return 0;
 }
 

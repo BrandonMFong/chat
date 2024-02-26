@@ -7,14 +7,18 @@
 #define CONNECTION_HPP
 
 #include <bflibcpp/object.hpp>
+#include <uuid/uuid.h>
 
 class SocketConnection : public BF::Object {
 public:
+	static void ReleaseConnection(SocketConnection * sc);
+
 	SocketConnection(int sd);
 	virtual ~SocketConnection();
 
+	int descriptor() const;
 private:
-	int _id;
+	uuid_t _uuid;
 	
 	/// socket descriptor
 	int _sd;

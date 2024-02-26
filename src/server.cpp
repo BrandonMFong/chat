@@ -13,6 +13,7 @@
 #include <unistd.h>
 #include <bflibcpp/bflibcpp.hpp>
 #include "log.hpp"
+#include "connection.hpp"
 
 Server::Server() : Socket() {
 	this->_mainSocket = 0;
@@ -63,16 +64,23 @@ void Server::pollthread(void * in) {
 		int csock = accept(s->_mainSocket, NULL, NULL);
 		LOG_DEBUG("new connection: %d", csock);
 
-		//int err = Investigate::NewConnection(csock);
 		int err = 0;
-		if (s->_cbnewconn)
-			err = s->_cbnewconn(csock);
+		SocketConnection * sc = new SocketConnection(csock);
+		if (!sc) {
+			LOG_WRITE("couldn't create a connection object");
+			err = 1;
+		}
+
+		if (!err) {
+			if (s->_cbnewconn)
+				err = s->_cbnewconn(sc);
+		}
 
 		// if there are no errors with connection then
 		// we will add it to our connections list
 		if (!err) {
-			s->_connections.get().add(csock);
-			s->startInStreamForConnection(csock);
+			s->_connections.get().add(sc);
+			s->startInStreamForConnection(sc);
 		}
 	}
 
