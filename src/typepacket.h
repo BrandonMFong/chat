@@ -15,8 +15,8 @@ extern "C" {
 #define DATA_BUFFER_SIZE 255
 
 typedef enum {
-	kPacketTypeMessage = 1,
-} PacketType;
+	kPayloadTypeMessage = 1,
+} PayloadType;
 
 typedef struct {
 	//Header header;
@@ -28,6 +28,11 @@ typedef struct {
 		 * the time this message was sent
 		 */
 		BFTime time;
+
+		/**
+		 * determines the payload
+		 */
+		PayloadType type;
 	} header;
 
 	union {

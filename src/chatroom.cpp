@@ -66,6 +66,9 @@ int Chatroom::sendBuffer(const InputBuffer * buf) {
 	// time
 	p.header.time = BFTimeGetCurrentTime();
 
+	// set payload type
+	p.header.type = kPayloadTypeMessage;
+
 	// give chatroom this message to add to 
 	// its list
 	this->addMessage(new Message(&p));

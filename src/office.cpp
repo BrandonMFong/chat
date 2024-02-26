@@ -14,13 +14,7 @@
 
 using namespace BF;
 
-void Office::PacketReceive(const void * buf, size_t size) {
-	const Packet * p = (const Packet *) buf;
-	if (!p) {
-		LOG_DEBUG("data is null");
-		return;
-	}
-
+void _OfficeReceivedPayloadTypeMessage(const Packet * p) {
 	// chatroom will own this memory
 	Message * m = new Message(p);
 	if (!m) {
@@ -38,6 +32,20 @@ void Office::PacketReceive(const void * buf, size_t size) {
 	if (err) {
 		LOG_DEBUG("error adding message to chatroom: %d", err);
 		return;
+	}
+}
+
+void Office::PacketReceive(const void * buf, size_t size) {
+	const Packet * p = (const Packet *) buf;
+	if (!p) {
+		LOG_DEBUG("data is null");
+		return;
+	}
+
+	switch (p->header.type) {
+	case kPayloadTypeMessage:
+		_OfficeReceivedPayloadTypeMessage(p);
+		break;
 	}
 }
 
