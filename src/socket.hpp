@@ -41,7 +41,7 @@ public:
 	 * data : data to be sent
 	 * size : size of data buffer
 	 */
-	int sendData(const void * data, size_t size);
+	//int sendData(const void * data, size_t size);
 
 	/**
 	 * sets callback that gets invoked when incoming data is ready to be handled
@@ -151,7 +151,7 @@ private:
 	/**
 	 * queues outgoing data using send
 	 */
-	BF::Atomic<BF::Queue<struct Buffer *>> _outq;
+	BF::Atomic<BF::Queue<struct Envelope *>> _outq;
 };
 
 #endif // SOCKET_HPP

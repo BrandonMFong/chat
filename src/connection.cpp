@@ -50,8 +50,15 @@ int SocketConnection::queueData(const void * data, size_t size) {
 	buf->size = size;
 	memcpy(buf->data, data, size);
 
-	// queue up buffer
-	int error = Socket::shared()->_outq.get().push(buf);
+	// make envelope
+	struct Socket::Envelope * envelope = (struct Socket::Envelope *) malloc(sizeof(struct Socket::Envelope *));
+	if (!envelope) return -2;
+
+	envelope->sc = this;
+	envelope->buf = buf;
+
+	// queue up envelope
+	int error = Socket::shared()->_outq.get().push(envelope);
 	return error;
 }
 

@@ -181,7 +181,8 @@ void Socket::outStream(void * in) {
 		// if queue is not empty, send the next message
 		if (!skt->_outq.unsafeget().empty()) {
 			// get top data
-			struct Socket::Buffer * buf = skt->_outq.unsafeget().front();
+			struct Socket::Envelope * envelope = skt->_outq.unsafeget().front();
+			struct Socket::Buffer * buf = envelope->buf;
 
 			// pop data from queue
 			skt->_outq.unsafeget().pop();
@@ -203,6 +204,7 @@ void Socket::outStream(void * in) {
 	LOG_DEBUG("< %s", __func__);
 }
 
+/*
 int Socket::sendData(const void * data, size_t size) {
 	if (!data) return -2;
 
@@ -219,6 +221,7 @@ int Socket::sendData(const void * data, size_t size) {
 	int error = this->_outq.get().push(buf);
 	return error;
 }
+*/
 
 // called by subclasses whenever they get a new connection
 int Socket::startInStreamForConnection(SocketConnection * sc) {
