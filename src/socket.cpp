@@ -88,7 +88,7 @@ void Socket::setNewConnectionCallback(int (* cb)(SocketConnection * sc)) {
 	this->_cbnewconn = cb;
 }
 
-void Socket::setInStreamCallback(void (* cb)(const void * buf, size_t size)) {
+void Socket::setInStreamCallback(void (* cb)(SocketConnection * sc, const void * buf, size_t size)) {
 	this->_cbinstream = cb;
 }
 
@@ -103,17 +103,17 @@ void Socket::queueCallback(void * in) {
 		// if queue is not empty, send the next message
 		if (!skt->_inq.unsafeget().empty()) {
 			// get first message
-			struct Socket::Buffer * buf = skt->_inq.unsafeget().front();
+			struct Socket::Envelope * envelope = skt->_inq.unsafeget().front();
 
-			if (buf) {
-				skt->_cbinstream(buf->data, buf->size);
+			if (envelope) {
+				skt->_cbinstream(envelope->sc, envelope->buf.data, envelope->buf.size);
 			}
 
 			// pop queue
 			skt->_inq.unsafeget().pop();
 
-			BFFree(buf->data);
-			BFFree(buf);
+			BFFree(envelope->buf.data);
+			BFFree(envelope);
 		}
 		skt->_inq.unlock();
 	}
@@ -146,16 +146,17 @@ void Socket::inStream(void * in) {
 	sc->_isready = true;	
 	while (!BFThreadAsyncIsCanceled(tid)) {
 		// create buffer
-		struct Socket::Buffer * buf = (struct Socket::Buffer *) malloc(sizeof(struct Socket::Buffer));
-		buf->data = malloc(skt->_bufferSize);
+		struct Socket::Envelope * envelope = (struct Socket::Envelope *) malloc(sizeof(struct Socket::Envelope));
+		envelope->buf.data = malloc(skt->_bufferSize);
+		envelope->sc = sc;
 
 		// receive data from connections using buffer
-		int err = sc->recvData(buf);
+		int err = sc->recvData(&envelope->buf);
         if (!err) {
-			skt->_inq.get().push(buf);
+			skt->_inq.get().push(envelope);
 		} else {
-			BFFree(buf->data);
-			BFFree(buf);
+			BFFree(envelope->buf.data);
+			BFFree(envelope);
 			break;
 		}
 	}

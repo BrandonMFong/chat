@@ -45,7 +45,7 @@ void _OfficeReceivedPayloadTypeRequestInfo(const Packet * p) {
 	User * curruser = UserGetCurrent();
 }
 
-void Office::PacketReceive(const void * buf, size_t size) {
+void Office::PacketReceive(SocketConnection * sc, const void * buf, size_t size) {
 	const Packet * p = (const Packet *) buf;
 	if (!p) {
 		LOG_DEBUG("data is null");

@@ -52,7 +52,7 @@ public:
 	 *
 	 * callback owner MUST copy buffer data because the data will be lost when it returns
 	 */
-	void setInStreamCallback(void (* cb)(const void * buf, size_t size));
+	void setInStreamCallback(void (* cb)(SocketConnection * sc, const void * buf, size_t size));
 
 	/**
 	 * see _cbnewconn
@@ -105,7 +105,7 @@ private:
 	 * call back that gets called in `queueCallback` when it
 	 * pops data from in q
 	 */
-	void (* _cbinstream)(const void * buf, size_t size);
+	void (* _cbinstream)(SocketConnection * sc, const void * buf, size_t size);
 
 	/**
 	 * receives packets and puts them in a queue
@@ -150,7 +150,7 @@ private:
 	/**
 	 * queues incoming data from recv
 	 */	
-	BF::Atomic<BF::Queue<struct Buffer *>> _inq;
+	BF::Atomic<BF::Queue<struct Envelope *>> _inq;
 
 	/**
 	 * queues outgoing data using send
