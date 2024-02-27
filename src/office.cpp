@@ -10,6 +10,7 @@
 #include "chatdirectory.hpp"
 #include "message.hpp"
 #include "agent.hpp"
+#include "agentlist.hpp"
 #include "log.hpp"
 #include <string.h>
 #include <bflibcpp/bflibcpp.hpp>
@@ -56,9 +57,7 @@ int Office::PacketSend(const Packet * p) {
 }
 
 int Office::NewConnection(const SocketConnection * sc) {
-	Agent * agent = new Agent(sc);
-
-	Delete(agent);
+	AgentList::AddAgent(new Agent(sc));
 	return 0;
 }
 
