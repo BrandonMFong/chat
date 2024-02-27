@@ -36,6 +36,11 @@ public:
 	 */
 	int queueData(const void * data, size_t size);
 
+	/**
+	 * see Socket::mode
+	 */
+	const char mode();
+
 private:
 
 	/**

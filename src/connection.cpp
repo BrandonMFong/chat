@@ -40,6 +40,10 @@ bool SocketConnection::isready() {
 	return this->_isready.get();
 }
 
+const char SocketConnection::mode() {
+	return this->_sktref->mode();
+}
+
 int SocketConnection::queueData(const void * data, size_t size) {
 	if (!data) return -2;
 

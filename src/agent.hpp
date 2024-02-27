@@ -7,7 +7,8 @@
 #define AGENT_HPP
 
 #include <bflibcpp/object.hpp>
-#include "connection.hpp"
+
+class SocketConnection;
 
 /**
  * Represents the remote user
@@ -17,7 +18,8 @@ public:
 	/**
 	 * we do not own the socket connection object
 	 */
-	Agent(SocketConnection * sc);
+	static Agent * create(SocketConnection * sc);
+
 	virtual ~Agent();
 
 	/**
@@ -25,6 +27,10 @@ public:
 	 * to get to know them
 	 */
 	int start();
+
+protected:
+
+	Agent();
 
 private:
 

@@ -4,20 +4,53 @@
  */
 
 #include "agent.hpp"
+#include "agentserver.hpp"
+#include "agentclient.hpp"
 #include "log.hpp"
+#include "socket.hpp"
+#include "connection.hpp"
 #include <bflibcpp/bflibcpp.hpp>
 
-Agent::Agent(SocketConnection * sc) {
-	this->_sc = sc;
+Agent::Agent() {
+	this->_sc = NULL;
 }
 
 Agent::~Agent() {
 	this->_sc = NULL; // we don't own memory
 }
 
+Agent * Agent::create(SocketConnection * sc) {
+	if (!sc) return NULL;
+
+	Agent * result = NULL;
+	switch (sc->mode()) {
+	case SOCKET_MODE_SERVER:
+		result = new AgentServer;
+		break;
+	case SOCKET_MODE_CLIENT:
+		result = new AgentClient;
+		break;
+	default:
+		break;
+	}
+
+	if (result) {
+		result->_sc = sc;
+	}
+
+	return result;
+}
+
 int Agent::start() {
-	BFThreadAsyncID tid = BFThreadAsync(Agent::handshake, this);
-	BFThreadAsyncDestroy(tid);
+	// if we are on the server, then we
+	// need to start the converstaion
+	if (this->_sc->mode() == SOCKET_MODE_SERVER) {
+		BFThreadAsyncID tid = BFThreadAsync(Agent::handshake, this);
+		BFThreadAsyncDestroy(tid);
+	} else {
+
+	}
+
 	return 0;
 }
 
@@ -31,8 +64,5 @@ void Agent::handshake(void * in) {
 	while (!a->_sc->isready()) {}
 
 	LOG_DEBUG("connection is ready");
-
-
-
 }
 

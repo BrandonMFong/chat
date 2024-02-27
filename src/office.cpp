@@ -59,7 +59,7 @@ int Office::PacketSend(const Packet * p) {
 }
 
 int Office::NewConnection(SocketConnection * sc) {
-	Agent * a = new Agent(sc);
+	Agent * a = Agent::create(sc);
 	AgentList::AddAgent(a);
 	a->start();
 	return 0;

@@ -30,6 +30,10 @@ public:
 	static Socket * create(const char mode, int * err);
 	virtual ~Socket();
 
+	/**
+	 * returns: SOCKET_MODE_SERVER if we are a server or
+	 * SOCKET_MODE_CLIENT if we are a client
+	 */
 	virtual const char mode() const = 0;
 
 	int start();
