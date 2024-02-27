@@ -22,8 +22,10 @@ class SocketConnection : public BF::Object {
 public:
 	static void ReleaseConnection(SocketConnection * sc);
 
-	int descriptor();
-
+	/**
+	 * if true, then we are now able to send data
+	 * to remote user
+	 */
 	bool isready();
 	
 	/**
@@ -41,6 +43,11 @@ private:
 	 */
 	SocketConnection(int sd, Socket * sktref);
 	virtual ~SocketConnection();
+
+	/**
+	 * closes socket descriptor
+	 */
+	void closeConnection();
 
 	int sendData(const void * buf);
 	int recvData(void * buf);

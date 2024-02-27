@@ -10,7 +10,6 @@
 #include <netinet/in.h> //structure for storing address information 
 #include <stdio.h> 
 #include <stdlib.h> 
-#include <unistd.h> 
 #include <sys/socket.h> //for socket APIs 
 #include <sys/types.h> 
 #include <unistd.h>
@@ -32,8 +31,9 @@ SocketConnection::~SocketConnection() {
 	BFRelease(this->_sktref);
 }
 
-int SocketConnection::descriptor() {
-	return this->_sd;
+void SocketConnection::closeConnection() {
+	shutdown(this->_sd, SHUT_RDWR);
+	close(this->_sd);
 }
 
 bool SocketConnection::isready() {

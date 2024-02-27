@@ -13,7 +13,6 @@
 #include <netinet/in.h> //structure for storing address information 
 #include <stdio.h> 
 #include <stdlib.h> 
-#include <unistd.h> 
 #include <sys/socket.h> //for socket APIs 
 #include <sys/types.h> 
 #include <unistd.h>
@@ -261,8 +260,9 @@ int Socket::stop() {
 	// shutdown connections
 	this->_connections.lock();
 	for (int i = 0; i < this->_connections.unsafeget().count(); i++) {
-		shutdown(this->_connections.unsafeget().objectAtIndex(i)->descriptor(), SHUT_RDWR);
-		close(this->_connections.unsafeget().objectAtIndex(i)->descriptor());
+		this->_connections.unsafeget().objectAtIndex(i)->closeConnection();
+		//shutdown(this->_connections.unsafeget().objectAtIndex(i)->descriptor(), SHUT_RDWR);
+		//close(this->_connections.unsafeget().objectAtIndex(i)->descriptor());
 	}
 	this->_connections.unlock();
 
