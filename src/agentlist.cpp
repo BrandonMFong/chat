@@ -9,7 +9,7 @@
 
 using namespace BF;
 
-List<Agent *> agents;
+Atomic<List<Agent *>> agents;
 
 int AgentList::AddAgent(Agent * a) {
 	return 0;
