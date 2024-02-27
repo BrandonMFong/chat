@@ -23,6 +23,8 @@ int Agent::start() {
 void Agent::handshake(void * in) {
 	Agent * a = (Agent *) in;
 
+	// wait for the connection to be ready before we
+	// start the conversation with the remote user
 	while (!a->_sc->isready()) {}
 }
 

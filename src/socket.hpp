@@ -22,6 +22,8 @@ extern "C" {
 class SocketConnection;
 
 class Socket : public BF::Object {
+	friend class SocketConnection;
+
 public: 
 	static Socket * shared();
 
