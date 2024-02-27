@@ -26,19 +26,11 @@ public:
 	 * starts a conversation with the user on the other end
 	 * to get to know them
 	 */
-	int start();
+	virtual int start() = 0;
 
 protected:
 
 	Agent();
-
-private:
-
-	/**
-	 * waits for the socket connection to be ready before start
-	 * a conversation with the remote user
-	 */
-	static void handshake(void * in);
 
 	/*
 	 * socket connection

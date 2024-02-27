@@ -15,6 +15,14 @@ public:
 
 private:
 	AgentServer();
+
+	int start();
+
+	/**
+	 * waits for the socket connection to be ready before start
+	 * a conversation with the remote user
+	 */
+	static void handshake(void * in);
 };
 
 #endif // AGENT_SERVER_HPP

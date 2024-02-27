@@ -15,6 +15,7 @@ public:
 
 private:
 	AgentClient();
+	int start();
 };
 
 #endif // AGENT_CLIENT_HPP

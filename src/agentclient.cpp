@@ -13,3 +13,7 @@ AgentClient::~AgentClient() {
 
 }
 
+int AgentClient::start() {
+	return 0;
+}
+

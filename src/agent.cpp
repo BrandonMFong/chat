@@ -41,28 +41,4 @@ Agent * Agent::create(SocketConnection * sc) {
 	return result;
 }
 
-int Agent::start() {
-	// if we are on the server, then we
-	// need to start the converstaion
-	if (this->_sc->mode() == SOCKET_MODE_SERVER) {
-		BFThreadAsyncID tid = BFThreadAsync(Agent::handshake, this);
-		BFThreadAsyncDestroy(tid);
-	} else {
-
-	}
-
-	return 0;
-}
-
-void Agent::handshake(void * in) {
-	Agent * a = (Agent *) in;
-	
-	LOG_DEBUG("waiting for connection");
-
-	// wait for the connection to be ready before we
-	// start the conversation with the remote user
-	while (!a->_sc->isready()) {}
-
-	LOG_DEBUG("connection is ready");
-}
 
