@@ -117,11 +117,30 @@ private:
 	BFThreadAsyncID _tidq;
 	BFThreadAsyncID _tidout;
 
+	/**
+	 * buffer for incoming and outgoing data
+	 */
 	struct Buffer {
 		void * data;
 		size_t size;
 	};
 
+	/**
+	 * ties relationship for buffer data with socket connection
+	 *
+	 * that way outStream thread knows who to send
+	 * buffer data to
+	 */
+	struct Envelope {
+		SocketConnection * sc;
+		struct Buffer * buf;
+	};
+
+	/**
+	 * holds expected buffer size for all incoming and outcoming data
+	 *
+	 * implementer is responsible for setting this
+	 */
 	size_t _bufferSize;
 
 	/**
