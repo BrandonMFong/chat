@@ -4,6 +4,7 @@
  */
 
 #include "office.hpp"
+#include "chat.hpp"
 #include "socket.hpp"
 #include "user.hpp"
 #include "chatroom.hpp"
@@ -41,6 +42,7 @@ void _OfficeReceivedPayloadTypeMessage(const Packet * p) {
 void _OfficeReceivedPayloadTypeRequestInfo(const Packet * p) {
 	LOG_DEBUG("our user info is being requested");
 
+	User * curruser = UserGetCurrent();
 }
 
 void Office::PacketReceive(const void * buf, size_t size) {

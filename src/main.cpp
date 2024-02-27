@@ -5,6 +5,7 @@
  * https://www.geeksforgeeks.org/simple-client-server-application-in-c/
  */
 
+#include "chat.hpp"
 #include <stdio.h>
 #include <string.h>
 #include "server.hpp"
@@ -56,6 +57,10 @@ int InitializeUser() {
 	return 0;
 }
 
+User * UserGetCurrent() {
+	return _curruser;
+}
+
 int main(int argc, char * argv[]) {
 	int result = 0;
 	char mode = 0;
@@ -99,6 +104,7 @@ int main(int argc, char * argv[]) {
 	}
 
 	BFRelease(skt);
+	Delete(_curruser);
 
 	LOG_DEBUG("============ App ended ============");
 	LOG_CLOSE;
