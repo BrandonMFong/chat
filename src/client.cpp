@@ -53,7 +53,7 @@ void Client::init(void * in) {
 
 	SocketConnection * sc = NULL;
 	if (!err) {
-		sc = new SocketConnection(sock);
+		sc = new SocketConnection(sock, c);
 	}
 
 	if (!err) {

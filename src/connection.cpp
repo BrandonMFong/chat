@@ -21,13 +21,15 @@ void SocketConnection::ReleaseConnection(SocketConnection * sc) {
 	Delete(sc);
 }
 
-SocketConnection::SocketConnection(int sd) : Object() {
+SocketConnection::SocketConnection(int sd, Socket * sktref) : Object() {
 	this->_sd = sd;
+	this->_sktref = sktref;
+	BFRetain(this->_sktref);
 	uuid_generate_random(this->_uuid);
 }
 
 SocketConnection::~SocketConnection() {
-
+	BFRelease(this->_sktref);
 }
 
 int SocketConnection::descriptor() {
@@ -51,7 +53,7 @@ int SocketConnection::queueData(const void * data, size_t size) {
 	memcpy(envelope->buf.data, data, size);
 
 	// queue up envelope
-	int error = Socket::shared()->_outq.get().push(envelope);
+	int error = this->_sktref->_outq.get().push(envelope);
 	return error;
 }
 
@@ -64,7 +66,7 @@ int SocketConnection::sendData(const void * b) {
 
 int SocketConnection::recvData(void * b) {
 	Socket::Buffer * buf = (Socket::Buffer *) b;
-	buf->size = recv(this->_sd, buf->data, Socket::shared()->_bufferSize, 0);
+	buf->size = recv(this->_sd, buf->data, this->_sktref->_bufferSize, 0);
 	if (buf->size == -1) {
 		LOG_DEBUG("recv error %d", errno);
 		return errno;

@@ -65,7 +65,7 @@ void Server::pollthread(void * in) {
 		LOG_DEBUG("new connection: %d", csock);
 
 		int err = 0;
-		SocketConnection * sc = new SocketConnection(csock);
+		SocketConnection * sc = new SocketConnection(csock, s);
 		if (!sc) {
 			LOG_WRITE("couldn't create a connection object");
 			err = 1;

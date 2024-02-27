@@ -11,14 +11,16 @@
 #include <uuid/uuid.h>
 
 class Socket;
+class Client;
+class Client;
 
 class SocketConnection : public BF::Object {
 	friend class Socket;
+	friend class Server;
+	friend class Client;
+
 public:
 	static void ReleaseConnection(SocketConnection * sc);
-
-	SocketConnection(int sd);
-	virtual ~SocketConnection();
 
 	int descriptor();
 
@@ -33,7 +35,13 @@ public:
 	int queueData(const void * data, size_t size);
 
 private:
-	
+
+	/**
+	 * sktref : reference to socket
+	 */
+	SocketConnection(int sd, Socket * sktref);
+	virtual ~SocketConnection();
+
 	int sendData(const void * buf);
 	int recvData(void * buf);
 
@@ -47,6 +55,11 @@ private:
 	 * our _sd
 	 */
 	BF::Atomic<bool> _isready;
+
+	/**
+	 * reference to socket
+	 */
+	Socket * _sktref;
 };
 
 #endif // CONNECTION_HPP
