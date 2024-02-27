@@ -35,6 +35,7 @@ public:
 private:
 	
 	int sendData(const void * buf);
+	int recvData(void * buf);
 
 	uuid_t _uuid;
 	

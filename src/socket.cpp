@@ -154,18 +154,9 @@ void Socket::inStream(void * in) {
 		buf->data = malloc(skt->_bufferSize);
 
 		// receive data from connections using buffer
-		buf->size = recv(sc->descriptor(), buf->data, skt->_bufferSize, 0);
-
-		int err = 0;
-        if (buf->size == -1) {
-			err = errno;
-			LOG_DEBUG("recv returned %d", err);
-		} else if (buf->size == 0) {
-			LOG_DEBUG("recv received 0");
-			err = -1;
-		}
-
-		if (!err) {
+		//buf->size = recv(sc->descriptor(), buf->data, skt->_bufferSize, 0);
+		int err = sc->recvData(buf);
+        if (!err) {
 			skt->_inq.get().push(buf);
 		} else {
 			BFFree(buf->data);

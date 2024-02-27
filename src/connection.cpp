@@ -5,6 +5,7 @@
 
 #include "connection.hpp"
 #include "socket.hpp"
+#include "log.hpp"
 #include <bflibcpp/bflibcpp.hpp>
 #include <netinet/in.h> //structure for storing address information 
 #include <stdio.h> 
@@ -57,6 +58,20 @@ int SocketConnection::queueData(const void * data, size_t size) {
 int SocketConnection::sendData(const void * b) {
 	const Socket::Buffer * buf = (const Socket::Buffer *) b;
 	send(this->_sd, buf->data, buf->size, 0);
+
+	return 0;
+}
+
+int SocketConnection::recvData(void * b) {
+	Socket::Buffer * buf = (Socket::Buffer *) b;
+	buf->size = recv(this->_sd, buf->data, Socket::shared()->_bufferSize, 0);
+	if (buf->size == -1) {
+		LOG_DEBUG("recv error %d", errno);
+		return errno;
+	} else if (buf->size == 0) {
+		LOG_DEBUG("recv received 0");
+		return -1;
+	}
 
 	return 0;
 }
