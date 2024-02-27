@@ -12,7 +12,7 @@ FILES = \
 server client interface socket \
 log user inputbuffer office \
 chatroom chatdirectory protocol message \
-connection
+connection agent
 
 ### Release settings
 R_CXXFLAGS += -Isrc/ -Iexternal/libs/$(BF_LIB_RPATH_RELEASE)

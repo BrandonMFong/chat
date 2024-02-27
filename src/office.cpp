@@ -53,3 +53,7 @@ int Office::PacketSend(const Packet * p) {
 	return Socket::shared()->sendData(p, sizeof(Packet));
 }
 
+int Office::NewConnection(const SocketConnection * sc) {
+	return 0;
+}
+

@@ -8,6 +8,7 @@
 
 #include "typepacket.h"
 #include "inputbuffer.hpp"
+#include "connection.hpp"
 
 /**
  * in charge of making packet
@@ -24,6 +25,8 @@ void PacketReceive(const void * buf, size_t size);
 /**
  */
 int PacketSend(const Packet * pkt);
+
+int NewConnection(const SocketConnection * sc);
 
 }
 

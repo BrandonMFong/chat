@@ -75,7 +75,7 @@ int main(int argc, char * argv[]) {
 
 		if (skt) {
 			skt->setInStreamCallback(Office::PacketReceive);
-			skt->setNewConnectionCallback(Protocol::Handshake);
+			skt->setNewConnectionCallback(Office::NewConnection);
 			skt->setBufferSize(sizeof(Packet));
 		}
 	}
