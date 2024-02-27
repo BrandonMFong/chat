@@ -7,7 +7,6 @@
 #include "server.hpp"
 #include "connection.hpp"
 #include "client.hpp"
-#include "chat.h"
 #include "log.hpp"
 #include "office.hpp"
 #include <netinet/in.h> //structure for storing address information 

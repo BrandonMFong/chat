@@ -3,7 +3,7 @@
  * date: 1/24/24
  */
 
-#include "chat.h"
+#include "chat.hpp"
 #include "server.hpp"
 #include <netinet/in.h> //structure for storing address information 
 #include <stdio.h> 

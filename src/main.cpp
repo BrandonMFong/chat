@@ -20,7 +20,7 @@
 #define ARGUMENT_CLIENT "client"
 
 LOG_INIT
-User * curruser = 0;
+User * _curruser = 0;
 
 void Help(const char * toolname) {
 	printf("usage: %s\n", toolname);
@@ -52,7 +52,7 @@ int ArgumentsRead(int argc, char * argv[], char * mode) {
 }
 
 int InitializeUser() {
-	curruser = new User;
+	_curruser = new User;
 	return 0;
 }
 

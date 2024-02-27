@@ -3,10 +3,10 @@
  * date: 1/25/24
  */
 
-#ifndef CHAT_H
-#define CHAT_H
+#ifndef CHAT_HPP
+#define CHAT_HPP
 
 #define CHAT_ROOM_MAX_SIZE 5
 
-#endif // CHAT_H
+#endif // CHAT_HPP
 
