@@ -63,7 +63,7 @@ int main(int argc, char * argv[]) {
 
 	result = ArgumentsRead(argc, argv, &mode);
 
-	if (mode == SOCKET_MODE_SERVER)
+	if (mode == SOCKET_MODE_CLIENT)
 		LOG_OPEN;
 
 	LOG_DEBUG("============ App started ============");

@@ -38,6 +38,11 @@ void _OfficeReceivedPayloadTypeMessage(const Packet * p) {
 	}
 }
 
+void _OfficeReceivedPayloadTypeRequestInfo(const Packet * p) {
+	LOG_DEBUG("our user info is being requested");
+
+}
+
 void Office::PacketReceive(const void * buf, size_t size) {
 	const Packet * p = (const Packet *) buf;
 	if (!p) {
@@ -45,9 +50,14 @@ void Office::PacketReceive(const void * buf, size_t size) {
 		return;
 	}
 
+	LOG_DEBUG("received packet");
+
 	switch (p->header.type) {
 	case kPayloadTypeMessage:
 		_OfficeReceivedPayloadTypeMessage(p);
+		break;
+	case kPayloadTypeRequestInfo:
+		_OfficeReceivedPayloadTypeRequestInfo(p);
 		break;
 	}
 }
