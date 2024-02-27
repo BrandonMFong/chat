@@ -4,16 +4,14 @@
  */
 
 #include "agentlist.hpp"
+#include <bflibcpp/bflibcpp.hpp>
 #include "agent.hpp"
 
 using namespace BF;
 
-Atomic<List<Agent *>> agents;
+List<Agent *> agents;
 
 int AgentList::AddAgent(Agent * a) {
-	agents.lock();
-
-	agents.unlock();
 	return 0;
 }
 
