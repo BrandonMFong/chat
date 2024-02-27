@@ -20,12 +20,8 @@ AgentServer::~AgentServer() {
 int AgentServer::start() {
 	// if we are on the server, then we
 	// need to start the converstaion
-	if (this->_sc->mode() == SOCKET_MODE_SERVER) {
-		BFThreadAsyncID tid = BFThreadAsync(AgentServer::handshake, this);
-		BFThreadAsyncDestroy(tid);
-	} else {
-
-	}
+	BFThreadAsyncID tid = BFThreadAsync(AgentServer::handshake, this);
+	BFThreadAsyncDestroy(tid);
 
 	return 0;
 }
@@ -40,5 +36,10 @@ void AgentServer::handshake(void * in) {
 	while (!a->_sc->isready()) {}
 
 	LOG_DEBUG("connection is ready");
+
+	Packet p;
+	memset(&p, 0, sizeof(p));
+	p.header.type = kPayloadTypeRequestInfo;
+	a->_sc->queueData(&p, sizeof(p));
 }
 

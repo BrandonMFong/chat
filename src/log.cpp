@@ -27,18 +27,18 @@ void _LogWriteEntry(BFFileWriter * filewriter, int mode, ...) {
 
 	switch (mode) {
 		case 'd': // debug
-			format = "[%02d/%02d/%04d, %02d:%02d:%02d] %d.%d DEBUG - %s";
+			format = "[%02d/%02d/%04d, %02d:%02d:%02d] DEBUG - %s";
 			break;
 		case 'e': // error
-			format = "[%02d/%02d/%04d, %02d:%02d:%02d] %d.%d ERROR - %s";
+			format = "[%02d/%02d/%04d, %02d:%02d:%02d] ERROR - %s";
 			break;
 		default: // normal
-			format = "[%02d/%02d/%04d, %02d:%02d:%02d] %d.%d - %s";
+			format = "[%02d/%02d/%04d, %02d:%02d:%02d] - %s";
 			break;
 	}
 
-	pid_t procid = getpid();
-	pid_t threadid = gettid();
+	//pid_t procid = getpid();
+	//pid_t threadid = gettid();
 
 	BFFileWriterQueueFormatLine(
 		filewriter,
@@ -49,8 +49,6 @@ void _LogWriteEntry(BFFileWriter * filewriter, int mode, ...) {
 		dt.hour,
 		dt.minute,
 		dt.second,
-		procid,
-		threadid,
 		logstr
 	);
 

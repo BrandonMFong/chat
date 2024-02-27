@@ -15,7 +15,16 @@ extern "C" {
 #define DATA_BUFFER_SIZE 255
 
 typedef enum {
+	/**
+	 * payload holds a message
+	 */
 	kPayloadTypeMessage = 1,
+
+	/**
+	 * empty payload. type signals receiver
+	 * send information
+	 */
+	kPayloadTypeRequestInfo = 2,
 } PayloadType;
 
 typedef struct {

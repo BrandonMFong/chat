@@ -41,4 +41,3 @@ Agent * Agent::create(SocketConnection * sc) {
 	return result;
 }
 
-

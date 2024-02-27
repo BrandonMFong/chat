@@ -114,7 +114,6 @@ void Socket::queueCallback(void * in) {
 			skt->_inq.unsafeget().pop();
 
 			BFFree(buf->data);
-			LOG_DEBUG("deleting memory at %x", buf);
 			BFFree(buf);
 		}
 		skt->_inq.unlock();
@@ -149,7 +148,6 @@ void Socket::inStream(void * in) {
 	while (!BFThreadAsyncIsCanceled(tid)) {
 		// create buffer
 		struct Socket::Buffer * buf = (struct Socket::Buffer *) malloc(sizeof(struct Socket::Buffer));
-		LOG_DEBUG("created memory at %x", buf);
 		buf->data = malloc(skt->_bufferSize);
 
 		// receive data from connections using buffer
@@ -188,15 +186,6 @@ void Socket::outStream(void * in) {
 
 			envelope->sc->sendData(&envelope->buf);
 
-			/*
-			// send buf to each connection
-			skt->_connections.lock();
-			for (int i = 0; i < skt->_connections.unsafeget().count(); i++) {
-				send(skt->_connections.unsafeget().objectAtIndex(i)->descriptor(), buf->data, buf->size, 0);
-			}
-			skt->_connections.unlock();
-			*/
-
 			BFFree(envelope->buf.data);
 			BFFree(envelope);
 		}
@@ -206,25 +195,6 @@ void Socket::outStream(void * in) {
 	BFRelease(skt);
 	LOG_DEBUG("< %s", __func__);
 }
-
-/*
-int Socket::sendData(const void * data, size_t size) {
-	if (!data) return -2;
-
-	// make struct
-	struct Socket::Buffer * buf = (struct Socket::Buffer *) malloc(sizeof(struct Socket::Buffer));
-	if (!buf) return -2;
-
-	// make data
-	buf->data = malloc(size);
-	buf->size = size;
-	memcpy(buf->data, data, size);
-
-	// queue up buffer
-	int error = this->_outq.get().push(buf);
-	return error;
-}
-*/
 
 // called by subclasses whenever they get a new connection
 int Socket::startInStreamForConnection(SocketConnection * sc) {
