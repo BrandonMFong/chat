@@ -51,7 +51,7 @@ public:
 	/**
 	 * see _cbnewconn
 	 */
-	void setNewConnectionCallback(int (* cb)(const SocketConnection * sc));
+	void setNewConnectionCallback(int (* cb)(SocketConnection * sc));
 
 	/**
 	 * buffer length for incoming data
@@ -86,7 +86,7 @@ protected:
 	 * sc : keep a record of this if you want to send data to the 
 	 * device on the other end.  You do not own memory
 	 */
-	int (* _cbnewconn)(const SocketConnection * sc);
+	int (* _cbnewconn)(SocketConnection * sc);
 
 private:
 

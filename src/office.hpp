@@ -38,7 +38,7 @@ int PacketSend(const Packet * pkt);
  * Once created, the agent will get to know the user on ther
  * other end and get them ready to join a conversation.
  */
-int NewConnection(const SocketConnection * sc);
+int NewConnection(SocketConnection * sc);
 
 }
 

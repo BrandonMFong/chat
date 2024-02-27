@@ -86,7 +86,7 @@ void Socket::setBufferSize(size_t size) {
 	this->_bufferSize = size;
 }
 
-void Socket::setNewConnectionCallback(int (* cb)(const SocketConnection * sc)) {
+void Socket::setNewConnectionCallback(int (* cb)(SocketConnection * sc)) {
 	this->_cbnewconn = cb;
 }
 
@@ -140,12 +140,13 @@ public:
 void Socket::inStream(void * in) {
 	LOG_DEBUG("> %s", __func__);
 	InStreamTools * tools = (InStreamTools *) in; // we own memory
-	const SocketConnection * sc = tools->mainConnection;
+	SocketConnection * sc = tools->mainConnection;
 	Socket * skt = tools->socket;
 	BFThreadAsyncID tid = BFThreadAsyncGetID();
 
 	BFRetain(skt);
-	
+
+	sc->_isready = true;	
 	while (!BFThreadAsyncIsCanceled(tid)) {
 		// create buffer
 		struct Socket::Buffer * buf = (struct Socket::Buffer *) malloc(sizeof(struct Socket::Buffer));

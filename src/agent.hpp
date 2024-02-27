@@ -17,7 +17,7 @@ public:
 	/**
 	 * we do not own the socket connection object
 	 */
-	Agent(const SocketConnection * sc);
+	Agent(SocketConnection * sc);
 	virtual ~Agent();
 
 	/**
@@ -40,7 +40,7 @@ private:
 	 * the socket descriptor that is wrapped within this object
 	 * represents to user on other end we are representing
 	 */
-	const SocketConnection * _sc;
+	SocketConnection * _sc;
 };
 
 #endif // AGENT_HPP

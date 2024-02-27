@@ -56,7 +56,7 @@ int Office::PacketSend(const Packet * p) {
 	return Socket::shared()->sendData(p, sizeof(Packet));
 }
 
-int Office::NewConnection(const SocketConnection * sc) {
+int Office::NewConnection(SocketConnection * sc) {
 	Agent * a = new Agent(sc);
 	AgentList::AddAgent(a);
 	a->start();

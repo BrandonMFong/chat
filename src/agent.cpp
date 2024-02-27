@@ -6,7 +6,7 @@
 #include "agent.hpp"
 #include <bflibcpp/bflibcpp.hpp>
 
-Agent::Agent(const SocketConnection * sc) {
+Agent::Agent(SocketConnection * sc) {
 	this->_sc = sc;
 }
 
@@ -23,5 +23,6 @@ int Agent::start() {
 void Agent::handshake(void * in) {
 	Agent * a = (Agent *) in;
 
+	while (!a->_sc->isready()) {}
 }
 

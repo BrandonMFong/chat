@@ -4,7 +4,9 @@
  */
 
 #include "connection.hpp"
-#include <bflibcpp/delete.hpp>
+#include <bflibcpp/bflibcpp.hpp>
+
+using namespace BF;
 
 void SocketConnection::ReleaseConnection(SocketConnection * sc) {
 	Delete(sc);
@@ -19,7 +21,11 @@ SocketConnection::~SocketConnection() {
 
 }
 
-int SocketConnection::descriptor() const {
+int SocketConnection::descriptor() {
 	return this->_sd;
+}
+
+bool SocketConnection::isready() {
+	return this->_isready.get();
 }
 
