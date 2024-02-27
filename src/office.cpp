@@ -53,6 +53,7 @@ void Office::PacketReceive(const void * buf, size_t size) {
 }
 
 int Office::PacketSend(const Packet * p) {
+	// TODO: this is agent's job
 	return Socket::shared()->sendData(p, sizeof(Packet));
 }
 
@@ -60,7 +61,6 @@ int Office::NewConnection(SocketConnection * sc) {
 	Agent * a = new Agent(sc);
 	AgentList::AddAgent(a);
 	a->start();
-	
 	return 0;
 }
 

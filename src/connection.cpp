@@ -4,7 +4,15 @@
  */
 
 #include "connection.hpp"
+#include "socket.hpp"
 #include <bflibcpp/bflibcpp.hpp>
+#include <netinet/in.h> //structure for storing address information 
+#include <stdio.h> 
+#include <stdlib.h> 
+#include <unistd.h> 
+#include <sys/socket.h> //for socket APIs 
+#include <sys/types.h> 
+#include <unistd.h>
 
 using namespace BF;
 
@@ -27,5 +35,29 @@ int SocketConnection::descriptor() {
 
 bool SocketConnection::isready() {
 	return this->_isready.get();
+}
+
+int SocketConnection::queueData(const void * data, size_t size) {
+	if (!data) return -2;
+
+	// make struct
+	struct Socket::Buffer * buf = (struct Socket::Buffer *) malloc(sizeof(struct Socket::Buffer));
+	if (!buf) return -2;
+
+	// make data
+	buf->data = malloc(size);
+	buf->size = size;
+	memcpy(buf->data, data, size);
+
+	// queue up buffer
+	int error = Socket::shared()->_outq.get().push(buf);
+	return error;
+}
+
+int SocketConnection::sendData(const void * b) {
+	const Socket::Buffer * buf = (const Socket::Buffer *) b;
+	send(this->_sd, buf->data, buf->size, 0);
+
+	return 0;
 }
 

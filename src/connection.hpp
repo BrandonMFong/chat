@@ -23,7 +23,19 @@ public:
 	int descriptor();
 
 	bool isready();
+	
+	/**
+	 * queues up data to be sent
+	 *
+	 * data : data to be sent
+	 * size : size of data buffer
+	 */
+	int queueData(const void * data, size_t size);
+
 private:
+	
+	int sendData(const void * buf);
+
 	uuid_t _uuid;
 	
 	/// socket descriptor
