@@ -9,12 +9,21 @@
 #include <bflibcpp/object.hpp>
 #include "connection.hpp"
 
+/**
+ * Represents the remote user
+ */
 class Agent : public BF::Object {
 public:
+	/**
+	 * we do not own the socket connection object
+	 */
 	Agent(const SocketConnection * sc);
 	virtual ~Agent();
 
 private:
+	/*
+	 * socket connection
+	 */
 	const SocketConnection * _sc;
 };
 

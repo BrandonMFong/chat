@@ -9,8 +9,10 @@
 #include "chatroom.hpp"
 #include "chatdirectory.hpp"
 #include "message.hpp"
+#include "agent.hpp"
 #include "log.hpp"
 #include <string.h>
+#include <bflibcpp/bflibcpp.hpp>
 
 using namespace BF;
 
@@ -54,6 +56,9 @@ int Office::PacketSend(const Packet * p) {
 }
 
 int Office::NewConnection(const SocketConnection * sc) {
+	Agent * agent = new Agent(sc);
+
+	Delete(agent);
 	return 0;
 }
 

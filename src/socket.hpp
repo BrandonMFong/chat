@@ -83,12 +83,8 @@ protected:
 	/**
 	 * callback used, if given, when a new connection is made
 	 *
-	 * when a new connection is made, socket will invoke callback
-	 * to ask caller if connection via socket descriptor is safe
-	 * to continue to use.
-	 *
-	 * Caller may send and recv using this active descriptor and return
-	 * nonzero value if there is a problem
+	 * sc : keep a record of this if you want to send data to the 
+	 * device on the other end.  You do not own memory
 	 */
 	int (* _cbnewconn)(const SocketConnection * sc);
 
