@@ -48,9 +48,10 @@ int SocketConnection::queueData(const void * data, size_t size) {
 	if (!data) return -2;
 
 	// make envelope
-	struct Socket::Envelope * envelope = (struct Socket::Envelope *) malloc(sizeof(struct Socket::Envelope *));
+	struct Socket::Envelope * envelope = (struct Socket::Envelope *) malloc(sizeof(struct Socket::Envelope));
 	if (!envelope) return -2;
 
+	memset(envelope, 0, sizeof(struct Socket::Envelope));
 	envelope->sc = this;
 	envelope->buf.data = malloc(size);
 	envelope->buf.size = size;
