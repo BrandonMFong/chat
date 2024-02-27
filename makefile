@@ -11,7 +11,7 @@ CXXLINKS = -lpthread -lncurses -luuid
 FILES = \
 server client interface socket \
 log user inputbuffer office \
-chatroom chatdirectory protocol message \
+chatroom chatdirectory message \
 connection agent
 
 ### Release settings

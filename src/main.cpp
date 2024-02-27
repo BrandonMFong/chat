@@ -14,7 +14,6 @@
 #include "log.hpp"
 #include "user.hpp"
 #include "office.hpp"
-#include "protocol.hpp"
 #include <bflibcpp/bflibcpp.hpp>
 
 #define ARGUMENT_SERVER "server"
