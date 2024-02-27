@@ -182,20 +182,24 @@ void Socket::outStream(void * in) {
 		if (!skt->_outq.unsafeget().empty()) {
 			// get top data
 			struct Socket::Envelope * envelope = skt->_outq.unsafeget().front();
-			struct Socket::Buffer * buf = envelope->buf;
+			//struct Socket::Buffer * buf = &envelope->buf;
 
 			// pop data from queue
 			skt->_outq.unsafeget().pop();
 
+			envelope->sc->sendData(&envelope->buf);
+
+			/*
 			// send buf to each connection
 			skt->_connections.lock();
 			for (int i = 0; i < skt->_connections.unsafeget().count(); i++) {
 				send(skt->_connections.unsafeget().objectAtIndex(i)->descriptor(), buf->data, buf->size, 0);
 			}
 			skt->_connections.unlock();
+			*/
 
-			BFFree(buf->data);
-			BFFree(buf);
+			BFFree(envelope->buf.data);
+			BFFree(envelope);
 		}
 		skt->_outq.unlock();
 	}

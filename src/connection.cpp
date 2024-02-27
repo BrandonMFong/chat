@@ -41,21 +41,14 @@ bool SocketConnection::isready() {
 int SocketConnection::queueData(const void * data, size_t size) {
 	if (!data) return -2;
 
-	// make struct
-	struct Socket::Buffer * buf = (struct Socket::Buffer *) malloc(sizeof(struct Socket::Buffer));
-	if (!buf) return -2;
-
-	// make data
-	buf->data = malloc(size);
-	buf->size = size;
-	memcpy(buf->data, data, size);
-
 	// make envelope
 	struct Socket::Envelope * envelope = (struct Socket::Envelope *) malloc(sizeof(struct Socket::Envelope *));
 	if (!envelope) return -2;
 
 	envelope->sc = this;
-	envelope->buf = buf;
+	envelope->buf.data = malloc(size);
+	envelope->buf.size = size;
+	memcpy(envelope->buf.data, data, size);
 
 	// queue up envelope
 	int error = Socket::shared()->_outq.get().push(envelope);

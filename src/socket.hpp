@@ -133,7 +133,7 @@ private:
 	 */
 	struct Envelope {
 		SocketConnection * sc;
-		struct Buffer * buf;
+		struct Buffer buf;
 	};
 
 	/**
