@@ -38,14 +38,14 @@ public:
 
 	virtual ~User();
 	const char * username() const;
-	const char * uuid() const;
+	void getuuid(uuid_t uuid) const;
 
 	void getuserinfo(PayloadUserInfo * ui) const;
 
 private:
 	User();
 	char _username[USER_NAME_SIZE];
-	char _uuid[kBFStringUUIDStringLength];
+	uuid_t _uuid;
 };
 
 #endif // USER_HPP

@@ -45,7 +45,7 @@ void User::setCurrent(User * user) {
 
 User::User() {
 	this->_username[0] = '\0';
-	BFStringGetRandomUUIDString(this->_uuid);
+	uuid_generate_random(this->_uuid);
 }
 
 User::~User() {
@@ -74,8 +74,8 @@ const char * User::username() const {
 	return this->_username;
 }
 
-const char * User::uuid() const {
-	return this->_uuid;
+void User::getuuid(uuid_t uuid) const {
+	uuid_copy(uuid, this->_uuid);
 }
 
 void User::getuserinfo(PayloadUserInfo * ui) const {

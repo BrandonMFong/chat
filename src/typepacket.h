@@ -6,6 +6,8 @@
 #ifndef TYPE_PACKET_H
 #define TYPE_PACKET_H
 
+#include <uuid/uuid.h>
+
 extern "C" {
 #include <bflibc/bftime.h>
 #include <bflibc/stringutils.h>
@@ -42,12 +44,12 @@ typedef struct {
 	/**
 	 * sender's user uuid
 	 */
-	char useruuid[kBFStringUUIDStringLength];
+	uuid_t useruuid;
 
 	/**
 	 * chat room uuid
 	 */
-	char chatuuid[kBFStringUUIDStringLength];
+	uuid_t chatuuid;
 
 	char data[DATA_BUFFER_SIZE];
 } PayloadMessage;
@@ -61,7 +63,7 @@ typedef struct {
 	/**
 	 * sender's user uuid
 	 */
-	char useruuid[kBFStringUUIDStringLength];
+	uuid_t useruuid;
 } PayloadUserInfo;
 
 typedef struct {

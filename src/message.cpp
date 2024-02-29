@@ -26,7 +26,7 @@ const char * Message::data() const {
 	return this->_packet.payload.message.data;
 }
 
-const char * Message::chatuuid() const {
-	return this->_packet.payload.message.chatuuid;
+void Message::getuuidchatroom(uuid_t uuid) const {
+	uuid_copy(uuid, this->_packet.payload.message.chatuuid);
 }
 

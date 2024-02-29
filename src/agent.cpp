@@ -96,7 +96,9 @@ void Agent::receivedPayloadTypeMessage(const Packet * pkt) {
 		return;
 	}
 
-	Chatroom * chatroom = ChatDirectoryGetChatroom(m->chatuuid());
+	uuid_t uuid;
+	m->getuuidchatroom(uuid);
+	Chatroom * chatroom = ChatDirectoryGetChatroom(uuid);
 	if (!chatroom) {
 		LOG_DEBUG("chatroom not available");
 		return;
