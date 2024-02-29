@@ -19,6 +19,7 @@ public:
 private:
 	AgentClient();
 	int start();
+	virtual void receivedPayloadTypeRequestInfo(const Packet * pkt);
 };
 
 #endif // AGENT_CLIENT_HPP

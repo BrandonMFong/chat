@@ -64,6 +64,10 @@ protected:
 	 * represents to user on other end we are representing
 	 */
 	SocketConnection * _sc;
+	
+	virtual void receivedPayloadTypeRequestInfo(const Packet * pkt);
+	void receivedPayloadTypeMessage(const Packet * pkt);
+	void receivedPayloadTypeUserInfo(const Packet * pkt);
 
 private:
 	/**
@@ -72,10 +76,6 @@ private:
 	 * caller does not own memory
 	 */
 	static Agent * getAgentForConnection(SocketConnection * sc);
-
-	void receivedPayloadTypeRequestInfo(const Packet * pkt);
-	void receivedPayloadTypeMessage(const Packet * pkt);
-	void receivedPayloadTypeUserInfo(const Packet * pkt);
 
 	/**
 	 * the remote user we represent
