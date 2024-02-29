@@ -4,6 +4,7 @@
  */
 
 #include "user.hpp"
+#include "log.hpp"
 #include <string.h>
 #include <unistd.h>
 #include <bflibcpp/bflibcpp.hpp>
@@ -78,6 +79,10 @@ const char * User::uuid() const {
 }
 
 void User::getuserinfo(PayloadUserInfo * ui) const {
+	if (!ui) return;
 
+	LOG_DEBUG("filling in user info");
+
+	strncpy(ui->username, this->_username, sizeof(this->_username));
 }
 

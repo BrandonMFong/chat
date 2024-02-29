@@ -120,6 +120,7 @@ void Agent::receivedPayloadTypeRequestInfo(const Packet * pkt) {
 
 	// Ask current user to give their information
 	const User * curruser = User::current();
+	curruser->getuserinfo(&p.payload.userinfo);
 }
 
 void Agent::packetReceive(SocketConnection * sc, const void * buf, size_t size) {
