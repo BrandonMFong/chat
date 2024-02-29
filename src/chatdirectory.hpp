@@ -6,9 +6,11 @@
 #ifndef CHAT_DIRECTORY_HPP
 #define CHAT_DIRECTORY_HPP
 
+#include <uuid/uuid.h>
+
 class Chatroom;
 
-Chatroom * ChatDirectoryGetChatroom(const char * chatroomuuid);
+Chatroom * ChatDirectoryGetChatroom(uuid_t chatroomuuid);
 void ChatDirectoryAddChatroom(Chatroom * room);
 
 int ChatDirectoryCount();

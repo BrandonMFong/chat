@@ -3,7 +3,6 @@
  * date: 1/24/24
  */
 
-#include "chat.h"
 #include "client.hpp"
 #include <netinet/in.h> //structure for storing address information 
 #include <stdio.h> 
@@ -53,7 +52,7 @@ void Client::init(void * in) {
 
 	SocketConnection * sc = NULL;
 	if (!err) {
-		sc = new SocketConnection(sock);
+		sc = new SocketConnection(sock, c);
 	}
 
 	if (!err) {

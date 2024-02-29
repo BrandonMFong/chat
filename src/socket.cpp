@@ -7,13 +7,11 @@
 #include "server.hpp"
 #include "connection.hpp"
 #include "client.hpp"
-#include "chat.h"
 #include "log.hpp"
 #include "office.hpp"
 #include <netinet/in.h> //structure for storing address information 
 #include <stdio.h> 
 #include <stdlib.h> 
-#include <unistd.h> 
 #include <sys/socket.h> //for socket APIs 
 #include <sys/types.h> 
 #include <unistd.h>
@@ -90,7 +88,7 @@ void Socket::setNewConnectionCallback(int (* cb)(SocketConnection * sc)) {
 	this->_cbnewconn = cb;
 }
 
-void Socket::setInStreamCallback(void (* cb)(const void * buf, size_t size)) {
+void Socket::setInStreamCallback(void (* cb)(SocketConnection * sc, const void * buf, size_t size)) {
 	this->_cbinstream = cb;
 }
 
@@ -105,18 +103,17 @@ void Socket::queueCallback(void * in) {
 		// if queue is not empty, send the next message
 		if (!skt->_inq.unsafeget().empty()) {
 			// get first message
-			struct Socket::Buffer * buf = skt->_inq.unsafeget().front();
+			struct Socket::Envelope * envelope = skt->_inq.unsafeget().front();
 
-			if (buf) {
-				skt->_cbinstream(buf->data, buf->size);
+			if (envelope) {
+				skt->_cbinstream(envelope->sc, envelope->buf.data, envelope->buf.size);
 			}
 
 			// pop queue
 			skt->_inq.unsafeget().pop();
 
-			BFFree(buf->data);
-			LOG_DEBUG("deleting memory at %x", buf);
-			BFFree(buf);
+			BFFree(envelope->buf.data);
+			BFFree(envelope);
 		}
 		skt->_inq.unlock();
 	}
@@ -149,18 +146,17 @@ void Socket::inStream(void * in) {
 	sc->_isready = true;	
 	while (!BFThreadAsyncIsCanceled(tid)) {
 		// create buffer
-		struct Socket::Buffer * buf = (struct Socket::Buffer *) malloc(sizeof(struct Socket::Buffer));
-		LOG_DEBUG("created memory at %x", buf);
-		buf->data = malloc(skt->_bufferSize);
+		struct Socket::Envelope * envelope = (struct Socket::Envelope *) malloc(sizeof(struct Socket::Envelope));
+		envelope->buf.data = malloc(skt->_bufferSize);
+		envelope->sc = sc;
 
 		// receive data from connections using buffer
-		//buf->size = recv(sc->descriptor(), buf->data, skt->_bufferSize, 0);
-		int err = sc->recvData(buf);
+		int err = sc->recvData(&envelope->buf);
         if (!err) {
-			skt->_inq.get().push(buf);
+			skt->_inq.get().push(envelope);
 		} else {
-			BFFree(buf->data);
-			BFFree(buf);
+			BFFree(envelope->buf.data);
+			BFFree(envelope);
 			break;
 		}
 	}
@@ -182,43 +178,22 @@ void Socket::outStream(void * in) {
 		// if queue is not empty, send the next message
 		if (!skt->_outq.unsafeget().empty()) {
 			// get top data
-			struct Socket::Buffer * buf = skt->_outq.unsafeget().front();
+			struct Socket::Envelope * envelope = skt->_outq.unsafeget().front();
+			//struct Socket::Buffer * buf = &envelope->buf;
 
 			// pop data from queue
 			skt->_outq.unsafeget().pop();
 
-			// send buf to each connection
-			skt->_connections.lock();
-			for (int i = 0; i < skt->_connections.unsafeget().count(); i++) {
-				send(skt->_connections.unsafeget().objectAtIndex(i)->descriptor(), buf->data, buf->size, 0);
-			}
-			skt->_connections.unlock();
+			envelope->sc->sendData(&envelope->buf);
 
-			BFFree(buf->data);
-			BFFree(buf);
+			BFFree(envelope->buf.data);
+			BFFree(envelope);
 		}
 		skt->_outq.unlock();
 	}
 
 	BFRelease(skt);
 	LOG_DEBUG("< %s", __func__);
-}
-
-int Socket::sendData(const void * data, size_t size) {
-	if (!data) return -2;
-
-	// make struct
-	struct Socket::Buffer * buf = (struct Socket::Buffer *) malloc(sizeof(struct Socket::Buffer));
-	if (!buf) return -2;
-
-	// make data
-	buf->data = malloc(size);
-	buf->size = size;
-	memcpy(buf->data, data, size);
-
-	// queue up buffer
-	int error = this->_outq.get().push(buf);
-	return error;
 }
 
 // called by subclasses whenever they get a new connection
@@ -255,8 +230,9 @@ int Socket::stop() {
 	// shutdown connections
 	this->_connections.lock();
 	for (int i = 0; i < this->_connections.unsafeget().count(); i++) {
-		shutdown(this->_connections.unsafeget().objectAtIndex(i)->descriptor(), SHUT_RDWR);
-		close(this->_connections.unsafeget().objectAtIndex(i)->descriptor());
+		this->_connections.unsafeget().objectAtIndex(i)->closeConnection();
+		//shutdown(this->_connections.unsafeget().objectAtIndex(i)->descriptor(), SHUT_RDWR);
+		//close(this->_connections.unsafeget().objectAtIndex(i)->descriptor());
 	}
 	this->_connections.unlock();
 

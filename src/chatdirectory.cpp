@@ -16,13 +16,15 @@ int ChatDirectoryCount() {
 	return chatrooms.get().count();
 }
 
-Chatroom * ChatDirectoryGetChatroom(const char * chatroomuuid) {
+Chatroom * ChatDirectoryGetChatroom(uuid_t chatroomuuid) {
 	Chatroom * room = NULL;
 	chatrooms.lock();
 	List<Chatroom *>::Node * n = chatrooms.unsafeget().first();
 	for (; n != NULL; n = n->next()) {
 		Chatroom * troom = n->object();
-		if (!BFStringCompareUUID(troom->uuid(), chatroomuuid)) {
+		uuid_t uuid;
+		troom->getuuid(uuid);
+		if (!uuid_compare(uuid, chatroomuuid)) {
 			room = troom;
 			break;
 		}

@@ -10,7 +10,6 @@
 #include <bflibcpp/list.hpp>
 #include <bflibcpp/atomic.hpp>
 #include <bflibcpp/object.hpp>
-#include <typepacket.h>
 
 extern "C" {
 #include <bflibc/thread.h>
@@ -30,6 +29,10 @@ public:
 	static Socket * create(const char mode, int * err);
 	virtual ~Socket();
 
+	/**
+	 * returns: SOCKET_MODE_SERVER if we are a server or
+	 * SOCKET_MODE_CLIENT if we are a client
+	 */
 	virtual const char mode() const = 0;
 
 	int start();
@@ -41,14 +44,14 @@ public:
 	 * data : data to be sent
 	 * size : size of data buffer
 	 */
-	int sendData(const void * data, size_t size);
+	//int sendData(const void * data, size_t size);
 
 	/**
 	 * sets callback that gets invoked when incoming data is ready to be handled
 	 *
 	 * callback owner MUST copy buffer data because the data will be lost when it returns
 	 */
-	void setInStreamCallback(void (* cb)(const void * buf, size_t size));
+	void setInStreamCallback(void (* cb)(SocketConnection * sc, const void * buf, size_t size));
 
 	/**
 	 * see _cbnewconn
@@ -101,7 +104,7 @@ private:
 	 * call back that gets called in `queueCallback` when it
 	 * pops data from in q
 	 */
-	void (* _cbinstream)(const void * buf, size_t size);
+	void (* _cbinstream)(SocketConnection * sc, const void * buf, size_t size);
 
 	/**
 	 * receives packets and puts them in a queue
@@ -117,22 +120,41 @@ private:
 	BFThreadAsyncID _tidq;
 	BFThreadAsyncID _tidout;
 
+	/**
+	 * buffer for incoming and outgoing data
+	 */
 	struct Buffer {
 		void * data;
 		size_t size;
 	};
 
+	/**
+	 * ties relationship for buffer data with socket connection
+	 *
+	 * that way outStream thread knows who to send
+	 * buffer data to
+	 */
+	struct Envelope {
+		SocketConnection * sc;
+		struct Buffer buf;
+	};
+
+	/**
+	 * holds expected buffer size for all incoming and outcoming data
+	 *
+	 * implementer is responsible for setting this
+	 */
 	size_t _bufferSize;
 
 	/**
 	 * queues incoming data from recv
 	 */	
-	BF::Atomic<BF::Queue<struct Buffer *>> _inq;
+	BF::Atomic<BF::Queue<struct Envelope *>> _inq;
 
 	/**
 	 * queues outgoing data using send
 	 */
-	BF::Atomic<BF::Queue<struct Buffer *>> _outq;
+	BF::Atomic<BF::Queue<struct Envelope *>> _outq;
 };
 
 #endif // SOCKET_HPP

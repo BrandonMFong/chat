@@ -17,8 +17,7 @@ void _ChatroomMessageFree(Message * m) {
 
 Chatroom::Chatroom(const char * uuid) : Object() {
 	this->updateConversation = false;
-	BFStringGetRandomUUIDString(this->_uuid);
-	memcpy(this->_uuid, uuid, sizeof(this->_uuid));
+	uuid_parse(uuid, this->_uuid);
 	memset(this->_name, 0, sizeof(this->_name));
 
 	// setup conversation thread
@@ -42,8 +41,8 @@ void Chatroom::setName(const char * name) {
 	strncpy(this->_name, name, sizeof(this->_name));
 }
 
-const char * Chatroom::uuid() {
-	return this->_uuid;
+void Chatroom::getuuid(uuid_t uuid) {
+	uuid_copy(uuid, this->_uuid);
 }
 
 int Chatroom::sendBuffer(const InputBuffer * buf) {
@@ -56,12 +55,15 @@ int Chatroom::sendBuffer(const InputBuffer * buf) {
 
 	// username
 	strncpy(p.payload.message.username, User::current()->username(), sizeof(p.payload.message.username));
-	
+
+	uuid_t uuid;
+	User::current()->getuuid(uuid);	
+
 	// user uuid
-	strncpy(p.payload.message.useruuid, User::current()->uuid(), sizeof(p.payload.message.useruuid));
+	uuid_copy(p.payload.message.useruuid, uuid);
 
 	// chatroom uuid
-	strncpy(p.payload.message.chatuuid, this->_uuid, kBFStringUUIDStringLength);
+	uuid_copy(p.payload.message.chatuuid, this->_uuid);
 
 	// time
 	p.header.time = BFTimeGetCurrentTime();

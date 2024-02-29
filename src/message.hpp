@@ -11,12 +11,15 @@
 
 class Message : public BF::Object {
 public:
+	/**
+	 * pkt : copies memory
+	 */
 	Message(const Packet * pkt);
 	virtual ~Message();
 
 	const char * username() const;
 	const char * data() const;
-	const char * chatuuid() const;
+	void getuuidchatroom(uuid_t uuid) const;
 private:
 	Packet _packet;
 };

@@ -42,13 +42,13 @@ public:
 
 	int sendBuffer(const InputBuffer * buf);
 
-	const char * uuid();
+	void getuuid(uuid_t uuid);
 
 	BF::Atomic<BF::List<Message *>> conversation;
 	BF::Atomic<bool> updateConversation;
 
 private:
-	char _uuid[kBFStringUUIDStringLength];
+	uuid_t _uuid;
 	char _name[CHAT_ROOM_NAME_SIZE];
 };
 

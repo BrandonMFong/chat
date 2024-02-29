@@ -16,30 +16,8 @@
 namespace Office {
 
 /**
- * handles incoming packets
- *
- * packet gets passed from socket to us
- */
-void PacketReceive(const void * buf, size_t size);
-
-/**
  */
 int PacketSend(const Packet * pkt);
-
-/**
- * this is a callback described by the Socket family
- *
- * this will get called when a new connection is made
- * by the socket. 
- *
- * in this function we will create an agent that represents
- * the conversation between us and the user on the other end.
- *
- * Once created, the agent will get to know the user on ther
- * other end and get them ready to join a conversation.
- */
-int NewConnection(SocketConnection * sc);
-
 }
 
 #endif // OFFICE_HPP

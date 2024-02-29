@@ -250,7 +250,6 @@ int InterfaceWindowLoop() {
 
 int InterfaceGatherUserData() {
 	// set up user
-	User * currentuser = User::current();
 	char username[USER_NAME_SIZE];
 	printf("username: ");
 	fgets(username, sizeof(username), stdin);
@@ -259,7 +258,8 @@ int InterfaceGatherUserData() {
 		username[strlen(username)- 1] = '\0';
 	}
 
-	currentuser->setUsername(username);
+	User * currentuser = User::create(username);
+	User::setCurrent(currentuser);
 
 	return 0;
 }

@@ -11,8 +11,8 @@ CXXLINKS = -lpthread -lncurses -luuid
 FILES = \
 server client interface socket \
 log user inputbuffer office \
-chatroom chatdirectory message agentlist \
-connection agent
+chatroom chatdirectory message \
+connection agent agentclient agentserver
 
 ### Release settings
 R_CXXFLAGS += -Isrc/ -Iexternal/libs/$(BF_LIB_RPATH_RELEASE)
