@@ -25,10 +25,12 @@ void _AgentReleaseAgent(Agent * a) {
 
 Agent::Agent() {
 	this->_sc = NULL;
+	this->_remoteuser = NULL;
 }
 
 Agent::~Agent() {
 	this->_sc = NULL; // we don't own memory
+	this->_remoteuser; // we do not own memory
 }
 
 Agent * Agent::create(SocketConnection * sc) {
@@ -128,7 +130,12 @@ void Agent::receivedPayloadTypeRequestInfo(const Packet * pkt) {
 }
 
 void Agent::receivedPayloadTypeUserInfo(const Packet * pkt) {
+	if (!pkt)
+		return;
 	LOG_DEBUG("received user info");
+
+	// save user and save a record of the user
+	this->_remoteuser = User::create(&pkt->payload.userinfo);
 }
 
 void Agent::packetReceive(SocketConnection * sc, const void * buf, size_t size) {

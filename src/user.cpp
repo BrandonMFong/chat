@@ -43,29 +43,50 @@ void User::setCurrent(User * user) {
 	currentuser.set(user);
 }
 
-User::User() {
-	this->_username[0] = '\0';
-	uuid_generate_random(this->_uuid);
+User::User(const char * username, const uuid_t uuid) {
+	strncpy(this->_username, username, sizeof(this->_username));
+	uuid_copy(this->_uuid, uuid);
 }
 
 User::~User() {
 }
 
-User * User::create(const char * username) {
-	User * user = new User;
+void _UserAddUserToUsers(User * user) {
+	users.lock();
 
-	if (user) {
-		strncpy(user->_username, username, sizeof(user->_username));
-
-		users.lock();
-
-		if (users.unsafeget().count() == 0) {
-			users.unsafeget().setDeallocateCallback(_UserRelease);
-		}
-
-		users.unsafeget().add(user);
-		users.unlock();
+	if (users.unsafeget().count() == 0) {
+		users.unsafeget().setDeallocateCallback(_UserRelease);
 	}
+
+	users.unsafeget().add(user);
+	users.unlock();
+}
+
+User * User::create(const char * username) {
+	if (!username)
+		return NULL;
+
+	uuid_t uuid;
+	uuid_generate_random(uuid);
+	
+	User * user = new User(
+		username,
+		uuid
+	);
+	_UserAddUserToUsers(user);
+
+	return user;
+}
+
+User * User::create(const PayloadUserInfo * ui) {
+	if (!ui) 
+		return NULL;
+
+	User * user = new User(
+		ui->username,
+		ui->useruuid
+	);
+	_UserAddUserToUsers(user);
 
 	return user;
 }

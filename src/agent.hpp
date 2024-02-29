@@ -10,6 +10,7 @@
 #include "typepacket.h"
 
 class SocketConnection;
+class User;
 
 /**
  * Represents the remote user
@@ -54,6 +55,17 @@ public:
 
 protected:
 
+	Agent();
+
+	/*
+	 * socket connection
+	 *
+	 * the socket descriptor that is wrapped within this object
+	 * represents to user on other end we are representing
+	 */
+	SocketConnection * _sc;
+
+private:
 	/**
 	 * returns null if no agent was found for connection
 	 *
@@ -65,15 +77,10 @@ protected:
 	void receivedPayloadTypeMessage(const Packet * pkt);
 	void receivedPayloadTypeUserInfo(const Packet * pkt);
 
-	Agent();
-
-	/*
-	 * socket connection
-	 *
-	 * the socket descriptor that is wrapped within this object
-	 * represents to user on other end we are representing
+	/**
+	 * the remote user we represent
 	 */
-	SocketConnection * _sc;
+	User * _remoteuser;
 };
 
 #endif // AGENT_HPP

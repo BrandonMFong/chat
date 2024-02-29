@@ -11,7 +11,7 @@
 
 /**
  *
- * mem management : retain/release
+ * This class has its own memory management
  */
 class User : public BF::Object {
 public:
@@ -22,6 +22,13 @@ public:
 	 * management
 	 */
 	static User * create(const char * username);
+
+	/**
+	 * creates user based on user info
+	 *
+	 * caller does not own memory
+	 */
+	static User * create(const PayloadUserInfo * ui);
 
 	/**
 	 * gets current user that was assigned at app launch (see
@@ -43,7 +50,7 @@ public:
 	void getuserinfo(PayloadUserInfo * ui) const;
 
 private:
-	User();
+	User(const char * username, const uuid_t uuid);
 	char _username[USER_NAME_SIZE];
 	uuid_t _uuid;
 };
