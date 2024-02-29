@@ -60,6 +60,16 @@ void _UserAddUserToUsers(User * user) {
 
 	users.unsafeget().add(user);
 	users.unlock();
+
+#if DEBUG
+	uuid_t uuid;
+	user->getuuid(uuid);
+	char uuidstr[UUID_STR_LEN];
+	uuid_unparse_lower(uuid, uuidstr);
+	LOG_DEBUG("created user: %s",
+		uuidstr
+	);
+#endif
 }
 
 User * User::create(const char * username) {

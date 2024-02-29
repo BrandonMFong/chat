@@ -135,6 +135,16 @@ void Agent::receivedPayloadTypeUserInfo(const Packet * pkt) {
 
 	// save user and save a record of the user
 	this->_remoteuser = User::create(&pkt->payload.userinfo);
+
+#if DEBUG
+	uuid_t uuid;
+	this->_remoteuser->getuuid(uuid);
+	char uuidstr[UUID_STR_LEN];
+	uuid_unparse_lower(uuid, uuidstr);
+	LOG_DEBUG("user %s is now ready to join a chatroom",
+		uuidstr
+	);
+#endif
 }
 
 void Agent::packetReceive(SocketConnection * sc, const void * buf, size_t size) {
