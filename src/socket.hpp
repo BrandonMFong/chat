@@ -10,7 +10,6 @@
 #include <bflibcpp/list.hpp>
 #include <bflibcpp/atomic.hpp>
 #include <bflibcpp/object.hpp>
-#include <typepacket.h>
 
 extern "C" {
 #include <bflibc/thread.h>

@@ -12,6 +12,7 @@
 #include "message.hpp"
 #include "chatroom.hpp"
 #include "chatdirectory.hpp"
+#include "user.hpp"
 #include <bflibcpp/bflibcpp.hpp>
 
 using namespace BF;
@@ -83,7 +84,7 @@ Agent * Agent::getAgentForConnection(SocketConnection * sc) {
 
 	agents.unlock();
 
-	return NULL;
+	return result;
 }
 
 // handles incoming messages
@@ -116,10 +117,13 @@ void Agent::receivedPayloadTypeRequestInfo(const Packet * pkt) {
 	p.header.time = BFTimeGetCurrentTime();
 	p.header.type = kPayloadTypeUserInfo;
 
-	//p.payload.userinfo
+
+	// Ask current user to give their information
+	const User * curruser = User::current();
 }
 
 void Agent::packetReceive(SocketConnection * sc, const void * buf, size_t size) {
+	LOG_DEBUG("> %s", __func__);
 	if (!sc || !buf) 
 		return;
 
@@ -138,6 +142,7 @@ void Agent::packetReceive(SocketConnection * sc, const void * buf, size_t size) 
 		agent->receivedPayloadTypeRequestInfo(p);
 		break;
 	}
+	LOG_DEBUG("< %s", __func__);
 }
 
 int Agent::newConnection(SocketConnection * sc) {

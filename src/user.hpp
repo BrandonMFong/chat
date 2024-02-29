@@ -29,7 +29,7 @@ public:
 	 *
 	 * returns null if no current user was set yet
 	 */
-	static User * current();
+	static const User * current();
 
 	/**
 	 * sets the current user
@@ -37,8 +37,10 @@ public:
 	static void setCurrent(User * user);
 
 	virtual ~User();
-	const char * username();
-	const char * uuid();
+	const char * username() const;
+	const char * uuid() const;
+
+	void getuserinfo(PayloadUserInfo * ui) const;
 
 private:
 	User();

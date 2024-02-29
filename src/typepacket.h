@@ -22,12 +22,47 @@ typedef enum {
 
 	/**
 	 * empty payload. type signals receiver
-	 * send information
+	 * send information about their current user
 	 */
 	kPayloadTypeRequestInfo = 2,
 
+	/**
+	 * information about the user who sent 
+	 * data
+	 */
 	kPayloadTypeUserInfo = 3,
 } PayloadType;
+
+typedef struct {
+	/**
+	 * sender's user name
+	 */
+	char username[USER_NAME_SIZE];
+
+	/**
+	 * sender's user uuid
+	 */
+	char useruuid[kBFStringUUIDStringLength];
+
+	/**
+	 * chat room uuid
+	 */
+	char chatuuid[kBFStringUUIDStringLength];
+
+	char data[DATA_BUFFER_SIZE];
+} PayloadMessage;
+
+typedef struct {
+	/**
+	 * sender's user name
+	 */
+	char username[USER_NAME_SIZE];
+
+	/**
+	 * sender's user uuid
+	 */
+	char useruuid[kBFStringUUIDStringLength];
+} PayloadUserInfo;
 
 typedef struct {
 	//Header header;
@@ -47,37 +82,8 @@ typedef struct {
 	} header;
 
 	union {
-		struct {
-
-			/**
-			 * sender's user name
-			 */
-			char username[USER_NAME_SIZE];
-
-			/**
-			 * sender's user uuid
-			 */
-			char useruuid[kBFStringUUIDStringLength];
-
-			/**
-			 * chat room uuid
-			 */
-			char chatuuid[kBFStringUUIDStringLength];
-
-			char data[DATA_BUFFER_SIZE];
-		} message;
-
-		struct {
-			/**
-			 * sender's user name
-			 */
-			char username[USER_NAME_SIZE];
-
-			/**
-			 * sender's user uuid
-			 */
-			char useruuid[kBFStringUUIDStringLength];
-		} userinfo;
+		PayloadMessage message;
+		PayloadUserInfo userinfo;
 	} payload;
 } Packet;
 

@@ -5,6 +5,7 @@
 
 #include "user.hpp"
 #include <string.h>
+#include <unistd.h>
 #include <bflibcpp/bflibcpp.hpp>
 
 using namespace BF;
@@ -16,7 +17,24 @@ void _UserRelease(User * user) {
 	BFRelease(user);
 }
 
-User * User::current() {
+const User * User::current() {
+	while (!currentuser.get()) {
+		// current user is stil null
+		// 
+		// we will wait for current
+		// user to be set before returning
+		usleep(50);
+	}
+
+	// should we return current user as an 
+	// atomic object?
+	//
+	// I believe we should revisit this if
+	// we are intending to modify user
+	// outside of this
+	//
+	// for now we are going to return curr
+	// user as const
 	return currentuser.get();
 }
 
@@ -51,11 +69,15 @@ User * User::create(const char * username) {
 	return user;
 }
 
-const char * User::username() {
+const char * User::username() const {
 	return this->_username;
 }
 
-const char * User::uuid() {
+const char * User::uuid() const {
 	return this->_uuid;
+}
+
+void User::getuserinfo(PayloadUserInfo * ui) const {
+
 }
 
