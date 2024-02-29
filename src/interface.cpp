@@ -259,6 +259,7 @@ int InterfaceGatherUserData() {
 	}
 
 	User * currentuser = User::create(username);
+	User::setCurrent(currentuser);
 
 	return 0;
 }

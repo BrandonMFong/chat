@@ -9,11 +9,15 @@
 
 using namespace BF;
 
-User * currentuser = 0;
+Atomic<User *> currentuser;
 Atomic<List<User * >> users;
 
 User * User::current() {
-	return currentuser;
+	return currentuser.get();
+}
+
+void User::setCurrent(User * user) {
+	currentuser.set(user);
 }
 
 User::User() {

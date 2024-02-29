@@ -11,6 +11,14 @@
 #include "connection.hpp"
 #include <bflibcpp/bflibcpp.hpp>
 
+using namespace BF;
+
+Atomic<List<Agent *>> agents;
+
+void _AgentReleaseAgent(Agent * a) {
+	Delete(a);
+}
+
 Agent::Agent() {
 	this->_sc = NULL;
 }
@@ -36,6 +44,17 @@ Agent * Agent::create(SocketConnection * sc) {
 
 	if (result) {
 		result->_sc = sc;
+
+		agents.lock();
+
+		// if agents are 0, then we can safely assume
+		// the callback hasn't been set yet
+		if (agents.unsafeget().count() == 0) {
+			agents.unsafeget().setDeallocateCallback(_AgentReleaseAgent);
+		}
+
+		agents.unsafeget().add(result);
+		agents.unlock();
 	}
 
 	return result;
