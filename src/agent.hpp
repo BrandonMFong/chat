@@ -14,7 +14,8 @@ class SocketConnection;
 /**
  * Represents the remote user
  *
- * mem management : retain/release
+ * There are two subclasses, AgentServer & AgentClient. Both represent remote users but 
+ * AgentServer are agents that are on a running server mode and client mode for the other
  */
 class Agent : public BF::Object {
 public:
@@ -35,9 +36,11 @@ public:
 	static int newConnection(SocketConnection * sc);
 
 	/**
-	 * creates new agent.  we do not own agent.
+	 * creates new agent	
 	 *
 	 * sc : we do not own the socket connection object
+	 *
+	 * caller can retain or release but they do not own memory
 	 */
 	static Agent * create(SocketConnection * sc);
 

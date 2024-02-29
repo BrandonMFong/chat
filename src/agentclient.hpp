@@ -8,6 +8,9 @@
 
 #include "agent.hpp"
 
+/**
+ * represents remote user in client mode
+ */
 class AgentClient : public Agent {
 	friend class Agent;
 public:
