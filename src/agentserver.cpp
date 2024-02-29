@@ -39,6 +39,7 @@ void AgentServer::handshake(void * in) {
 
 	Packet p;
 	memset(&p, 0, sizeof(p));
+	p.header.time = BFTimeGetCurrentTime();
 	p.header.type = kPayloadTypeRequestInfo;
 	a->_sc->queueData(&p, sizeof(p));
 }

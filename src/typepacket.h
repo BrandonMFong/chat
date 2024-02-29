@@ -25,6 +25,8 @@ typedef enum {
 	 * send information
 	 */
 	kPayloadTypeRequestInfo = 2,
+
+	kPayloadTypeUserInfo = 3,
 } PayloadType;
 
 typedef struct {
@@ -64,6 +66,18 @@ typedef struct {
 
 			char data[DATA_BUFFER_SIZE];
 		} message;
+
+		struct {
+			/**
+			 * sender's user name
+			 */
+			char username[USER_NAME_SIZE];
+
+			/**
+			 * sender's user uuid
+			 */
+			char useruuid[kBFStringUUIDStringLength];
+		} userinfo;
 	} payload;
 } Packet;
 

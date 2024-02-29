@@ -17,6 +17,22 @@ class SocketConnection;
  */
 class Agent : public BF::Object {
 public:
+	static void packetReceive(SocketConnection * sc, const void * buf, size_t size);
+
+	/**
+	 * this is a callback described by the Socket family
+	 *
+	 * this will get called when a new connection is made
+	 * by the socket. 
+	 *
+	 * in this function we will create an agent that represents
+	 * the conversation between us and the user on the other end.
+	 *
+	 * Once created, the agent will get to know the user on ther
+	 * other end and get them ready to join a conversation.
+	 */
+	static int newConnection(SocketConnection * sc);
+
 	/**
 	 * creates new agent.  we do not own agent.
 	 *

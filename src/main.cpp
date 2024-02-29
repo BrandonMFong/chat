@@ -15,6 +15,7 @@
 #include "log.hpp"
 #include "user.hpp"
 #include "office.hpp"
+#include "agent.hpp"
 #include <bflibcpp/bflibcpp.hpp>
 
 #define ARGUMENT_SERVER "server"
@@ -67,8 +68,8 @@ int main(int argc, char * argv[]) {
 		skt = Socket::create(mode, &result);
 
 		if (skt) {
-			skt->setInStreamCallback(Office::PacketReceive);
-			skt->setNewConnectionCallback(Office::NewConnection);
+			skt->setInStreamCallback(Agent::packetReceive);
+			skt->setNewConnectionCallback(Agent::newConnection);
 			skt->setBufferSize(sizeof(Packet));
 		}
 	}
