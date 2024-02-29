@@ -8,7 +8,6 @@
 #include "socket.hpp"
 #include "user.hpp"
 #include "chatroom.hpp"
-#include "chatdirectory.hpp"
 #include "message.hpp"
 #include "agent.hpp"
 #include "log.hpp"

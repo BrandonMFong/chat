@@ -9,15 +9,23 @@
 #include "log.hpp"
 #include "message.hpp"
 #include <string.h>
-#include <bflibcpp/delete.hpp>
+#include <bflibcpp/bflibcpp.hpp>
+
+using namespace BF;
+
+Atomic<List<Chatroom *>> chatrooms;
 
 void _ChatroomMessageFree(Message * m) {
 	Delete(m);
 }
 
-Chatroom::Chatroom(const char * uuid) : Object() {
+void _ChatroomRelease(Chatroom * cr) {
+	BFRelease(cr);
+}
+
+Chatroom::Chatroom() : Object() {
 	this->updateConversation = false;
-	uuid_parse(uuid, this->_uuid);
+	uuid_generate_random(this->_uuid);
 	memset(this->_name, 0, sizeof(this->_name));
 
 	// setup conversation thread
@@ -26,6 +34,23 @@ Chatroom::Chatroom(const char * uuid) : Object() {
 
 Chatroom::~Chatroom() {
 
+}
+
+void _ChatroomAddRoomToChatrooms(Chatroom * cr) {
+	chatrooms.lock();
+
+	if (chatrooms.unsafeget().count() == 0) {
+		chatrooms.unsafeget().setDeallocateCallback(_ChatroomRelease);
+	}
+
+	chatrooms.unsafeget().add(cr);
+	chatrooms.unlock();
+}
+
+Chatroom * Chatroom::create() {
+	Chatroom * cr = new Chatroom;
+	_ChatroomAddRoomToChatrooms(cr);
+	return cr;
 }
 
 int Chatroom::addMessage(Message * msg) {
@@ -75,8 +100,27 @@ int Chatroom::sendBuffer(const InputBuffer * buf) {
 	// its list
 	this->addMessage(new Message(&p));
 
-	// send out message to the rest of the users in the 
+	// send out message to the rest of the chatrooms.in the 
 	// chatroom
 	return Office::PacketSend(&p);
 }
+
+Chatroom * Chatroom::getChatroom(uuid_t chatroomuuid) {
+	Chatroom * room = NULL;
+	chatrooms.lock();
+	List<Chatroom *>::Node * n = chatrooms.unsafeget().first();
+	for (; n != NULL; n = n->next()) {
+		Chatroom * troom = n->object();
+		uuid_t uuid;
+		troom->getuuid(uuid);
+		if (!uuid_compare(uuid, chatroomuuid)) {
+			room = troom;
+			break;
+		}
+	}
+	chatrooms.unlock();
+
+	return room;
+}
+
 

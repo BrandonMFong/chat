@@ -14,7 +14,6 @@
 #include "office.hpp"
 #include "chatroom.hpp"
 #include "message.hpp"
-#include "chatdirectory.hpp"
 
 using namespace BF;
 
@@ -267,7 +266,7 @@ int InterfaceGatherUserData() {
 int InterfaceLobbyRun() {
 	// set up chat room name
 	char chatroomname[CHAT_ROOM_NAME_SIZE];
-	chatroom = new Chatroom("ea46019c-4c39-4838-b44d-6a990bbb4ae9");
+	chatroom = Chatroom::create();
 
 	printf("chat room name: ");
 	fgets(chatroomname, sizeof(chatroomname), stdin);
@@ -277,7 +276,6 @@ int InterfaceLobbyRun() {
 	}
 	
 	chatroom->setName(chatroomname);
-	ChatDirectoryAddChatroom(chatroom);
 	
 	return 0;
 }

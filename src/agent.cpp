@@ -11,7 +11,6 @@
 #include "connection.hpp"
 #include "message.hpp"
 #include "chatroom.hpp"
-#include "chatdirectory.hpp"
 #include "user.hpp"
 #include <bflibcpp/bflibcpp.hpp>
 
@@ -100,7 +99,7 @@ void Agent::receivedPayloadTypeMessage(const Packet * pkt) {
 
 	uuid_t uuid;
 	m->getuuidchatroom(uuid);
-	Chatroom * chatroom = ChatDirectoryGetChatroom(uuid);
+	Chatroom * chatroom = Chatroom::getChatroom(uuid);
 	if (!chatroom) {
 		LOG_DEBUG("chatroom not available");
 		return;

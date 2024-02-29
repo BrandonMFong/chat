@@ -21,14 +21,20 @@ class Message;
 
 /**
  * In charge of creating message
+ *
+ * This class has its own memory management
  */
 class Chatroom : public BF::Object {
 public:
-	
 	/**
-	 * inits chatroom with uuid
+	 * creates a chatroom
+	 *
+	 * we do not own memory
 	 */
-	Chatroom(const char * uuid);
+	static Chatroom * create();
+
+	static Chatroom * getChatroom(uuid_t chatroomuuid);
+
 	virtual ~Chatroom();
 
 	/**
@@ -48,6 +54,11 @@ public:
 	BF::Atomic<bool> updateConversation;
 
 private:
+	/**
+	 * inits chatroom with uuid
+	 */
+	Chatroom();
+
 	uuid_t _uuid;
 	char _name[CHAT_ROOM_NAME_SIZE];
 };

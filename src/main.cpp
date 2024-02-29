@@ -9,7 +9,6 @@
 #include <stdio.h>
 #include <string.h>
 #include "server.hpp"
-#include "chatdirectory.hpp"
 #include "client.hpp"
 #include "interface.hpp"
 #include "log.hpp"
