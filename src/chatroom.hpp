@@ -33,6 +33,7 @@ public:
 	 */
 	static Chatroom * create();
 
+	/// returns chat room for uuid
 	static Chatroom * getChatroom(uuid_t chatroomuuid);
 
 	virtual ~Chatroom();
