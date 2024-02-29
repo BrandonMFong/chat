@@ -44,6 +44,10 @@ const char SocketConnection::mode() {
 	return this->_sktref->mode();
 }
 
+void SocketConnection::getuuid(uuid_t uuid) {
+	memcpy(uuid, this->_uuid, sizeof(uuid_t));
+}
+
 int SocketConnection::queueData(const void * data, size_t size) {
 	if (!data) return -2;
 

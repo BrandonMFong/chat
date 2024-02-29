@@ -50,6 +50,11 @@ public:
 
 protected:
 
+	/**
+	 * returns null if no agent was found for connection
+	 */
+	static Agent * getAgentForConnection(SocketConnection * sc);
+
 	Agent();
 
 	/*

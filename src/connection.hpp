@@ -41,6 +41,11 @@ public:
 	 */
 	const char mode();
 
+	/**
+	 * returns uuid
+	 */
+	void getuuid(uuid_t uuid);
+
 private:
 
 	/**
@@ -57,6 +62,9 @@ private:
 	int sendData(const void * buf);
 	int recvData(void * buf);
 
+	/**
+	 * uniquely ids the connection
+	 */
 	uuid_t _uuid;
 	
 	/// socket descriptor

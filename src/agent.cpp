@@ -63,6 +63,29 @@ Agent * Agent::create(SocketConnection * sc) {
 	return result;
 }
 
+Agent * Agent::getAgentForConnection(SocketConnection * sc) {
+	if (!sc) return NULL;
+
+	agents.lock();
+
+	uuid_t uuid;
+	sc->getuuid(uuid);
+
+	Agent * result = NULL;
+	List<Agent *>::Node * n = agents.unsafeget().first();
+	for (; n; n = n->next()) {
+		result = n->object();
+		uuid_t tuuid;
+		result->_sc->getuuid(tuuid);
+		if (!uuid_compare(tuuid, uuid))
+			break;
+	}
+
+	agents.unlock();
+
+	return NULL;
+}
+
 // handles incoming messages
 void _OfficeReceivedPayloadTypeMessage(SocketConnection * sc, const Packet * p) {
 	// chatroom will own this memory
