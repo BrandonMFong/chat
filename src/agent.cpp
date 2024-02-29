@@ -16,7 +16,7 @@ using namespace BF;
 Atomic<List<Agent *>> agents;
 
 void _AgentReleaseAgent(Agent * a) {
-	Delete(a);
+	BFRelease(a);
 }
 
 Agent::Agent() {

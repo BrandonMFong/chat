@@ -12,6 +12,10 @@ using namespace BF;
 Atomic<User *> currentuser;
 Atomic<List<User * >> users;
 
+void _UserRelease(User * user) {
+	BFRelease(user);
+}
+
 User * User::current() {
 	return currentuser.get();
 }

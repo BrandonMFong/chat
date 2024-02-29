@@ -12,11 +12,15 @@ class SocketConnection;
 
 /**
  * Represents the remote user
+ *
+ * mem management : retain/release
  */
 class Agent : public BF::Object {
 public:
 	/**
-	 * we do not own the socket connection object
+	 * creates new agent.  we do not own agent.
+	 *
+	 * sc : we do not own the socket connection object
 	 */
 	static Agent * create(SocketConnection * sc);
 

@@ -9,6 +9,10 @@
 #include <bflibcpp/object.hpp>
 #include <typepacket.h>
 
+/**
+ *
+ * mem management : retain/release
+ */
 class User : public BF::Object {
 public:
 	/**
