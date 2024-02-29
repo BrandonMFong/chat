@@ -8,9 +8,5 @@
 
 #define CHAT_ROOM_MAX_SIZE 5
 
-class User;
-
-User * UserGetCurrent();
-
 #endif // CHAT_HPP
 

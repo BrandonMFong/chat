@@ -11,13 +11,13 @@
 
 class User : public BF::Object {
 public:
+	static User * create(const char * username);
 	static User * current();
-	User();
 	virtual ~User();
-	void setUsername(const char * username);
 	const char * username();
 	const char * uuid();
 private:
+	User();
 	char _username[USER_NAME_SIZE];
 	char _uuid[kBFStringUUIDStringLength];
 };

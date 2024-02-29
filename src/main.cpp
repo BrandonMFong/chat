@@ -21,7 +21,6 @@
 #define ARGUMENT_CLIENT "client"
 
 LOG_INIT
-User * _curruser = 0;
 
 void Help(const char * toolname) {
 	printf("usage: %s\n", toolname);
@@ -52,15 +51,6 @@ int ArgumentsRead(int argc, char * argv[], char * mode) {
 	return 0;
 }
 
-int InitializeUser() {
-	_curruser = new User;
-	return 0;
-}
-
-User * UserGetCurrent() {
-	return _curruser;
-}
-
 int main(int argc, char * argv[]) {
 	int result = 0;
 	char mode = 0;
@@ -84,10 +74,6 @@ int main(int argc, char * argv[]) {
 	}
 
 	if (!result) {
-		result = InitializeUser();
-	}
-
-	if (!result) {
 		result = skt->start();
 	}
 
@@ -104,7 +90,6 @@ int main(int argc, char * argv[]) {
 	}
 
 	BFRelease(skt);
-	Delete(_curruser);
 
 	LOG_DEBUG("============ App ended ============");
 	LOG_CLOSE;

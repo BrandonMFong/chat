@@ -5,26 +5,33 @@
 
 #include "user.hpp"
 #include <string.h>
+#include <bflibcpp/bflibcpp.hpp>
 
-User * _currentuser = 0;
+using namespace BF;
+
+User * currentuser = 0;
+Atomic<List<User * >> users;
 
 User * User::current() {
-	return _currentuser;
+	return currentuser;
 }
 
 User::User() {
 	this->_username[0] = '\0';
 	BFStringGetRandomUUIDString(this->_uuid);
-	if (_currentuser == NULL)
-		_currentuser = this;
 }
 
 User::~User() {
-	_currentuser = NULL;
 }
 
-void User::setUsername(const char * username) {
-	strncpy(this->_username, username, sizeof(this->_username));
+User * User::create(const char * username) {
+	User * user = new User;
+
+	if (user) {
+		strncpy(user->_username, username, sizeof(user->_username));
+	}
+
+	return user;
 }
 
 const char * User::username() {
