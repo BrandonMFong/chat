@@ -87,9 +87,9 @@ Agent * Agent::getAgentForConnection(SocketConnection * sc) {
 }
 
 // handles incoming messages
-void _OfficeReceivedPayloadTypeMessage(SocketConnection * sc, const Packet * p) {
+void Agent::receivedPayloadTypeMessage(const Packet * pkt) {
 	// chatroom will own this memory
-	Message * m = new Message(p);
+	Message * m = new Message(pkt);
 	if (!m) {
 		LOG_DEBUG("couldn't create message object");
 		return;
@@ -108,7 +108,7 @@ void _OfficeReceivedPayloadTypeMessage(SocketConnection * sc, const Packet * p) 
 	}
 }
 
-void _OfficeReceivedPayloadTypeRequestInfo(SocketConnection * sc, const Packet * inpkt) {
+void Agent::receivedPayloadTypeRequestInfo(const Packet * pkt) {
 	LOG_DEBUG("our user info is being requested");
 
 	Packet p;
@@ -120,20 +120,22 @@ void _OfficeReceivedPayloadTypeRequestInfo(SocketConnection * sc, const Packet *
 }
 
 void Agent::packetReceive(SocketConnection * sc, const void * buf, size_t size) {
-	const Packet * p = (const Packet *) buf;
-	if (!p) {
-		LOG_DEBUG("data is null");
+	if (!sc || !buf) 
 		return;
-	}
+
+	const Packet * p = (const Packet *) buf;
+	Agent * agent = Agent::getAgentForConnection(sc);
+	if (!agent)
+		return;
 
 	LOG_DEBUG("received packet");
 
 	switch (p->header.type) {
 	case kPayloadTypeMessage:
-		_OfficeReceivedPayloadTypeMessage(sc, p);
+		agent->receivedPayloadTypeMessage(p);
 		break;
 	case kPayloadTypeRequestInfo:
-		_OfficeReceivedPayloadTypeRequestInfo(sc, p);
+		agent->receivedPayloadTypeRequestInfo(p);
 		break;
 	}
 }

@@ -7,6 +7,7 @@
 #define AGENT_HPP
 
 #include <bflibcpp/object.hpp>
+#include "typepacket.h"
 
 class SocketConnection;
 
@@ -52,8 +53,13 @@ protected:
 
 	/**
 	 * returns null if no agent was found for connection
+	 *
+	 * caller does not own memory
 	 */
 	static Agent * getAgentForConnection(SocketConnection * sc);
+
+	void receivedPayloadTypeRequestInfo(const Packet * pkt);
+	void receivedPayloadTypeMessage(const Packet * pkt);
 
 	Agent();
 

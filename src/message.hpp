@@ -11,6 +11,9 @@
 
 class Message : public BF::Object {
 public:
+	/**
+	 * pkt : copies memory
+	 */
 	Message(const Packet * pkt);
 	virtual ~Message();
 
