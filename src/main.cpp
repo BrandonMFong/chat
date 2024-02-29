@@ -22,6 +22,9 @@
 #define ARGUMENT_CLIENT "client"
 
 LOG_INIT
+	
+Socket * skt = NULL;
+char sktmode = '\0';
 
 void Help(const char * toolname) {
 	printf("usage: %s\n", toolname);
@@ -52,15 +55,19 @@ int ArgumentsRead(int argc, char * argv[], char * mode) {
 	return 0;
 }
 
+const char ChatSocketGetMode() {
+	return sktmode;
+}
+
 int main(int argc, char * argv[]) {
 	int result = 0;
 	char mode = 0;
-	Socket * skt = NULL;
 
 	result = ArgumentsRead(argc, argv, &mode);
 
-	if (mode == SOCKET_MODE_CLIENT)
-		LOG_OPEN;
+	sktmode = mode;
+
+	LOG_OPEN;
 
 	LOG_DEBUG("============ App started ============");
 

@@ -51,6 +51,9 @@ typedef struct {
 	 */
 	uuid_t chatuuid;
 
+	/**
+	 * raw message
+	 */
 	char data[DATA_BUFFER_SIZE];
 } PayloadMessage;
 

@@ -4,6 +4,7 @@
  */
 
 #include "log.hpp"
+#include "chat.hpp"
 #include <stdarg.h>
 #include <bflibcpp/bflibcpp.hpp>
 #include <sys/types.h>
@@ -25,15 +26,17 @@ void _LogWriteEntry(BFFileWriter * filewriter, int mode, ...) {
 	BFDateTime dt = {0};
 	if (BFTimeGetCurrentDateTime(&dt)) return;
 
+	char sockmode = ChatSocketGetMode();
+
 	switch (mode) {
 		case 'd': // debug
-			format = "[%02d/%02d/%04d, %02d:%02d:%02d] DEBUG - %s";
+			format = "[%02d/%02d/%04d, %02d:%02d:%02d] DEBUG (%c) - %s";
 			break;
 		case 'e': // error
-			format = "[%02d/%02d/%04d, %02d:%02d:%02d] ERROR - %s";
+			format = "[%02d/%02d/%04d, %02d:%02d:%02d] ERROR (%c) - %s";
 			break;
 		default: // normal
-			format = "[%02d/%02d/%04d, %02d:%02d:%02d] - %s";
+			format = "[%02d/%02d/%04d, %02d:%02d:%02d] (%c) - %s";
 			break;
 	}
 
@@ -49,6 +52,7 @@ void _LogWriteEntry(BFFileWriter * filewriter, int mode, ...) {
 		dt.hour,
 		dt.minute,
 		dt.second,
+		sockmode,
 		logstr
 	);
 

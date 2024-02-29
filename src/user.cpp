@@ -84,5 +84,6 @@ void User::getuserinfo(PayloadUserInfo * ui) const {
 	LOG_DEBUG("filling in user info");
 
 	strncpy(ui->username, this->_username, sizeof(this->_username));
+	this->getuuid(ui->useruuid);
 }
 

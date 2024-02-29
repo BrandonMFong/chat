@@ -119,10 +119,16 @@ void Agent::receivedPayloadTypeRequestInfo(const Packet * pkt) {
 	p.header.time = BFTimeGetCurrentTime();
 	p.header.type = kPayloadTypeUserInfo;
 
-
 	// Ask current user to give their information
 	const User * curruser = User::current();
 	curruser->getuserinfo(&p.payload.userinfo);
+
+	// send the information back
+	this->_sc->queueData(&p, sizeof(p));
+}
+
+void Agent::receivedPayloadTypeUserInfo(const Packet * pkt) {
+	LOG_DEBUG("received user info");
 }
 
 void Agent::packetReceive(SocketConnection * sc, const void * buf, size_t size) {
@@ -143,6 +149,9 @@ void Agent::packetReceive(SocketConnection * sc, const void * buf, size_t size) 
 		break;
 	case kPayloadTypeRequestInfo:
 		agent->receivedPayloadTypeRequestInfo(p);
+		break;
+	case kPayloadTypeUserInfo:
+		agent->receivedPayloadTypeUserInfo(p);
 		break;
 	}
 	LOG_DEBUG("< %s", __func__);
