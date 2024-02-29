@@ -37,6 +37,15 @@ User * User::create(const char * username) {
 
 	if (user) {
 		strncpy(user->_username, username, sizeof(user->_username));
+
+		users.lock();
+
+		if (users.unsafeget().count() == 0) {
+			users.unsafeget().setDeallocateCallback(_UserRelease);
+		}
+
+		users.unsafeget().add(user);
+		users.unlock();
 	}
 
 	return user;
