@@ -8,6 +8,8 @@
 #include "connection.hpp"
 #include <string.h>
 
+AgentClient * agentclient = NULL;
+
 AgentClient::AgentClient() : Agent() {
 
 }
@@ -29,5 +31,9 @@ void AgentClient::receivedPayloadTypeRequestInfo(const Packet * pkt) {
 	p.header.time = BFTimeGetCurrentTime();
 	p.header.type = kPayloadTypeRequestUserInfo;
 	this->_sc->queueData(&p, sizeof(p));
+}
+
+Agent * AgentClient::getmain() {
+	return agentclient;
 }
 

@@ -74,6 +74,10 @@ void Server::pollthread(void * in) {
 		if (!err) {
 			if (s->_cbnewconn)
 				err = s->_cbnewconn(sc);
+
+			if (err) {
+				LOG_DEBUG("error returned on new connection: %d", err);
+			}
 		}
 
 		// if there are no errors with connection then

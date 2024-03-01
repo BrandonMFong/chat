@@ -37,7 +37,11 @@ Chatroom::~Chatroom() {
 
 }
 
-void _ChatroomAddRoomToChatrooms(Chatroom * cr) {
+int Chatroom::getChatroomsCount() {
+	return chatrooms.get().count();
+}
+
+void Chatroom::addRoomToChatrooms(Chatroom * cr) {
 	chatrooms.lock();
 
 	if (chatrooms.unsafeget().count() == 0) {
@@ -47,14 +51,6 @@ void _ChatroomAddRoomToChatrooms(Chatroom * cr) {
 	BFRetain(cr);
 	chatrooms.unsafeget().add(cr);
 	chatrooms.unlock();
-}
-
-Chatroom * Chatroom::create(const char * name) {
-	Chatroom * cr = new Chatroom;
-	strncpy(cr->_name, name, sizeof(cr->_name));
-
-	_ChatroomAddRoomToChatrooms(cr);
-	return cr;
 }
 
 int Chatroom::addMessage(Message * msg) {
@@ -125,6 +121,11 @@ Chatroom * Chatroom::getChatroom(uuid_t chatroomuuid) {
 
 int Chatroom::updateChatrooms() {
 	LOG_DEBUG("pinging server to give us an up to date list of chatrooms we can join");
+	Packet p;
+	memset(&p, 0, sizeof(p));
+	p.header.time = BFTimeGetCurrentTime();
+	p.header.type = kPayloadTypeRequestAvailableChatrooms;
+
 	return 0;
 }
 

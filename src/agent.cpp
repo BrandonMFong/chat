@@ -53,14 +53,25 @@ Agent * Agent::create(SocketConnection * sc) {
 
 		agents.lock();
 
-		// if agents are 0, then we can safely assume
-		// the callback hasn't been set yet
-		if (agents.unsafeget().count() == 0) {
-			agents.unsafeget().setDeallocateCallback(_AgentReleaseAgent);
+		// making sure that we do not declare more than
+		// 1 AgentClient in client mode
+		if (sc->mode() == SOCKET_MODE_CLIENT) {
+			if (agents.unsafeget().count() == 1) {
+				LOG_ERROR("cannot have more than one AgentClient");
+				BFRelease(result);
+				result = NULL;
+			}
+		} else {
+			// if agents are 0, then we can safely assume
+			// the callback hasn't been set yet
+			if (agents.unsafeget().count() == 0) {
+				agents.unsafeget().setDeallocateCallback(_AgentReleaseAgent);
+			}
+
+			BFRetain(result);
+			agents.unsafeget().add(result);
 		}
 
-		BFRetain(result);
-		agents.unsafeget().add(result);
 		agents.unlock();
 	}
 
@@ -179,9 +190,14 @@ void Agent::packetReceive(SocketConnection * sc, const void * buf, size_t size) 
 
 int Agent::newConnection(SocketConnection * sc) {
 	Agent * a = Agent::create(sc);
-	a->start();
 
-	BFRelease(a);
-	return 0;
+	if (!a) {
+		return 1;
+	} else {
+		a->start();
+
+		BFRelease(a);
+		return 0;
+	}
 }
 

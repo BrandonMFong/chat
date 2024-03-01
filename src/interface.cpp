@@ -14,6 +14,7 @@
 #include "inputbuffer.hpp"
 #include "office.hpp"
 #include "chatroom.hpp"
+#include "chatroomadmin.hpp"
 #include "message.hpp"
 
 using namespace BF;
@@ -290,7 +291,11 @@ int InterfaceLobbyRunClient() {
 	printf("waiting for chatrooms");
 	fflush(stdout);
 	Chatroom::updateChatrooms();
-	sleep(5);
+	while (1) {
+		sleep(1);
+		printf("chatrooms count: %d", Chatroom::getChatroomsCount());
+		fflush(stdout);
+	}
 
 	return 1;
 }
@@ -303,10 +308,10 @@ int InterfaceLobbyRunServer() {
 	fgets(chatroomname, sizeof(chatroomname), stdin);
 
 	if (chatroomname[strlen(chatroomname) - 1] == '\n') {
-		chatroomname[strlen(chatroomname)- 1] = '\0';
+		chatroomname[strlen(chatroomname) - 1] = '\0';
 	}
 	
-	chatroom = Chatroom::create(chatroomname);
+	chatroom = ChatroomAdmin::create(chatroomname);
 	BFRelease(chatroom);
 	
 	return 0;

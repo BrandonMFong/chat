@@ -10,11 +10,15 @@
 
 /**
  * represents remote user in client mode
+ *
+ * there should only be one AgentClient on the client side
  */
 class AgentClient : public Agent {
 	friend class Agent;
 public:
 	virtual ~AgentClient();
+
+	static Agent * getmain();
 
 private:
 	AgentClient();

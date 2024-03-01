@@ -26,17 +26,10 @@ class Message;
  */
 class Chatroom : public BF::Object {
 public:
-	/**
-	 * creates a chatroom
-	 *
-	 * name : chat room name
-	 *
-	 * retain count on return is +2. Caller is responsible for releasing object after they are done
-	 */
-	static Chatroom * create(const char * name);
-
 	/// returns chat room for uuid
 	static Chatroom * getChatroom(uuid_t chatroomuuid);
+
+	static int getChatroomsCount();
 
 	/**
 	 * pings server to get an up to date list 
@@ -67,10 +60,11 @@ protected:
 	 */
 	Chatroom();
 
-private:
+	static void addRoomToChatrooms(Chatroom * cr);
 
 	uuid_t _uuid;
 	char _name[CHAT_ROOM_NAME_SIZE];
+
 };
 
 #endif // CHATROOM_HPP
