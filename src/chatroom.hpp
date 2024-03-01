@@ -31,12 +31,6 @@ public:
 
 	static int getChatroomsCount();
 
-	/**
-	 * pings server to get an up to date list 
-	 * of all available chatrooms
-	 */
-	static int updateChatrooms();
-
 	virtual ~Chatroom();
 
 	/**

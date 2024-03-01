@@ -18,12 +18,19 @@ class AgentClient : public Agent {
 public:
 	virtual ~AgentClient();
 
-	static Agent * getmain();
+	static AgentClient * getmain();
+
+	/**
+	 * Asks the server for updated list of
+	 * chatrooms
+	 */
+	int requestChatroomListUpdate();
 
 private:
 	AgentClient();
 	int start();
 	virtual void receivedPayloadTypeRequestInfo(const Packet * pkt);
+	static void setmain(AgentClient * ac);
 };
 
 #endif // AGENT_CLIENT_HPP

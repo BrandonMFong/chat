@@ -9,6 +9,7 @@
 #include "log.hpp"
 #include "message.hpp"
 #include "interface.hpp"
+#include "agentclient.hpp"
 #include <string.h>
 #include <bflibcpp/bflibcpp.hpp>
 
@@ -117,15 +118,5 @@ Chatroom * Chatroom::getChatroom(uuid_t chatroomuuid) {
 	chatrooms.unlock();
 
 	return room;
-}
-
-int Chatroom::updateChatrooms() {
-	LOG_DEBUG("pinging server to give us an up to date list of chatrooms we can join");
-	Packet p;
-	memset(&p, 0, sizeof(p));
-	p.header.time = BFTimeGetCurrentTime();
-	p.header.type = kPayloadTypeRequestAvailableChatrooms;
-
-	return 0;
 }
 

@@ -7,8 +7,12 @@
 #include "log.hpp"
 #include "connection.hpp"
 #include <string.h>
+#include <unistd.h>
+#include <bflibcpp/bflibcpp.hpp>
 
-AgentClient * agentclient = NULL;
+using namespace BF;
+
+Atomic<AgentClient *> agentclientmain;
 
 AgentClient::AgentClient() : Agent() {
 
@@ -33,7 +37,22 @@ void AgentClient::receivedPayloadTypeRequestInfo(const Packet * pkt) {
 	this->_sc->queueData(&p, sizeof(p));
 }
 
-Agent * AgentClient::getmain() {
-	return agentclient;
+AgentClient * AgentClient::getmain() {
+	while (!agentclientmain.get()) { usleep(50); } // make sure its available
+	return agentclientmain.get();
+}
+
+void AgentClient::setmain(AgentClient * ac) {
+	agentclientmain.set(ac);
+}
+
+int AgentClient::requestChatroomListUpdate() {
+	LOG_DEBUG("pinging server to give us an up to date list of chatrooms we can join");
+	Packet p;
+	memset(&p, 0, sizeof(p));
+	p.header.time = BFTimeGetCurrentTime();
+	p.header.type = kPayloadTypeRequestAvailableChatrooms;
+
+	return 0;
 }
 

@@ -16,6 +16,7 @@
 #include "chatroom.hpp"
 #include "chatroomadmin.hpp"
 #include "message.hpp"
+#include "agentclient.hpp"
 
 using namespace BF;
 
@@ -288,12 +289,12 @@ int InterfaceGatherUserData() {
 }
 
 int InterfaceLobbyRunClient() {
-	printf("waiting for chatrooms");
+	printf("waiting for chatrooms\n");
 	fflush(stdout);
-	Chatroom::updateChatrooms();
+	AgentClient::getmain()->requestChatroomListUpdate();
 	while (1) {
 		sleep(1);
-		printf("chatrooms count: %d", Chatroom::getChatroomsCount());
+		printf("chatrooms count: %d\n", Chatroom::getChatroomsCount());
 		fflush(stdout);
 	}
 
