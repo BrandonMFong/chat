@@ -59,6 +59,7 @@ Agent * Agent::create(SocketConnection * sc) {
 			agents.unsafeget().setDeallocateCallback(_AgentReleaseAgent);
 		}
 
+		BFRetain(result);
 		agents.unsafeget().add(result);
 		agents.unlock();
 	}
@@ -179,6 +180,8 @@ void Agent::packetReceive(SocketConnection * sc, const void * buf, size_t size) 
 int Agent::newConnection(SocketConnection * sc) {
 	Agent * a = Agent::create(sc);
 	a->start();
+
+	BFRelease(a);
 	return 0;
 }
 
