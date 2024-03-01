@@ -29,9 +29,11 @@ public:
 	/**
 	 * creates a chatroom
 	 *
+	 * name : chat room name
+	 *
 	 * retain count on return is +2. Caller is responsible for releasing object after they are done
 	 */
-	static Chatroom * create();
+	static Chatroom * create(const char * name);
 
 	/// returns chat room for uuid
 	static Chatroom * getChatroom(uuid_t chatroomuuid);

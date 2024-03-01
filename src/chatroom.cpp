@@ -49,8 +49,10 @@ void _ChatroomAddRoomToChatrooms(Chatroom * cr) {
 	chatrooms.unlock();
 }
 
-Chatroom * Chatroom::create() {
+Chatroom * Chatroom::create(const char * name) {
 	Chatroom * cr = new Chatroom;
+	cr->setName(name);
+
 	_ChatroomAddRoomToChatrooms(cr);
 	return cr;
 }

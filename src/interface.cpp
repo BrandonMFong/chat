@@ -288,7 +288,6 @@ int InterfaceGatherUserData() {
 int InterfaceLobbyRun() {
 	// set up chat room name
 	char chatroomname[CHAT_ROOM_NAME_SIZE];
-	chatroom = Chatroom::create();
 
 	printf("chat room name: ");
 	fgets(chatroomname, sizeof(chatroomname), stdin);
@@ -297,8 +296,7 @@ int InterfaceLobbyRun() {
 		chatroomname[strlen(chatroomname)- 1] = '\0';
 	}
 	
-	chatroom->setName(chatroomname);
-
+	chatroom = Chatroom::create(chatroomname);
 	BFRelease(chatroom);
 	
 	return 0;
