@@ -44,6 +44,7 @@ void _ChatroomAddRoomToChatrooms(Chatroom * cr) {
 		chatrooms.unsafeget().setDeallocateCallback(_ChatroomRelease);
 	}
 
+	BFRetain(cr);
 	chatrooms.unsafeget().add(cr);
 	chatrooms.unlock();
 }

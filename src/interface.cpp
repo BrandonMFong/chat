@@ -298,6 +298,8 @@ int InterfaceLobbyRun() {
 	}
 	
 	chatroom->setName(chatroomname);
+
+	BFRelease(chatroom);
 	
 	return 0;
 }
