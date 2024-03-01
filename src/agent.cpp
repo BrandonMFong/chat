@@ -166,6 +166,13 @@ void Agent::receivedPayloadTypeUserInfo(const Packet * pkt) {
 	BFRelease(this->_remoteuser);
 }
 
+void Agent::receivedPayloadTypeRequestAvailableChatrooms(const Packet * pkt) {
+	if (!pkt)
+		return;
+	LOG_DEBUG("list of chatrooms are being requested");
+
+}
+
 void Agent::packetReceive(SocketConnection * sc, const void * buf, size_t size) {
 	LOG_DEBUG("> %s", __func__);
 	if (!sc || !buf) 
@@ -187,6 +194,9 @@ void Agent::packetReceive(SocketConnection * sc, const void * buf, size_t size) 
 		break;
 	case kPayloadTypeUserInfo:
 		agent->receivedPayloadTypeUserInfo(p);
+		break;
+	case kPayloadTypeRequestAvailableChatrooms:
+		agent->receivedPayloadTypeRequestAvailableChatrooms(p);
 		break;
 	}
 	LOG_DEBUG("< %s", __func__);

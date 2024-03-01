@@ -53,6 +53,8 @@ int AgentClient::requestChatroomListUpdate() {
 	p.header.time = BFTimeGetCurrentTime();
 	p.header.type = kPayloadTypeRequestAvailableChatrooms;
 
+	this->_sc->queueData(&p, sizeof(p));
+
 	return 0;
 }
 

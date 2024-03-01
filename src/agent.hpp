@@ -70,6 +70,7 @@ protected:
 	virtual void receivedPayloadTypeRequestInfo(const Packet * pkt);
 	void receivedPayloadTypeMessage(const Packet * pkt);
 	void receivedPayloadTypeUserInfo(const Packet * pkt);
+	void receivedPayloadTypeRequestAvailableChatrooms(const Packet * pkt);
 
 private:
 	/**

@@ -289,14 +289,10 @@ int InterfaceGatherUserData() {
 }
 
 int InterfaceLobbyRunClient() {
-	printf("waiting for chatrooms\n");
-	fflush(stdout);
+	LOG_DEBUG("waiting for chatrooms\n");
 	AgentClient::getmain()->requestChatroomListUpdate();
-	while (1) {
-		sleep(1);
-		printf("chatrooms count: %d\n", Chatroom::getChatroomsCount());
-		fflush(stdout);
-	}
+	sleep(5);
+	LOG_DEBUG("chatrooms count: %d\n", Chatroom::getChatroomsCount());
 
 	return 1;
 }
