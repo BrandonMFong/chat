@@ -27,7 +27,7 @@ void AgentClient::receivedPayloadTypeRequestInfo(const Packet * pkt) {
 	Packet p;
 	memset(&p, 0, sizeof(p));
 	p.header.time = BFTimeGetCurrentTime();
-	p.header.type = kPayloadTypeRequestInfo;
+	p.header.type = kPayloadTypeRequestUserInfo;
 	this->_sc->queueData(&p, sizeof(p));
 }
 

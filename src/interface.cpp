@@ -303,7 +303,6 @@ int InterfaceLobbyRun() {
 }
 
 int Interface::Run() {
-
 	int error = InterfaceGatherUserData();
 
 	if (!error)

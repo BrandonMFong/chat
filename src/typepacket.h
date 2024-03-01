@@ -26,7 +26,7 @@ typedef enum {
 	 * empty payload. type signals receiver
 	 * send information about their current user
 	 */
-	kPayloadTypeRequestInfo = 2,
+	kPayloadTypeRequestUserInfo = 2,
 
 	/**
 	 * information about the user who sent 

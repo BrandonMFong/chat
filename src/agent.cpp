@@ -167,7 +167,7 @@ void Agent::packetReceive(SocketConnection * sc, const void * buf, size_t size) 
 	case kPayloadTypeMessage:
 		agent->receivedPayloadTypeMessage(p);
 		break;
-	case kPayloadTypeRequestInfo:
+	case kPayloadTypeRequestUserInfo:
 		agent->receivedPayloadTypeRequestInfo(p);
 		break;
 	case kPayloadTypeUserInfo:

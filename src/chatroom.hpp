@@ -57,6 +57,7 @@ public:
 	BF::Atomic<bool> updateConversation;
 
 private:
+
 	/**
 	 * inits chatroom with uuid
 	 */
