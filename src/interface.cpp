@@ -289,6 +289,7 @@ int InterfaceGatherUserData() {
 int InterfaceLobbyRunClient() {
 	printf("waiting for chatrooms");
 	fflush(stdout);
+	Chatroom::updateChatrooms();
 	sleep(5);
 
 	return 1;

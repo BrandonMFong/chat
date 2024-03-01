@@ -38,6 +38,12 @@ public:
 	/// returns chat room for uuid
 	static Chatroom * getChatroom(uuid_t chatroomuuid);
 
+	/**
+	 * pings server to get an up to date list 
+	 * of all available chatrooms
+	 */
+	static int updateChatrooms();
+
 	virtual ~Chatroom();
 
 	/**
@@ -54,12 +60,14 @@ public:
 	BF::Atomic<BF::List<Message *>> conversation;
 	BF::Atomic<bool> updateConversation;
 
-private:
+protected:
 
 	/**
 	 * inits chatroom with uuid
 	 */
 	Chatroom();
+
+private:
 
 	uuid_t _uuid;
 	char _name[CHAT_ROOM_NAME_SIZE];

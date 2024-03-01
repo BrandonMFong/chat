@@ -123,3 +123,8 @@ Chatroom * Chatroom::getChatroom(uuid_t chatroomuuid) {
 	return room;
 }
 
+int Chatroom::updateChatrooms() {
+	LOG_DEBUG("pinging server to give us an up to date list of chatrooms we can join");
+	return 0;
+}
+
