@@ -12,7 +12,7 @@
 using namespace BF;
 
 // could this live in interface?
-Atomic<User *> currentuser;
+//Atomic<User *> currentuser;
 
 Atomic<List<User * >> users;
 
@@ -20,6 +20,7 @@ void _UserRelease(User * user) {
 	BFRelease(user);
 }
 
+/*
 const User * User::current() {
 	while (!currentuser.get()) {
 		// current user is stil null
@@ -44,6 +45,7 @@ const User * User::current() {
 void User::setCurrent(User * user) {
 	currentuser.set(user);
 }
+*/
 
 User::User(const char * username, const uuid_t uuid) {
 	strncpy(this->_username, username, sizeof(this->_username));

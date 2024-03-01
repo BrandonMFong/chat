@@ -36,12 +36,12 @@ public:
 	 *
 	 * returns null if no current user was set yet
 	 */
-	static const User * current();
+	//static const User * current();
 
 	/**
 	 * sets the current user
 	 */
-	static void setCurrent(User * user);
+	//static void setCurrent(User * user);
 
 	virtual ~User();
 	const char * username() const;

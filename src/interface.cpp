@@ -28,6 +28,7 @@ WINDOW * displayWin = NULL;
 WINDOW * helpWin = NULL;
 
 Chatroom * chatroom;
+Atomic<User *> user;
 
 int InterfaceCraftChatLineFromMessage(const Message * msg, char * line) {
 	if (!msg || !line) return 30;
@@ -247,6 +248,27 @@ int InterfaceWindowLoop() {
 	return 0;
 }
 
+const User * Interface::GetCurrentUser() {
+	while (!user.get()) {
+		// current user is stil null
+		// 
+		// we will wait for current
+		// user to be set before returning
+		usleep(50);
+	}
+
+	// should we return current user as an 
+	// atomic object?
+	//
+	// I believe we should revisit this if
+	// we are intending to modify user
+	// outside of this
+	//
+	// for now we are going to return curr
+	// user as const
+	return user.get();
+}
+
 int InterfaceGatherUserData() {
 	// set up user
 	char username[USER_NAME_SIZE];
@@ -257,8 +279,7 @@ int InterfaceGatherUserData() {
 		username[strlen(username)- 1] = '\0';
 	}
 
-	User * currentuser = User::create(username);
-	User::setCurrent(currentuser);
+	user = User::create(username);
 
 	return 0;
 }
@@ -280,7 +301,7 @@ int InterfaceLobbyRun() {
 	return 0;
 }
 
-int InterfaceRun() {
+int Interface::Run() {
 
 	int error = InterfaceGatherUserData();
 

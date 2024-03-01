@@ -9,7 +9,14 @@
 #include "socket.hpp"
 #include <typepacket.h>
 
-int InterfaceRun();
+class User;
+
+namespace Interface {
+
+int Run();
+const User * GetCurrentUser();
+
+}
 
 #endif // INTERFACE_HPP
 

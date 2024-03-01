@@ -8,6 +8,7 @@
 #include "user.hpp"
 #include "log.hpp"
 #include "message.hpp"
+#include "interface.hpp"
 #include <string.h>
 #include <bflibcpp/bflibcpp.hpp>
 
@@ -79,10 +80,10 @@ int Chatroom::sendBuffer(const InputBuffer * buf) {
 	strncpy(p.payload.message.data, buf->cString(), sizeof(p.payload.message.data));
 
 	// username
-	strncpy(p.payload.message.username, User::current()->username(), sizeof(p.payload.message.username));
+	strncpy(p.payload.message.username, Interface::GetCurrentUser()->username(), sizeof(p.payload.message.username));
 
 	uuid_t uuid;
-	User::current()->getuuid(uuid);	
+	Interface::GetCurrentUser()->getuuid(uuid);	
 
 	// user uuid
 	uuid_copy(p.payload.message.useruuid, uuid);
@@ -122,5 +123,4 @@ Chatroom * Chatroom::getChatroom(uuid_t chatroomuuid) {
 
 	return room;
 }
-
 

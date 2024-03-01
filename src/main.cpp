@@ -85,7 +85,7 @@ int main(int argc, char * argv[]) {
 	}
 
 	if (!result) {
-		result = InterfaceRun();
+		result = Interface::Run();
 	}
 
 	if (!result) {

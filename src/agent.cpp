@@ -12,6 +12,7 @@
 #include "message.hpp"
 #include "chatroom.hpp"
 #include "user.hpp"
+#include "interface.hpp"
 #include <bflibcpp/bflibcpp.hpp>
 
 using namespace BF;
@@ -121,7 +122,7 @@ void Agent::receivedPayloadTypeRequestInfo(const Packet * pkt) {
 	p.header.type = kPayloadTypeUserInfo;
 
 	// Ask current user to give their information
-	const User * curruser = User::current();
+	const User * curruser = Interface::GetCurrentUser();
 	curruser->getuserinfo(&p.payload.userinfo);
 
 	// send the information back
