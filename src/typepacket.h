@@ -33,6 +33,12 @@ typedef enum {
 	 * data
 	 */
 	kPayloadTypeUserInfo = 3,
+
+	/**
+	 * returns brief information of all chatrooms
+	 * that are available to join
+	 */
+	kPayloadTypeRequestAvailableChatrooms = 4,
 } PayloadType;
 
 typedef struct {
@@ -68,6 +74,10 @@ typedef struct {
 	 */
 	uuid_t useruuid;
 } PayloadUserInfo;
+
+typedef struct {
+
+} PayloadChatroomInfoBrief;
 
 typedef struct {
 	//Header header;

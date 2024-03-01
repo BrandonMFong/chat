@@ -4,6 +4,7 @@
  */
 
 #include "interface.hpp"
+#include "chat.hpp"
 #include "user.hpp"
 #include <bflibcpp/bflibcpp.hpp>
 #include <unistd.h>
@@ -285,7 +286,15 @@ int InterfaceGatherUserData() {
 	return 0;
 }
 
-int InterfaceLobbyRun() {
+int InterfaceLobbyRunClient() {
+	printf("waiting for chatrooms");
+	fflush(stdout);
+	sleep(5);
+
+	return 1;
+}
+
+int InterfaceLobbyRunServer() {
 	// set up chat room name
 	char chatroomname[CHAT_ROOM_NAME_SIZE];
 
@@ -305,8 +314,13 @@ int InterfaceLobbyRun() {
 int Interface::Run() {
 	int error = InterfaceGatherUserData();
 
-	if (!error)
-		error = InterfaceLobbyRun();
+	if (!error) {
+		if (ChatSocketGetMode() == SOCKET_MODE_SERVER) {
+			error = InterfaceLobbyRunServer();
+		} else {
+			error = InterfaceLobbyRunClient();
+		}
+	}
 
 	InterfaceWindowStart();
 
@@ -314,8 +328,6 @@ int Interface::Run() {
 		error = InterfaceWindowLoop();
 
 	InterfaceWindowEnd();
-
-	Delete(chatroom);
 
 	return error;
 }
