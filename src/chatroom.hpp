@@ -29,7 +29,7 @@ public:
 	/**
 	 * creates a chatroom
 	 *
-	 * we do not own memory
+	 * retain count on return is +2. Caller is responsible for releasing object after they are done
 	 */
 	static Chatroom * create();
 

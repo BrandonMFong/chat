@@ -41,7 +41,7 @@ public:
 	 *
 	 * sc : we do not own the socket connection object
 	 *
-	 * caller can retain or release but they do not own memory
+	 * retain count on return is +2. Caller is responsible for releasing object after they are done
 	 */
 	static Agent * create(SocketConnection * sc);
 

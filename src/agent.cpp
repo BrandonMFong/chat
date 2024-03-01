@@ -146,6 +146,8 @@ void Agent::receivedPayloadTypeUserInfo(const Packet * pkt) {
 		uuidstr
 	);
 #endif
+
+	BFRelease(this->_remoteuser);
 }
 
 void Agent::packetReceive(SocketConnection * sc, const void * buf, size_t size) {

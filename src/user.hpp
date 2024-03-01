@@ -18,8 +18,7 @@ public:
 	/**
 	 * creates a new user
 	 *
-	 * caller does not own  memory. This class has its own memory
-	 * management
+	 * retain count on return is +2. Caller is responsible for releasing object after they are done
 	 */
 	static User * create(const char * username);
 

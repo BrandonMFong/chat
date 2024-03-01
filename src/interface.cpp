@@ -280,6 +280,7 @@ int InterfaceGatherUserData() {
 	}
 
 	user = User::create(username);
+	BFRelease(user.get());
 
 	return 0;
 }

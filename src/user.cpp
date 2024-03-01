@@ -20,33 +20,6 @@ void _UserRelease(User * user) {
 	BFRelease(user);
 }
 
-/*
-const User * User::current() {
-	while (!currentuser.get()) {
-		// current user is stil null
-		// 
-		// we will wait for current
-		// user to be set before returning
-		usleep(50);
-	}
-
-	// should we return current user as an 
-	// atomic object?
-	//
-	// I believe we should revisit this if
-	// we are intending to modify user
-	// outside of this
-	//
-	// for now we are going to return curr
-	// user as const
-	return currentuser.get();
-}
-
-void User::setCurrent(User * user) {
-	currentuser.set(user);
-}
-*/
-
 User::User(const char * username, const uuid_t uuid) {
 	strncpy(this->_username, username, sizeof(this->_username));
 	uuid_copy(this->_uuid, uuid);
@@ -62,6 +35,7 @@ void _UserAddUserToUsers(User * user) {
 		users.unsafeget().setDeallocateCallback(_UserRelease);
 	}
 
+	BFRetain(user);
 	users.unsafeget().add(user);
 	users.unlock();
 
