@@ -51,7 +51,7 @@ void _ChatroomAddRoomToChatrooms(Chatroom * cr) {
 
 Chatroom * Chatroom::create(const char * name) {
 	Chatroom * cr = new Chatroom;
-	cr->setName(name);
+	strncpy(cr->_name, name, sizeof(cr->_name));
 
 	_ChatroomAddRoomToChatrooms(cr);
 	return cr;
@@ -64,10 +64,6 @@ int Chatroom::addMessage(Message * msg) {
 	this->updateConversation = true;
 
 	return 0;
-}
-
-void Chatroom::setName(const char * name) {
-	strncpy(this->_name, name, sizeof(this->_name));
 }
 
 void Chatroom::getuuid(uuid_t uuid) {

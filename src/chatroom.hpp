@@ -47,8 +47,6 @@ public:
 	 */
 	int addMessage(Message * msg);
 
-	void setName(const char * name);
-
 	int sendBuffer(const InputBuffer * buf);
 
 	void getuuid(uuid_t uuid);
