@@ -6,6 +6,7 @@
 #include "agentclient.hpp"
 #include "log.hpp"
 #include "connection.hpp"
+#include "packet.hpp"
 #include <string.h>
 #include <unistd.h>
 #include <bflibcpp/bflibcpp.hpp>
@@ -32,8 +33,7 @@ void AgentClient::receivedPayloadTypeRequestInfo(const Packet * pkt) {
 
 	Packet p;
 	memset(&p, 0, sizeof(p));
-	p.header.time = BFTimeGetCurrentTime();
-	p.header.type = kPayloadTypeRequestUserInfo;
+	PacketSetHeader(&p, kPayloadTypeRequestUserInfo);
 	this->_sc->queueData(&p, sizeof(p));
 }
 
@@ -50,9 +50,7 @@ int AgentClient::requestChatroomListUpdate() {
 	LOG_DEBUG("pinging server to give us an up to date list of chatrooms we can join");
 	Packet p;
 	memset(&p, 0, sizeof(p));
-	p.header.time = BFTimeGetCurrentTime();
-	p.header.type = kPayloadTypeRequestAvailableChatrooms;
-
+	PacketSetHeader(&p, kPayloadTypeRequestAvailableChatrooms);
 	this->_sc->queueData(&p, sizeof(p));
 
 	return 0;

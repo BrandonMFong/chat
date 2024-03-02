@@ -15,7 +15,6 @@ int PacketSetHeader(Packet * pkt, PayloadType type) {
 	if (!pkt)
 		return 1;
 
-	memset(&pkt, 0, sizeof(Packet));
 	pkt->header.version = 0;
 	pkt->header.time = BFTimeGetCurrentTime();
 	pkt->header.type = type;

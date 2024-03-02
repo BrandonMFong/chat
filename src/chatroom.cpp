@@ -122,7 +122,11 @@ int Chatroom::sendBuffer(const InputBuffer * buf) {
 	strncpy(p.payload.message.data, buf->cString(), sizeof(p.payload.message.data));
 
 	// username
-	strncpy(p.payload.message.username, Interface::GetCurrentUser()->username(), sizeof(p.payload.message.username));
+	strncpy(
+		p.payload.message.username,
+		Interface::GetCurrentUser()->username(),
+		sizeof(p.payload.message.username)
+	);
 
 	uuid_t uuid;
 	Interface::GetCurrentUser()->getuuid(uuid);	

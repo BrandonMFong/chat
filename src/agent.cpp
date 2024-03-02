@@ -180,9 +180,11 @@ void Agent::receivedPayloadTypeRequestAvailableChatrooms(const Packet * pkt) {
 		&size, &error
 	);
 
+	// send a packet for each chatroom
 	for (int i = 0; i < size; i++) {
 		// make packet
 		Packet p;
+		memset(&p, 0, sizeof(p));
 		PacketSetHeader(&p, kPayloadTypeChatroomInfo);
 		PacketSetPayload(&p, info[i]);
 
@@ -229,6 +231,7 @@ void Agent::packetReceive(SocketConnection * sc, const void * buf, size_t size) 
 		agent->receivedPayloadTypeRequestAvailableChatrooms(p);
 		break;
 	case kPayloadTypeChatroomInfo:
+		agent->receivedPayloadTypeChatroomInfo(p);
 		break;
 	}
 	LOG_DEBUG("< %s", __func__);
