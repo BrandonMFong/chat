@@ -14,7 +14,7 @@
 #include "inputbuffer.hpp"
 #include "office.hpp"
 #include "chatroom.hpp"
-#include "chatroomadmin.hpp"
+#include "chatroomserver.hpp"
 #include "message.hpp"
 #include "agentclient.hpp"
 
@@ -329,7 +329,7 @@ int InterfaceLobbyRunServer() {
 		chatroomname[strlen(chatroomname) - 1] = '\0';
 	}
 	
-	chatroom = ChatroomAdmin::create(chatroomname);
+	chatroom = ChatroomServer::create(chatroomname);
 	BFRelease(chatroom);
 	
 	LOG_FLUSH;

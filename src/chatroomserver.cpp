@@ -3,19 +3,19 @@
  * date: 3/1/24
  */
 
-#include "chatroomadmin.hpp"
+#include "chatroomserver.hpp"
 #include "log.hpp"
 
-ChatroomAdmin::ChatroomAdmin() : Chatroom() {
+ChatroomServer::ChatroomServer() : Chatroom() {
 
 }
 
-ChatroomAdmin::~ChatroomAdmin() {
+ChatroomServer::~ChatroomServer() {
 
 }
 
-ChatroomAdmin * ChatroomAdmin::create(const char * name) {
-	ChatroomAdmin * cr = new ChatroomAdmin;
+ChatroomServer * ChatroomServer::create(const char * name) {
+	ChatroomServer * cr = new ChatroomServer;
 	strncpy(cr->_name, name, sizeof(cr->_name));
 
 #ifdef DEBUG
