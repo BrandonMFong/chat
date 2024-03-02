@@ -88,30 +88,6 @@ int Chatroom::getinfobrief(PayloadChatroomInfoBrief * info) {
 	return 0;
 }
 
-int Chatroom::recordChatroom(const PayloadChatroomInfoBrief * info) {
-	if (!info)
-		return 1;
-
-	Chatroom * chatroom = new Chatroom;
-	if (!chatroom)
-		return 2;
-
-	uuid_copy(chatroom->_uuid, info->chatroomuuid);
-	memcpy(chatroom->_name, info->chatroomname, sizeof(chatroom->_name));
-
-#ifdef DEBUG
-	char uuidstr[UUID_STR_LEN];
-	uuid_unparse(chatroom->_uuid, uuidstr);
-	LOG_DEBUG("new chat room: %s - %s", chatroom->_name, uuidstr);
-#endif
-
-	Chatroom::addRoomToChatrooms(chatroom);
-
-	BFRelease(chatroom);
-
-	return 0;
-}
-
 void Chatroom::addRoomToChatrooms(Chatroom * cr) {
 	chatrooms.lock();
 

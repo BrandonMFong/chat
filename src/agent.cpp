@@ -11,6 +11,7 @@
 #include "connection.hpp"
 #include "message.hpp"
 #include "chatroom.hpp"
+#include "chatroomclient.hpp"
 #include "user.hpp"
 #include "interface.hpp"
 #include "packet.hpp"
@@ -203,7 +204,7 @@ void Agent::receivedPayloadTypeChatroomInfo(const Packet * pkt) {
 		return;
 	
 	LOG_DEBUG("received chatroom information from server");
-	Chatroom::recordChatroom(&pkt->payload.chatroominfobrief);
+	ChatroomClient::recordChatroom(&pkt->payload.chatroominfobrief);
 }
 
 void Agent::packetReceive(SocketConnection * sc, const void * buf, size_t size) {
