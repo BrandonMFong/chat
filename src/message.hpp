@@ -21,6 +21,11 @@ public:
 	const char * data() const;
 	void getuuidchatroom(uuid_t uuid) const;
 private:
+	
+	/**
+	 * this object is basically a wrapper around a
+	 * message packet
+	 */
 	Packet _packet;
 };
 
