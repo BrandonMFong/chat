@@ -294,16 +294,28 @@ int InterfaceLobbyRunClient() {
 	// ask server for list of chats
 	AgentClient::getmain()->requestChatroomListUpdate();
 
-	int max = 5;
-	while (Chatroom::getChatroomsCount() == 0) {
-		sleep(1);
-		max--;	
-	}
+	// wait until one is available
+	while (Chatroom::getChatroomsCount() == 0) { }
 
-	printf("chatrooms count: %d\n", Chatroom::getChatroomsCount());
-	fflush(stdout);
+	int size = 0;
+	int error = 0;
+	PayloadChatroomInfoBrief ** list = Chatroom::getChatroomList(&size, &error);
+	if (!list || error)
+		return error == 0 ? 1 : error;
 
-	return 1;
+	// choosing current chatroom
+	//
+	// for now we are just choosing the first one
+	chatroom = Chatroom::getChatroom(list[0]->chatroomuuid);
+	if (!chatroom)
+		return 2;
+
+	LOG_DEBUG("using chatroom: %s", list[0]->chatroomuuid);
+
+	// free memory
+	for (int i = 0; i < size; i++) { BFFree(list[i]); }
+	BFFree(list);
+	return error;
 }
 
 int InterfaceLobbyRunServer() {
