@@ -37,6 +37,8 @@ public:
 	 */
 	static PayloadChatroomInfoBrief ** getChatroomList(int * size, int * err);
 
+	static int recordChatroom(const PayloadChatroomInfoBrief * info);
+
 	virtual ~Chatroom();
 
 	/**

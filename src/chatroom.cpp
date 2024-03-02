@@ -88,6 +88,24 @@ int Chatroom::getinfobrief(PayloadChatroomInfoBrief * info) {
 	return 0;
 }
 
+int Chatroom::recordChatroom(const PayloadChatroomInfoBrief * info) {
+	if (!info)
+		return 1;
+
+	Chatroom * chatroom = new Chatroom;
+	if (!chatroom)
+		return 2;
+
+	uuid_copy(chatroom->_uuid, info->chatroomuuid);
+	memcpy(chatroom->_name, info->chatroomname, sizeof(chatroom->_name));
+
+	Chatroom::addRoomToChatrooms(chatroom);
+
+	BFRelease(chatroom);
+
+	return 0;
+}
+
 void Chatroom::addRoomToChatrooms(Chatroom * cr) {
 	chatrooms.lock();
 
@@ -119,7 +137,11 @@ int Chatroom::sendBuffer(const InputBuffer * buf) {
 	memset(&p, 0, sizeof(p));
 
 	// load buffer 
-	strncpy(p.payload.message.data, buf->cString(), sizeof(p.payload.message.data));
+	strncpy(
+		p.payload.message.data,
+		buf->cString(),
+		sizeof(p.payload.message.data)
+	);
 
 	// username
 	strncpy(

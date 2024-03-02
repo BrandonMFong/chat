@@ -290,12 +290,18 @@ int InterfaceGatherUserData() {
 
 int InterfaceLobbyRunClient() {
 	LOG_DEBUG("waiting for chatrooms");
-	
+	LOG_FLUSH;
 	// ask server for list of chats
 	AgentClient::getmain()->requestChatroomListUpdate();
 
-	sleep(5);
-	LOG_DEBUG("chatrooms count: %d", Chatroom::getChatroomsCount());
+	int max = 5;
+	while (Chatroom::getChatroomsCount() == 0) {
+		sleep(1);
+		max--;	
+	}
+
+	printf("chatrooms count: %d\n", Chatroom::getChatroomsCount());
+	fflush(stdout);
 
 	return 1;
 }
@@ -313,6 +319,8 @@ int InterfaceLobbyRunServer() {
 	
 	chatroom = ChatroomAdmin::create(chatroomname);
 	BFRelease(chatroom);
+	
+	LOG_FLUSH;
 	
 	return 0;
 }

@@ -203,6 +203,7 @@ void Agent::receivedPayloadTypeChatroomInfo(const Packet * pkt) {
 		return;
 	
 	LOG_DEBUG("received chatroom information from server");
+	Chatroom::recordChatroom(&pkt->payload.chatroominfobrief);
 }
 
 void Agent::packetReceive(SocketConnection * sc, const void * buf, size_t size) {

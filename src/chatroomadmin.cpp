@@ -4,6 +4,7 @@
  */
 
 #include "chatroomadmin.hpp"
+#include "log.hpp"
 
 ChatroomAdmin::ChatroomAdmin() : Chatroom() {
 
@@ -14,6 +15,7 @@ ChatroomAdmin::~ChatroomAdmin() {
 }
 
 ChatroomAdmin * ChatroomAdmin::create(const char * name) {
+	LOG_DEBUG("creating new chatroom");
 	ChatroomAdmin * cr = new ChatroomAdmin;
 	strncpy(cr->_name, name, sizeof(cr->_name));
 
