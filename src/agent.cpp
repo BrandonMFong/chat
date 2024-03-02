@@ -13,6 +13,7 @@
 #include "chatroom.hpp"
 #include "user.hpp"
 #include "interface.hpp"
+#include "packet.hpp"
 #include <bflibcpp/bflibcpp.hpp>
 
 using namespace BF;
@@ -169,8 +170,37 @@ void Agent::receivedPayloadTypeUserInfo(const Packet * pkt) {
 void Agent::receivedPayloadTypeRequestAvailableChatrooms(const Packet * pkt) {
 	if (!pkt)
 		return;
+	
 	LOG_DEBUG("list of chatrooms are being requested");
 
+	// gather list of chatrooms
+	int size = 0;
+	int error = 0;
+	PayloadChatroomInfoBrief ** info = Chatroom::getChatroomList(
+		&size, &error
+	);
+
+	for (int i = 0; i < size; i++) {
+		// make packet
+		Packet p;
+		PacketSetHeader(&p, kPayloadTypeChatroomInfo);
+		PacketSetPayload(&p, info[i]);
+
+		// send packet
+		this->_sc->queueData(&p, sizeof(p));
+
+		// free info
+		BFFree(info[i]);
+	}
+
+	BFFree(info);
+}
+
+void Agent::receivedPayloadTypeChatroomInfo(const Packet * pkt) {
+	if (!pkt)
+		return;
+	
+	LOG_DEBUG("received chatroom information from server");
 }
 
 void Agent::packetReceive(SocketConnection * sc, const void * buf, size_t size) {
@@ -197,6 +227,8 @@ void Agent::packetReceive(SocketConnection * sc, const void * buf, size_t size) 
 		break;
 	case kPayloadTypeRequestAvailableChatrooms:
 		agent->receivedPayloadTypeRequestAvailableChatrooms(p);
+		break;
+	case kPayloadTypeChatroomInfo:
 		break;
 	}
 	LOG_DEBUG("< %s", __func__);

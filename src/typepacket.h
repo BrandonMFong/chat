@@ -14,9 +14,12 @@ extern "C" {
 }
 
 #define USER_NAME_SIZE 255
+#define CHAT_ROOM_NAME_SIZE 255
 #define DATA_BUFFER_SIZE 255
 
 typedef enum {
+	kPayloadTypeUnknown = 0,
+
 	/**
 	 * payload holds a message
 	 */
@@ -39,6 +42,8 @@ typedef enum {
 	 * that are available to join
 	 */
 	kPayloadTypeRequestAvailableChatrooms = 4,
+
+	kPayloadTypeChatroomInfo = 5,
 } PayloadType;
 
 typedef struct {
@@ -76,11 +81,29 @@ typedef struct {
 } PayloadUserInfo;
 
 typedef struct {
+	/**
+	 * uuid for chat room
+	 */
+	uuid_t chatroomuuid;
 
+	/**
+	 * chatroom name
+	 */
+	char chatroomname[CHAT_ROOM_NAME_SIZE];
+	
+	/**
+	 * total number of chatrooms on server
+	 */
+	int totalcount;
+
+	/**
+	 * sequence number of the chatroom out of the
+	 * total chatroom
+	 */
+	int seqcount;
 } PayloadChatroomInfoBrief;
 
 typedef struct {
-	//Header header;
 	struct {
 		// struct version
 		unsigned char version;
@@ -99,6 +122,7 @@ typedef struct {
 	union {
 		PayloadMessage message;
 		PayloadUserInfo userinfo;
+		PayloadChatroomInfoBrief chatroominfobrief;
 	} payload;
 } Packet;
 

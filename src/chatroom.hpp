@@ -10,12 +10,12 @@
 #include <bflibcpp/atomic.hpp>
 #include <bflibcpp/list.hpp>
 #include "inputbuffer.hpp"
+#include "typepacket.h"
 
 extern "C" {
 #include <bflibc/stringutils.h>
 }
 
-#define CHAT_ROOM_NAME_SIZE 255
 
 class Message;
 
@@ -29,7 +29,13 @@ public:
 	/// returns chat room for uuid
 	static Chatroom * getChatroom(uuid_t chatroomuuid);
 
+	/// count of all available chatrooms
 	static int getChatroomsCount();
+
+	/**
+	 * caller owns memory of array and its elements
+	 */
+	static PayloadChatroomInfoBrief ** getChatroomList(int * size, int * err);
 
 	virtual ~Chatroom();
 
@@ -59,6 +65,9 @@ protected:
 	uuid_t _uuid;
 	char _name[CHAT_ROOM_NAME_SIZE];
 
+private:
+
+	int getinfobrief(PayloadChatroomInfoBrief * info);
 };
 
 #endif // CHATROOM_HPP

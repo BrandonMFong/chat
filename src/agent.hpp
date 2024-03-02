@@ -71,6 +71,7 @@ protected:
 	void receivedPayloadTypeMessage(const Packet * pkt);
 	void receivedPayloadTypeUserInfo(const Packet * pkt);
 	void receivedPayloadTypeRequestAvailableChatrooms(const Packet * pkt);
+	void receivedPayloadTypeChatroomInfo(const Packet * pkt);
 
 private:
 	/**

@@ -42,6 +42,52 @@ int Chatroom::getChatroomsCount() {
 	return chatrooms.get().count();
 }
 
+PayloadChatroomInfoBrief ** Chatroom::getChatroomList(int * size, int * err) {
+	if (!err || !size)
+		return NULL;
+
+	chatrooms.lock();
+	int error = 0;
+	int count = *size = chatrooms.unsafeget().count();
+	PayloadChatroomInfoBrief ** result = (PayloadChatroomInfoBrief **) malloc(
+		sizeof(PayloadChatroomInfoBrief *) * count
+	);
+
+	List<Chatroom *>::Node * n = chatrooms.unsafeget().first();
+	int i = 0;
+	for (; n; n = n->next()) {
+		Chatroom * cr = n->object();
+		PayloadChatroomInfoBrief * info = (PayloadChatroomInfoBrief *) malloc(
+			sizeof(PayloadChatroomInfoBrief)
+		);
+
+		// get info for the chat room
+		cr->getinfobrief(info);
+		result[i] = info;
+
+		// note down the sequence of this chatroom
+		//
+		// the receiver would want to know how many to expect
+		info->seqcount = i;
+		info->totalcount = count;
+		i++;
+	}
+
+	*err = error;
+	chatrooms.unlock();
+
+	return result;
+}
+
+int Chatroom::getinfobrief(PayloadChatroomInfoBrief * info) {
+	if (!info)
+		return 1;
+
+	uuid_copy(info->chatroomuuid, this->_uuid);
+	strncpy(info->chatroomname, this->_name, sizeof(info->chatroomname));
+	return 0;
+}
+
 void Chatroom::addRoomToChatrooms(Chatroom * cr) {
 	chatrooms.lock();
 

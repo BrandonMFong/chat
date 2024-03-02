@@ -289,10 +289,13 @@ int InterfaceGatherUserData() {
 }
 
 int InterfaceLobbyRunClient() {
-	LOG_DEBUG("waiting for chatrooms\n");
+	LOG_DEBUG("waiting for chatrooms");
+	
+	// ask server for list of chats
 	AgentClient::getmain()->requestChatroomListUpdate();
+
 	sleep(5);
-	LOG_DEBUG("chatrooms count: %d\n", Chatroom::getChatroomsCount());
+	LOG_DEBUG("chatrooms count: %d", Chatroom::getChatroomsCount());
 
 	return 1;
 }
