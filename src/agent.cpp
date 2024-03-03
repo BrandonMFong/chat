@@ -231,9 +231,7 @@ void Agent::receivedPayloadTypeChatroomEnrollment(const Packet * pkt) {
 		return;
 
 	BFRetain(chatroom);
-
-
-
+	chatroom->addAgent((AgentServer *) this);
 	BFRelease(chatroom);
 }
 

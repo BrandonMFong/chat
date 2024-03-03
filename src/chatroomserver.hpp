@@ -27,6 +27,9 @@ public:
 
 	virtual ~ChatroomServer();
 
+	/**
+	 * +1 to agent's retain count
+	 */
 	void addAgent(AgentServer * a);
 
 private:

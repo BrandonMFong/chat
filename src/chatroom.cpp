@@ -132,11 +132,8 @@ int Chatroom::sendBuffer(const InputBuffer * buf) {
 		sizeof(p.payload.message.username)
 	);
 
-	uuid_t uuid;
-	Interface::GetCurrentUser()->getuuid(uuid);	
-
 	// user uuid
-	uuid_copy(p.payload.message.useruuid, uuid);
+	Interface::GetCurrentUser()->getuuid(p.payload.message.useruuid);	
 
 	// chatroom uuid
 	uuid_copy(p.payload.message.chatuuid, this->_uuid);
@@ -151,9 +148,7 @@ int Chatroom::sendBuffer(const InputBuffer * buf) {
 	// its list
 	this->addMessage(new Message(&p));
 
-	// send out message to the rest of the chatrooms.in the 
-	// chatroom
-	return Office::PacketSend(&p);
+	return this->sendPacket(&p);
 }
 
 Chatroom * Chatroom::getChatroom(const uuid_t chatroomuuid) {
