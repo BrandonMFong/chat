@@ -31,6 +31,17 @@ public:
 	 */
 	int requestChatroomListUpdate(const User * user);
 
+	/**
+	 * tells server we are joining the chatroom with uuid
+	 *
+	 * this gives the server a notification that there is a new
+	 * recipient that should receive chatroom messages
+	 *
+	 * we may want to have an approval step after this but for
+	 * now we are just joining without it
+	 */
+	int enrollInChatroom(const PayloadChatInfo * chatinfo);
+
 private:
 	AgentClient();
 	int start();

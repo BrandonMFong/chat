@@ -28,20 +28,7 @@ public:
 	 * caller does not own memory
 	 */
 	static User * create(const PayloadUserInfo * ui);
-
-	/**
-	 * gets current user that was assigned at app launch (see
-	 * interface.cpp)
-	 *
-	 * returns null if no current user was set yet
-	 */
-	//static const User * current();
-
-	/**
-	 * sets the current user
-	 */
-	//static void setCurrent(User * user);
-
+	
 	virtual ~User();
 	const char * username() const;
 	void getuuid(uuid_t uuid) const;

@@ -7,6 +7,8 @@
 #include "log.hpp"
 #include "connection.hpp"
 #include "packet.hpp"
+#include "interface.hpp"
+#include "user.hpp"
 #include <string.h>
 #include <unistd.h>
 #include <bflibcpp/bflibcpp.hpp>
@@ -51,7 +53,18 @@ int AgentClient::requestChatroomListUpdate(const User * user) {
 	Packet p;
 	memset(&p, 0, sizeof(p));
 	PacketSetHeader(&p, kPayloadTypeRequestChatroomList);
+	Interface::GetCurrentUser()->getuserinfo(&p.payload.userinfo);
+	this->_sc->queueData(&p, sizeof(p));
 
+	return 0;
+}
+
+int AgentClient::enrollInChatroom(const PayloadChatInfo * chatinfo) {
+	LOG_DEBUG("enrolling in chatroom");
+	Packet p;
+	memset(&p, 0, sizeof(p));
+	PacketSetHeader(&p, kPayloadTypeChatroomEnrollment);
+	PacketSetPayload(&p, chatinfo);
 	this->_sc->queueData(&p, sizeof(p));
 
 	return 0;

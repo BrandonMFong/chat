@@ -25,8 +25,11 @@ class Message;
  */
 class Chatroom : public BF::Object {
 public:
-	/// returns chat room for uuid
-	static Chatroom * getChatroom(uuid_t chatroomuuid);
+	/** returns chat room for uuid
+	 *
+	 * caller does not own but returned object can be retained
+	 */
+	static Chatroom * getChatroom(const uuid_t chatroomuuid);
 
 	/// count of all available chatrooms
 	static int getChatroomsCount();
@@ -60,6 +63,15 @@ protected:
 	Chatroom();
 
 	static void addRoomToChatrooms(Chatroom * cr);
+
+	/**
+	 * the two subclasses have different amount of
+	 * agents
+	 *
+	 * chatroom on the client side will always have 
+	 * one agent, whereas the server will have many
+	 */
+	virtual int sendPacket(const Packet * pkt) = 0;
 
 	uuid_t _uuid;
 	char _name[CHAT_ROOM_NAME_SIZE];

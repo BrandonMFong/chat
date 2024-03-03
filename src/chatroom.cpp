@@ -156,7 +156,7 @@ int Chatroom::sendBuffer(const InputBuffer * buf) {
 	return Office::PacketSend(&p);
 }
 
-Chatroom * Chatroom::getChatroom(uuid_t chatroomuuid) {
+Chatroom * Chatroom::getChatroom(const uuid_t chatroomuuid) {
 	Chatroom * room = NULL;
 	chatrooms.lock();
 	List<Chatroom *>::Node * n = chatrooms.unsafeget().first();

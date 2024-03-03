@@ -7,6 +7,10 @@
 #define CHATROOM_SERVER_HPP
 
 #include "chatroom.hpp"
+#include <bflibcpp/atomic.hpp>
+#include <bflibcpp/list.hpp>
+
+class AgentServer;
 
 /**
  */
@@ -23,8 +27,13 @@ public:
 
 	virtual ~ChatroomServer();
 
+	void addAgent(AgentServer * a);
+
 private:
 	ChatroomServer();
+	int sendPacket(const Packet * pkt);
+
+	BF::Atomic<BF::List<AgentServer *>> _agents;
 };
 
 #endif // CHATROOM_SERVER_HPP

@@ -43,7 +43,21 @@ typedef enum {
 	 */
 	kPayloadTypeRequestChatroomList = 4,
 
+	/**
+	 * contains chat room information
+	 *
+	 * should be enough information for the user to use
+	 * to determine whether they want to join it or not
+	 */
 	kPayloadTypeChatInfo = 5,
+
+	/**
+	 * a notification that a user is joining a classroom
+	 * 
+	 * receiver should note the agent associated with
+	 * packet
+	 */
+	kPayloadTypeChatroomEnrollment = 6,
 } PayloadType;
 
 typedef struct {

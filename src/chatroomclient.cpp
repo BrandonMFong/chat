@@ -6,20 +6,22 @@
 #include "chatroomclient.hpp"
 #include <bflibcpp/bflibcpp.hpp>
 #include "log.hpp"
+#include "agentclient.hpp"
 
-ChatroomClient::ChatroomClient() : Chatroom() {
-
+ChatroomClient::ChatroomClient(AgentClient * a) : Chatroom() {
+	this->_agent = a;
+	BFRetain(this->_agent);
 }
 
 ChatroomClient::~ChatroomClient() {
-
+	BFRelease(this->_agent);
 }
 
-int ChatroomClient::recordChatroom(const PayloadChatInfo * info) {
+int ChatroomClient::recordChatroom(const PayloadChatInfo * info, AgentClient * agent) {
 	if (!info)
 		return 1;
 
-	ChatroomClient * chatroom = new ChatroomClient;
+	ChatroomClient * chatroom = new ChatroomClient(agent);
 	if (!chatroom)
 		return 2;
 
@@ -39,4 +41,7 @@ int ChatroomClient::recordChatroom(const PayloadChatInfo * info) {
 	return 0;
 }
 
+int ChatroomClient::sendPacket(const Packet * pkt) {
+	return this->_agent->sendPacket(pkt);
+}
 

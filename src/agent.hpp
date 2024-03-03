@@ -55,6 +55,11 @@ public:
 	 */
 	virtual int start() = 0;
 
+	/**
+	 * pkt : is copied
+	 */
+	int sendPacket(const Packet * pkt);
+
 protected:
 
 	Agent();
@@ -72,6 +77,7 @@ protected:
 	void receivedPayloadTypeUserInfo(const Packet * pkt);
 	void receivedPayloadTypeRequestAvailableChatrooms(const Packet * pkt);
 	void receivedPayloadTypeChatroomInfo(const Packet * pkt);
+	void receivedPayloadTypeChatroomEnrollment(const Packet * pkt);
 
 private:
 	/**

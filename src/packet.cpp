@@ -27,25 +27,16 @@ int PacketSetPayload(Packet * pkt, const void * buf) {
 		return 2;
 
 	switch (pkt->header.type) {
-	case kPayloadTypeMessage:
-		break;
-	case kPayloadTypeRequestUserInfo:
-		break;
-	case kPayloadTypeUserInfo:
-		break;
-	case kPayloadTypeRequestChatroomList:
-		break;
+	case kPayloadTypeChatroomEnrollment:
 	case kPayloadTypeChatInfo:
 		memcpy(
 			&pkt->payload.chatinfo,
 			buf,
 			sizeof(pkt->payload.chatinfo)
 		);
-		break;
+		return 0;
 	default:
-		break;
+		return 3;
 	}
-
-	return 0;
 }
 

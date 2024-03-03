@@ -8,12 +8,22 @@
 
 #include "chatroom.hpp"
 
+class AgentClient;
+
 class ChatroomClient : public Chatroom {
 public:
-	static int recordChatroom(const PayloadChatInfo * info);
+	/**
+	 * creates a client chatroom that the main user
+	 * can join
+	 */
+	static int recordChatroom(const PayloadChatInfo * info, AgentClient * agent);
+
 	virtual ~ChatroomClient();
 private:
-	ChatroomClient();
+	ChatroomClient(AgentClient * a);
+	int sendPacket(const Packet * pkt);
+
+	AgentClient * _agent;
 };
 
 #endif // CHATROOM_CLIENT_HPP

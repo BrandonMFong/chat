@@ -12,6 +12,7 @@
 #include "message.hpp"
 #include "chatroom.hpp"
 #include "chatroomclient.hpp"
+#include "chatroomserver.hpp"
 #include "user.hpp"
 #include "interface.hpp"
 #include "packet.hpp"
@@ -172,7 +173,17 @@ void Agent::receivedPayloadTypeRequestAvailableChatrooms(const Packet * pkt) {
 	if (!pkt)
 		return;
 	
+#ifdef DEBUG
 	LOG_DEBUG("list of chatrooms are being requested");
+	char uuidstr[UUID_STR_LEN];
+	uuid_unparse(pkt->payload.userinfo.useruuid, uuidstr);
+	LOG_DEBUG("chatroom list requested by user: %s", uuidstr);
+
+	// maybe we can user the user info to see user permissions
+	//
+	// nothing is being done with it right now but just passing
+	// it for now
+#endif
 
 	// gather list of chatrooms
 	int size = 0;
@@ -204,7 +215,26 @@ void Agent::receivedPayloadTypeChatroomInfo(const Packet * pkt) {
 		return;
 	
 	LOG_DEBUG("received chatroom information from server");
-	ChatroomClient::recordChatroom(&pkt->payload.chatinfo);
+	ChatroomClient::recordChatroom(&pkt->payload.chatinfo, (AgentClient *) this);
+}
+
+void Agent::receivedPayloadTypeChatroomEnrollment(const Packet * pkt) {
+	if (!pkt)
+		return;
+
+	LOG_DEBUG("chatroom enrollment");	
+	ChatroomServer * chatroom = (ChatroomServer *) Chatroom::getChatroom(
+		pkt->payload.chatinfo.chatroomuuid
+	);
+
+	if (!chatroom)
+		return;
+
+	BFRetain(chatroom);
+
+
+
+	BFRelease(chatroom);
 }
 
 void Agent::packetReceive(SocketConnection * sc, const void * buf, size_t size) {
@@ -235,8 +265,16 @@ void Agent::packetReceive(SocketConnection * sc, const void * buf, size_t size) 
 	case kPayloadTypeChatInfo:
 		agent->receivedPayloadTypeChatroomInfo(p);
 		break;
+	case kPayloadTypeChatroomEnrollment:
+		agent->receivedPayloadTypeChatroomEnrollment(p);
+		break;
 	}
 	LOG_DEBUG("< %s", __func__);
+}
+
+int Agent::sendPacket(const Packet * pkt) {
+	this->_sc->queueData(pkt, sizeof(Packet));
+	return 0;
 }
 
 int Agent::newConnection(SocketConnection * sc) {

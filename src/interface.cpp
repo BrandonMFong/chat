@@ -306,6 +306,7 @@ int InterfaceLobbyRunClient() {
 	// choosing current chatroom
 	//
 	// for now we are just choosing the first one
+	AgentClient::getmain()->enrollInChatroom(list[0]);
 	chatroom = Chatroom::getChatroom(list[0]->chatroomuuid);
 	if (!chatroom)
 		return 2;
