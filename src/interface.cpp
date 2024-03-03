@@ -30,8 +30,25 @@ WINDOW * inputWin = NULL;
 WINDOW * displayWin = NULL;
 WINDOW * helpWin = NULL;
 
-Chatroom * chatroom;
+Chatroom * chatroom = NULL;
 Atomic<User *> user;
+Interface * interface = NULL;
+
+Interface * Interface::current() {
+	return interface;
+}
+
+Interface::Interface() {
+	interface = this;
+}
+
+Interface::~Interface() {
+
+}
+
+Interface * Interface::create(char mode) {
+	return new Interface;
+}
 
 int InterfaceCraftChatLineFromMessage(const Message * msg, char * line) {
 	if (!msg || !line) return 30;
@@ -251,7 +268,7 @@ int InterfaceWindowLoop() {
 	return 0;
 }
 
-User * Interface::GetCurrentUser() {
+User * Interface::getuser() {
 	while (!user.get()) {
 		// current user is stil null
 		// 
@@ -342,7 +359,7 @@ int InterfaceLobbyRunServer() {
 	return 0;
 }
 
-int Interface::Run() {
+int Interface::run() {
 	int error = InterfaceGatherUserData();
 
 	if (!error) {

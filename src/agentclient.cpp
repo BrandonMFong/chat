@@ -53,7 +53,7 @@ int AgentClient::requestChatroomListUpdate(const User * user) {
 	Packet p;
 	memset(&p, 0, sizeof(p));
 	PacketSetHeader(&p, kPayloadTypeRequestChatroomList);
-	Interface::GetCurrentUser()->getuserinfo(&p.payload.userinfo);
+	Interface::current()->getuser()->getuserinfo(&p.payload.userinfo);
 	return this->sendPacket(&p);
 }
 

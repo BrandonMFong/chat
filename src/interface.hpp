@@ -8,15 +8,30 @@
 
 #include "socket.hpp"
 #include <typepacket.h>
+#include <bflibcpp/object.hpp>
 
 class User;
 
-namespace Interface {
+class Interface : public BF::Object {
+public:
+	static Interface * create(char mode);
 
-int Run();
-User * GetCurrentUser();
+	/**
+	 * returns current interface
+	 */
+	static Interface * current();
 
-}
+	virtual ~Interface();
+	int run();
+
+	/**
+	 * current user on this machine
+	 */
+	User * getuser();
+
+private:
+	Interface();
+};
 
 #endif // INTERFACE_HPP
 
