@@ -36,7 +36,7 @@ void AgentClient::receivedPayloadTypeRequestInfo(const Packet * pkt) {
 	Packet p;
 	memset(&p, 0, sizeof(p));
 	PacketSetHeader(&p, kPayloadTypeRequestUserInfo);
-	this->_sc->queueData(&p, sizeof(p));
+	this->sendPacket(&p);
 }
 
 AgentClient * AgentClient::getmain() {
@@ -54,9 +54,7 @@ int AgentClient::requestChatroomListUpdate(const User * user) {
 	memset(&p, 0, sizeof(p));
 	PacketSetHeader(&p, kPayloadTypeRequestChatroomList);
 	Interface::GetCurrentUser()->getuserinfo(&p.payload.userinfo);
-	this->_sc->queueData(&p, sizeof(p));
-
-	return 0;
+	return this->sendPacket(&p);
 }
 
 int AgentClient::enrollInChatroom(const PayloadChatInfo * chatinfo) {
@@ -65,8 +63,6 @@ int AgentClient::enrollInChatroom(const PayloadChatInfo * chatinfo) {
 	memset(&p, 0, sizeof(p));
 	PacketSetHeader(&p, kPayloadTypeChatroomEnrollment);
 	PacketSetPayload(&p, chatinfo);
-	this->_sc->queueData(&p, sizeof(p));
-
-	return 0;
+	return this->sendPacket(&p);
 }
 

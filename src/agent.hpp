@@ -64,14 +64,8 @@ protected:
 
 	Agent();
 
-	/*
-	 * socket connection
-	 *
-	 * the socket descriptor that is wrapped within this object
-	 * represents to user on other end we are representing
-	 */
-	SocketConnection * _sc;
-	
+	bool connectionIsReady();
+
 	virtual void receivedPayloadTypeRequestInfo(const Packet * pkt);
 	void receivedPayloadTypeMessage(const Packet * pkt);
 	void receivedPayloadTypeUserInfo(const Packet * pkt);
@@ -80,6 +74,14 @@ protected:
 	void receivedPayloadTypeChatroomEnrollment(const Packet * pkt);
 
 private:
+	/*
+	 * socket connection
+	 *
+	 * the socket descriptor that is wrapped within this object
+	 * represents to user on other end we are representing
+	 */
+	SocketConnection * _sc;
+	
 	/**
 	 * returns null if no agent was found for connection
 	 *

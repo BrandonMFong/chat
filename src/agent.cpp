@@ -145,7 +145,7 @@ void Agent::receivedPayloadTypeRequestInfo(const Packet * pkt) {
 	curruser->getuserinfo(&p.payload.userinfo);
 
 	// send the information back
-	this->_sc->queueData(&p, sizeof(p));
+	this->sendPacket(&p);
 }
 
 void Agent::receivedPayloadTypeUserInfo(const Packet * pkt) {
@@ -201,7 +201,7 @@ void Agent::receivedPayloadTypeRequestAvailableChatrooms(const Packet * pkt) {
 		PacketSetPayload(&p, info[i]);
 
 		// send packet
-		this->_sc->queueData(&p, sizeof(p));
+		this->sendPacket(&p);
 
 		// free info
 		BFFree(info[i]);
@@ -273,8 +273,7 @@ void Agent::packetReceive(SocketConnection * sc, const void * buf, size_t size) 
 }
 
 int Agent::sendPacket(const Packet * pkt) {
-	this->_sc->queueData(pkt, sizeof(Packet));
-	return 0;
+	return this->_sc->queueData(pkt, sizeof(Packet));
 }
 
 int Agent::newConnection(SocketConnection * sc) {
@@ -288,5 +287,9 @@ int Agent::newConnection(SocketConnection * sc) {
 		BFRelease(a);
 		return 0;
 	}
+}
+
+bool Agent::connectionIsReady() {
+	return this->_sc->isready();
 }
 

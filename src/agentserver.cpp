@@ -33,7 +33,7 @@ void AgentServer::handshake(void * in) {
 
 	// wait for the connection to be ready before we
 	// start the conversation with the remote user
-	while (!a->_sc->isready()) {}
+	while (!a->connectionIsReady()) {}
 
 	LOG_DEBUG("connection is ready");
 
@@ -41,6 +41,6 @@ void AgentServer::handshake(void * in) {
 	memset(&p, 0, sizeof(p));
 	p.header.time = BFTimeGetCurrentTime();
 	p.header.type = kPayloadTypeRequestUserInfo;
-	a->_sc->queueData(&p, sizeof(p));
+	a->sendPacket(&p);
 }
 
