@@ -18,7 +18,7 @@ using namespace BF;
 Atomic<List<Chatroom *>> chatrooms;
 
 void _ChatroomMessageFree(Message * m) {
-	Delete(m);
+	BFRelease(m);
 }
 
 void _ChatroomRelease(Chatroom * cr) {
@@ -102,7 +102,9 @@ void Chatroom::addRoomToChatrooms(Chatroom * cr) {
 
 int Chatroom::addMessage(Message * msg) {
 	if (!msg) return 2;
-	
+
+	// msg count should have a retain count of 1 
+	// so we don't need to retain	
 	this->conversation.get().add(msg);
 	this->updateConversation = true;
 
@@ -149,6 +151,23 @@ int Chatroom::sendBuffer(const InputBuffer * buf) {
 	this->addMessage(new Message(&p));
 
 	return this->sendPacket(&p);
+}
+
+int Chatroom::receiveMessagePacket(const Packet * pkt) {
+	// chatroom will own this memory
+	Message * m = new Message(pkt);
+	if (!m) {
+		LOG_DEBUG("couldn't create message object");
+		return 1;
+	}
+
+	int err = this->addMessage(m);
+	if (err) {
+		LOG_DEBUG("error adding message to chatroom: %d", err);
+		return 2;
+	}
+
+	return 0;
 }
 
 Chatroom * Chatroom::getChatroom(const uuid_t chatroomuuid) {

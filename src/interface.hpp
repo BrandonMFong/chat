@@ -14,7 +14,7 @@ class User;
 namespace Interface {
 
 int Run();
-const User * GetCurrentUser();
+User * GetCurrentUser();
 
 }
 

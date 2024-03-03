@@ -33,7 +33,7 @@ Agent::Agent() {
 
 Agent::~Agent() {
 	this->_sc = NULL; // we don't own memory
-	this->_remoteuser; // we do not own memory
+	BFRelease(this->_remoteuser);
 }
 
 Agent * Agent::create(SocketConnection * sc) {
@@ -85,6 +85,10 @@ Agent * Agent::create(SocketConnection * sc) {
 	return result;
 }
 
+bool Agent::connectionIsReady() {
+	return this->_sc->isready();
+}
+
 Agent * Agent::getAgentForConnection(SocketConnection * sc) {
 	if (!sc) return NULL;
 
@@ -110,22 +114,13 @@ Agent * Agent::getAgentForConnection(SocketConnection * sc) {
 
 // handles incoming messages
 void Agent::receivedPayloadTypeMessage(const Packet * pkt) {
-	// chatroom will own this memory
-	Message * m = new Message(pkt);
-	if (!m) {
-		LOG_DEBUG("couldn't create message object");
-		return;
-	}
-
-	uuid_t uuid;
-	m->getuuidchatroom(uuid);
-	Chatroom * chatroom = Chatroom::getChatroom(uuid);
+	Chatroom * chatroom = Chatroom::getChatroom(pkt->payload.message.chatuuid);
 	if (!chatroom) {
 		LOG_DEBUG("chatroom not available");
 		return;
 	}
 
-	int err = chatroom->addMessage(m);
+	int err = chatroom->receiveMessagePacket(pkt);
 	if (err) {
 		LOG_DEBUG("error adding message to chatroom: %d", err);
 		return;
@@ -137,15 +132,20 @@ void Agent::receivedPayloadTypeRequestInfo(const Packet * pkt) {
 
 	Packet p;
 	memset(&p, 0, sizeof(p));
-	p.header.time = BFTimeGetCurrentTime();
-	p.header.type = kPayloadTypeUserInfo;
+	PacketSetHeader(&p, kPayloadTypeUserInfo);
 
 	// Ask current user to give their information
-	const User * curruser = Interface::GetCurrentUser();
+	User * curruser = Interface::GetCurrentUser();
+	BFRetain(curruser);
 	curruser->getuserinfo(&p.payload.userinfo);
+	BFRelease(curruser);
 
 	// send the information back
 	this->sendPacket(&p);
+}
+
+const User * Agent::user() {
+	return this->_remoteuser;
 }
 
 void Agent::receivedPayloadTypeUserInfo(const Packet * pkt) {
@@ -154,6 +154,9 @@ void Agent::receivedPayloadTypeUserInfo(const Packet * pkt) {
 	LOG_DEBUG("received user info");
 
 	// save user and save a record of the user
+	// 
+	// user is returned from create with retain count 2. We
+	// will own this object and release it in our destructor
 	this->_remoteuser = User::create(&pkt->payload.userinfo);
 
 #if DEBUG
@@ -165,8 +168,6 @@ void Agent::receivedPayloadTypeUserInfo(const Packet * pkt) {
 		uuidstr
 	);
 #endif
-
-	BFRelease(this->_remoteuser);
 }
 
 void Agent::receivedPayloadTypeRequestAvailableChatrooms(const Packet * pkt) {
@@ -285,9 +286,5 @@ int Agent::newConnection(SocketConnection * sc) {
 		BFRelease(a);
 		return 0;
 	}
-}
-
-bool Agent::connectionIsReady() {
-	return this->_sc->isready();
 }
 

@@ -19,7 +19,8 @@ AgentServer::~AgentServer() {
 
 int AgentServer::start() {
 	// if we are on the server, then we
-	// need to start the converstaion
+	// need to start the converstaion with the new 
+	// client
 	BFThreadAsyncID tid = BFThreadAsync(AgentServer::handshake, this);
 	BFThreadAsyncDestroy(tid);
 

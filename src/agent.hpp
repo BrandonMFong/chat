@@ -60,6 +60,11 @@ public:
 	 */
 	int sendPacket(const Packet * pkt);
 
+	/**
+	 * the remote user we are representing
+	 */
+	const User * user();
+
 protected:
 
 	Agent();
@@ -91,6 +96,12 @@ private:
 
 	/**
 	 * the remote user we represent
+	 *
+	 * this doesn't provide a deep representation
+	 * of the actual remote user. This object should
+	 * hold enough information to work with
+	 *
+	 * See class header for more info
 	 */
 	User * _remoteuser;
 };

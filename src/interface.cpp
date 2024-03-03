@@ -251,7 +251,7 @@ int InterfaceWindowLoop() {
 	return 0;
 }
 
-const User * Interface::GetCurrentUser() {
+User * Interface::GetCurrentUser() {
 	while (!user.get()) {
 		// current user is stil null
 		// 

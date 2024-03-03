@@ -11,9 +11,6 @@
 
 using namespace BF;
 
-// could this live in interface?
-//Atomic<User *> currentuser;
-
 Atomic<List<User * >> users;
 
 void _UserRelease(User * user) {

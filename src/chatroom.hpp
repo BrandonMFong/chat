@@ -42,13 +42,16 @@ public:
 	virtual ~Chatroom();
 
 	/**
-	 * adds message and flags an update
+	 * constructs a packet to send to all receivers
 	 *
-	 * msg : memory must be created before calling
+	 * this function also calls `addMessage`
 	 */
-	int addMessage(Message * msg);
-
 	int sendBuffer(const InputBuffer * buf);
+
+	/**
+	 * constructs message from packet and adds to our list of messages
+	 */
+	virtual int receiveMessagePacket(const Packet * pkt);
 
 	void getuuid(uuid_t uuid);
 
@@ -56,6 +59,13 @@ public:
 	BF::Atomic<bool> updateConversation;
 
 protected:
+
+	/**
+	 * adds message and flags an update
+	 *
+	 * msg : memory must be created before calling
+	 */
+	int addMessage(Message * msg);
 
 	/**
 	 * inits chatroom with uuid

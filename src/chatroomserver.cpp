@@ -6,6 +6,7 @@
 #include "chatroomserver.hpp"
 #include "log.hpp"
 #include "agentserver.hpp"
+#include "user.hpp"
 #include <bflibcpp/bflibcpp.hpp>
 
 using namespace BF;
@@ -52,6 +53,30 @@ int ChatroomServer::sendPacket(const Packet * pkt) {
 	for (; n; n = n->next()) {
 		AgentServer * a = n->object();
 		a->sendPacket(pkt);
+	}
+	this->_agents.unlock();
+
+	return 0;
+}
+
+int ChatroomServer::receiveMessagePacket(const Packet * pkt) {
+	// this adds new message to our conversation
+	this->Chatroom::receiveMessagePacket(pkt);
+
+	// now sending packet to our agents
+	this->_agents.lock();
+	List<AgentServer *>::Node * n = this->_agents.unsafeget().first();
+	for (; n; n = n->next()) {
+		AgentServer * a = n->object();
+		
+		uuid_t uuid;
+		a->user()->getuuid(uuid);
+
+		// if the agent represents the user we received our packet from,
+		// skip
+		if (uuid_compare(uuid, pkt->payload.message.useruuid)) {
+			a->sendPacket(pkt);
+		}
 	}
 	this->_agents.unlock();
 

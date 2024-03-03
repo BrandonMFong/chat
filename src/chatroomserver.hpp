@@ -32,6 +32,13 @@ public:
 	 */
 	void addAgent(AgentServer * a);
 
+	/**
+	 * this overrides `Chatroom`'s implementation by adding a step 
+	 * to act as a proxy and send incoming packet
+	 * to all our agents excluding the packet sender
+	 */
+	virtual int receiveMessagePacket(const Packet * pkt);
+
 private:
 	ChatroomServer();
 	int sendPacket(const Packet * pkt);
