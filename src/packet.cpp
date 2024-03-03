@@ -33,13 +33,13 @@ int PacketSetPayload(Packet * pkt, const void * buf) {
 		break;
 	case kPayloadTypeUserInfo:
 		break;
-	case kPayloadTypeRequestAvailableChatrooms:
+	case kPayloadTypeRequestChatroomList:
 		break;
-	case kPayloadTypeChatroomInfo:
+	case kPayloadTypeChatInfo:
 		memcpy(
-			&pkt->payload.chatroominfobrief,
+			&pkt->payload.chatinfo,
 			buf,
-			sizeof(pkt->payload.chatroominfobrief)
+			sizeof(pkt->payload.chatinfo)
 		);
 		break;
 	default:

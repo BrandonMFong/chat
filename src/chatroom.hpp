@@ -16,7 +16,6 @@ extern "C" {
 #include <bflibc/stringutils.h>
 }
 
-
 class Message;
 
 /**
@@ -35,7 +34,7 @@ public:
 	/**
 	 * caller owns memory of array and its elements
 	 */
-	static PayloadChatroomInfoBrief ** getChatroomList(int * size, int * err);
+	static PayloadChatInfo ** getChatroomList(int * size, int * err);
 
 	virtual ~Chatroom();
 
@@ -67,7 +66,7 @@ protected:
 
 private:
 
-	int getinfobrief(PayloadChatroomInfoBrief * info);
+	int getinfo(PayloadChatInfo * info);
 };
 
 #endif // CHATROOM_HPP

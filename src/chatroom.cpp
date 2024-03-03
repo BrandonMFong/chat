@@ -42,27 +42,27 @@ int Chatroom::getChatroomsCount() {
 	return chatrooms.get().count();
 }
 
-PayloadChatroomInfoBrief ** Chatroom::getChatroomList(int * size, int * err) {
+PayloadChatInfo ** Chatroom::getChatroomList(int * size, int * err) {
 	if (!err || !size)
 		return NULL;
 
 	chatrooms.lock();
 	int error = 0;
 	int count = *size = chatrooms.unsafeget().count();
-	PayloadChatroomInfoBrief ** result = (PayloadChatroomInfoBrief **) malloc(
-		sizeof(PayloadChatroomInfoBrief *) * count
+	PayloadChatInfo ** result = (PayloadChatInfo **) malloc(
+		sizeof(PayloadChatInfo *) * count
 	);
 
 	List<Chatroom *>::Node * n = chatrooms.unsafeget().first();
 	int i = 0;
 	for (; n; n = n->next()) {
 		Chatroom * cr = n->object();
-		PayloadChatroomInfoBrief * info = (PayloadChatroomInfoBrief *) malloc(
-			sizeof(PayloadChatroomInfoBrief)
+		PayloadChatInfo * info = (PayloadChatInfo *) malloc(
+			sizeof(PayloadChatInfo)
 		);
 
 		// get info for the chat room
-		cr->getinfobrief(info);
+		cr->getinfo(info);
 		result[i] = info;
 
 		// note down the sequence of this chatroom
@@ -79,7 +79,7 @@ PayloadChatroomInfoBrief ** Chatroom::getChatroomList(int * size, int * err) {
 	return result;
 }
 
-int Chatroom::getinfobrief(PayloadChatroomInfoBrief * info) {
+int Chatroom::getinfo(PayloadChatInfo * info) {
 	if (!info)
 		return 1;
 

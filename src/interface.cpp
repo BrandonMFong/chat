@@ -299,7 +299,7 @@ int InterfaceLobbyRunClient() {
 
 	int size = 0;
 	int error = 0;
-	PayloadChatroomInfoBrief ** list = Chatroom::getChatroomList(&size, &error);
+	PayloadChatInfo ** list = Chatroom::getChatroomList(&size, &error);
 	if (!list || error)
 		return error == 0 ? 1 : error;
 

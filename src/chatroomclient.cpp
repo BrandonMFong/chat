@@ -15,7 +15,7 @@ ChatroomClient::~ChatroomClient() {
 
 }
 
-int ChatroomClient::recordChatroom(const PayloadChatroomInfoBrief * info) {
+int ChatroomClient::recordChatroom(const PayloadChatInfo * info) {
 	if (!info)
 		return 1;
 

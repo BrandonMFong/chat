@@ -10,7 +10,7 @@
 
 class ChatroomClient : public Chatroom {
 public:
-	static int recordChatroom(const PayloadChatroomInfoBrief * info);
+	static int recordChatroom(const PayloadChatInfo * info);
 	virtual ~ChatroomClient();
 private:
 	ChatroomClient();

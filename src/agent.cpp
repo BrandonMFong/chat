@@ -177,7 +177,7 @@ void Agent::receivedPayloadTypeRequestAvailableChatrooms(const Packet * pkt) {
 	// gather list of chatrooms
 	int size = 0;
 	int error = 0;
-	PayloadChatroomInfoBrief ** info = Chatroom::getChatroomList(
+	PayloadChatInfo ** info = Chatroom::getChatroomList(
 		&size, &error
 	);
 
@@ -186,7 +186,7 @@ void Agent::receivedPayloadTypeRequestAvailableChatrooms(const Packet * pkt) {
 		// make packet
 		Packet p;
 		memset(&p, 0, sizeof(p));
-		PacketSetHeader(&p, kPayloadTypeChatroomInfo);
+		PacketSetHeader(&p, kPayloadTypeChatInfo);
 		PacketSetPayload(&p, info[i]);
 
 		// send packet
@@ -204,7 +204,7 @@ void Agent::receivedPayloadTypeChatroomInfo(const Packet * pkt) {
 		return;
 	
 	LOG_DEBUG("received chatroom information from server");
-	ChatroomClient::recordChatroom(&pkt->payload.chatroominfobrief);
+	ChatroomClient::recordChatroom(&pkt->payload.chatinfo);
 }
 
 void Agent::packetReceive(SocketConnection * sc, const void * buf, size_t size) {
@@ -229,10 +229,10 @@ void Agent::packetReceive(SocketConnection * sc, const void * buf, size_t size) 
 	case kPayloadTypeUserInfo:
 		agent->receivedPayloadTypeUserInfo(p);
 		break;
-	case kPayloadTypeRequestAvailableChatrooms:
+	case kPayloadTypeRequestChatroomList:
 		agent->receivedPayloadTypeRequestAvailableChatrooms(p);
 		break;
-	case kPayloadTypeChatroomInfo:
+	case kPayloadTypeChatInfo:
 		agent->receivedPayloadTypeChatroomInfo(p);
 		break;
 	}

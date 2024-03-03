@@ -41,9 +41,9 @@ typedef enum {
 	 * returns brief information of all chatrooms
 	 * that are available to join
 	 */
-	kPayloadTypeRequestAvailableChatrooms = 4,
+	kPayloadTypeRequestChatroomList = 4,
 
-	kPayloadTypeChatroomInfo = 5,
+	kPayloadTypeChatInfo = 5,
 } PayloadType;
 
 typedef struct {
@@ -101,7 +101,7 @@ typedef struct {
 	 * total chatroom
 	 */
 	int seqcount;
-} PayloadChatroomInfoBrief;
+} PayloadChatInfo;
 
 typedef struct {
 	struct {
@@ -122,7 +122,7 @@ typedef struct {
 	union {
 		PayloadMessage message;
 		PayloadUserInfo userinfo;
-		PayloadChatroomInfoBrief chatroominfobrief;
+		PayloadChatInfo chatinfo;
 	} payload;
 } Packet;
 
