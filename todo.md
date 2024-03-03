@@ -1,2 +1,3 @@
-[] chatrooms
-
+[x] chatrooms
+[] create chatroom
+[] join chatroom

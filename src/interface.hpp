@@ -9,9 +9,12 @@
 #include "socket.hpp"
 #include <typepacket.h>
 #include <bflibcpp/object.hpp>
+#include <bflibcpp/atomic.hpp>
+#include <ncurses.h>
 
 class User;
 class InputBuffer;
+class Chatroom;
 
 class Interface : public BF::Object {
 public:
@@ -42,7 +45,15 @@ private:
 	int windowCreateModeEdit();
 	int windowCreateModeHelp();
 	int windowCreateModeCommand();
+	int windowCreateModeLobby();
 	static void displayWindowUpdateThread(void * in);
+	
+	BFLock _winlock;
+	WINDOW * _inputWin;
+	WINDOW * _displayWin;
+	WINDOW * _helpWin;
+	Chatroom * _chatroom;
+	BF::Atomic<User *> _user;
 };
 
 #endif // INTERFACE_HPP

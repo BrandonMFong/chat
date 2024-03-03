@@ -8,7 +8,6 @@
 #include "user.hpp"
 #include <bflibcpp/bflibcpp.hpp>
 #include <unistd.h>
-#include <ncurses.h>
 #include <string.h>
 #include "log.hpp"
 #include "inputbuffer.hpp"
@@ -24,14 +23,7 @@ const size_t linelen = DATA_BUFFER_SIZE + USER_NAME_SIZE + (2 << 4);
 const int stateNormal = 0;
 const int stateEdit = 1;
 const int stateHelp = 2;
-
-BFLock winlock = 0;
-WINDOW * inputWin = NULL;
-WINDOW * displayWin = NULL;
-WINDOW * helpWin = NULL;
-
-Chatroom * chatroom = NULL;
-Atomic<User *> user;
+const int stateLobby = 3;
 Interface * interface = NULL;
 
 Interface * Interface::current() {
@@ -40,10 +32,15 @@ Interface * Interface::current() {
 
 Interface::Interface() {
 	interface = this;
+	this->_inputWin = NULL;
+	this->_displayWin = NULL;
+	this->_helpWin = NULL;
+	this->_chatroom = NULL;
+	BFLockCreate(&this->_winlock);
 }
 
 Interface::~Interface() {
-
+	BFLockDestroy(&this->_winlock);
 }
 
 Interface * Interface::create(char mode) {
@@ -59,140 +56,170 @@ int InterfaceCraftChatLineFromMessage(const Message * msg, char * line) {
 
 void Interface::displayWindowUpdateThread(void * in) {
 	int error = 0;
+	Interface * ui = (Interface *) ui;
 	const BFThreadAsyncID tid = BFThreadAsyncGetID();
 
-	while (BFThreadAsyncIDIsValid(tid) && !BFThreadAsyncIsCanceled(tid)) {
-		chatroom->updateConversation.lock();
-		if (chatroom->updateConversation.unsafeget()) {
-			chatroom->conversation.lock();
-			BFLockLock(&winlock);
+	while (!BFThreadAsyncIsCanceled(tid)) {
+		ui->_chatroom->updateConversation.lock();
+		if (ui->_chatroom->updateConversation.unsafeget()) {
+			ui->_chatroom->conversation.lock();
+			BFLockLock(&ui->_winlock);
 
-			werase(displayWin);
-			box(displayWin, 0, 0);
+			werase(ui->_displayWin);
+			box(ui->_displayWin, 0, 0);
 
 			// write messages
-			for (int i = 0; i < chatroom->conversation.unsafeget().count(); i++) {
-				Message * m = chatroom->conversation.unsafeget().objectAtIndex(i);
+			for (int i = 0; i < ui->_chatroom->conversation.unsafeget().count(); i++) {
+				Message * m = ui->_chatroom->conversation.unsafeget().objectAtIndex(i);
 
 				if (m) {
 					char line[linelen];
 					InterfaceCraftChatLineFromMessage(m, line);
-					mvwprintw(displayWin, i+1, 1, line);
+					mvwprintw(ui->_displayWin, i+1, 1, line);
 				}
 			}
 
-			wrefresh(displayWin);
+			wrefresh(ui->_displayWin);
 			
-			chatroom->updateConversation.unsafeset(false);
+			ui->_chatroom->updateConversation.unsafeset(false);
 
-			BFLockUnlock(&winlock);
-			chatroom->conversation.unlock();
+			BFLockUnlock(&ui->_winlock);
+			ui->_chatroom->conversation.unlock();
 		}
-		chatroom->updateConversation.unlock();
+		ui->_chatroom->updateConversation.unlock();
 	}
+}
+
+int Interface::windowCreateModeLobby() {
+	BFLockLock(&this->_winlock);
+
+	if (this->_inputWin)
+		delwin(this->_inputWin);
+	if (this->_displayWin)
+		delwin(this->_displayWin);
+	
+	// Create two windows
+	this->_inputWin = newwin(1, COLS, LINES - 1, 0);
+	this->_displayWin = newwin(LINES - 1, COLS, 0, 0);
+
+	box(this->_displayWin, 0, 0); // Add a box around the display window
+
+	refresh(); // Refresh the main window to show the boxes
+	wrefresh(this->_inputWin); // Refresh the input window
+	wrefresh(this->_displayWin); // Refresh the display window
+
+	keypad(this->_inputWin, true); // Enable special keys in input window
+	nodelay(this->_inputWin, false); // Set blocking input for input window
+
+	BFLockUnlock(&this->_winlock);
+
+	return 0;
 }
 
 int Interface::windowCreateModeCommand() {
 	// change to normal mode
-	BFLockLock(&winlock);
+	BFLockLock(&this->_winlock);
 
-	if (inputWin)
-		delwin(inputWin);
-	if (displayWin)
-		delwin(displayWin);
+	if (this->_inputWin)
+		delwin(this->_inputWin);
+	if (this->_displayWin)
+		delwin(this->_displayWin);
 	
 	// Create two windows
-	inputWin = newwin(1, COLS, LINES - 1, 0);
-	displayWin = newwin(LINES - 1, COLS, 0, 0);
+	this->_inputWin = newwin(1, COLS, LINES - 1, 0);
+	this->_displayWin = newwin(LINES - 1, COLS, 0, 0);
 
-	box(displayWin, 0, 0); // Add a box around the display window
+	box(this->_displayWin, 0, 0); // Add a box around the display window
 
 	refresh(); // Refresh the main window to show the boxes
-	wrefresh(inputWin); // Refresh the input window
-	wrefresh(displayWin); // Refresh the display window
+	wrefresh(this->_inputWin); // Refresh the input window
+	wrefresh(this->_displayWin); // Refresh the display window
 
-	keypad(inputWin, true); // Enable special keys in input window
-	nodelay(inputWin, false); // Set blocking input for input window
+	keypad(this->_inputWin, true); // Enable special keys in input window
+	nodelay(this->_inputWin, false); // Set blocking input for input window
 
-	chatroom->updateConversation = true;
+	this->_chatroom->updateConversation = true;
 
-	BFLockUnlock(&winlock);
+	BFLockUnlock(&this->_winlock);
 
 	return 0;
 }
 
 int Interface::windowCreateModeHelp() {
-	BFLockLock(&winlock);
-	helpWin = newwin(LINES - 10, COLS - 10, 5, 5);
-	box(helpWin, 0, 0); // Draw a box around the sub-window
+	BFLockLock(&this->_winlock);
+	this->_helpWin = newwin(LINES - 10, COLS - 10, 5, 5);
+	box(this->_helpWin, 0, 0); // Draw a box around the sub-window
 
 	// dialog
-	mvwprintw(helpWin, 1, 3, " 'edit' : Draft message. To send hit enter key.");
-	mvwprintw(helpWin, 2, 3, " 'quit' : Quits application.");
-	mvwprintw(helpWin, LINES - 12, 3, "Press any key to close...");
+	mvwprintw(this->_helpWin, 1, 3, " 'edit' : Draft message. To send hit enter key.");
+	mvwprintw(this->_helpWin, 2, 3, " 'quit' : Quits application.");
+	mvwprintw(this->_helpWin, LINES - 12, 3, "Press any key to close...");
 
 	refresh(); // Refresh the main window to show the boxes
-	wrefresh(inputWin); // Refresh the input window
-	wrefresh(displayWin); // Refresh the display window
-	wrefresh(helpWin); // Refresh the help window
+	wrefresh(this->_inputWin); // Refresh the input window
+	wrefresh(this->_displayWin); // Refresh the display window
+	wrefresh(this->_helpWin); // Refresh the help window
 
-	keypad(inputWin, true); // Enable special keys in input window
-	nodelay(inputWin, false); // Set blocking input for input window
+	keypad(this->_inputWin, true); // Enable special keys in input window
+	nodelay(this->_inputWin, false); // Set blocking input for input window
 
-	BFLockUnlock(&winlock);
+	BFLockUnlock(&this->_winlock);
 	return 0;
 }
 
 int Interface::windowCreateModeEdit() {
-	BFLockLock(&winlock);
+	BFLockLock(&this->_winlock);
 
-	if (helpWin)
-		delwin(helpWin);
-	if (inputWin)
-		delwin(inputWin);
-	if (displayWin)
-		delwin(displayWin);
+	if (this->_helpWin)
+		delwin(this->_helpWin);
+	if (this->_inputWin)
+		delwin(this->_inputWin);
+	if (this->_displayWin)
+		delwin(this->_displayWin);
 	
 	// Create two windows
-	inputWin = newwin(3, COLS, LINES - 3, 0);
-	displayWin = newwin(LINES - 3, COLS, 0, 0);
+	this->_inputWin = newwin(3, COLS, LINES - 3, 0);
+	this->_displayWin = newwin(LINES - 3, COLS, 0, 0);
 
-	box(inputWin, 0, 0); // Add a box around the input window
-	box(displayWin, 0, 0); // Add a box around the display window
+	box(this->_inputWin, 0, 0); // Add a box around the input window
+	box(this->_displayWin, 0, 0); // Add a box around the display window
 
 	refresh(); // Refresh the main window to show the boxes
-	wrefresh(inputWin); // Refresh the input window
-	wrefresh(displayWin); // Refresh the display window
+	wrefresh(this->_inputWin); // Refresh the input window
+	wrefresh(this->_displayWin); // Refresh the display window
 
-	keypad(inputWin, true); // Enable special keys in input window
-	nodelay(inputWin, false); // Set blocking input for input window
+	keypad(this->_inputWin, true); // Enable special keys in input window
+	nodelay(this->_inputWin, false); // Set blocking input for input window
 
-	BFLockUnlock(&winlock);
+	BFLockUnlock(&this->_winlock);
 
 	return 0;
 }
 
 int Interface::windowUpdateInputWindowText(InputBuffer & userInput, const int state) {
-	BFLockLock(&winlock);
-	if (state == stateNormal) {
-		werase(inputWin);
-		mvwprintw(inputWin, 0, 0, userInput.cString());
-		wmove(inputWin, 0, userInput.cursorPosition());
-		wrefresh(inputWin);
-	} else if (state == stateEdit) {
-		werase(inputWin);
-		box(inputWin, 0, 0); // Add a box around the display window
-		mvwprintw(inputWin, 1, 1, userInput.cString());
-		wmove(inputWin, 1, userInput.cursorPosition() + 1);
-		wrefresh(inputWin);
+	BFLockLock(&this->_winlock);
+	switch (state) {
+	case stateNormal:
+	case stateLobby:
+		werase(this->_inputWin);
+		mvwprintw(this->_inputWin, 0, 0, userInput.cString());
+		wmove(this->_inputWin, 0, userInput.cursorPosition());
+		wrefresh(this->_inputWin);
+		break;
+	case stateEdit:
+		werase(this->_inputWin);
+		box(this->_inputWin, 0, 0); // Add a box around the display window
+		mvwprintw(this->_inputWin, 1, 1, userInput.cString());
+		wmove(this->_inputWin, 1, userInput.cursorPosition() + 1);
+		wrefresh(this->_inputWin);
+		break;
 	}
-	BFLockUnlock(&winlock);
+	BFLockUnlock(&this->_winlock);
 
 	return 0;
 }
 
 int Interface::windowStart() {
-	BFLockCreate(&winlock);
 
 	initscr(); // Initialize the library
     cbreak();  // Line buffering disabled, pass on everything to me
@@ -204,27 +231,25 @@ int Interface::windowStart() {
 int Interface::windowStop() {
     endwin(); // End curses mode
 
-	BFLockDestroy(&winlock);
 	return 0;
 }
 
 int Interface::windowLoop() {
+	this->windowCreateModeLobby();
 
-	this->windowCreateModeCommand();
-
-	BFThreadAsyncID tid = BFThreadAsync(Interface::displayWindowUpdateThread, 0);
+	//BFThreadAsyncID tid = BFThreadAsync(Interface::displayWindowUpdateThread, (void *) this);
     InputBuffer userInput;
-	int state = stateNormal; // 0 = normal, 1 = edit
+	int state = stateLobby;
     while (1) {
-        int ch = wgetch(inputWin); // Get user input
+        int ch = wgetch(this->_inputWin); // Get user input
 		userInput.addChar(ch);
 		if (state == stateNormal) { // normal
 			if (!userInput.isready()) { 
 				this->windowUpdateInputWindowText(userInput, state);
 			} else {
 				if (!userInput.compareString("quit")) {
-					delwin(inputWin);
-					delwin(displayWin);
+					delwin(this->_inputWin);
+					delwin(this->_displayWin);
 					break; // exit loop
 				} else if (!userInput.compareString("help")) {
 					state = stateHelp;
@@ -234,7 +259,7 @@ int Interface::windowLoop() {
 
 					// change to edit mode
 					this->windowCreateModeEdit();
-					chatroom->updateConversation = true;
+					this->_chatroom->updateConversation = true;
 				} else {
 					LOG_DEBUG("unknown: '%s'", userInput.cString());
 				}
@@ -246,7 +271,7 @@ int Interface::windowLoop() {
 				this->windowUpdateInputWindowText(userInput, state);
 			} else {
 				// send buf
-				chatroom->sendBuffer(&userInput);
+				this->_chatroom->sendBuffer(&userInput);
 
 				state = stateNormal;
 
@@ -258,19 +283,31 @@ int Interface::windowLoop() {
 			this->windowCreateModeCommand();
 			state = stateNormal;
 			userInput.reset();
+		} else if (state == stateLobby) { // lobby
+			if (!userInput.isready()) {
+				this->windowUpdateInputWindowText(userInput, state);
+			} else {
+				if (!userInput.compareString("quit")) {
+					delwin(this->_inputWin);
+					delwin(this->_displayWin);
+					break; // exit loop
+				}
+				userInput.reset();
+			}
 		}
     }
 
+	/*
 	BFThreadAsyncCancel(tid);
 	BFThreadAsyncWait(tid);
 	BFThreadAsyncDestroy(tid);
-	
+	*/	
 	return 0;
 }
 
 User * Interface::getuser() {
-	while (!user.get()) {
-		// current user is stil null
+	while (!this->_user.get()) {
+		// current this->_user is stil null
 		// 
 		// we will wait for current
 		// user to be set before returning
@@ -286,7 +323,7 @@ User * Interface::getuser() {
 	//
 	// for now we are going to return curr
 	// user as const
-	return user.get();
+	return this->_user.get();
 }
 
 int Interface::gatherUserData() {
@@ -299,38 +336,39 @@ int Interface::gatherUserData() {
 		username[strlen(username)- 1] = '\0';
 	}
 
-	user = User::create(username);
-	BFRelease(user.get());
+	this->_user = User::create(username);
+	BFRelease(this->_user.get());
 
 	return 0;
 }
 
+/*
 int InterfaceLobbyRunClient() {
-	LOG_DEBUG("waiting for chatrooms");
+	LOG_DEBUG("waiting for this->_chatrooms");
 	
 	// ask server for list of chats
-	AgentClient::getmain()->requestChatroomListUpdate(user.get());
+	AgentClient::getmain()->requestthis->_chatroomListUpdate(this->_user.get());
 
 	// wait until one is available
-	while (Chatroom::getChatroomsCount() == 0) { }
+	while (this->_chatroom::getthis->_chatroomsCount() == 0) { }
 
 	int size = 0;
 	int error = 0;
-	PayloadChatInfo ** list = Chatroom::getChatroomList(&size, &error);
+	PayloadChatInfo ** list = this->_chatroom::getthis->_chatroomList(&size, &error);
 	if (!list || error)
 		return error == 0 ? 1 : error;
 
-	// choosing current chatroom
+	// choosing current this->_chatroom
 	//
 	// for now we are just choosing the first one
-	AgentClient::getmain()->enrollInChatroom(list[0]);
+	AgentClient::getmain()->enrollInthis->_chatroom(list[0]);
 
-	// save as current chatroom
-	chatroom = Chatroom::getChatroom(list[0]->chatroomuuid);
-	if (!chatroom)
+	// save as current this->_chatroom
+	this->_chatroom = this->_chatroom::getthis->_chatroom(list[0]->this->_chatroomuuid);
+	if (!this->_chatroom)
 		return 2;
 
-	LOG_DEBUG("using chatroom: %s", list[0]->chatroomuuid);
+	LOG_DEBUG("using this->_chatroom: %s", list[0]->this->_chatroomuuid);
 
 	// free memory
 	for (int i = 0; i < size; i++) { BFFree(list[i]); }
@@ -342,26 +380,28 @@ int InterfaceLobbyRunClient() {
 
 int InterfaceLobbyRunServer() {
 	// set up chat room name
-	char chatroomname[CHAT_ROOM_NAME_SIZE];
+	char this->_chatroomname[CHAT_ROOM_NAME_SIZE];
 
 	printf("chat room name: ");
-	fgets(chatroomname, sizeof(chatroomname), stdin);
+	fgets(this->_chatroomname, sizeof(this->_chatroomname), stdin);
 
-	if (chatroomname[strlen(chatroomname) - 1] == '\n') {
-		chatroomname[strlen(chatroomname) - 1] = '\0';
+	if (this->_chatroomname[strlen(this->_chatroomname) - 1] == '\n') {
+		this->_chatroomname[strlen(this->_chatroomname) - 1] = '\0';
 	}
 	
-	chatroom = ChatroomServer::create(chatroomname);
-	BFRelease(chatroom);
+	this->_chatroom = this->_chatroomServer::create(this->_chatroomname);
+	BFRelease(this->_chatroom);
 	
 	LOG_FLUSH;
 	
 	return 0;
 }
+*/
 
 int Interface::run() {
 	int error = this->gatherUserData();
 
+	/*
 	if (!error) {
 		if (ChatSocketGetMode() == SOCKET_MODE_SERVER) {
 			error = InterfaceLobbyRunServer();
@@ -369,6 +409,7 @@ int Interface::run() {
 			error = InterfaceLobbyRunClient();
 		}
 	}
+	*/
 
 	this->windowStart();
 
