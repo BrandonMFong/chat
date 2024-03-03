@@ -290,9 +290,9 @@ int InterfaceGatherUserData() {
 
 int InterfaceLobbyRunClient() {
 	LOG_DEBUG("waiting for chatrooms");
-	LOG_FLUSH;
+	
 	// ask server for list of chats
-	AgentClient::getmain()->requestChatroomListUpdate();
+	AgentClient::getmain()->requestChatroomListUpdate(user.get());
 
 	// wait until one is available
 	while (Chatroom::getChatroomsCount() == 0) { }
@@ -315,7 +315,9 @@ int InterfaceLobbyRunClient() {
 	// free memory
 	for (int i = 0; i < size; i++) { BFFree(list[i]); }
 	BFFree(list);
-	return error;
+	
+	LOG_FLUSH;
+	return 0;
 }
 
 int InterfaceLobbyRunServer() {

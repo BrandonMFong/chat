@@ -217,7 +217,7 @@ void Agent::packetReceive(SocketConnection * sc, const void * buf, size_t size) 
 	if (!agent)
 		return;
 
-	LOG_DEBUG("received packet");
+	LOG_DEBUG("received packet: %d", p->header.type);
 
 	switch (p->header.type) {
 	case kPayloadTypeMessage:

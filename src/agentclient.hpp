@@ -8,6 +8,8 @@
 
 #include "agent.hpp"
 
+class User;
+
 /**
  * represents remote user in client mode
  *
@@ -23,8 +25,11 @@ public:
 	/**
 	 * Asks the server for updated list of
 	 * chatrooms
+	 *
+	 * user : the user that is requesting data. This is
+	 * the main user on the machine
 	 */
-	int requestChatroomListUpdate();
+	int requestChatroomListUpdate(const User * user);
 
 private:
 	AgentClient();

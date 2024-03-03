@@ -46,11 +46,13 @@ void AgentClient::setmain(AgentClient * ac) {
 	agentclientmain.set(ac);
 }
 
-int AgentClient::requestChatroomListUpdate() {
+int AgentClient::requestChatroomListUpdate(const User * user) {
 	LOG_DEBUG("pinging server to give us an up to date list of chatrooms we can join");
 	Packet p;
 	memset(&p, 0, sizeof(p));
 	PacketSetHeader(&p, kPayloadTypeRequestAvailableChatrooms);
+
+
 	this->_sc->queueData(&p, sizeof(p));
 
 	return 0;
