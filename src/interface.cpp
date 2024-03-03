@@ -289,7 +289,7 @@ User * Interface::getuser() {
 	return user.get();
 }
 
-int InterfaceGatherUserData() {
+int Interface::gatherUserData() {
 	// set up user
 	char username[USER_NAME_SIZE];
 	printf("username: ");
@@ -360,7 +360,7 @@ int InterfaceLobbyRunServer() {
 }
 
 int Interface::run() {
-	int error = InterfaceGatherUserData();
+	int error = this->gatherUserData();
 
 	if (!error) {
 		if (ChatSocketGetMode() == SOCKET_MODE_SERVER) {

@@ -29,8 +29,12 @@ public:
 	 */
 	User * getuser();
 
+protected:
+
 private:
 	Interface();
+
+	int gatherUserData();
 };
 
 #endif // INTERFACE_HPP
