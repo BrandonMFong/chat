@@ -57,7 +57,7 @@ int InterfaceCraftChatLineFromMessage(const Message * msg, char * line) {
 	return 0;
 }
 
-void InterfaceDisplayWindowUpdateThread(void * in) {
+void Interface::displayWindowUpdateThread(void * in) {
 	int error = 0;
 	const BFThreadAsyncID tid = BFThreadAsyncGetID();
 
@@ -92,7 +92,7 @@ void InterfaceDisplayWindowUpdateThread(void * in) {
 	}
 }
 
-int InterfaceWindowCreateModeCommand() {
+int Interface::windowCreateModeCommand() {
 	// change to normal mode
 	BFLockLock(&winlock);
 
@@ -121,7 +121,7 @@ int InterfaceWindowCreateModeCommand() {
 	return 0;
 }
 
-int InterfaceWindowCreateModeHelp() {
+int Interface::windowCreateModeHelp() {
 	BFLockLock(&winlock);
 	helpWin = newwin(LINES - 10, COLS - 10, 5, 5);
 	box(helpWin, 0, 0); // Draw a box around the sub-window
@@ -143,7 +143,7 @@ int InterfaceWindowCreateModeHelp() {
 	return 0;
 }
 
-int InterfaceWindowCreateModeEdit() {
+int Interface::windowCreateModeEdit() {
 	BFLockLock(&winlock);
 
 	if (helpWin)
@@ -172,7 +172,7 @@ int InterfaceWindowCreateModeEdit() {
 	return 0;
 }
 
-int InterfaceWindowUpdateInputWindowText(InputBuffer & userInput, const int state) {
+int Interface::windowUpdateInputWindowText(InputBuffer & userInput, const int state) {
 	BFLockLock(&winlock);
 	if (state == stateNormal) {
 		werase(inputWin);
@@ -191,7 +191,7 @@ int InterfaceWindowUpdateInputWindowText(InputBuffer & userInput, const int stat
 	return 0;
 }
 
-int InterfaceWindowStart() {
+int Interface::windowStart() {
 	BFLockCreate(&winlock);
 
 	initscr(); // Initialize the library
@@ -201,18 +201,18 @@ int InterfaceWindowStart() {
 	return 0;
 }
 
-int InterfaceWindowEnd() {
+int Interface::windowStop() {
     endwin(); // End curses mode
 
 	BFLockDestroy(&winlock);
 	return 0;
 }
 
-int InterfaceWindowLoop() {
+int Interface::windowLoop() {
 
-	InterfaceWindowCreateModeCommand();
+	this->windowCreateModeCommand();
 
-	BFThreadAsyncID tid = BFThreadAsync(InterfaceDisplayWindowUpdateThread, 0);
+	BFThreadAsyncID tid = BFThreadAsync(Interface::displayWindowUpdateThread, 0);
     InputBuffer userInput;
 	int state = stateNormal; // 0 = normal, 1 = edit
     while (1) {
@@ -220,7 +220,7 @@ int InterfaceWindowLoop() {
 		userInput.addChar(ch);
 		if (state == stateNormal) { // normal
 			if (!userInput.isready()) { 
-				InterfaceWindowUpdateInputWindowText(userInput, state);
+				this->windowUpdateInputWindowText(userInput, state);
 			} else {
 				if (!userInput.compareString("quit")) {
 					delwin(inputWin);
@@ -228,12 +228,12 @@ int InterfaceWindowLoop() {
 					break; // exit loop
 				} else if (!userInput.compareString("help")) {
 					state = stateHelp;
-					InterfaceWindowCreateModeHelp();
+					this->windowCreateModeHelp();
 				} else if (!userInput.compareString("edit")) {
 					state = stateEdit;
 
 					// change to edit mode
-					InterfaceWindowCreateModeEdit();
+					this->windowCreateModeEdit();
 					chatroom->updateConversation = true;
 				} else {
 					LOG_DEBUG("unknown: '%s'", userInput.cString());
@@ -243,19 +243,19 @@ int InterfaceWindowLoop() {
 			}
 		} else if (state == stateEdit) { // edit
 			if (!userInput.isready()) {
-				InterfaceWindowUpdateInputWindowText(userInput, state);
+				this->windowUpdateInputWindowText(userInput, state);
 			} else {
 				// send buf
 				chatroom->sendBuffer(&userInput);
 
 				state = stateNormal;
 
-				InterfaceWindowCreateModeCommand();
+				this->windowCreateModeCommand();
 
 				userInput.reset();
 			}
 		} else if (state == stateHelp) { // modal window
-			InterfaceWindowCreateModeCommand();
+			this->windowCreateModeCommand();
 			state = stateNormal;
 			userInput.reset();
 		}
@@ -370,12 +370,12 @@ int Interface::run() {
 		}
 	}
 
-	InterfaceWindowStart();
+	this->windowStart();
 
 	if (!error)
-		error = InterfaceWindowLoop();
+		error = this->windowLoop();
 
-	InterfaceWindowEnd();
+	this->windowStop();
 
 	return error;
 }

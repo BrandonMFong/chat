@@ -11,6 +11,7 @@
 #include <bflibcpp/object.hpp>
 
 class User;
+class InputBuffer;
 
 class Interface : public BF::Object {
 public:
@@ -30,11 +31,18 @@ public:
 	User * getuser();
 
 protected:
-
-private:
 	Interface();
 
+private:
+	int windowStart();
+	int windowLoop();
+	int windowStop();
 	int gatherUserData();
+	int windowUpdateInputWindowText(InputBuffer & userInput, const int state);
+	int windowCreateModeEdit();
+	int windowCreateModeHelp();
+	int windowCreateModeCommand();
+	static void displayWindowUpdateThread(void * in);
 };
 
 #endif // INTERFACE_HPP
