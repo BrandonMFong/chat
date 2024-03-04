@@ -69,8 +69,8 @@ private:
 	Chatroom * _chatroom;
 	BF::Atomic<User *> _user;
 
-	InterfaceState _state;
-	InterfaceState _prevstate;
+	BF::Atomic<InterfaceState> _state;
+	BF::Atomic<InterfaceState> _prevstate;
 
 	bool _quitapp;
 };

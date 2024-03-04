@@ -17,14 +17,6 @@
 #include "message.hpp"
 #include "agentclient.hpp"
 
-#define DELETE_WINDOWS \
-	if (this->_inputWin) \
-		delwin(this->_inputWin); \
-	if (this->_displayWin) \
-		delwin(this->_displayWin); \
-	if (this->_helpWin) \
-		delwin(this->_helpWin);
-
 using namespace BF;
 
 const size_t linelen = DATA_BUFFER_SIZE + USER_NAME_SIZE + (2 << 4);
@@ -64,39 +56,63 @@ int InterfaceCraftChatLineFromMessage(const Message * msg, char * line) {
 
 void Interface::displayWindowUpdateThread(void * in) {
 	int error = 0;
-	Interface * ui = (Interface *) ui;
+	Interface * interface = (Interface *) in;
 	const BFThreadAsyncID tid = BFThreadAsyncGetID();
 
 	while (!BFThreadAsyncIsCanceled(tid)) {
-		ui->_chatroom->updateConversation.lock();
-		if (ui->_chatroom->updateConversation.unsafeget()) {
-			ui->_chatroom->conversation.lock();
-			BFLockLock(&ui->_winlock);
-
-			werase(ui->_displayWin);
-			box(ui->_displayWin, 0, 0);
-
-			// write messages
-			for (int i = 0; i < ui->_chatroom->conversation.unsafeget().count(); i++) {
-				Message * m = ui->_chatroom->conversation.unsafeget().objectAtIndex(i);
-
-				if (m) {
-					char line[linelen];
-					InterfaceCraftChatLineFromMessage(m, line);
-					mvwprintw(ui->_displayWin, i+1, 1, line);
-				}
+		switch (interface->_state.get()) 
+		{
+			case kInterfaceStateLobby:
+			{
+				
+				break;
 			}
 
-			wrefresh(ui->_displayWin);
-			
-			ui->_chatroom->updateConversation.unsafeset(false);
+			// allow the display window to always update its conversation
+			// even when we are typing
+			case kInterfaceStateChatroom:
+			case kInterfaceStateDraft: 
+			{
+				interface->_chatroom->updateConversation.lock();
+				if (interface->_chatroom->updateConversation.unsafeget()) {
+					interface->_chatroom->conversation.lock();
+					BFLockLock(&interface->_winlock);
 
-			BFLockUnlock(&ui->_winlock);
-			ui->_chatroom->conversation.unlock();
+					werase(interface->_displayWin);
+					box(interface->_displayWin, 0, 0);
+
+					// write messages
+					for (int i = 0; i < interface->_chatroom->conversation.unsafeget().count(); i++) {
+						Message * m = interface->_chatroom->conversation.unsafeget().objectAtIndex(i);
+
+						if (m) {
+							char line[linelen];
+							InterfaceCraftChatLineFromMessage(m, line);
+							mvwprintw(interface->_displayWin, i+1, 1, line);
+						}
+					}
+
+					wrefresh(interface->_displayWin);
+					
+					interface->_chatroom->updateConversation.unsafeset(false);
+
+					BFLockUnlock(&interface->_winlock);
+					interface->_chatroom->conversation.unlock();
+				}
+				interface->_chatroom->updateConversation.unlock();
+				break;
+			}
 		}
-		ui->_chatroom->updateConversation.unlock();
 	}
 }
+
+#define DELETE_WINDOWS \
+	if (this->_inputWin) \
+		delwin(this->_inputWin); \
+	if (this->_displayWin) \
+		delwin(this->_displayWin); \
+	if (this->_helpWin) \
+		delwin(this->_helpWin);
 
 int Interface::windowCreateModeLobby() {
 	BFLockLock(&this->_winlock);
@@ -195,7 +211,7 @@ int Interface::windowCreateModeEdit() {
 
 int Interface::windowUpdateInputWindowText(InputBuffer & userInput) {
 	BFLockLock(&this->_winlock);
-	switch (this->_state) {
+	switch (this->_state.get()) {
 	case kInterfaceStateChatroom:
 	case kInterfaceStateLobby:
 		werase(this->_inputWin);
@@ -225,32 +241,30 @@ int Interface::windowStart() {
 }
 
 int Interface::windowStop() {
-	if (this->_inputWin)
-		delwin(this->_inputWin);
-	if (this->_displayWin)
-		delwin(this->_displayWin);
-	if (this->_helpWin)
-		delwin(this->_helpWin);
-
+	DELETE_WINDOWS;
     endwin(); // End curses mode
 
 	return 0;
 }
 
 int Interface::draw() {
-	switch (this->_state) {
-	case kInterfaceStateLobby:
-		this->windowCreateModeLobby();
-		break;
-	case kInterfaceStateChatroom:
-		this->windowCreateModeCommand();
-		break;
-	case kInterfaceStateDraft:
-		this->windowCreateModeEdit();
-		break;
-	case kInterfaceStateHelp:
-		this->windowCreateModeHelp();
-		break;
+	// only create new windows if
+	// we changed states
+	if (this->_state != this->_prevstate) {
+		switch (this->_state.get()) {
+		case kInterfaceStateLobby:
+			this->windowCreateModeLobby();
+			break;
+		case kInterfaceStateChatroom:
+			this->windowCreateModeCommand();
+			break;
+		case kInterfaceStateDraft:
+			this->windowCreateModeEdit();
+			break;
+		case kInterfaceStateHelp:
+			this->windowCreateModeHelp();
+			break;
+		}
 	}
 
 	return 0;
@@ -258,7 +272,7 @@ int Interface::draw() {
 
 int Interface::processinput(InputBuffer & userInput) {
 	this->_prevstate = this->_state;
-	switch (this->_state) {
+	switch (this->_state.get()) {
 	case kInterfaceStateLobby:
 		if (!userInput.isready()) {
 			this->windowUpdateInputWindowText(userInput);
@@ -311,6 +325,7 @@ int Interface::windowLoop() {
 
 	BFThreadAsyncID tid = BFThreadAsync(Interface::displayWindowUpdateThread, (void *) this);
     InputBuffer userInput;
+	this->_prevstate = kInterfaceStateUnknown;
 	this->_state = kInterfaceStateLobby;
     while (!this->_quitapp) {
 		// draw ui based on current state
