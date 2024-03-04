@@ -10,7 +10,7 @@ typedef enum {
 	kInterfaceStateUnknown = 0,
 	kInterfaceStateLobby = 1,
 	kInterfaceStateDraft = 2,
-	kInterfaceStateMessageViewer = 3,
+	kInterfaceStateChatroom = 3,
 	kInterfaceStateHelp = 4,
 } InterfaceState;
 

@@ -198,7 +198,7 @@ int Interface::windowCreateModeEdit() {
 int Interface::windowUpdateInputWindowText(InputBuffer & userInput) {
 	BFLockLock(&this->_winlock);
 	switch (this->_state) {
-	case kInterfaceStateMessageViewer:
+	case kInterfaceStateChatroom:
 	case kInterfaceStateLobby:
 		werase(this->_inputWin);
 		mvwprintw(this->_inputWin, 0, 0, userInput.cString());
@@ -232,6 +232,69 @@ int Interface::windowStop() {
 	return 0;
 }
 
+int Interface::draw() {
+	return 0;
+}
+
+int Interface::processinput(InputBuffer & userInput) {
+	this->_prevstate = this->_state;
+	switch (this->_state) {
+	case kInterfaceStateLobby:
+		if (!userInput.isready()) {
+			this->windowUpdateInputWindowText(userInput);
+		} else {
+			if (!userInput.compareString("quit")) {
+				delwin(this->_inputWin);
+				delwin(this->_displayWin);
+				break; // exit loop
+			}
+			userInput.reset();
+		}
+		break;
+	case kInterfaceStateChatroom:
+		if (!userInput.isready()) { 
+			this->windowUpdateInputWindowText(userInput);
+		} else {
+			if (!userInput.compareString("help")) {
+				this->_state = kInterfaceStateHelp;
+				this->windowCreateModeHelp();
+			} else if (!userInput.compareString("edit")) {
+				this->_state = kInterfaceStateDraft;
+
+				// change to edit mode
+				this->windowCreateModeEdit();
+				this->_chatroom->updateConversation = true;
+			} else {
+				LOG_DEBUG("unknown: '%s'", userInput.cString());
+			}
+
+			userInput.reset();
+		}
+		break;
+	case kInterfaceStateDraft:
+		if (!userInput.isready()) {
+			this->windowUpdateInputWindowText(userInput);
+		} else {
+			// send buf
+			this->_chatroom->sendBuffer(&userInput);
+
+			this->_state = kInterfaceStateChatroom;
+
+			this->windowCreateModeCommand();
+
+			userInput.reset();
+		}
+		break;
+	case kInterfaceStateHelp:
+		this->windowCreateModeCommand();
+		this->_state = this->_prevstate;
+		userInput.reset();
+		break;
+	}
+
+	return 0;
+}
+
 int Interface::windowLoop() {
 	this->windowCreateModeLobby();
 
@@ -239,67 +302,13 @@ int Interface::windowLoop() {
     InputBuffer userInput;
 	this->_state = kInterfaceStateLobby;
     while (1) {
+		// draw ui based on current state
+		this->draw();
+
         int ch = wgetch(this->_inputWin); // Get user input
 		userInput.addChar(ch);
 
-		this->_prevstate = this->_state;
-		switch (this->_state) {
-		case kInterfaceStateMessageViewer:
-			if (!userInput.isready()) { 
-				this->windowUpdateInputWindowText(userInput);
-			} else {
-				if (!userInput.compareString("quit")) {
-					delwin(this->_inputWin);
-					delwin(this->_displayWin);
-					break; // exit loop
-				} else if (!userInput.compareString("help")) {
-					this->_state = kInterfaceStateHelp;
-					this->windowCreateModeHelp();
-				} else if (!userInput.compareString("edit")) {
-					this->_state = kInterfaceStateDraft;
-
-					// change to edit mode
-					this->windowCreateModeEdit();
-					this->_chatroom->updateConversation = true;
-				} else {
-					LOG_DEBUG("unknown: '%s'", userInput.cString());
-				}
-
-				userInput.reset();
-			}
-			break;
-		case kInterfaceStateDraft:
-			if (!userInput.isready()) {
-				this->windowUpdateInputWindowText(userInput);
-			} else {
-				// send buf
-				this->_chatroom->sendBuffer(&userInput);
-
-				this->_state = kInterfaceStateMessageViewer;
-
-				this->windowCreateModeCommand();
-
-				userInput.reset();
-			}
-			break;
-		case kInterfaceStateHelp:
-			this->windowCreateModeCommand();
-			this->_state = this->_prevstate;
-			userInput.reset();
-			break;
-		case kInterfaceStateLobby:
-			if (!userInput.isready()) {
-				this->windowUpdateInputWindowText(userInput);
-			} else {
-				if (!userInput.compareString("quit")) {
-					delwin(this->_inputWin);
-					delwin(this->_displayWin);
-					break; // exit loop
-				}
-				userInput.reset();
-			}
-			break;
-		}
+		this->processinput(userInput);
     }
 
 	BFThreadAsyncCancel(tid);

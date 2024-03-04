@@ -48,6 +48,9 @@ private:
 	int windowCreateModeCommand();
 	int windowCreateModeLobby();
 	static void displayWindowUpdateThread(void * in);
+
+	int draw();
+	int processinput(InputBuffer & buf);
 	
 	BFLock _winlock;
 	WINDOW * _inputWin;
