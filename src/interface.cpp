@@ -34,7 +34,6 @@ Interface::Interface() {
 	this->_chatroom = NULL;
 	this->_state = kInterfaceStateUnknown;
 	this->_prevstate = kInterfaceStateUnknown;
-	this->_quitapp = false;
 	this->_updatechatroomlist = false;
 	this->_updateconversation = false;
 
@@ -93,6 +92,7 @@ void Interface::displayWindowUpdateThread(void * in) {
 						}
 						BFFree(list);
 					}
+					interface->_updatechatroomlist.unsafeset(false);
 				}
 				interface->_updatechatroomlist.unlock();
 				break;
@@ -207,12 +207,7 @@ int Interface::windowCreateModeHelp() {
 	mvwprintw(this->_helpWin, LINES - 12, 3, "Press any key to close...");
 
 	refresh(); // Refresh the main window to show the boxes
-	wrefresh(this->_inputWin); // Refresh the input window
-	wrefresh(this->_displayWin); // Refresh the display window
 	wrefresh(this->_helpWin); // Refresh the help window
-
-	keypad(this->_inputWin, true); // Enable special keys in input window
-	nodelay(this->_inputWin, false); // Set blocking input for input window
 
 	BFLockUnlock(&this->_winlock);
 	return 0;
@@ -313,7 +308,7 @@ int Interface::processinput(InputBuffer & userInput) {
 			if (!userInput.compareString("quit")) {
 				this->_state = kInterfaceStateQuit;
 			} else if (!userInput.compareString("create")) {
-				this->_state = kInterfaceStateCreateChatroom;
+
 			}
 			userInput.reset();
 		}

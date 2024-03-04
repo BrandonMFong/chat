@@ -77,8 +77,6 @@ private:
 	BF::Atomic<InterfaceState> _prevstate;
 	BF::Atomic<bool> _updatechatroomlist;
 	BF::Atomic<bool> _updateconversation;
-
-	bool _quitapp;
 };
 
 #endif // INTERFACE_HPP
