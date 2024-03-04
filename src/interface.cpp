@@ -227,12 +227,31 @@ int Interface::windowStart() {
 }
 
 int Interface::windowStop() {
+	delwin(this->_inputWin);
+	delwin(this->_displayWin);
+	delwin(this->_helpWin);
+
     endwin(); // End curses mode
 
 	return 0;
 }
 
 int Interface::draw() {
+	switch (this->_state) {
+	case kInterfaceStateLobby:
+		this->windowCreateModeLobby();
+		break;
+	case kInterfaceStateChatroom:
+		this->windowCreateModeCommand();
+		break;
+	case kInterfaceStateDraft:
+		this->windowCreateModeEdit();
+		break;
+	case kInterfaceStateHelp:
+		this->windowCreateModeHelp();
+		break;
+	}
+
 	return 0;
 }
 
@@ -244,9 +263,6 @@ int Interface::processinput(InputBuffer & userInput) {
 			this->windowUpdateInputWindowText(userInput);
 		} else {
 			if (!userInput.compareString("quit")) {
-				delwin(this->_inputWin);
-				delwin(this->_displayWin);
-				break; // exit loop
 			}
 			userInput.reset();
 		}
@@ -257,12 +273,8 @@ int Interface::processinput(InputBuffer & userInput) {
 		} else {
 			if (!userInput.compareString("help")) {
 				this->_state = kInterfaceStateHelp;
-				this->windowCreateModeHelp();
 			} else if (!userInput.compareString("edit")) {
 				this->_state = kInterfaceStateDraft;
-
-				// change to edit mode
-				this->windowCreateModeEdit();
 				this->_chatroom->updateConversation = true;
 			} else {
 				LOG_DEBUG("unknown: '%s'", userInput.cString());
@@ -280,13 +292,10 @@ int Interface::processinput(InputBuffer & userInput) {
 
 			this->_state = kInterfaceStateChatroom;
 
-			this->windowCreateModeCommand();
-
 			userInput.reset();
 		}
 		break;
 	case kInterfaceStateHelp:
-		this->windowCreateModeCommand();
 		this->_state = this->_prevstate;
 		userInput.reset();
 		break;
@@ -308,6 +317,7 @@ int Interface::windowLoop() {
         int ch = wgetch(this->_inputWin); // Get user input
 		userInput.addChar(ch);
 
+		// act on current input state
 		this->processinput(userInput);
     }
 

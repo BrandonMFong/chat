@@ -17,6 +17,9 @@ class User;
 class InputBuffer;
 class Chatroom;
 
+/**
+ * main functionality is a display window and prompt window
+ */
 class Interface : public BF::Object {
 public:
 	static Interface * create(char mode);
@@ -49,7 +52,14 @@ private:
 	int windowCreateModeLobby();
 	static void displayWindowUpdateThread(void * in);
 
+	/**
+	 * updates UI based on current state
+	 */
 	int draw();
+
+	/**
+	 * process user input
+	 */
 	int processinput(InputBuffer & buf);
 	
 	BFLock _winlock;
