@@ -311,7 +311,9 @@ int Interface::processinput(InputBuffer & userInput) {
 			this->windowUpdateInputWindowText(userInput);
 		} else {
 			if (!userInput.compareString("quit")) {
-				this->_quitapp = true;
+				this->_state = kInterfaceStateQuit;
+			} else if (!userInput.compareString("create")) {
+				this->_state = kInterfaceStateCreateChatroom;
 			}
 			userInput.reset();
 		}
@@ -358,7 +360,7 @@ int Interface::windowLoop() {
     InputBuffer userInput;
 	this->_prevstate = kInterfaceStateUnknown;
 	this->_state = kInterfaceStateLobby;
-    while (!this->_quitapp) {
+	while (this->_state != kInterfaceStateQuit) {
 		// draw ui based on current state
 		this->draw();
 
@@ -471,16 +473,6 @@ int InterfaceLobbyRunServer() {
 
 int Interface::run() {
 	int error = this->gatherUserData();
-
-	/*
-	if (!error) {
-		if (ChatSocketGetMode() == SOCKET_MODE_SERVER) {
-			error = InterfaceLobbyRunServer();
-		} else {
-			error = InterfaceLobbyRunClient();
-		}
-	}
-	*/
 
 	this->windowStart();
 
