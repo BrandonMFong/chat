@@ -30,3 +30,7 @@ void Message::getuuidchatroom(uuid_t uuid) const {
 	uuid_copy(uuid, this->_packet.payload.message.chatuuid);
 }
 
+void Message::getuuiduser(uuid_t uuid) const {
+	uuid_copy(uuid, this->_packet.payload.message.useruuid);
+}
+

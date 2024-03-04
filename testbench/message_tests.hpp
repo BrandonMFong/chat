@@ -38,10 +38,14 @@ int test_packet2message() {
 		Packet p;
 		memset(&p, 0, sizeof(p));
 
-		strncpy(p.data, "hello world", sizeof(p.data));
-		strncpy(p.header.username, "username", sizeof(p.header.username));
-		strncpy(p.header.useruuid, "uuid", kBFStringUUIDStringLength);
-		strncpy(p.header.chatuuid, "uuid", kBFStringUUIDStringLength);
+		uuid_t uuidu, uuidc;
+		uuid_generate_random(uuidu);
+		uuid_generate_random(uuidc);
+
+		strncpy(p.payload.message.data, "hello world", sizeof(p.payload.message.data));
+		strncpy(p.payload.message.username, "username", sizeof(p.payload.message.username));
+		uuid_copy(p.payload.message.useruuid, uuidu);
+		uuid_copy(p.payload.message.chatuuid, uuidc);
 		p.header.time = BFTimeGetCurrentTime();
 
 		Message * m = new Message(&p);
@@ -49,11 +53,16 @@ int test_packet2message() {
 			result = max;
 
 		if (!result) {
-			if (strcmp(m->data(), p.data)) {
+			uuid_t u0, u1;
+			m->getuuidchatroom(u0);
+			m->getuuiduser(u1);
+			if (strcmp(m->data(), p.payload.message.data)) {
 				result = max;
-			} else if (strcmp(m->username(), p.header.username)) {
+			} else if (strcmp(m->username(), p.payload.message.username)) {
 				result = max;
-			} else if (strcmp(m->chatuuid(), p.header.chatuuid)) {
+			} else if (uuid_compare(u0, uuidc)) {
+				result = max;
+			} else if (uuid_compare(u1, uuidu)) {
 				result = max;
 			}
 		}
