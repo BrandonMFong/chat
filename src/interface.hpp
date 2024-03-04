@@ -71,6 +71,8 @@ private:
 
 	InterfaceState _state;
 	InterfaceState _prevstate;
+
+	bool _quitapp;
 };
 
 #endif // INTERFACE_HPP

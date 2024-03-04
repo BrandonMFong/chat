@@ -17,6 +17,14 @@
 #include "message.hpp"
 #include "agentclient.hpp"
 
+#define DELETE_WINDOWS \
+	if (this->_inputWin) \
+		delwin(this->_inputWin); \
+	if (this->_displayWin) \
+		delwin(this->_displayWin); \
+	if (this->_helpWin) \
+		delwin(this->_helpWin);
+
 using namespace BF;
 
 const size_t linelen = DATA_BUFFER_SIZE + USER_NAME_SIZE + (2 << 4);
@@ -34,6 +42,7 @@ Interface::Interface() {
 	this->_chatroom = NULL;
 	this->_state = kInterfaceStateUnknown;
 	this->_prevstate = kInterfaceStateUnknown;
+	this->_quitapp = false;
 
 	BFLockCreate(&this->_winlock);
 }
@@ -92,11 +101,8 @@ void Interface::displayWindowUpdateThread(void * in) {
 int Interface::windowCreateModeLobby() {
 	BFLockLock(&this->_winlock);
 
-	if (this->_inputWin)
-		delwin(this->_inputWin);
-	if (this->_displayWin)
-		delwin(this->_displayWin);
-	
+	DELETE_WINDOWS;
+
 	// Create two windows
 	this->_inputWin = newwin(1, COLS, LINES - 1, 0);
 	this->_displayWin = newwin(LINES - 1, COLS, 0, 0);
@@ -119,10 +125,7 @@ int Interface::windowCreateModeCommand() {
 	// change to normal mode
 	BFLockLock(&this->_winlock);
 
-	if (this->_inputWin)
-		delwin(this->_inputWin);
-	if (this->_displayWin)
-		delwin(this->_displayWin);
+	DELETE_WINDOWS;
 	
 	// Create two windows
 	this->_inputWin = newwin(1, COLS, LINES - 1, 0);
@@ -169,12 +172,7 @@ int Interface::windowCreateModeHelp() {
 int Interface::windowCreateModeEdit() {
 	BFLockLock(&this->_winlock);
 
-	if (this->_helpWin)
-		delwin(this->_helpWin);
-	if (this->_inputWin)
-		delwin(this->_inputWin);
-	if (this->_displayWin)
-		delwin(this->_displayWin);
+	DELETE_WINDOWS;
 	
 	// Create two windows
 	this->_inputWin = newwin(3, COLS, LINES - 3, 0);
@@ -227,9 +225,12 @@ int Interface::windowStart() {
 }
 
 int Interface::windowStop() {
-	delwin(this->_inputWin);
-	delwin(this->_displayWin);
-	delwin(this->_helpWin);
+	if (this->_inputWin)
+		delwin(this->_inputWin);
+	if (this->_displayWin)
+		delwin(this->_displayWin);
+	if (this->_helpWin)
+		delwin(this->_helpWin);
 
     endwin(); // End curses mode
 
@@ -263,6 +264,7 @@ int Interface::processinput(InputBuffer & userInput) {
 			this->windowUpdateInputWindowText(userInput);
 		} else {
 			if (!userInput.compareString("quit")) {
+				this->_quitapp = true;
 			}
 			userInput.reset();
 		}
@@ -310,7 +312,7 @@ int Interface::windowLoop() {
 	BFThreadAsyncID tid = BFThreadAsync(Interface::displayWindowUpdateThread, (void *) this);
     InputBuffer userInput;
 	this->_state = kInterfaceStateLobby;
-    while (1) {
+    while (!this->_quitapp) {
 		// draw ui based on current state
 		this->draw();
 
