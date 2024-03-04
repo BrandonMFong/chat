@@ -20,10 +20,12 @@
 using namespace BF;
 
 const size_t linelen = DATA_BUFFER_SIZE + USER_NAME_SIZE + (2 << 4);
+/*
 const int stateNormal = 0;
 const int stateEdit = 1;
 const int stateHelp = 2;
 const int stateLobby = 3;
+*/
 Interface * interface = NULL;
 
 Interface * Interface::current() {
@@ -36,6 +38,7 @@ Interface::Interface() {
 	this->_displayWin = NULL;
 	this->_helpWin = NULL;
 	this->_chatroom = NULL;
+	this->_state = kInterfaceStateUnknown;
 	BFLockCreate(&this->_winlock);
 }
 
@@ -196,17 +199,17 @@ int Interface::windowCreateModeEdit() {
 	return 0;
 }
 
-int Interface::windowUpdateInputWindowText(InputBuffer & userInput, const int state) {
+int Interface::windowUpdateInputWindowText(InputBuffer & userInput) {
 	BFLockLock(&this->_winlock);
-	switch (state) {
-	case stateNormal:
-	case stateLobby:
+	switch (this->_state) {
+	case kInterfaceStateMessageViewer:
+	case kInterfaceStateLobby:
 		werase(this->_inputWin);
 		mvwprintw(this->_inputWin, 0, 0, userInput.cString());
 		wmove(this->_inputWin, 0, userInput.cursorPosition());
 		wrefresh(this->_inputWin);
 		break;
-	case stateEdit:
+	case kInterfaceStateDraft:
 		werase(this->_inputWin);
 		box(this->_inputWin, 0, 0); // Add a box around the display window
 		mvwprintw(this->_inputWin, 1, 1, userInput.cString());
@@ -220,7 +223,6 @@ int Interface::windowUpdateInputWindowText(InputBuffer & userInput, const int st
 }
 
 int Interface::windowStart() {
-
 	initscr(); // Initialize the library
     cbreak();  // Line buffering disabled, pass on everything to me
     noecho();  // Don't echo user input
@@ -237,25 +239,26 @@ int Interface::windowStop() {
 int Interface::windowLoop() {
 	this->windowCreateModeLobby();
 
-	//BFThreadAsyncID tid = BFThreadAsync(Interface::displayWindowUpdateThread, (void *) this);
+	BFThreadAsyncID tid = BFThreadAsync(Interface::displayWindowUpdateThread, (void *) this);
     InputBuffer userInput;
-	int state = stateLobby;
+	this->_state = kInterfaceStateLobby;
     while (1) {
         int ch = wgetch(this->_inputWin); // Get user input
 		userInput.addChar(ch);
-		if (state == stateNormal) { // normal
+		switch (this->_state) {
+		case kInterfaceStateMessageViewer:
 			if (!userInput.isready()) { 
-				this->windowUpdateInputWindowText(userInput, state);
+				this->windowUpdateInputWindowText(userInput);
 			} else {
 				if (!userInput.compareString("quit")) {
 					delwin(this->_inputWin);
 					delwin(this->_displayWin);
 					break; // exit loop
 				} else if (!userInput.compareString("help")) {
-					state = stateHelp;
+					this->_state = kInterfaceStateHelp;
 					this->windowCreateModeHelp();
 				} else if (!userInput.compareString("edit")) {
-					state = stateEdit;
+					this->_state = kInterfaceStateDraft;
 
 					// change to edit mode
 					this->windowCreateModeEdit();
@@ -266,26 +269,29 @@ int Interface::windowLoop() {
 
 				userInput.reset();
 			}
-		} else if (state == stateEdit) { // edit
+			break;
+		case kInterfaceStateDraft:
 			if (!userInput.isready()) {
-				this->windowUpdateInputWindowText(userInput, state);
+				this->windowUpdateInputWindowText(userInput);
 			} else {
 				// send buf
 				this->_chatroom->sendBuffer(&userInput);
 
-				state = stateNormal;
+				this->_state = kInterfaceStateMessageViewer;
 
 				this->windowCreateModeCommand();
 
 				userInput.reset();
 			}
-		} else if (state == stateHelp) { // modal window
+			break;
+		case kInterfaceStateHelp:
 			this->windowCreateModeCommand();
-			state = stateNormal;
+			this->_state = kInterfaceStateMessageViewer;
 			userInput.reset();
-		} else if (state == stateLobby) { // lobby
+			break;
+		case kInterfaceStateLobby:
 			if (!userInput.isready()) {
-				this->windowUpdateInputWindowText(userInput, state);
+				this->windowUpdateInputWindowText(userInput);
 			} else {
 				if (!userInput.compareString("quit")) {
 					delwin(this->_inputWin);
@@ -294,14 +300,14 @@ int Interface::windowLoop() {
 				}
 				userInput.reset();
 			}
+			break;
 		}
     }
 
-	/*
 	BFThreadAsyncCancel(tid);
 	BFThreadAsyncWait(tid);
 	BFThreadAsyncDestroy(tid);
-	*/	
+
 	return 0;
 }
 

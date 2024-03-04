@@ -7,7 +7,8 @@
 #define INTERFACE_HPP
 
 #include "socket.hpp"
-#include <typepacket.h>
+#include "typepacket.h"
+#include "typeinterfacestate.hpp"
 #include <bflibcpp/object.hpp>
 #include <bflibcpp/atomic.hpp>
 #include <ncurses.h>
@@ -41,7 +42,7 @@ private:
 	int windowLoop();
 	int windowStop();
 	int gatherUserData();
-	int windowUpdateInputWindowText(InputBuffer & userInput, const int state);
+	int windowUpdateInputWindowText(InputBuffer & userInput);
 	int windowCreateModeEdit();
 	int windowCreateModeHelp();
 	int windowCreateModeCommand();
@@ -54,6 +55,8 @@ private:
 	WINDOW * _helpWin;
 	Chatroom * _chatroom;
 	BF::Atomic<User *> _user;
+
+	InterfaceState _state;
 };
 
 #endif // INTERFACE_HPP
