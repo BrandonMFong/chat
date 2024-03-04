@@ -20,12 +20,6 @@
 using namespace BF;
 
 const size_t linelen = DATA_BUFFER_SIZE + USER_NAME_SIZE + (2 << 4);
-/*
-const int stateNormal = 0;
-const int stateEdit = 1;
-const int stateHelp = 2;
-const int stateLobby = 3;
-*/
 Interface * interface = NULL;
 
 Interface * Interface::current() {
@@ -39,6 +33,8 @@ Interface::Interface() {
 	this->_helpWin = NULL;
 	this->_chatroom = NULL;
 	this->_state = kInterfaceStateUnknown;
+	this->_prevstate = kInterfaceStateUnknown;
+
 	BFLockCreate(&this->_winlock);
 }
 
@@ -245,6 +241,8 @@ int Interface::windowLoop() {
     while (1) {
         int ch = wgetch(this->_inputWin); // Get user input
 		userInput.addChar(ch);
+
+		this->_prevstate = this->_state;
 		switch (this->_state) {
 		case kInterfaceStateMessageViewer:
 			if (!userInput.isready()) { 
@@ -286,7 +284,7 @@ int Interface::windowLoop() {
 			break;
 		case kInterfaceStateHelp:
 			this->windowCreateModeCommand();
-			this->_state = kInterfaceStateMessageViewer;
+			this->_state = this->_prevstate;
 			userInput.reset();
 			break;
 		case kInterfaceStateLobby:

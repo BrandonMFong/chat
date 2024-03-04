@@ -57,6 +57,7 @@ private:
 	BF::Atomic<User *> _user;
 
 	InterfaceState _state;
+	InterfaceState _prevstate;
 };
 
 #endif // INTERFACE_HPP
