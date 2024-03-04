@@ -21,6 +21,7 @@ class Chatroom;
  * main functionality is a display window and prompt window
  */
 class Interface : public BF::Object {
+	friend class Chatroom;
 public:
 	static Interface * create(char mode);
 
@@ -61,6 +62,9 @@ private:
 	 * process user input
 	 */
 	int processinput(InputBuffer & buf);
+
+	void chatroomListHasChanged();
+	void converstaionHasChanged();
 	
 	BFLock _winlock;
 	WINDOW * _inputWin;
@@ -71,6 +75,8 @@ private:
 
 	BF::Atomic<InterfaceState> _state;
 	BF::Atomic<InterfaceState> _prevstate;
+	BF::Atomic<bool> _updatechatroomlist;
+	BF::Atomic<bool> _updateconversation;
 
 	bool _quitapp;
 };

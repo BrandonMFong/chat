@@ -26,7 +26,6 @@ void _ChatroomRelease(Chatroom * cr) {
 }
 
 Chatroom::Chatroom() : Object() {
-	this->updateConversation = false;
 	uuid_generate_random(this->_uuid);
 	memset(this->_name, 0, sizeof(this->_name));
 
@@ -98,6 +97,10 @@ void Chatroom::addRoomToChatrooms(Chatroom * cr) {
 	BFRetain(cr);
 	chatrooms.unsafeget().add(cr);
 	chatrooms.unlock();
+
+	// tell the ui that our chatroom list
+	// changed so they can update the ui
+	Interface::current()->chatroomListHasChanged();
 }
 
 int Chatroom::addMessage(Message * msg) {
@@ -106,7 +109,7 @@ int Chatroom::addMessage(Message * msg) {
 	// msg count should have a retain count of 1 
 	// so we don't need to retain	
 	this->conversation.get().add(msg);
-	this->updateConversation = true;
+	Interface::current()->converstaionHasChanged();
 
 	return 0;
 }

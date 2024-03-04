@@ -35,6 +35,8 @@ Interface::Interface() {
 	this->_state = kInterfaceStateUnknown;
 	this->_prevstate = kInterfaceStateUnknown;
 	this->_quitapp = false;
+	this->_updatechatroomlist = false;
+	this->_updateconversation = false;
 
 	BFLockCreate(&this->_winlock);
 }
@@ -45,6 +47,14 @@ Interface::~Interface() {
 
 Interface * Interface::create(char mode) {
 	return new Interface;
+}
+
+void Interface::chatroomListHasChanged() {
+	this->_updatechatroomlist = true;
+}
+
+void Interface::converstaionHasChanged() {
+	this->_updateconversation = true;
 }
 
 int InterfaceCraftChatLineFromMessage(const Message * msg, char * line) {
@@ -64,7 +74,6 @@ void Interface::displayWindowUpdateThread(void * in) {
 		{
 			case kInterfaceStateLobby:
 			{
-				
 				break;
 			}
 
@@ -73,8 +82,8 @@ void Interface::displayWindowUpdateThread(void * in) {
 			case kInterfaceStateChatroom:
 			case kInterfaceStateDraft: 
 			{
-				interface->_chatroom->updateConversation.lock();
-				if (interface->_chatroom->updateConversation.unsafeget()) {
+				interface->_updateconversation.lock();
+				if (interface->_updateconversation.unsafeget()) {
 					interface->_chatroom->conversation.lock();
 					BFLockLock(&interface->_winlock);
 
@@ -94,12 +103,12 @@ void Interface::displayWindowUpdateThread(void * in) {
 
 					wrefresh(interface->_displayWin);
 					
-					interface->_chatroom->updateConversation.unsafeset(false);
+					interface->_updateconversation.unsafeset(false);
 
 					BFLockUnlock(&interface->_winlock);
 					interface->_chatroom->conversation.unlock();
 				}
-				interface->_chatroom->updateConversation.unlock();
+				interface->_updateconversation.unlock();
 				break;
 			}
 		}
@@ -156,7 +165,7 @@ int Interface::windowCreateModeCommand() {
 	keypad(this->_inputWin, true); // Enable special keys in input window
 	nodelay(this->_inputWin, false); // Set blocking input for input window
 
-	this->_chatroom->updateConversation = true;
+	this->_updateconversation = true;
 
 	BFLockUnlock(&this->_winlock);
 
@@ -165,6 +174,9 @@ int Interface::windowCreateModeCommand() {
 
 int Interface::windowCreateModeHelp() {
 	BFLockLock(&this->_winlock);
+
+	DELETE_WINDOWS;
+
 	this->_helpWin = newwin(LINES - 10, COLS - 10, 5, 5);
 	box(this->_helpWin, 0, 0); // Draw a box around the sub-window
 
@@ -291,7 +303,7 @@ int Interface::processinput(InputBuffer & userInput) {
 				this->_state = kInterfaceStateHelp;
 			} else if (!userInput.compareString("edit")) {
 				this->_state = kInterfaceStateDraft;
-				this->_chatroom->updateConversation = true;
+				this->_updateconversation = true;
 			} else {
 				LOG_DEBUG("unknown: '%s'", userInput.cString());
 			}
