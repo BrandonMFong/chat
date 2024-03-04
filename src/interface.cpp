@@ -74,6 +74,27 @@ void Interface::displayWindowUpdateThread(void * in) {
 		{
 			case kInterfaceStateLobby:
 			{
+				interface->_updatechatroomlist.lock();
+				if (interface->_updatechatroomlist.unsafeget()) {
+					// get list
+					int size = 0;
+					int error = 0;
+					PayloadChatInfo ** list = interface->_chatroom->getChatroomList(&size, &error);
+					if (!list || error) {
+						LOG_DEBUG("could not get list of chatrooms: %d", error);
+					} else {
+						// show available rooms
+						for (int i = 0; i < size; i++) { 
+							char line[512];
+							snprintf(line, 512, "(%d) %s", i, list[i]->chatroomname);
+							mvwprintw(interface->_displayWin, i+1, 1, line);
+
+							BFFree(list[i]);
+						}
+						BFFree(list);
+					}
+				}
+				interface->_updatechatroomlist.unlock();
 				break;
 			}
 
