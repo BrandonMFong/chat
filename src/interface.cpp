@@ -321,8 +321,6 @@ int Interface::processinput(InputBuffer & userInput) {
 }
 
 int Interface::windowLoop() {
-	this->windowCreateModeLobby();
-
 	BFThreadAsyncID tid = BFThreadAsync(Interface::displayWindowUpdateThread, (void *) this);
     InputBuffer userInput;
 	this->_prevstate = kInterfaceStateUnknown;
