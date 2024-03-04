@@ -8,7 +8,7 @@
 #include "log.hpp"
 #include "agentclient.hpp"
 
-ChatroomClient::ChatroomClient(AgentClient * a) : Chatroom() {
+ChatroomClient::ChatroomClient(AgentClient * a, const uuid_t chatroomuuid) : Chatroom(chatroomuuid) {
 	this->_agent = a;
 	BFRetain(this->_agent);
 }
@@ -21,11 +21,10 @@ int ChatroomClient::recordChatroom(const PayloadChatInfo * info, AgentClient * a
 	if (!info)
 		return 1;
 
-	ChatroomClient * chatroom = new ChatroomClient(agent);
+	ChatroomClient * chatroom = new ChatroomClient(agent, info->chatroomuuid);
 	if (!chatroom)
 		return 2;
 
-	uuid_copy(chatroom->_uuid, info->chatroomuuid);
 	memcpy(chatroom->_name, info->chatroomname, sizeof(chatroom->_name));
 
 #ifdef DEBUG

@@ -33,6 +33,14 @@ Chatroom::Chatroom() : Object() {
 	this->conversation.get().setDeallocateCallback(_ChatroomMessageFree);
 }
 
+Chatroom::Chatroom(const uuid_t uuid) : Object() {
+	uuid_copy(this->_uuid, uuid);
+	memset(this->_name, 0, sizeof(this->_name));
+
+	// setup conversation thread
+	this->conversation.get().setDeallocateCallback(_ChatroomMessageFree);
+}
+
 Chatroom::~Chatroom() {
 
 }

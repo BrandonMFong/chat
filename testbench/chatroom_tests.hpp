@@ -9,6 +9,8 @@
 #define ASSERT_PUBLIC_MEMBER_ACCESS
 
 #include "chatroom.hpp"
+#include "chatroomserver.hpp"
+#include "chatroomclient.hpp"
 
 extern "C" {
 #include <bflibc/bflibc.h>
@@ -21,11 +23,11 @@ int test_chatroominit() {
 	UNIT_TEST_START;
 	int result = 0;
 	
-	char u[kBFStringUUIDStringLength];
-	
-	BFStringGetRandomUUIDString(u);
+	uuid_t u;
+	uuid_generate_random(u);	
 
-	Chatroom chat(u);
+	ChatroomServer sc(u);
+	ChatroomClient cc(u);
 
 	UNIT_TEST_END(!result, result);
 	return result;

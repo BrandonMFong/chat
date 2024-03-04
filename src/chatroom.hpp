@@ -68,6 +68,12 @@ protected:
 
 	/**
 	 * inits chatroom with uuid
+	 * uuid : gets copied
+	 */
+	Chatroom(const uuid_t uuid);
+
+	/**
+	 * creates chatroom and sets random uuid
 	 */
 	Chatroom();
 

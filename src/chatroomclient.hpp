@@ -20,7 +20,7 @@ public:
 
 	virtual ~ChatroomClient();
 private:
-	ChatroomClient(AgentClient * a);
+	ChatroomClient(AgentClient * a, const uuid_t chatroomuuid);
 	int sendPacket(const Packet * pkt);
 
 	AgentClient * _agent;
