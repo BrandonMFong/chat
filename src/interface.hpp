@@ -51,6 +51,7 @@ private:
 	int windowCreateModeHelp();
 	int windowCreateModeCommand();
 	int windowCreateModeLobby();
+	int windowCreateModeCreateChatroom();
 	static void displayWindowUpdateThread(void * in);
 
 	/**

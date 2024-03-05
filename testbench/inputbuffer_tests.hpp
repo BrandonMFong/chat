@@ -84,6 +84,31 @@ int test_inputbufferbackspacechar() {
 	return result;
 }
 
+int test_commandandarg() {
+	UNIT_TEST_START;
+	int result = 0;
+
+	InputBuffer buf;
+	int max = 2 << 8;
+	while (!result && max) {
+		const char * line = "create room_name";
+		for (int i = 0; i < strlen(line); i++) {
+			buf.addChar(line[i]);
+		}
+		
+		buf.addChar('\n');
+
+		if (!buf.isready()) {
+			result = max;
+		}
+
+		max--;
+	}
+
+	UNIT_TEST_END(!result, result);
+	return result;
+}
+
 void inputbuffer_tests(int * pass, int * fail) {
 	int p = 0, f = 0;
 	
@@ -92,6 +117,7 @@ void inputbuffer_tests(int * pass, int * fail) {
 	LAUNCH_TEST(test_inputbufferinit, p, f);
 	LAUNCH_TEST(test_inputbuffermodifiers, p, f);
 	LAUNCH_TEST(test_inputbufferbackspacechar, p, f);
+	LAUNCH_TEST(test_commandandarg, p, f);
 
 	if (pass) *pass += p;
 	if (fail) *fail += f;

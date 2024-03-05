@@ -13,6 +13,7 @@ typedef enum {
 	kInterfaceStateDraft = 2,
 	kInterfaceStateChatroom = 3,
 	kInterfaceStateHelp = 4,
+	kInterfaceStateCreateChatroom = 5,
 } InterfaceState;
 
 #endif // INTERFACE_STATE_HPP

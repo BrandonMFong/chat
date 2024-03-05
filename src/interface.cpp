@@ -237,6 +237,30 @@ int Interface::windowCreateModeEdit() {
 	return 0;
 }
 
+int Interface::windowCreateModeCreateChatroom() {
+	BFLockLock(&this->_winlock);
+
+	DELETE_WINDOWS;
+	
+	// Create two windows
+	this->_inputWin = newwin(3, COLS, LINES - 3, 0);
+	this->_displayWin = newwin(LINES - 3, COLS, 0, 0);
+
+	box(this->_inputWin, 0, 0); // Add a box around the input window
+	box(this->_displayWin, 0, 0); // Add a box around the display window
+
+	refresh(); // Refresh the main window to show the boxes
+	wrefresh(this->_inputWin); // Refresh the input window
+	wrefresh(this->_displayWin); // Refresh the display window
+
+	keypad(this->_inputWin, true); // Enable special keys in input window
+	nodelay(this->_inputWin, false); // Set blocking input for input window
+
+	BFLockUnlock(&this->_winlock);
+
+	return 0;
+}
+
 int Interface::windowUpdateInputWindowText(InputBuffer & userInput) {
 	BFLockLock(&this->_winlock);
 	switch (this->_state.get()) {

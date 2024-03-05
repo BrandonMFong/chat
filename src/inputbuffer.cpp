@@ -20,19 +20,6 @@ InputBuffer::~InputBuffer() {
 
 }
 
-/*
-int InputBuffer::unload(Message * msg) {
-	if (!msg) return 50;
-
-	strncpy(msg->buf, this->cString(), sizeof(msg->buf));
-	strncpy(msg->username, User::current()->username(), sizeof(msg->username));
-	Time * t = Time::createCurrent();
-	msg->time = t->epoch();
-	Delete(t);
-
-	return 0;
-}
-*/
 int InputBuffer::addChar(int ch) {
 	switch (ch) {
 	case '\n':
