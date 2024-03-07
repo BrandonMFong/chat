@@ -16,6 +16,7 @@
 #include "chatroomserver.hpp"
 #include "message.hpp"
 #include "agentclient.hpp"
+#include "command.hpp"
 
 using namespace BF;
 
@@ -322,9 +323,10 @@ int Interface::processinput(InputBuffer & userInput) {
 	switch (this->_state.get()) {
 	case kInterfaceStateLobby:
 		if (userInput.isready()) {
-			if (!userInput.compareString("quit")) {
+			Command cmd(userInput);
+			if (!cmd.op().compareString("quit")) {
 				this->_state = kInterfaceStateQuit;
-			} else if (!userInput.compareString("create")) {
+			} else if (!cmd.op().compareString("create")) {
 				// set up chat room name
 				char chatroomname[CHAT_ROOM_NAME_SIZE];
 				snprintf(chatroomname, CHAT_ROOM_NAME_SIZE, "chatroom%d",
@@ -341,9 +343,10 @@ int Interface::processinput(InputBuffer & userInput) {
 		break;
 	case kInterfaceStateChatroom:
 		if (userInput.isready()) { 
-			if (!userInput.compareString("help")) {
+			Command cmd(userInput);
+			if (!cmd.op().compareString("help")) {
 				this->_state = kInterfaceStateHelp;
-			} else if (!userInput.compareString("edit")) {
+			} else if (!cmd.op().compareString("edit")) {
 				this->_state = kInterfaceStateDraft;
 				this->_updateconversation = true;
 			} else {
