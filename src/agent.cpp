@@ -297,7 +297,8 @@ int Agent::broadcast(const Packet * pkt) {
 	List<Agent *>::Node * n = agents.unsafeget().first();
 	for (; n; n = n->next()) {
 		Agent * a = n->object();
-		a->sendPacket(pkt);
+		if (a)
+			a->sendPacket(pkt);
 	}
 	agents.unlock();
 	return 0;

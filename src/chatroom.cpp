@@ -127,6 +127,11 @@ void Chatroom::getuuid(uuid_t uuid) {
 	uuid_copy(uuid, this->_uuid);
 }
 
+// user is not being recorded. we can assume
+// the enrolling user is the current one on
+// the machine
+//
+// i'm leaving it like this in case we may need to record users
 int Chatroom::enroll(const User * user) {
 	LOG_DEBUG("enrolling user into chatroom");
 	Packet p;
