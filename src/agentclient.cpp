@@ -57,6 +57,7 @@ int AgentClient::requestChatroomListUpdate(const User * user) {
 	return this->sendPacket(&p);
 }
 
+/*
 int AgentClient::enrollInChatroom(const PayloadChatInfo * chatinfo) {
 	LOG_DEBUG("enrolling in chatroom");
 	Packet p;
@@ -65,4 +66,5 @@ int AgentClient::enrollInChatroom(const PayloadChatInfo * chatinfo) {
 	PacketSetPayload(&p, chatinfo);
 	return this->sendPacket(&p);
 }
+*/
 
