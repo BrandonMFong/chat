@@ -4,6 +4,8 @@
  */
 
 #include "interface.hpp"
+#include "interfaceserver.hpp"
+#include "interfaceclient.hpp"
 #include "chat.hpp"
 #include "user.hpp"
 #include <bflibcpp/bflibcpp.hpp>
@@ -48,7 +50,14 @@ Interface::~Interface() {
 }
 
 Interface * Interface::create(char mode) {
-	return new Interface;
+	switch (mode) {
+	case SOCKET_MODE_SERVER:
+		return new InterfaceServer;
+	case SOCKET_MODE_CLIENT:
+		return new InterfaceClient;
+	default:
+		return NULL;
+	}
 }
 
 void Interface::chatroomListHasChanged() {
@@ -57,6 +66,14 @@ void Interface::chatroomListHasChanged() {
 
 void Interface::converstaionHasChanged() {
 	this->_updateconversation = true;
+}
+
+InterfaceState Interface::currstate() {
+	return this->_state.get();
+}
+
+InterfaceState Interface::prevstate() {
+	return this->_prevstate.get();
 }
 
 int InterfaceCraftChatLineFromMessage(const Message * msg, char * line) {
@@ -297,10 +314,6 @@ int Interface::draw() {
 	// only create new windows if
 	// we changed states
 	if (this->_state != this->_prevstate) {
-		LOG_DEBUG("curr: %d, prev: %d",
-			this->_state.get(),
-			this->_prevstate.get());
-
 		switch (this->_state.get()) {
 		case kInterfaceStateLobby:
 			this->windowCreateModeLobby();
@@ -375,7 +388,10 @@ int Interface::processinput(InputBuffer & userInput) {
 	case kInterfaceStateChatroom:
 		if (userInput.isready()) { 
 			Command cmd(userInput);
-			if (!cmd.op().compareString("help")) {
+			if (!cmd.op().compareString("leave")) {
+				BFRelease(this->_chatroom);
+				this->_state = kInterfaceStateLobby;
+			} else if (!cmd.op().compareString("help")) {
 				this->_state = kInterfaceStateHelp;
 			} else if (!cmd.op().compareString("edit")) {
 				this->_state = kInterfaceStateDraft;

@@ -38,8 +38,16 @@ public:
 	 */
 	User * getuser();
 
+	InterfaceState currstate();
+	InterfaceState prevstate();
+
 protected:
 	Interface();
+
+	/**
+	 * updates UI based on current state
+	 */
+	virtual int draw();
 
 private:
 	int windowStart();
@@ -53,11 +61,6 @@ private:
 	int windowCreateModeLobby();
 	int windowCreateModeCreateChatroom();
 	static void displayWindowUpdateThread(void * in);
-
-	/**
-	 * updates UI based on current state
-	 */
-	int draw();
 
 	/**
 	 * process user input

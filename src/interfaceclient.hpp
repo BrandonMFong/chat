@@ -15,6 +15,8 @@ public:
 
 private:
 	InterfaceClient();
+
+	virtual int draw();
 };
 
 #endif // INTERFACE_CLIENT_HPP
