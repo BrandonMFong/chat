@@ -43,6 +43,7 @@ Interface::Interface() {
 
 Interface::~Interface() {
 	BFLockDestroy(&this->_winlock);
+	BFRelease(this->_chatroom);
 }
 
 Interface * Interface::create(char mode) {
@@ -89,7 +90,7 @@ void Interface::displayWindowUpdateThread(void * in) {
 					// get list
 					int size = 0;
 					int error = 0;
-					PayloadChatInfo ** list = interface->_chatroom->getChatroomList(&size, &error);
+					PayloadChatInfo ** list = Chatroom::getChatroomList(&size, &error);
 					if (!list || error) {
 						LOG_DEBUG("could not get list of chatrooms: %d", error);
 					} else {
@@ -318,6 +319,27 @@ int Interface::draw() {
 	return 0;
 }
 
+Chatroom * _InterfaceGetChatroomAtIndex(int i) {
+	Chatroom * res = NULL;
+
+	// get list
+	int size = 0;
+	int error = 0;
+	PayloadChatInfo ** list = Chatroom::getChatroomList(&size, &error);
+	if (!list || error) {
+		LOG_DEBUG("could not get list of chatrooms: %d", error);
+	} else {
+		res = Chatroom::getChatroom(list[i]->chatroomuuid);
+
+		for (int i = 0; i < size; i++) { 
+			BFFree(list[i]);
+		}
+		BFFree(list);
+	}
+
+	return res;
+}
+
 int Interface::processinput(InputBuffer & userInput) {
 	switch (this->_state.get()) {
 	case kInterfaceStateLobby:
@@ -335,12 +357,14 @@ int Interface::processinput(InputBuffer & userInput) {
 						Chatroom::getChatroomsCount());
 
 				LOG_DEBUG("creating chatroom %s", chatroomname);
-				this->_chatroom = ChatroomServer::create(chatroomname);
-				BFRelease(this->_chatroom);
+				Chatroom * cr = ChatroomServer::create(chatroomname);
+				BFRelease(cr);
 				LOG_DEBUG("creating chatroom was %sa success",
-						this->_chatroom == NULL ? "not " : "");
+						cr == NULL ? "not " : "");
 			} else if (!cmd.op().compareString("join")) {
-
+				int index = 0;
+				this->_chatroom = _InterfaceGetChatroomAtIndex(index);
+				BFRetain(this->_chatroom);
 			}
 			userInput.reset();
 		}
