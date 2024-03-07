@@ -28,7 +28,7 @@ Command::~Command() {
 
 }
 
-String & Command::op() const {
+String Command::op() const {
 	const char * res = this->_args[0];
 	if (res) return res;
 	return "";

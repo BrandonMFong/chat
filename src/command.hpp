@@ -22,7 +22,7 @@ public:
 	 *
 	 * this is the first word in the buf
 	 */
-	BF::String & op() const;
+	BF::String op() const;
 
 private:
 	BF::Array<char *> _args;

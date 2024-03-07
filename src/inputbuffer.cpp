@@ -11,7 +11,9 @@
 
 using namespace BF;
 
-InputBuffer::InputBuffer() : String("") {
+InputBuffer::InputBuffer() : InputBuffer("") {}
+
+InputBuffer::InputBuffer(const char * str) : String(str) {
 	this->_isready = false;
 	this->_cursorpos = 0;
 }

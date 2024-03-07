@@ -11,12 +11,8 @@
 class InputBuffer : public BF::String {
 public:
 	InputBuffer();
+	InputBuffer(const char * str);
 	virtual ~InputBuffer();
-
-	/**
-	 * unloads buffer to the packet
-	 */
-	//int unload(Message * pkt);
 
 	/**
 	 * Adds appends char to our buffer
