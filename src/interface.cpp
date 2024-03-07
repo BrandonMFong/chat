@@ -362,9 +362,11 @@ int Interface::processinput(InputBuffer & userInput) {
 				LOG_DEBUG("creating chatroom was %sa success",
 						cr == NULL ? "not " : "");
 			} else if (!cmd.op().compareString("join")) {
-				int index = 0;
+				int index = String::toi(cmd[1]);
 				this->_chatroom = _InterfaceGetChatroomAtIndex(index);
 				BFRetain(this->_chatroom);
+
+				this->_state = kInterfaceStateChatroom;
 			}
 			userInput.reset();
 		}
