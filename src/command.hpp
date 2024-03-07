@@ -7,6 +7,8 @@
 #define COMMAND_HPP
 
 #include <bflibcpp/object.hpp>
+#include <bflibcpp/array.hpp>
+#include <bflibcpp/string.hpp>
 
 class InputBuffer;
 
@@ -14,6 +16,16 @@ class Command : public BF::Object {
 public:
 	Command(InputBuffer & buf);
 	virtual ~Command();
+
+	/**
+	 * main code
+	 *
+	 * this is the first word in the buf
+	 */
+	BF::String & op() const;
+
+private:
+	BF::Array<char *> _args;
 };
 
 #endif // COMMAND_HPP
