@@ -81,6 +81,10 @@ void Interface::displayWindowUpdateThread(void * in) {
 					werase(interface->_displayWin);
 					box(interface->_displayWin, 0, 0);
 
+					// print title
+					int row = 1;
+					mvwprintw(interface->_displayWin, row++, 1, "Chatrooms:");
+
 					// get list
 					int size = 0;
 					int error = 0;
@@ -93,8 +97,8 @@ void Interface::displayWindowUpdateThread(void * in) {
 						// show available rooms
 						for (int i = 0; i < size; i++) { 
 							char line[512];
-							snprintf(line, 512, "(%d) %s", i, list[i]->chatroomname);
-							mvwprintw(interface->_displayWin, i+1, 1, line);
+							snprintf(line, 512, "(%d) \"%s\"", i, list[i]->chatroomname);
+							mvwprintw(interface->_displayWin, row++, 1, line);
 
 							BFFree(list[i]);
 						}
