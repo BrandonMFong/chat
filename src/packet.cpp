@@ -28,6 +28,13 @@ int PacketSetPayload(Packet * pkt, const void * buf) {
 
 	switch (pkt->header.type) {
 	case kPayloadTypeChatroomEnrollment:
+		memcpy(
+			&pkt->payload.enrollment,
+			buf,
+			sizeof(pkt->payload.enrollment)
+		);
+		return 0;
+
 	case kPayloadTypeChatInfo:
 		memcpy(
 			&pkt->payload.chatinfo,

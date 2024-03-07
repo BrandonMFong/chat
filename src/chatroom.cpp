@@ -10,6 +10,7 @@
 #include "message.hpp"
 #include "interface.hpp"
 #include "agentclient.hpp"
+#include "packet.hpp"
 #include <string.h>
 #include <bflibcpp/bflibcpp.hpp>
 
@@ -128,7 +129,16 @@ void Chatroom::getuuid(uuid_t uuid) {
 
 int Chatroom::enroll(const User * user) {
 	LOG_DEBUG("enrolling user into chatroom");
-	return 0;
+	Packet p;
+	memset(&p, 0, sizeof(p));
+	PacketSetHeader(&p, kPayloadTypeChatroomEnrollment);
+
+	PayloadChatEnrollment enrollment;
+	this->getuuid(enrollment.chatroomuuid);
+	user->getuuid(enrollment.useruuid);
+	PacketSetPayload(&p, &enrollment);
+
+	return Agent::broadcast(&p);
 }
 
 int Chatroom::sendBuffer(const InputBuffer * buf) {
