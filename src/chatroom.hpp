@@ -17,6 +17,7 @@ extern "C" {
 }
 
 class Message;
+class User;
 
 /**
  * In charge of creating message
@@ -53,7 +54,16 @@ public:
 	 */
 	virtual int receiveMessagePacket(const Packet * pkt);
 
+	/**
+	 * returns uuid
+	 */
 	void getuuid(uuid_t uuid);
+
+	/**
+	 * enrolls user to chatroom and communicates with everyone in
+	 * the chatroom, currently, that `user` joined
+	 */
+	int enroll(const User * user);
 
 	BF::Atomic<BF::List<Message *>> conversation;
 

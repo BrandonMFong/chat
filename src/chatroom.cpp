@@ -126,6 +126,11 @@ void Chatroom::getuuid(uuid_t uuid) {
 	uuid_copy(uuid, this->_uuid);
 }
 
+int Chatroom::enroll(const User * user) {
+	LOG_DEBUG("enrolling user into chatroom");
+	return 0;
+}
+
 int Chatroom::sendBuffer(const InputBuffer * buf) {
 	Packet p;
 

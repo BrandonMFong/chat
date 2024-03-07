@@ -92,6 +92,7 @@ void Socket::setInStreamCallback(void (* cb)(SocketConnection * sc, const void *
 	this->_cbinstream = cb;
 }
 
+// maybe this could be implemented by app and not by this 
 void Socket::queueCallback(void * in) {
 	LOG_DEBUG("> %s", __func__);
 	Socket * skt = (Socket *) in;

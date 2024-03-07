@@ -380,6 +380,9 @@ int Interface::processinput(InputBuffer & userInput) {
 				this->_chatroom = _InterfaceGetChatroomAtIndex(index);
 				BFRetain(this->_chatroom);
 
+				// enrolls current user on this machine to the chatroom
+				this->_chatroom->enroll(this->_user.get());
+
 				this->_state = kInterfaceStateChatroom;
 			}
 			userInput.reset();
