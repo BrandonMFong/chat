@@ -56,7 +56,6 @@ public:
 	void getuuid(uuid_t uuid);
 
 	BF::Atomic<BF::List<Message *>> conversation;
-	BF::Atomic<bool> updateConversation;
 
 protected:
 
@@ -69,6 +68,12 @@ protected:
 
 	/**
 	 * inits chatroom with uuid
+	 * uuid : gets copied
+	 */
+	Chatroom(const uuid_t uuid);
+
+	/**
+	 * creates chatroom and sets random uuid
 	 */
 	Chatroom();
 

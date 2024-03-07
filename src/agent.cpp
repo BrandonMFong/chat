@@ -135,7 +135,7 @@ void Agent::receivedPayloadTypeRequestInfo(const Packet * pkt) {
 	PacketSetHeader(&p, kPayloadTypeUserInfo);
 
 	// Ask current user to give their information
-	User * curruser = Interface::GetCurrentUser();
+	User * curruser = Interface::current()->getuser();
 	BFRetain(curruser);
 	curruser->getuserinfo(&p.payload.userinfo);
 	BFRelease(curruser);

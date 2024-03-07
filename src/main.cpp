@@ -61,6 +61,7 @@ const char ChatSocketGetMode() {
 int main(int argc, char * argv[]) {
 	int result = 0;
 	char mode = 0;
+	Interface * interface = NULL;
 
 	result = ArgumentsRead(argc, argv, &mode);
 
@@ -85,7 +86,11 @@ int main(int argc, char * argv[]) {
 	}
 
 	if (!result) {
-		result = Interface::Run();
+		interface = Interface::create(mode);
+	}
+
+	if (!result) {
+		result = interface->run();
 	}
 
 	if (!result) {
@@ -97,6 +102,7 @@ int main(int argc, char * argv[]) {
 	}
 
 	BFRelease(skt);
+	BFRelease(interface);
 
 	LOG_DEBUG("============ App ended ============");
 	LOG_CLOSE;

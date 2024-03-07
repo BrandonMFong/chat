@@ -9,6 +9,9 @@
 #define ASSERT_PUBLIC_MEMBER_ACCESS
 
 #include "chatroom.hpp"
+#include "chatroomserver.hpp"
+#include "chatroomclient.hpp"
+#include "agentclient.hpp"
 
 extern "C" {
 #include <bflibc/bflibc.h>
@@ -17,15 +20,25 @@ extern "C" {
 
 using namespace BF;
 
-int test_chatroominit() {
+int test_chatroominitclient() {
 	UNIT_TEST_START;
 	int result = 0;
 	
-	char u[kBFStringUUIDStringLength];
-	
-	BFStringGetRandomUUIDString(u);
+	uuid_t u;
+	uuid_generate_random(u);	
 
-	Chatroom chat(u);
+	AgentClient a;
+	ChatroomClient chatroom(&a, u);
+
+	UNIT_TEST_END(!result, result);
+	return result;
+}
+
+int test_chatroominitserver() {
+	UNIT_TEST_START;
+	int result = 0;
+	
+	ChatroomServer chatroom;
 
 	UNIT_TEST_END(!result, result);
 	return result;
@@ -37,14 +50,13 @@ int test_chatroomUUIDs() {
 
 	int max = 2 << 18;
 	while (!result && max) {
-		char uuid0[kBFStringUUIDStringLength];
-		char uuid1[kBFStringUUIDStringLength];
-		
-		BFStringGetRandomUUIDString(uuid0);
-		BFStringGetRandomUUIDString(uuid1);
+		ChatroomServer c0, c1;
 
-		Chatroom a(uuid0), b(uuid1);
-		if (!strcmp(a._uuid, b._uuid)) {
+		uuid_t u0, u1;
+		c0.getuuid(u0);
+		c1.getuuid(u1);
+
+		if (!uuid_compare(u0, u1)) {
 			result = max;
 		}
 
@@ -60,8 +72,9 @@ void chatroom_tests(int * pass, int * fail) {
 	
 	INTRO_TEST_FUNCTION;
 
-	LAUNCH_TEST(test_chatroominit, p, f);
+	LAUNCH_TEST(test_chatroominitclient, p, f);
 	LAUNCH_TEST(test_chatroomUUIDs, p, f);
+	LAUNCH_TEST(test_chatroominitserver, p, f);
 
 	if (pass) *pass += p;
 	if (fail) *fail += f;

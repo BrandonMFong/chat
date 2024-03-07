@@ -26,8 +26,15 @@ void _ChatroomRelease(Chatroom * cr) {
 }
 
 Chatroom::Chatroom() : Object() {
-	this->updateConversation = false;
 	uuid_generate_random(this->_uuid);
+	memset(this->_name, 0, sizeof(this->_name));
+
+	// setup conversation thread
+	this->conversation.get().setDeallocateCallback(_ChatroomMessageFree);
+}
+
+Chatroom::Chatroom(const uuid_t uuid) : Object() {
+	uuid_copy(this->_uuid, uuid);
 	memset(this->_name, 0, sizeof(this->_name));
 
 	// setup conversation thread
@@ -98,6 +105,10 @@ void Chatroom::addRoomToChatrooms(Chatroom * cr) {
 	BFRetain(cr);
 	chatrooms.unsafeget().add(cr);
 	chatrooms.unlock();
+
+	// tell the ui that our chatroom list
+	// changed so they can update the ui
+	Interface::current()->chatroomListHasChanged();
 }
 
 int Chatroom::addMessage(Message * msg) {
@@ -106,7 +117,7 @@ int Chatroom::addMessage(Message * msg) {
 	// msg count should have a retain count of 1 
 	// so we don't need to retain	
 	this->conversation.get().add(msg);
-	this->updateConversation = true;
+	Interface::current()->converstaionHasChanged();
 
 	return 0;
 }
@@ -130,12 +141,12 @@ int Chatroom::sendBuffer(const InputBuffer * buf) {
 	// username
 	strncpy(
 		p.payload.message.username,
-		Interface::GetCurrentUser()->username(),
+		Interface::current()->getuser()->username(),
 		sizeof(p.payload.message.username)
 	);
 
 	// user uuid
-	Interface::GetCurrentUser()->getuuid(p.payload.message.useruuid);	
+	Interface::current()->getuser()->getuuid(p.payload.message.useruuid);	
 
 	// chatroom uuid
 	uuid_copy(p.payload.message.chatuuid, this->_uuid);
