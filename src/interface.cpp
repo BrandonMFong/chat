@@ -37,6 +37,7 @@ Interface::Interface() {
 	this->_prevstate = kInterfaceStateUnknown;
 	this->_updatechatroomlist = false;
 	this->_updateconversation = false;
+	this->_user = NULL;
 
 	BFLockCreate(&this->_winlock);
 }
