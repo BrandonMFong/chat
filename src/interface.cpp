@@ -319,7 +319,6 @@ int Interface::draw() {
 }
 
 int Interface::processinput(InputBuffer & userInput) {
-	this->_prevstate = this->_state;
 	switch (this->_state.get()) {
 	case kInterfaceStateLobby:
 		if (userInput.isready()) {
@@ -393,6 +392,9 @@ int Interface::windowLoop() {
 
         int ch = wgetch(this->_inputWin); // Get user input
 		userInput.addChar(ch);
+
+		// `processinput` changes the current state of the interface
+		this->_prevstate = this->_state;
 
 		// act on current input state
 		this->processinput(userInput);
