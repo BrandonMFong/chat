@@ -29,7 +29,15 @@ Command::~Command() {
 }
 
 String Command::op() const {
-	const char * res = this->_args[0];
+	return this->argumentAtIndex(0);
+}
+
+String Command::operator[](int i) const {
+	return this->argumentAtIndex(i);
+}
+
+String Command::argumentAtIndex(int i) const {
+	const char * res = this->_args[i];
 	if (res) return res;
 	return "";
 }

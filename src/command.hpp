@@ -24,6 +24,10 @@ public:
 	 */
 	BF::String op() const;
 
+	BF::String argumentAtIndex(int i) const;
+
+	BF::String  operator[](int index) const;
+
 private:
 	BF::Array<char *> _args;
 };

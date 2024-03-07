@@ -328,6 +328,9 @@ int Interface::processinput(InputBuffer & userInput) {
 				this->_state = kInterfaceStateQuit;
 			} else if (!cmd.op().compareString("create")) {
 				// set up chat room name
+				//
+				// right now we are automatically creating a chatroom. The
+				// user should be able to customize the room name
 				char chatroomname[CHAT_ROOM_NAME_SIZE];
 				snprintf(chatroomname, CHAT_ROOM_NAME_SIZE, "chatroom%d",
 						Chatroom::getChatroomsCount());
@@ -337,6 +340,8 @@ int Interface::processinput(InputBuffer & userInput) {
 				BFRelease(this->_chatroom);
 				LOG_DEBUG("creating chatroom was %sa success",
 						this->_chatroom == NULL ? "not " : "");
+			} else if (!cmd.op().compareString("join")) {
+
 			}
 			userInput.reset();
 		}
