@@ -75,6 +75,12 @@ void Interface::displayWindowUpdateThread(void * in) {
 			{
 				interface->_updatechatroomlist.lock();
 				if (interface->_updatechatroomlist.unsafeget()) {
+					LOG_DEBUG("updating chatroom list");
+
+					BFLockLock(&interface->_winlock);
+					werase(interface->_displayWin);
+					box(interface->_displayWin, 0, 0);
+
 					// get list
 					int size = 0;
 					int error = 0;
@@ -82,6 +88,8 @@ void Interface::displayWindowUpdateThread(void * in) {
 					if (!list || error) {
 						LOG_DEBUG("could not get list of chatrooms: %d", error);
 					} else {
+						LOG_DEBUG("found %d rooms", size);
+
 						// show available rooms
 						for (int i = 0; i < size; i++) { 
 							char line[512];
@@ -92,7 +100,10 @@ void Interface::displayWindowUpdateThread(void * in) {
 						}
 						BFFree(list);
 					}
+
+					wrefresh(interface->_displayWin);
 					interface->_updatechatroomlist.unsafeset(false);
+					BFLockUnlock(&interface->_winlock);
 				}
 				interface->_updatechatroomlist.unlock();
 				break;
@@ -237,30 +248,6 @@ int Interface::windowCreateModeEdit() {
 	return 0;
 }
 
-int Interface::windowCreateModeCreateChatroom() {
-	BFLockLock(&this->_winlock);
-
-	DELETE_WINDOWS;
-	
-	// Create two windows
-	this->_inputWin = newwin(3, COLS, LINES - 3, 0);
-	this->_displayWin = newwin(LINES - 3, COLS, 0, 0);
-
-	box(this->_inputWin, 0, 0); // Add a box around the input window
-	box(this->_displayWin, 0, 0); // Add a box around the display window
-
-	refresh(); // Refresh the main window to show the boxes
-	wrefresh(this->_inputWin); // Refresh the input window
-	wrefresh(this->_displayWin); // Refresh the display window
-
-	keypad(this->_inputWin, true); // Enable special keys in input window
-	nodelay(this->_inputWin, false); // Set blocking input for input window
-
-	BFLockUnlock(&this->_winlock);
-
-	return 0;
-}
-
 int Interface::windowUpdateInputWindowText(InputBuffer & userInput) {
 	BFLockLock(&this->_winlock);
 	switch (this->_state.get()) {
@@ -303,6 +290,10 @@ int Interface::draw() {
 	// only create new windows if
 	// we changed states
 	if (this->_state != this->_prevstate) {
+		LOG_DEBUG("curr: %d, prev: %d",
+			this->_state.get(),
+			this->_prevstate.get());
+
 		switch (this->_state.get()) {
 		case kInterfaceStateLobby:
 			this->windowCreateModeLobby();
@@ -326,21 +317,26 @@ int Interface::processinput(InputBuffer & userInput) {
 	this->_prevstate = this->_state;
 	switch (this->_state.get()) {
 	case kInterfaceStateLobby:
-		if (!userInput.isready()) {
-			this->windowUpdateInputWindowText(userInput);
-		} else {
+		if (userInput.isready()) {
 			if (!userInput.compareString("quit")) {
 				this->_state = kInterfaceStateQuit;
 			} else if (!userInput.compareString("create")) {
+				// set up chat room name
+				char chatroomname[CHAT_ROOM_NAME_SIZE];
+				snprintf(chatroomname, CHAT_ROOM_NAME_SIZE, "chatroom%d",
+						Chatroom::getChatroomsCount());
 
+				LOG_DEBUG("creating chatroom %s", chatroomname);
+				this->_chatroom = ChatroomServer::create(chatroomname);
+				BFRelease(this->_chatroom);
+				LOG_DEBUG("creating chatroom was %sa success",
+						this->_chatroom == NULL ? "not " : "");
 			}
 			userInput.reset();
 		}
 		break;
 	case kInterfaceStateChatroom:
-		if (!userInput.isready()) { 
-			this->windowUpdateInputWindowText(userInput);
-		} else {
+		if (userInput.isready()) { 
 			if (!userInput.compareString("help")) {
 				this->_state = kInterfaceStateHelp;
 			} else if (!userInput.compareString("edit")) {
@@ -354,9 +350,7 @@ int Interface::processinput(InputBuffer & userInput) {
 		}
 		break;
 	case kInterfaceStateDraft:
-		if (!userInput.isready()) {
-			this->windowUpdateInputWindowText(userInput);
-		} else {
+		if (userInput.isready()) {
 			// send buf
 			this->_chatroom->sendBuffer(&userInput);
 
@@ -380,6 +374,8 @@ int Interface::windowLoop() {
 	this->_prevstate = kInterfaceStateUnknown;
 	this->_state = kInterfaceStateLobby;
 	while (this->_state != kInterfaceStateQuit) {
+		this->windowUpdateInputWindowText(userInput);
+
 		// draw ui based on current state
 		this->draw();
 
