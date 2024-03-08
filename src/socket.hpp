@@ -155,6 +155,8 @@ private:
 	 * queues outgoing data using send
 	 */
 	BF::Atomic<BF::Queue<struct Envelope *>> _outq;
+
+
 };
 
 #endif // SOCKET_HPP

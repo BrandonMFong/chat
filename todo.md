@@ -1,3 +1,6 @@
+x.x
+[] window dynamic resizing
+
 0.1
 [x] chatrooms
 [x] create chatroom

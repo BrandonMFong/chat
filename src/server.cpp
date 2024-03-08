@@ -14,6 +14,7 @@
 #include <bflibcpp/bflibcpp.hpp>
 #include "log.hpp"
 #include "connection.hpp"
+#include <arpa/inet.h>
 
 Server::Server() : Socket() {
 	this->_mainSocket = 0;
@@ -42,7 +43,7 @@ void Server::init(void * in) {
 
     servAddr.sin_family = AF_INET;
     servAddr.sin_port = htons(9001);
-    servAddr.sin_addr.s_addr = INADDR_ANY;
+    servAddr.sin_addr.s_addr = inet_addr("127.0.0.1");
 
     // bind socket to the specified IP and port
     bind(s->_mainSocket, (struct sockaddr *) &servAddr, sizeof(servAddr));

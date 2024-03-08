@@ -405,7 +405,7 @@ int Interface::processinput(InputBuffer & userInput) {
 				this->_state = kInterfaceStateHelp;
 			} else if (!cmd.op().compareString(INTERFACE_COMMAND_CREATE)) {
 				char chatroomname[CHAT_ROOM_NAME_SIZE];
-				if (cmd.count() > 0) {
+				if (cmd.count() > 1) {
 					strncpy(chatroomname, cmd[1], CHAT_ROOM_NAME_SIZE);
 				} else {
 					// set up chat room name

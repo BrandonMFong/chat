@@ -13,6 +13,7 @@
 #include <bflibcpp/bflibcpp.hpp>
 #include "log.hpp"
 #include "connection.hpp"
+#include <arpa/inet.h>
 
 Client::Client() {
 }
@@ -36,7 +37,7 @@ void Client::init(void * in) {
 
     servAddr.sin_family = AF_INET;
     servAddr.sin_port = htons(9001); // use some unused port number
-    servAddr.sin_addr.s_addr = INADDR_ANY;
+    servAddr.sin_addr.s_addr = inet_addr("127.0.0.1");
 
     int connectStatus = connect(
 		sock,
