@@ -6,6 +6,7 @@
 #include "interfaceclient.hpp"
 #include "agentclient.hpp"
 #include "log.hpp"
+#include "chatroom.hpp"
 
 InterfaceClient::InterfaceClient() : Interface() {
 
@@ -23,6 +24,9 @@ int InterfaceClient::draw() {
 	if (this->currstate() != this->prevstate()) {
 		switch (this->currstate()) {
 		case kInterfaceStateLobby:
+			LOG_DEBUG("clearing chatrooms");
+			Chatroom::clearChatroomList();
+
 			LOG_DEBUG("requesting a list of chatrooms we can join");
 			// ask server for list of chats
 			AgentClient::getmain()->requestChatroomListUpdate(this->getuser());

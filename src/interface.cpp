@@ -419,6 +419,7 @@ int Interface::processinput(InputBuffer & userInput) {
 			Command cmd(userInput);
 			if (!cmd.op().compareString("leave")) {
 				BFRelease(this->_chatroom);
+				this->_chatroom = NULL;
 				this->_state = kInterfaceStateLobby;
 			} else if (!cmd.op().compareString("help")) {
 				this->_state = kInterfaceStateHelp;

@@ -60,6 +60,10 @@ int Chatroom::getChatroomsCount() {
 	return chatrooms.get().count();
 }
 
+void Chatroom::clearChatroomList() {
+	chatrooms.get().deleteAll();
+}
+
 const char * Chatroom::name() {
 	return this->_name;
 }

@@ -37,6 +37,11 @@ public:
 	static int getChatroomsCount();
 
 	/**
+	 * empties chatroom list
+	 */
+	static void clearChatroomList();
+
+	/**
 	 * caller owns memory of array and its elements
 	 */
 	static PayloadChatInfo ** getChatroomList(int * size, int * err);
