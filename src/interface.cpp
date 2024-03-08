@@ -404,13 +404,17 @@ int Interface::processinput(InputBuffer & userInput) {
 				this->_returnfromhelpstate = this->_state;
 				this->_state = kInterfaceStateHelp;
 			} else if (!cmd.op().compareString(INTERFACE_COMMAND_CREATE)) {
-				// set up chat room name
-				//
-				// right now we are automatically creating a chatroom. The
-				// user should be able to customize the room name
 				char chatroomname[CHAT_ROOM_NAME_SIZE];
-				snprintf(chatroomname, CHAT_ROOM_NAME_SIZE, "chatroom%d",
-						Chatroom::getChatroomsCount());
+				if (cmd.count() > 0) {
+					strncpy(chatroomname, cmd[1], CHAT_ROOM_NAME_SIZE);
+				} else {
+					// set up chat room name
+					//
+					// right now we are automatically creating a chatroom. The
+					// user should be able to customize the room name
+					snprintf(chatroomname, CHAT_ROOM_NAME_SIZE, "chatroom%d",
+							Chatroom::getChatroomsCount());
+				}
 
 				Chatroom * cr = ChatroomServer::create(chatroomname);
 				BFRelease(cr);
