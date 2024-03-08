@@ -118,6 +118,18 @@ typedef struct {
 } PayloadChatInfo;
 
 typedef struct {
+	/**
+	 * uuid for chat room
+	 */
+	uuid_t chatroomuuid;
+
+	/**
+	 * user that is enrolling
+	 */
+	uuid_t useruuid;
+} PayloadChatEnrollment;
+
+typedef struct {
 	struct {
 		// struct version
 		unsigned char version;
@@ -137,6 +149,7 @@ typedef struct {
 		PayloadMessage message;
 		PayloadUserInfo userinfo;
 		PayloadChatInfo chatinfo;
+		PayloadChatEnrollment enrollment;
 	} payload;
 } Packet;
 

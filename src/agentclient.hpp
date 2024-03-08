@@ -40,7 +40,7 @@ public:
 	 * we may want to have an approval step after this but for
 	 * now we are just joining without it
 	 */
-	int enrollInChatroom(const PayloadChatInfo * chatinfo);
+	//int enrollInChatroom(const PayloadChatInfo * chatinfo);
 
 private:
 	AgentClient();

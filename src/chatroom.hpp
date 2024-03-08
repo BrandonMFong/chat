@@ -17,6 +17,8 @@ extern "C" {
 }
 
 class Message;
+class User;
+class Agent;
 
 /**
  * In charge of creating message
@@ -53,7 +55,25 @@ public:
 	 */
 	virtual int receiveMessagePacket(const Packet * pkt);
 
+	/**
+	 * returns uuid
+	 */
 	void getuuid(uuid_t uuid);
+
+	/**
+	 * enrolls user to chatroom and communicates with everyone in
+	 * the chatroom, currently, that `user` joined
+	 *
+	 * this sends out a broadcast to all current agents
+	 *
+	 * retains user
+	 */
+	int enroll(User * user);
+
+	/**
+	 * +1 to agent's and its user's retain count
+	 */
+	int addAgent(Agent * a);
 
 	BF::Atomic<BF::List<Message *>> conversation;
 
@@ -91,7 +111,13 @@ protected:
 	uuid_t _uuid;
 	char _name[CHAT_ROOM_NAME_SIZE];
 
+	BF::Atomic<BF::List<Agent *>> _agents;
+
 private:
+	/**
+	 * list of users in chatroom
+	 */
+	BF::Atomic<BF::List<User *>> _users;
 
 	int getinfo(PayloadChatInfo * info);
 };

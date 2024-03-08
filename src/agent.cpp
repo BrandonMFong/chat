@@ -72,7 +72,7 @@ Agent * Agent::create(SocketConnection * sc) {
 		// the callback hasn't been set yet
 		if (result) {
 			if (agents.unsafeget().count() == 0) {
-				agents.unsafeget().setDeallocateCallback(_AgentReleaseAgent);
+				agents.unsafeget().setReleaseCallback(_AgentReleaseAgent);
 			}
 
 			BFRetain(result);
@@ -144,7 +144,7 @@ void Agent::receivedPayloadTypeRequestInfo(const Packet * pkt) {
 	this->sendPacket(&p);
 }
 
-const User * Agent::user() {
+User * Agent::user() {
 	return this->_remoteuser;
 }
 
@@ -223,16 +223,33 @@ void Agent::receivedPayloadTypeChatroomEnrollment(const Packet * pkt) {
 	if (!pkt)
 		return;
 
-	LOG_DEBUG("chatroom enrollment");	
-	ChatroomServer * chatroom = (ChatroomServer *) Chatroom::getChatroom(
-		pkt->payload.chatinfo.chatroomuuid
+	LOG_DEBUG("chatroom enrollment");
+	
+	// compare user record
+	//
+	// we want to make sure that we are representing the user that
+	// is trying to enroll
+	uuid_t uuid;
+	this->_remoteuser->getuuid(uuid);
+	if (uuid_compare(uuid, pkt->payload.enrollment.useruuid)) {
+		LOG_DEBUG("couldn't find user: %s",
+			pkt->payload.enrollment.useruuid);
+		return;
+	}
+
+	// get chatroom
+	Chatroom * chatroom = Chatroom::getChatroom(
+		pkt->payload.enrollment.chatroomuuid
 	);
 
-	if (!chatroom)
+	if (!chatroom) {
+		LOG_DEBUG("couldn't find chatroom: %s",
+			pkt->payload.enrollment.chatroomuuid);
 		return;
+	}
 
 	BFRetain(chatroom);
-	chatroom->addAgent((AgentServer *) this);
+	chatroom->addAgent(this);
 	BFRelease(chatroom);
 }
 
@@ -273,6 +290,18 @@ void Agent::packetReceive(SocketConnection * sc, const void * buf, size_t size) 
 
 int Agent::sendPacket(const Packet * pkt) {
 	return this->_sc->queueData(pkt, sizeof(Packet));
+}
+
+int Agent::broadcast(const Packet * pkt) {
+	agents.lock();
+	List<Agent *>::Node * n = agents.unsafeget().first();
+	for (; n; n = n->next()) {
+		Agent * a = n->object();
+		if (a)
+			a->sendPacket(pkt);
+	}
+	agents.unlock();
+	return 0;
 }
 
 int Agent::newConnection(SocketConnection * sc) {

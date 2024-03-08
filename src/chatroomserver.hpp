@@ -30,7 +30,7 @@ public:
 	/**
 	 * +1 to agent's retain count
 	 */
-	void addAgent(AgentServer * a);
+	//virtual int addAgent(Agent * a);
 
 	/**
 	 * this overrides `Chatroom`'s implementation by adding a step 
@@ -42,8 +42,6 @@ public:
 private:
 	ChatroomServer();
 	int sendPacket(const Packet * pkt);
-
-	BF::Atomic<BF::List<AgentServer *>> _agents;
 };
 
 #endif // CHATROOM_SERVER_HPP

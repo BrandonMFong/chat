@@ -266,6 +266,8 @@ int Interface::windowCreateModeEdit() {
 
 	keypad(this->_inputWin, true); // Enable special keys in input window
 	nodelay(this->_inputWin, false); // Set blocking input for input window
+	
+	this->_updateconversation = true;
 
 	BFLockUnlock(&this->_winlock);
 
@@ -379,6 +381,9 @@ int Interface::processinput(InputBuffer & userInput) {
 				int index = String::toi(cmd[1]);
 				this->_chatroom = _InterfaceGetChatroomAtIndex(index);
 				BFRetain(this->_chatroom);
+
+				// enrolls current user on this machine to the chatroom
+				this->_chatroom->enroll(this->_user.get());
 
 				this->_state = kInterfaceStateChatroom;
 			}

@@ -9,12 +9,14 @@
 #include "agentclient.hpp"
 
 ChatroomClient::ChatroomClient(AgentClient * a, const uuid_t chatroomuuid) : Chatroom(chatroomuuid) {
-	this->_agent = a;
-	BFRetain(this->_agent);
+	this->addAgent(a);
 }
 
 ChatroomClient::~ChatroomClient() {
-	BFRelease(this->_agent);
+}
+
+AgentClient * ChatroomClient::agent() {
+	return (AgentClient *) this->_agents.get().first()->object();
 }
 
 int ChatroomClient::recordChatroom(const PayloadChatInfo * info, AgentClient * agent) {
@@ -41,6 +43,6 @@ int ChatroomClient::recordChatroom(const PayloadChatInfo * info, AgentClient * a
 }
 
 int ChatroomClient::sendPacket(const Packet * pkt) {
-	return this->_agent->sendPacket(pkt);
+	return this->agent()->sendPacket(pkt);
 }
 

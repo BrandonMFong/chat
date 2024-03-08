@@ -29,7 +29,7 @@ void _UserAddUserToUsers(User * user) {
 	users.lock();
 
 	if (users.unsafeget().count() == 0) {
-		users.unsafeget().setDeallocateCallback(_UserRelease);
+		users.unsafeget().setReleaseCallback(_UserRelease);
 	}
 
 	BFRetain(user);

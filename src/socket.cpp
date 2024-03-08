@@ -35,7 +35,7 @@ Socket::Socket() {
 
 	this->_bufferSize = 0;
 
-	this->_connections.get().setDeallocateCallback(SocketConnection::ReleaseConnection);
+	this->_connections.get().setReleaseCallback(SocketConnection::ReleaseConnection);
 
 	_sharedSocket = this;
 }
@@ -92,6 +92,7 @@ void Socket::setInStreamCallback(void (* cb)(SocketConnection * sc, const void *
 	this->_cbinstream = cb;
 }
 
+// maybe this could be implemented by app and not by this 
 void Socket::queueCallback(void * in) {
 	LOG_DEBUG("> %s", __func__);
 	Socket * skt = (Socket *) in;

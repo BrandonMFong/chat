@@ -61,9 +61,14 @@ public:
 	int sendPacket(const Packet * pkt);
 
 	/**
+	 * broadcasts packet to every agent
+	 */
+	static int broadcast(const Packet * pkt);
+
+	/**
 	 * the remote user we are representing
 	 */
-	const User * user();
+	User * user();
 
 protected:
 
