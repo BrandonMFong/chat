@@ -13,6 +13,12 @@
 #include <bflibcpp/atomic.hpp>
 #include <ncurses.h>
 
+#define INTERFACE_COMMAND_DRAFT "draft"
+#define INTERFACE_COMMAND_QUIT "quit"
+#define INTERFACE_COMMAND_CREATE "create"
+#define INTERFACE_COMMAND_JOIN "join"
+#define INTERFACE_COMMAND_LEAVE "leave"
+
 class User;
 class InputBuffer;
 class Chatroom;
@@ -81,6 +87,7 @@ private:
 
 	BF::Atomic<InterfaceState> _state;
 	BF::Atomic<InterfaceState> _prevstate;
+	InterfaceState _returnfromhelpstate;
 	BF::Atomic<bool> _updatechatroomlist;
 	BF::Atomic<bool> _updateconversation;
 };

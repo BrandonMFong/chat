@@ -287,8 +287,11 @@ int Interface::windowCreateModeHelp() {
 	box(this->_helpWin, 0, 0); // Draw a box around the sub-window
 
 	// dialog
-	mvwprintw(this->_helpWin, 1, 3, " 'edit' : Draft message. To send hit enter key.");
-	mvwprintw(this->_helpWin, 2, 3, " 'quit' : Quits application.");
+	mvwprintw(this->_helpWin, 1, 3, " '%s' : Draft message. To send hit enter key.", INTERFACE_COMMAND_DRAFT);
+	mvwprintw(this->_helpWin, 2, 3, " '%s' : Quits application.", INTERFACE_COMMAND_QUIT);
+	mvwprintw(this->_helpWin, 3, 3, " '%s' [ <name> ] : Creates chatroom with <name>.", INTERFACE_COMMAND_CREATE);
+	mvwprintw(this->_helpWin, 4, 3, " '%s' <index> : Joins chatroom at index.", INTERFACE_COMMAND_JOIN);
+	mvwprintw(this->_helpWin, 5, 3, " '%s' : Leaves chatroom.", INTERFACE_COMMAND_LEAVE);
 	mvwprintw(this->_helpWin, LINES - 12, 3, "Press any key to close...");
 
 	refresh(); // Refresh the main window to show the boxes
@@ -387,6 +390,9 @@ int Interface::processinput(InputBuffer & userInput) {
 			Command cmd(userInput);
 			if (!cmd.op().compareString("quit")) {
 				this->_state = kInterfaceStateQuit;
+			} else if (!cmd.op().compareString("help")) {
+				this->_returnfromhelpstate = this->_state;
+				this->_state = kInterfaceStateHelp;
 			} else if (!cmd.op().compareString("create")) {
 				// set up chat room name
 				//
@@ -422,6 +428,7 @@ int Interface::processinput(InputBuffer & userInput) {
 				this->_chatroom = NULL;
 				this->_state = kInterfaceStateLobby;
 			} else if (!cmd.op().compareString("help")) {
+				this->_returnfromhelpstate = this->_state;
 				this->_state = kInterfaceStateHelp;
 			} else if (!cmd.op().compareString("edit")) {
 				this->_state = kInterfaceStateDraft;
@@ -444,7 +451,7 @@ int Interface::processinput(InputBuffer & userInput) {
 		}
 		break;
 	case kInterfaceStateHelp:
-		this->_state = this->_prevstate;
+		this->_state = this->_returnfromhelpstate;
 		userInput.reset();
 		break;
 	}
@@ -457,7 +464,7 @@ int Interface::windowLoop() {
     InputBuffer userInput;
 	this->_prevstate = kInterfaceStateUnknown;
 	this->_state = kInterfaceStateLobby;
-	while (this->_state != kInterfaceStateQuit) {
+	while (this->_state.get() != kInterfaceStateQuit) {
 		// draw ui based on current state
 		this->draw();
 		
@@ -516,62 +523,6 @@ int Interface::gatherUserData() {
 
 	return 0;
 }
-
-/*
-int InterfaceLobbyRunClient() {
-	LOG_DEBUG("waiting for this->_chatrooms");
-	
-	// ask server for list of chats
-	AgentClient::getmain()->requestthis->_chatroomListUpdate(this->_user.get());
-
-	// wait until one is available
-	while (this->_chatroom::getthis->_chatroomsCount() == 0) { }
-
-	int size = 0;
-	int error = 0;
-	PayloadChatInfo ** list = this->_chatroom::getthis->_chatroomList(&size, &error);
-	if (!list || error)
-		return error == 0 ? 1 : error;
-
-	// choosing current this->_chatroom
-	//
-	// for now we are just choosing the first one
-	AgentClient::getmain()->enrollInthis->_chatroom(list[0]);
-
-	// save as current this->_chatroom
-	this->_chatroom = this->_chatroom::getthis->_chatroom(list[0]->this->_chatroomuuid);
-	if (!this->_chatroom)
-		return 2;
-
-	LOG_DEBUG("using this->_chatroom: %s", list[0]->this->_chatroomuuid);
-
-	// free memory
-	for (int i = 0; i < size; i++) { BFFree(list[i]); }
-	BFFree(list);
-	
-	LOG_FLUSH;
-	return 0;
-}
-
-int InterfaceLobbyRunServer() {
-	// set up chat room name
-	char this->_chatroomname[CHAT_ROOM_NAME_SIZE];
-
-	printf("chat room name: ");
-	fgets(this->_chatroomname, sizeof(this->_chatroomname), stdin);
-
-	if (this->_chatroomname[strlen(this->_chatroomname) - 1] == '\n') {
-		this->_chatroomname[strlen(this->_chatroomname) - 1] = '\0';
-	}
-	
-	this->_chatroom = this->_chatroomServer::create(this->_chatroomname);
-	BFRelease(this->_chatroom);
-	
-	LOG_FLUSH;
-	
-	return 0;
-}
-*/
 
 int Interface::run() {
 	int error = this->gatherUserData();
