@@ -42,3 +42,7 @@ String Command::argumentAtIndex(int i) const {
 	return "";
 }
 
+int Command::count() const {
+	return this->_args.count();
+}
+

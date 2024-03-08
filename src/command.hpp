@@ -26,7 +26,9 @@ public:
 
 	BF::String argumentAtIndex(int i) const;
 
-	BF::String  operator[](int index) const;
+	BF::String operator[](int index) const;
+
+	int count() const;
 
 private:
 	BF::Array<char *> _args;
