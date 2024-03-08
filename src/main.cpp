@@ -24,7 +24,6 @@
 LOG_INIT
 	
 Socket * skt = NULL;
-char sktmode = SOCKET_MODE_CLIENT;
 
 void Help(const char * toolname) {
 	printf("usage: %s <mode> [ %s <ip4 address> ]\n", toolname, ARGUMENT_IP4_ADDRESS);
@@ -32,15 +31,16 @@ void Help(const char * toolname) {
 	printf("Arguments:\n");
 	printf("  <mode>\tEither 'server' or 'client'. Server will mean hosting your\n");
 	printf("\t\town chat server with admin privileges. Client will mean you\n");
-	printf("\t\twill be a participant in a chatroom\n");
+	printf("\t\twill be a participant in a chatroom.  Additionally, client mode\n");
+	printf("\t\tis implied so you don't have to pass `client`.\n");
 	printf("  [ %s ]\tThe server's ip4 address. Server mode does not require this\n", ARGUMENT_IP4_ADDRESS);
 
 	printf("\nCopyright © 2024 Brando. All rights reserved.\n");
 }
 
 int ArgumentsRead(int argc, char * argv[], char * mode, char * ipaddr) {
-	if (!argv || !mode || !ipaddr) return -2;
-	else if (argc < 2) return -3;
+	if (!argv || !mode || !ipaddr) return 2;
+	else if (argc < 1) return 3;
 
 	bool modereqclient = false;
 	bool modereqserver = false;
@@ -49,11 +49,14 @@ int ArgumentsRead(int argc, char * argv[], char * mode, char * ipaddr) {
 			modereqserver = true;
 		} else if (!strcmp(argv[i], ARGUMENT_CLIENT)) {
 			modereqclient = true;
+		} else if (!strcmp(argv[i], ARGUMENT_IP4_ADDRESS)) {
+			strncpy(ipaddr, argv[i], SOCKET_IP4_ADDR_STRLEN);
 		}
 	}
 
 	if (modereqclient && modereqserver) {
-		return -4;
+		printf("cannot request to be both server and client\n");
+		return 4;
 	} else if (modereqclient) {
 		*mode = SOCKET_MODE_CLIENT;
 	} else if (modereqserver) {
@@ -64,12 +67,13 @@ int ArgumentsRead(int argc, char * argv[], char * mode, char * ipaddr) {
 }
 
 const char ChatSocketGetMode() {
-	return sktmode;
+	if (skt) return skt->mode();
+	return ' ';
 }
 
 int main(int argc, char * argv[]) {
 	int result = 0;
-	char mode = 0;
+	char mode = SOCKET_MODE_CLIENT;
 	Interface * interface = NULL;
 	char ipaddr[SOCKET_IP4_ADDR_STRLEN];
 
@@ -77,8 +81,6 @@ int main(int argc, char * argv[]) {
 	strncpy(ipaddr, "127.0.0.1", SOCKET_IP4_ADDR_STRLEN);
 
 	result = ArgumentsRead(argc, argv, &mode, ipaddr);
-
-	sktmode = mode;
 
 	LOG_OPEN;
 
