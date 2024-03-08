@@ -152,14 +152,7 @@ void Chatroom::getuuid(uuid_t uuid) {
 	uuid_copy(uuid, this->_uuid);
 }
 
-// user is not being recorded. we can assume
-// the enrolling user is the current one on
-// the machine
-//
-// i'm leaving it like this in case we may need to record users
-// 
-// ^ lol and I was right
-int Chatroom::enroll(User * user) {
+int Chatroom::notifyAllServerUsersOfEnrollment(User * user) {
 	Packet p;
 	memset(&p, 0, sizeof(p));
 	PacketSetHeader(&p, kPayloadTypeChatroomEnrollment);
@@ -177,7 +170,45 @@ int Chatroom::enroll(User * user) {
 	}
 	this->_users.unlock();
 
+	// send to all users on server that a user joined a chatroom
 	return Agent::broadcast(&p);
+}
+
+int Chatroom::notifyAllChatroomUsersOfEnrollment(User * user) {
+	Packet p;
+	memset(&p, 0, sizeof(p));
+	PacketSetHeader(&p, kPayloadTypeMessage);
+	
+	p.payload.message.type = kPayloadMessageTypeUserJoined;
+
+	// username
+	strncpy(
+		p.payload.message.username,
+		user->username(),
+		sizeof(p.payload.message.username)
+	);
+
+	// user uuid
+	user->getuuid(p.payload.message.useruuid);	
+
+	// chatroom uuid
+	uuid_copy(p.payload.message.chatuuid, this->_uuid);
+
+	// give chatroom this message to add to 
+	// its list
+	this->addMessage(new Message(&p));
+
+	return this->sendPacket(&p);
+}
+
+int Chatroom::enroll(User * user) {
+	int error = this->notifyAllServerUsersOfEnrollment(user);
+
+	if (!error) {
+		error = this->notifyAllChatroomUsersOfEnrollment(user);
+	}
+
+	return error;
 }
 
 int Chatroom::addAgent(Agent * a) {
@@ -198,6 +229,8 @@ int Chatroom::sendBuffer(const InputBuffer * buf) {
 	Packet p;
 
 	memset(&p, 0, sizeof(p));
+
+	p.payload.message.type = kPayloadMessageTypeData;
 
 	// load buffer 
 	strncpy(

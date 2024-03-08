@@ -124,6 +124,18 @@ protected:
 	BF::Atomic<BF::List<Agent *>> _agents;
 
 private:
+
+	/**
+	 * sends out a broadcast that user is in chatroom
+	 */
+	int notifyAllServerUsersOfEnrollment(User * user);
+
+	/**
+	 * sends out a message to all users that this
+	 * user has joined the chat
+	 */
+	int notifyAllChatroomUsersOfEnrollment(User * user);
+
 	/**
 	 * list of users in chatroom
 	 */

@@ -67,6 +67,11 @@ typedef enum {
 	kPayloadTypeNotifyChatroomListChanged = 7,
 } PayloadType;
 
+typedef enum {
+	kPayloadMessageTypeData = 0,
+	kPayloadMessageTypeUserJoined = 1,
+} PayloadMessageType;
+
 typedef struct {
 	/**
 	 * sender's user name
@@ -87,6 +92,8 @@ typedef struct {
 	 * raw message
 	 */
 	char data[DATA_BUFFER_SIZE];
+
+	PayloadMessageType type;
 } PayloadMessage;
 
 typedef struct {

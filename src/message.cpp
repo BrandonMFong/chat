@@ -34,3 +34,7 @@ void Message::getuuiduser(uuid_t uuid) const {
 	uuid_copy(uuid, this->_packet.payload.message.useruuid);
 }
 
+PayloadMessageType Message::type() const {
+	return this->_packet.payload.message.type;
+}
+

@@ -21,6 +21,7 @@ public:
 	const char * data() const;
 	void getuuidchatroom(uuid_t uuid) const;
 	void getuuiduser(uuid_t uuid) const;
+	PayloadMessageType type() const;
 private:
 	
 	/**

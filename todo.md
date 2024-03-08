@@ -15,5 +15,5 @@ x.x
 [x] fix command line args
 [x] make ip and port configurable
 [] notify when user joins chatroom
-[] broadcast that chatroom list updated
+[x] broadcast that chatroom list updated
 

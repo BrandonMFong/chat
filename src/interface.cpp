@@ -79,8 +79,16 @@ InterfaceState Interface::prevstate() {
 int InterfaceCraftChatLineFromMessage(const Message * msg, char * line) {
 	if (!msg || !line) return 30;
 
-	snprintf(line, linelen, "%s> %s", msg->username(), msg->data());
-	return 0;
+	switch (msg->type()) {
+	case kPayloadMessageTypeData:
+		snprintf(line, linelen, "%s> %s", msg->username(), msg->data());
+		return 0;
+	case kPayloadMessageTypeUserJoined:
+		snprintf(line, linelen, "%s joined", msg->username(), msg->data());
+		return 0;
+	default:
+		return 31;
+	}
 }
 
 int Interface::windowWriteConversation() {
@@ -93,13 +101,15 @@ int Interface::windowWriteConversation() {
 		box(this->_displayWin, 0, 0);
 
 		// write messages
+		int row = 0;
 		for (int i = 0; i < this->_chatroom->conversation.unsafeget().count(); i++) {
 			Message * m = this->_chatroom->conversation.unsafeget().objectAtIndex(i);
 
 			if (m) {
 				char line[linelen];
-				InterfaceCraftChatLineFromMessage(m, line);
-				mvwprintw(this->_displayWin, i+1, 1, line);
+				if (!InterfaceCraftChatLineFromMessage(m, line)) {
+					mvwprintw(this->_displayWin, (row++) + 1, 1, line);
+				}
 			}
 		}
 

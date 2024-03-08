@@ -42,6 +42,7 @@ int test_packet2message() {
 		uuid_generate_random(uuidu);
 		uuid_generate_random(uuidc);
 
+		p.payload.message.type = kPayloadMessageTypeData;
 		strncpy(p.payload.message.data, "hello world", sizeof(p.payload.message.data));
 		strncpy(p.payload.message.username, "username", sizeof(p.payload.message.username));
 		uuid_copy(p.payload.message.useruuid, uuidu);
@@ -63,6 +64,8 @@ int test_packet2message() {
 			} else if (uuid_compare(u0, uuidc)) {
 				result = max;
 			} else if (uuid_compare(u1, uuidu)) {
+				result = max;
+			} else if (m->type() != kPayloadMessageTypeData) {
 				result = max;
 			}
 		}
