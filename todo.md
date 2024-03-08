@@ -16,4 +16,5 @@ x.x
 [x] make ip and port configurable
 [] notify when user joins chatroom
 [x] broadcast that chatroom list updated
+[] make sure command permissions are set
 

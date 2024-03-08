@@ -70,6 +70,7 @@ typedef enum {
 typedef enum {
 	kPayloadMessageTypeData = 0,
 	kPayloadMessageTypeUserJoined = 1,
+	kPayloadMessageTypeUserLeft = 2,
 } PayloadMessageType;
 
 typedef struct {

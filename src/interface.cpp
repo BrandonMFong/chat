@@ -84,7 +84,17 @@ int InterfaceCraftChatLineFromMessage(const Message * msg, char * line) {
 		snprintf(line, linelen, "%s> %s", msg->username(), msg->data());
 		return 0;
 	case kPayloadMessageTypeUserJoined:
-		snprintf(line, linelen, "%s joined", msg->username(), msg->data());
+		char username[USER_NAME_SIZE];
+		uuid_t u0, u1;
+		Interface::current()->getuser()->getuuid(u0);
+		msg->getuuiduser(u1);
+		if (!uuid_compare(u0, u1)) {
+			strncpy(username, "You", USER_NAME_SIZE);
+		} else {
+			strncpy(username, msg->username(), USER_NAME_SIZE);
+		}
+
+		snprintf(line, linelen, "%s joined the chat", username, msg->data());
 		return 0;
 	default:
 		return 31;
