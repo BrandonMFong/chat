@@ -47,6 +47,8 @@ private:
 	int start();
 	virtual void receivedPayloadTypeRequestInfo(const Packet * pkt);
 	static void setmain(AgentClient * ac);
+
+	virtual void receivedPayloadTypeNotifyChatroomListChanged(const Packet * pkt);
 };
 
 #endif // AGENT_CLIENT_HPP

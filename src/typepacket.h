@@ -58,6 +58,13 @@ typedef enum {
 	 * packet
 	 */
 	kPayloadTypeChatroomEnrollment = 6,
+
+	/**
+	 * tells receiver that chatroom list changed on
+	 * server.  All clients will go through the process
+	 * of updating their own list of chatrooms
+	 */
+	kPayloadTypeNotifyChatroomListChanged = 7,
 } PayloadType;
 
 typedef struct {

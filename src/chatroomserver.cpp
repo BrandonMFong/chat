@@ -31,14 +31,7 @@ ChatroomServer * ChatroomServer::create(const char * name) {
 	Chatroom::addRoomToChatrooms(cr);
 	return cr;
 }
-/*
-int ChatroomServer::addAgent(Agent * a) {
-	// make sure we retain this object
-	BFRetain(a);
 
-	return this->_agents.get().add(a);
-}
-*/
 int ChatroomServer::sendPacket(const Packet * pkt) {
 	this->_agents.lock();
 	List<Agent *>::Node * n = this->_agents.unsafeget().first();

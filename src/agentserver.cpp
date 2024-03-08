@@ -41,3 +41,7 @@ void AgentServer::handshake(void * in) {
 	a->sendPacket(&p);
 }
 
+void AgentServer::receivedPayloadTypeNotifyChatroomListChanged(const Packet * pkt) {
+	LOG_DEBUG("this should not be invoked on servers");
+}
+

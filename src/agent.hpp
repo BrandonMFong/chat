@@ -77,13 +77,16 @@ protected:
 	bool connectionIsReady();
 
 	virtual void receivedPayloadTypeRequestInfo(const Packet * pkt);
+
+private:
+
 	void receivedPayloadTypeMessage(const Packet * pkt);
 	void receivedPayloadTypeUserInfo(const Packet * pkt);
 	void receivedPayloadTypeRequestAvailableChatrooms(const Packet * pkt);
 	void receivedPayloadTypeChatroomInfo(const Packet * pkt);
 	void receivedPayloadTypeChatroomEnrollment(const Packet * pkt);
+	virtual void receivedPayloadTypeNotifyChatroomListChanged(const Packet * pkt) = 0;
 
-private:
 	/*
 	 * socket connection
 	 *

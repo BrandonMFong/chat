@@ -14,4 +14,6 @@ x.x
 [x] use the correct index for join
 [x] fix command line args
 [x] make ip and port configurable
+[] notify when user joins chatroom
+[] broadcast that chatroom list updated
 

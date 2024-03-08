@@ -26,6 +26,8 @@ private:
 	 * a conversation with the remote user
 	 */
 	static void handshake(void * in);
+
+	virtual void receivedPayloadTypeNotifyChatroomListChanged(const Packet * pkt);
 };
 
 #endif // AGENT_SERVER_HPP

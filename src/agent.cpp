@@ -258,6 +258,9 @@ void Agent::packetReceive(SocketConnection * sc, const void * buf, size_t size) 
 	case kPayloadTypeChatroomEnrollment:
 		agent->receivedPayloadTypeChatroomEnrollment(p);
 		break;
+	case kPayloadTypeNotifyChatroomListChanged:
+		agent->receivedPayloadTypeNotifyChatroomListChanged(p);
+		break;
 	}
 }
 
