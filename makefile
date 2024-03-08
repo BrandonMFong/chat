@@ -6,8 +6,14 @@ include external/libs/makefiles/libpaths.mk
 
 ### Global
 BUILD_PATH = build
-FILES = server client interface socket log user inputbuffer
 CXXLINKS = -lpthread -lncurses -luuid
+
+FILES = \
+server client interface socket \
+log user inputbuffer office \
+chatroom message chatroomserver packet \
+connection agent agentclient agentserver \
+chatroomclient interfaceserver interfaceclient command
 
 ### Release settings
 R_CXXFLAGS += -Isrc/ -Iexternal/libs/$(BF_LIB_RPATH_RELEASE)

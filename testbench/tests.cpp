@@ -4,22 +4,22 @@
  */
 
 #include "inputbuffer_tests.hpp"
+#include "chatroom_tests.hpp"
+#include "message_tests.hpp"
+#include "command_tests.hpp"
 #include "log.hpp"
 
 LOG_INIT
 
 int main() {
-	int pass = 0, fail = 0;
-	float tp = 0, tf = 0;
+	TEST_SUITE_START;
 
-	printf("\n---------------------------\n");
+	LAUNCH_TEST_SET(inputbuffer_tests);
+	LAUNCH_TEST_SET(chatroom_tests);
+	LAUNCH_TEST_SET(message_tests);
+	LAUNCH_TEST_SET(command_tests);
 
-	inputbuffer_tests(&pass, &fail);
-	printf("[+ %d, - %d]\n", pass, fail);
-	tp += pass; tf += fail;
-	pass = 0; fail = 0;
-
-	printf("Grade - %.2f%% (%d/%d)\n", (tp / (tp + tf)) * 100, (int) tp, (int) (tp + tf));
+	TEST_SUITE_END;
 
 	return 0;
 }

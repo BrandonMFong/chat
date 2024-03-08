@@ -19,11 +19,10 @@ public:
 	const int descriptor() const;
 	const char mode() const;
 protected:
-	void init();
+	static void init(void * in);
 	int _start();
 	int _stop();
 private:
-	int _mainSocket;
 };
 
 #endif // CLIENT_HPP

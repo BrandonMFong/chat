@@ -4,12 +4,14 @@
  */
 
 #include "log.hpp"
+#include "chat.hpp"
 #include <stdarg.h>
 #include <bflibcpp/bflibcpp.hpp>
 #include <sys/types.h>
 #include <unistd.h>
 
 void _LogWriteEntry(BFFileWriter * filewriter, int mode, ...) {
+#ifndef TESTING
 	if (!filewriter) return;
 
 	va_list arg0, arg1;
@@ -25,20 +27,22 @@ void _LogWriteEntry(BFFileWriter * filewriter, int mode, ...) {
 	BFDateTime dt = {0};
 	if (BFTimeGetCurrentDateTime(&dt)) return;
 
+	char sockmode = ChatSocketGetMode();
+
 	switch (mode) {
 		case 'd': // debug
-			format = "[%02d/%02d/%04d, %02d:%02d:%02d] %d.%d DEBUG - %s";
+			format = "[%02d/%02d/%04d, %02d:%02d:%02d] DEBUG (%c) - %s";
 			break;
 		case 'e': // error
-			format = "[%02d/%02d/%04d, %02d:%02d:%02d] %d.%d ERROR - %s";
+			format = "[%02d/%02d/%04d, %02d:%02d:%02d] ERROR (%c) - %s";
 			break;
 		default: // normal
-			format = "[%02d/%02d/%04d, %02d:%02d:%02d] %d.%d - %s";
+			format = "[%02d/%02d/%04d, %02d:%02d:%02d] (%c) - %s";
 			break;
 	}
 
-	pid_t procid = getpid();
-	pid_t threadid = gettid();
+	//pid_t procid = getpid();
+	//pid_t threadid = gettid();
 
 	BFFileWriterQueueFormatLine(
 		filewriter,
@@ -49,8 +53,7 @@ void _LogWriteEntry(BFFileWriter * filewriter, int mode, ...) {
 		dt.hour,
 		dt.minute,
 		dt.second,
-		procid,
-		threadid,
+		sockmode,
 		logstr
 	);
 
@@ -58,5 +61,6 @@ void _LogWriteEntry(BFFileWriter * filewriter, int mode, ...) {
 	va_end(arg1);
 
 	BFFree(logstr);
+#endif 
 }
 

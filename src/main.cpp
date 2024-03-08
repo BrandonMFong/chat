@@ -5,21 +5,25 @@
  * https://www.geeksforgeeks.org/simple-client-server-application-in-c/
  */
 
+#include "chat.hpp"
 #include <stdio.h>
 #include <string.h>
-#include <server.hpp>
-#include <client.hpp>
-#include <interface.hpp>
-#include <log.hpp>
-#include <user.hpp>
+#include "server.hpp"
+#include "client.hpp"
+#include "interface.hpp"
+#include "log.hpp"
+#include "user.hpp"
+#include "office.hpp"
+#include "agent.hpp"
 #include <bflibcpp/bflibcpp.hpp>
-
-LOG_INIT
 
 #define ARGUMENT_SERVER "server"
 #define ARGUMENT_CLIENT "client"
 
-User * curruser = 0;
+LOG_INIT
+	
+Socket * skt = NULL;
+char sktmode = '\0';
 
 void Help(const char * toolname) {
 	printf("usage: %s\n", toolname);
@@ -50,36 +54,43 @@ int ArgumentsRead(int argc, char * argv[], char * mode) {
 	return 0;
 }
 
-int InitializeUser() {
-	curruser = new User;
-	return 0;
+const char ChatSocketGetMode() {
+	return sktmode;
 }
 
 int main(int argc, char * argv[]) {
 	int result = 0;
 	char mode = 0;
-	Socket * skt = NULL;
+	Interface * interface = NULL;
+
+	result = ArgumentsRead(argc, argv, &mode);
+
+	sktmode = mode;
 
 	LOG_OPEN;
 
 	LOG_DEBUG("============ App started ============");
 
-	result = ArgumentsRead(argc, argv, &mode);
 	if (!result) {
 		skt = Socket::create(mode, &result);
+
+		if (skt) {
+			skt->setInStreamCallback(Agent::packetReceive);
+			skt->setNewConnectionCallback(Agent::newConnection);
+			skt->setBufferSize(sizeof(Packet));
+		}
 	}
 
 	if (!result) {
-		result = InitializeUser();
-	}
-
-	if (!result) {
-		skt->setQueueCallback(InterfaceInStreamQueueCallback);
 		result = skt->start();
 	}
 
 	if (!result) {
-		result = InterfaceRun(skt);
+		interface = Interface::create(mode);
+	}
+
+	if (!result) {
+		result = interface->run();
 	}
 
 	if (!result) {
@@ -91,6 +102,7 @@ int main(int argc, char * argv[]) {
 	}
 
 	BFRelease(skt);
+	BFRelease(interface);
 
 	LOG_DEBUG("============ App ended ============");
 	LOG_CLOSE;

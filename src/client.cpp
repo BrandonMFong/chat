@@ -3,8 +3,7 @@
  * date: 1/24/24
  */
 
-#include <chat.h>
-#include <client.hpp>
+#include "client.hpp"
 #include <netinet/in.h> //structure for storing address information 
 #include <stdio.h> 
 #include <stdlib.h> 
@@ -12,22 +11,26 @@
 #include <sys/types.h> 
 #include <unistd.h>
 #include <bflibcpp/bflibcpp.hpp>
-#include <log.hpp>
+#include "log.hpp"
+#include "connection.hpp"
 
 Client::Client() {
-	this->_mainSocket = 0;
 }
 
 Client::~Client() {
-
 }
 
 const char Client::mode() const {
 	return SOCKET_MODE_CLIENT;
 }
 
-void Client::init() {
-	this->_mainSocket = socket(AF_INET, SOCK_STREAM, 0);
+void Client::init(void * in) {
+	Client * c = (Client *) in;
+
+	BFRetain(c);
+
+	int sock = 0;	
+	sock = socket(AF_INET, SOCK_STREAM, 0);
 
     struct sockaddr_in servAddr;
 
@@ -36,34 +39,46 @@ void Client::init() {
     servAddr.sin_addr.s_addr = INADDR_ANY;
 
     int connectStatus = connect(
-		this->_mainSocket,
+		sock,
 		(struct sockaddr *) &servAddr,
 		sizeof(servAddr)
 	);
 
+	int err = 0;
     if (connectStatus == -1) {
-        printf("Error... %d\n", errno);
-    } else {
-		this->startIOStreams();
-    }
-}
+		err = errno;
+        printf("Error... %d\n", err);
+	}
 
-const int Client::descriptor() const {
-	return this->_mainSocket;
+	SocketConnection * sc = NULL;
+	if (!err) {
+		sc = new SocketConnection(sock, c);
+	}
+
+	if (!err) {
+		if (c->_cbnewconn)
+			err = c->_cbnewconn(sc);
+	}
+
+	if (!err) {
+		c->_connections.get().add(sc);
+		c->startInStreamForConnection(sc);
+    }
+
+	BFRelease(c);
 }
 
 int Client::_start() {
 	LOG_WRITE("client start");
-	this->init();
-
+	BFThreadAsyncID tid = BFThreadAsync(Client::init, this);
+	BFThreadAsyncDestroy(tid);
+	
 	int error = 0;
 	return error;
 }
 
 int Client::_stop() {
 	LOG_WRITE("client stop");
-	shutdown(this->_mainSocket, SHUT_RDWR);
-	close(this->_mainSocket);
 	return 0;
 }
 

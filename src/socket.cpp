@@ -5,32 +5,52 @@
 
 #include "socket.hpp"
 #include "server.hpp"
+#include "connection.hpp"
 #include "client.hpp"
-#include "chat.h"
 #include "log.hpp"
+#include "office.hpp"
 #include <netinet/in.h> //structure for storing address information 
 #include <stdio.h> 
 #include <stdlib.h> 
-#include <unistd.h> 
 #include <sys/socket.h> //for socket APIs 
 #include <sys/types.h> 
 #include <unistd.h>
 #include <bflibcpp/bflibcpp.hpp>
 #include <bflibc/bflibc.h>
 
+using namespace BF;
+
+Socket * _sharedSocket = NULL;
+
+Socket * Socket::shared() {
+	return _sharedSocket;
+}
+
 Socket::Socket() { 
-	this->_tidin = NULL;
-	this->_tidinpop = NULL;
+	this->_tidq = NULL;
 	this->_tidout = NULL;
 
-	this->_callback = NULL;
-	this->_stopStreams = false;
+	this->_cbinstream = NULL;
+	this->_cbnewconn = NULL;
+
+	this->_bufferSize = 0;
+
+	this->_connections.get().setReleaseCallback(SocketConnection::ReleaseConnection);
+
+	_sharedSocket = this;
 }
 
 Socket::~Socket() {
 	LOG_DEBUG("socket destroyed");
-	BFThreadAsyncDestroy(this->_tidin);
-	BFThreadAsyncDestroy(this->_tidinpop);
+	
+	this->_tidin.lock();
+	List<BFThreadAsyncID>::Node * n = this->_tidin.unsafeget().first();
+	for (; n != NULL; n = n->next()) {
+		BFThreadAsyncDestroy(n->object());
+	}
+	this->_tidin.unlock();
+
+	BFThreadAsyncDestroy(this->_tidq);
 	BFThreadAsyncDestroy(this->_tidout);
 }
 
@@ -60,30 +80,41 @@ Socket * Socket::create(const char mode, int * err) {
 	return result;
 }
 
+void Socket::setBufferSize(size_t size) {
+	this->_bufferSize = size;
+}
+
+void Socket::setNewConnectionCallback(int (* cb)(SocketConnection * sc)) {
+	this->_cbnewconn = cb;
+}
+
+void Socket::setInStreamCallback(void (* cb)(SocketConnection * sc, const void * buf, size_t size)) {
+	this->_cbinstream = cb;
+}
+
+// maybe this could be implemented by app and not by this 
 void Socket::queueCallback(void * in) {
 	LOG_DEBUG("> %s", __func__);
 	Socket * skt = (Socket *) in;
 
 	BFRetain(skt);
 
-	while (!BFThreadAsyncIsCanceled(skt->_tidinpop)) {
-		if (skt->_stopStreams.get())
-			break;
-
+	while (!BFThreadAsyncIsCanceled(skt->_tidq)) {
 		skt->_inq.lock();
 		// if queue is not empty, send the next message
-		if (!skt->_inq.get().empty()) {
+		if (!skt->_inq.unsafeget().empty()) {
 			// get first message
-			Packet * p = skt->_inq.get().front();
+			struct Socket::Envelope * envelope = skt->_inq.unsafeget().front();
 
-			if (p) {
-				skt->_callback(*p);
+			if (envelope) {
+				skt->_cbinstream(envelope->sc, envelope->buf.data, envelope->buf.size);
 			}
 
 			// pop queue
-			skt->_inq.get().pop();
+			skt->_inq.unsafeget().pop();
 
-			PACKET_FREE(p);
+			BFFree(envelope->buf.data);
+			BFFree(envelope);
 		}
 		skt->_inq.unlock();
 	}
@@ -93,39 +124,47 @@ void Socket::queueCallback(void * in) {
 	LOG_DEBUG("< %s", __func__);
 }
 
+/**
+ * used for inStream
+ *
+ * allows us to run dedicated threads for each socket connection
+ */
+class InStreamTools : public Object {
+public:
+	SocketConnection * mainConnection;
+	Socket * socket;
+};
+
 void Socket::inStream(void * in) {
 	LOG_DEBUG("> %s", __func__);
-	Socket * skt = (Socket *) in;
+	InStreamTools * tools = (InStreamTools *) in; // we own memory
+	SocketConnection * sc = tools->mainConnection;
+	Socket * skt = tools->socket;
+	BFThreadAsyncID tid = BFThreadAsyncGetID();
 
 	BFRetain(skt);
-	
-	while (!BFThreadAsyncIsCanceled(skt->_tidin)) {
-		if (skt->_stopStreams.get())
-			break;
 
-		Packet buf;
-		size_t bufsize = recv(skt->descriptor(), &buf, sizeof(Packet), 0);
-        if (bufsize == -1) {
-			LOG_ERROR("%d", errno);
-			break;
-		} else if (bufsize == 0) {
-			LOG_DEBUG("recv received 0");
+	sc->_isready = true;	
+	while (!BFThreadAsyncIsCanceled(tid)) {
+		// create buffer
+		struct Socket::Envelope * envelope = (struct Socket::Envelope *) malloc(sizeof(struct Socket::Envelope));
+		envelope->buf.data = malloc(skt->_bufferSize);
+		envelope->sc = sc;
+
+		// receive data from connections using buffer
+		int err = sc->recvData(&envelope->buf);
+        if (!err) {
+			skt->_inq.get().push(envelope);
+		} else {
+			BFFree(envelope->buf.data);
+			BFFree(envelope);
 			break;
 		}
-
-		Packet * p = PACKET_ALLOC;
-		memcpy(p, &buf, sizeof(Packet));
-		
-		LOG_DEBUG("incoming {packet = {message = {%f, \"%s\", \"%s\"}}}",
-			p->payload.message.time,
-			p->payload.message.username,
-			p->payload.message.buf
-		);
-
-		skt->_inq.get().push(p);
 	}
 
 	BFRelease(skt);
+	Delete(tools);
+
 	LOG_DEBUG("< %s", __func__);
 }
 
@@ -135,29 +174,21 @@ void Socket::outStream(void * in) {
 
 	BFRetain(skt);
 
-	while (!BFThreadAsyncIsCanceled(skt->_tidinpop)) {
-		if (skt->_stopStreams.get())
-			break;
-
+	while (!BFThreadAsyncIsCanceled(skt->_tidq)) {
 		skt->_outq.lock();
 		// if queue is not empty, send the next message
-		if (!skt->_outq.get().empty()) {
-			// get first message
-			Packet * p = skt->_outq.get().front();
+		if (!skt->_outq.unsafeget().empty()) {
+			// get top data
+			struct Socket::Envelope * envelope = skt->_outq.unsafeget().front();
+			//struct Socket::Buffer * buf = &envelope->buf;
 
-			LOG_DEBUG("outgoing {packet = {message = {%f, \"%s\", \"%s\"}}}",
-				p->payload.message.time,
-				p->payload.message.username,
-				p->payload.message.buf
-			);
+			// pop data from queue
+			skt->_outq.unsafeget().pop();
 
-			// pop queue
-			skt->_outq.get().pop();
+			envelope->sc->sendData(&envelope->buf);
 
-			// send buf from message
-			send(skt->descriptor(), p, sizeof(Packet), 0);
-
-			PACKET_FREE(p);
+			BFFree(envelope->buf.data);
+			BFFree(envelope);
 		}
 		skt->_outq.unlock();
 	}
@@ -166,34 +197,68 @@ void Socket::outStream(void * in) {
 	LOG_DEBUG("< %s", __func__);
 }
 
-int Socket::startIOStreams() {
-	this->_tidinpop = BFThreadAsync(Socket::queueCallback, (void *) this);
-	this->_tidin = BFThreadAsync(Socket::inStream, (void *) this);
-	this->_tidout = BFThreadAsync(Socket::outStream, (void *) this);
+// called by subclasses whenever they get a new connection
+int Socket::startInStreamForConnection(SocketConnection * sc) {
+	if (!sc) return 1;
+
+	InStreamTools * tools = new InStreamTools;
+	tools->mainConnection = sc;
+	tools->socket = this;
+
+	BFThreadAsyncID tid = BFThreadAsync(Socket::inStream, (void *) tools);
+	this->_tidin.get().add(tid);
 
 	return 0;
 }
 
 int Socket::start() {
-	if (this->_callback == NULL) {
-		LOG_DEBUG("please set callback for instream before starting socket\n");
-		return -1;
-	}
 	this->_start();
+
+	this->_tidq = BFThreadAsync(Socket::queueCallback, (void *) this);
+
+	// out stream uses `send`
+	//
+	// we can use this object and iterate through the connections
+	// array to send the same packet at the top of the queue
+	this->_tidout = BFThreadAsync(Socket::outStream, (void *) this);
+
 	return 0;
 }
 
 int Socket::stop() {
-	int error = this->_stop();
+	int error = 0;
 
-	if (!error && this->_tidin) {
-		error = BFThreadAsyncCancel(this->_tidin);
-		BFThreadAsyncWait(this->_tidin);
+	// shutdown connections
+	this->_connections.lock();
+	for (int i = 0; i < this->_connections.unsafeget().count(); i++) {
+		this->_connections.unsafeget().objectAtIndex(i)->closeConnection();
+		//shutdown(this->_connections.unsafeget().objectAtIndex(i)->descriptor(), SHUT_RDWR);
+		//close(this->_connections.unsafeget().objectAtIndex(i)->descriptor());
+	}
+	this->_connections.unlock();
+
+	// tell subclasses that they can stop too
+	error = this->_stop();
+
+	// stop our threads
+	
+	if (!error) {
+		this->_tidin.lock();
+		List<BFThreadAsyncID>::Node * n = this->_tidin.unsafeget().first();
+		for (; n != NULL; n = n->next()) {
+			error = BFThreadAsyncCancel(n->object());
+			BFThreadAsyncWait(n->object());
+			if (error) {
+				LOG_DEBUG("error code for cancel attempt: %d", error);
+				break;
+			}
+		}
+		this->_tidin.unlock();
 	}
 
-	if (!error && this->_tidinpop) {
-		error = BFThreadAsyncCancel(this->_tidinpop);
-		BFThreadAsyncWait(this->_tidinpop);
+	if (!error && this->_tidq) {
+		error = BFThreadAsyncCancel(this->_tidq);
+		BFThreadAsyncWait(this->_tidq);
 	}
 
 	if (!error && this->_tidout) {
@@ -202,21 +267,5 @@ int Socket::stop() {
 	}
 
 	return error;
-}
-
-int Socket::sendPacket(const Packet * pkt) {
-	if (!pkt) return -2;
-
-	Packet * p = PACKET_ALLOC;
-	if (!p) return -2;
-
-	memcpy(p, pkt, sizeof(Packet));
-
-	int error = this->_outq.get().push(p);
-	return error;
-}
-
-void Socket::setQueueCallback(void (* callback)(const Packet &)) {
-	this->_callback = callback;
 }
 

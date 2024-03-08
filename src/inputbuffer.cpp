@@ -11,26 +11,15 @@
 
 using namespace BF;
 
-InputBuffer::InputBuffer() : String("") {
+InputBuffer::InputBuffer() : InputBuffer("") {}
+
+InputBuffer::InputBuffer(const char * str) : String(str) {
 	this->_isready = false;
 	this->_cursorpos = 0;
 }
 
 InputBuffer::~InputBuffer() {
 
-}
-
-int InputBuffer::unload(Packet * pkt) {
-	if (!pkt) return 50;
-
-	strncpy(pkt->payload.message.buf, this->cString(), sizeof(pkt->payload.message.buf));
-	strncpy(pkt->payload.message.username, User::current()->username(), sizeof(pkt->payload.message.username));
-	Time * t = Time::createCurrent();
-	pkt->payload.message.time = t->epoch();
-	Delete(t);
-
-
-	return 0;
 }
 
 int InputBuffer::addChar(int ch) {
@@ -54,7 +43,6 @@ int InputBuffer::addChar(int ch) {
 		break;
 	default:
 		// If a key is pressed (excluding Enter), add it to the userInput string
-		LOG_DEBUG("user input char: %c", ch);
 		this->String::addCharAtIndex(ch, this->_cursorpos);
 		this->_cursorpos++;
 		break;

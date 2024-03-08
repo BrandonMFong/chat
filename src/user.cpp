@@ -4,30 +4,92 @@
  */
 
 #include "user.hpp"
+#include "log.hpp"
 #include <string.h>
+#include <unistd.h>
+#include <bflibcpp/bflibcpp.hpp>
 
-User * _currentuser = 0;
+using namespace BF;
 
-User * User::current() {
-	return _currentuser;
+Atomic<List<User * >> users;
+
+void _UserRelease(User * user) {
+	BFRelease(user);
 }
 
-User::User() {
-	this->_username[0] = '\0';
-
-	if (_currentuser == NULL)
-		_currentuser = this;
+User::User(const char * username, const uuid_t uuid) {
+	strncpy(this->_username, username, sizeof(this->_username));
+	uuid_copy(this->_uuid, uuid);
 }
 
 User::~User() {
-	_currentuser = NULL;
 }
 
-void User::setUsername(const char * username) {
-	strncpy(this->_username, username, sizeof(this->_username));
+void _UserAddUserToUsers(User * user) {
+	users.lock();
+
+	if (users.unsafeget().count() == 0) {
+		users.unsafeget().setReleaseCallback(_UserRelease);
+	}
+
+	BFRetain(user);
+	users.unsafeget().add(user);
+	users.unlock();
+
+#if DEBUG
+	uuid_t uuid;
+	user->getuuid(uuid);
+	char uuidstr[UUID_STR_LEN];
+	uuid_unparse_lower(uuid, uuidstr);
+	LOG_DEBUG("created user: %s",
+		uuidstr
+	);
+#endif
 }
 
-const char * User::username() {
+User * User::create(const char * username) {
+	if (!username)
+		return NULL;
+
+	uuid_t uuid;
+	uuid_generate_random(uuid);
+	
+	User * user = new User(
+		username,
+		uuid
+	);
+	_UserAddUserToUsers(user);
+
+	return user;
+}
+
+User * User::create(const PayloadUserInfo * ui) {
+	if (!ui) 
+		return NULL;
+
+	User * user = new User(
+		ui->username,
+		ui->useruuid
+	);
+	_UserAddUserToUsers(user);
+
+	return user;
+}
+
+const char * User::username() const {
 	return this->_username;
+}
+
+void User::getuuid(uuid_t uuid) const {
+	uuid_copy(uuid, this->_uuid);
+}
+
+void User::getuserinfo(PayloadUserInfo * ui) const {
+	if (!ui) return;
+
+	LOG_DEBUG("filling in user info");
+
+	strncpy(ui->username, this->_username, sizeof(this->_username));
+	this->getuuid(ui->useruuid);
 }
 

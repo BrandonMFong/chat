@@ -7,17 +7,12 @@
 #define INPUT_BUFFER_HPP
 
 #include <bflibcpp/string.hpp>
-#include "typepacket.h"
 
 class InputBuffer : public BF::String {
 public:
 	InputBuffer();
+	InputBuffer(const char * str);
 	virtual ~InputBuffer();
-
-	/**
-	 * unloads buffer to the packet
-	 */
-	int unload(Packet * pkt);
 
 	/**
 	 * Adds appends char to our buffer

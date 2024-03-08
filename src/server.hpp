@@ -17,16 +17,22 @@ public:
 	Server();
 	virtual ~Server();
 	const char mode() const;
-	const int descriptor() const;
 
 protected:
-	void init();
+	static void init(void * in);
 	int _start();
 	int _stop();
 
+	static void pollthread(void * in);
+
 private:
 	int _mainSocket;
-	int _clientSocket;
+
+	/**
+	 * polling thread that handles incoming connection
+	 * requests
+	 */
+	BFThreadAsyncID _pollt;
 };
 
 #endif // SERVER_HPP
