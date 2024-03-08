@@ -1,5 +1,8 @@
 x.x
 [] window dynamic resizing
+[] user typing
+[] list of users in lobby
+[] get list of users in chatroom
 
 0.1
 [x] chatrooms
@@ -9,6 +12,6 @@ x.x
 [x] finish help window
 [x] create custom name
 [x] use the correct index for join
-[] fix command line args
-[] make ip and port configurable
+[x] fix command line args
+[x] make ip and port configurable
 

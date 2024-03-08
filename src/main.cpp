@@ -54,7 +54,7 @@ int ArgumentsRead(int argc, char * argv[], char * mode, char * ipaddr) {
 			modereqclient = true;
 		} else if (!strcmp(argv[i], ARGUMENT_IP4_ADDRESS)) {
 			ip4addrpassed = true;
-			strncpy(ipaddr, argv[i], SOCKET_IP4_ADDR_STRLEN);
+			strncpy(ipaddr, argv[++i], SOCKET_IP4_ADDR_STRLEN);
 		}
 	}
 
