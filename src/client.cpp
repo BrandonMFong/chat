@@ -36,8 +36,8 @@ void Client::init(void * in) {
     struct sockaddr_in servAddr;
 
     servAddr.sin_family = AF_INET;
-    servAddr.sin_port = htons(9001); // use some unused port number
-    servAddr.sin_addr.s_addr = inet_addr("127.0.0.1");
+    servAddr.sin_port = htons(c->port());
+    servAddr.sin_addr.s_addr = inet_addr(c->ipaddr());
 
     int connectStatus = connect(
 		sock,

@@ -8,6 +8,8 @@
 
 #define CHAT_ROOM_MAX_SIZE 5
 
+#define CHAT_SOCKET_SERVER_PORT_NUM 9001
+
 /**
  * returns our main socket
  */

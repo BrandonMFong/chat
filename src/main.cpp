@@ -38,9 +38,9 @@ void Help(const char * toolname) {
 	printf("\nCopyright © 2024 Brando. All rights reserved.\n");
 }
 
-int ArgumentsRead(int argc, char * argv[], char * mode) {
-	if (!argv || !mode) return -2;
-	else if (argc < 2) return -2;
+int ArgumentsRead(int argc, char * argv[], char * mode, char * ipaddr) {
+	if (!argv || !mode || !ipaddr) return -2;
+	else if (argc < 2) return -3;
 
 	bool modereqclient = false;
 	bool modereqserver = false;
@@ -53,7 +53,7 @@ int ArgumentsRead(int argc, char * argv[], char * mode) {
 	}
 
 	if (modereqclient && modereqserver) {
-		return -2;
+		return -4;
 	} else if (modereqclient) {
 		*mode = SOCKET_MODE_CLIENT;
 	} else if (modereqserver) {
@@ -71,8 +71,12 @@ int main(int argc, char * argv[]) {
 	int result = 0;
 	char mode = 0;
 	Interface * interface = NULL;
+	char ipaddr[SOCKET_IP4_ADDR_STRLEN];
 
-	result = ArgumentsRead(argc, argv, &mode);
+	// default ip addr is localhost
+	strncpy(ipaddr, "127.0.0.1", SOCKET_IP4_ADDR_STRLEN);
+
+	result = ArgumentsRead(argc, argv, &mode, ipaddr);
 
 	sktmode = mode;
 
@@ -81,7 +85,7 @@ int main(int argc, char * argv[]) {
 	LOG_DEBUG("============ App started ============");
 
 	if (!result) {
-		skt = Socket::create(mode, &result);
+		skt = Socket::create(mode, ipaddr, CHAT_SOCKET_SERVER_PORT_NUM, &result);
 
 		if (skt) {
 			skt->setInStreamCallback(Agent::packetReceive);

@@ -42,8 +42,8 @@ void Server::init(void * in) {
     struct sockaddr_in servAddr;
 
     servAddr.sin_family = AF_INET;
-    servAddr.sin_port = htons(9001);
-    servAddr.sin_addr.s_addr = inet_addr("127.0.0.1");
+    servAddr.sin_port = htons(s->port());
+    servAddr.sin_addr.s_addr = inet_addr(s->ipaddr());
 
     // bind socket to the specified IP and port
     bind(s->_mainSocket, (struct sockaddr *) &servAddr, sizeof(servAddr));

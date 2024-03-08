@@ -37,6 +37,9 @@ Socket::Socket() {
 
 	this->_connections.get().setReleaseCallback(SocketConnection::ReleaseConnection);
 
+	this->_portnum = 0;
+	memset(this->_ip4addr, 0, SOCKET_IP4_ADDR_STRLEN);
+
 	_sharedSocket = this;
 }
 
@@ -52,7 +55,7 @@ Socket::~Socket() {
 	BFThreadAsyncDestroy(this->_tidout);
 }
 
-Socket * Socket::create(const char mode, int * err) {
+Socket * Socket::create(const char mode, const char * ipaddr, uint16_t port, int * err) {
 	Socket * result = NULL;
 	int error = 0;
 
@@ -70,6 +73,9 @@ Socket * Socket::create(const char mode, int * err) {
 
 	if (result == NULL) {
 		error = 1;
+	} else {
+		strncpy(result->_ip4addr, ipaddr, SOCKET_IP4_ADDR_STRLEN);
+		result->_portnum = port;
 	}
 
 	if (err)
@@ -88,6 +94,14 @@ void Socket::setNewConnectionCallback(int (* cb)(SocketConnection * sc)) {
 
 void Socket::setInStreamCallback(void (* cb)(SocketConnection * sc, const void * buf, size_t size)) {
 	this->_cbinstream = cb;
+}
+
+uint16_t Socket::port() const {
+	return this->_portnum;
+}
+
+const char * Socket::ipaddr() const {
+	return this->_ip4addr;
 }
 
 // maybe this could be implemented by app and not by this 

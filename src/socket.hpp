@@ -18,6 +18,8 @@ extern "C" {
 #define SOCKET_MODE_SERVER 's'
 #define SOCKET_MODE_CLIENT 'c'
 
+#define SOCKET_IP4_ADDR_STRLEN 16
+
 class SocketConnection;
 
 class Socket : public BF::Object {
@@ -26,7 +28,7 @@ class Socket : public BF::Object {
 public: 
 	static Socket * shared();
 
-	static Socket * create(const char mode, int * err);
+	static Socket * create(const char mode, const char * ipaddr, uint16_t port, int * err);
 	virtual ~Socket();
 
 	/**
@@ -64,6 +66,9 @@ public:
 	 * this is the expected size for all incoming data
 	 */
 	void setBufferSize(size_t size);
+
+	uint16_t port() const;
+	const char * ipaddr() const;
 
 protected:
 	Socket();
@@ -156,7 +161,8 @@ private:
 	 */
 	BF::Atomic<BF::Queue<struct Envelope *>> _outq;
 
-
+	uint16_t _portnum;
+	char _ip4addr[SOCKET_IP4_ADDR_STRLEN];
 };
 
 #endif // SOCKET_HPP
