@@ -68,7 +68,7 @@ public:
 	/**
 	 * the remote user we are representing
 	 */
-	const User * user();
+	User * user();
 
 protected:
 

@@ -19,11 +19,11 @@ public:
 	static int recordChatroom(const PayloadChatInfo * info, AgentClient * agent);
 
 	virtual ~ChatroomClient();
+
 private:
+	AgentClient * agent();
 	ChatroomClient(AgentClient * a, const uuid_t chatroomuuid);
 	int sendPacket(const Packet * pkt);
-
-	AgentClient * _agent;
 };
 
 #endif // CHATROOM_CLIENT_HPP

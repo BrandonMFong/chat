@@ -26,18 +26,22 @@ void _ChatroomRelease(Chatroom * cr) {
 	BFRelease(cr);
 }
 
-void _ChatroomRelease(User * u) {
+void _ChatroomReleaseUser(User * u) {
 	BFRelease(u);
 }
+
+void _ChatroomReleaseAgent(Agent * a) {
+	BFRelease(a);
+}
+
 
 Chatroom::Chatroom() : Object() {
 	uuid_generate_random(this->_uuid);
 	memset(this->_name, 0, sizeof(this->_name));
 
-	// setup conversation thread
 	this->conversation.get().setReleaseCallback(_ChatroomMessageFree);
-
-	this->_users.get().setReleaseCallback(_ChatroomRelease);
+	this->_users.get().setReleaseCallback(_ChatroomReleaseUser);
+	this->_agents.get().setReleaseCallback(_ChatroomReleaseAgent);
 }
 
 Chatroom::Chatroom(const uuid_t uuid) : Object() {
@@ -138,7 +142,9 @@ void Chatroom::getuuid(uuid_t uuid) {
 // the machine
 //
 // i'm leaving it like this in case we may need to record users
-int Chatroom::enroll(const User * user) {
+// 
+// ^ lol and I was right
+int Chatroom::enroll(User * user) {
 	LOG_DEBUG("enrolling user into chatroom");
 	Packet p;
 	memset(&p, 0, sizeof(p));
@@ -149,7 +155,29 @@ int Chatroom::enroll(const User * user) {
 	user->getuuid(enrollment.useruuid);
 	PacketSetPayload(&p, &enrollment);
 
+	// add user to list
+	this->_users.lock();
+	if (this->_users.unsafeget().contains(user)) {
+		BFRetain(user);
+		this->_users.unsafeget().add(user);
+	}
+	this->_users.unlock();
+
 	return Agent::broadcast(&p);
+}
+
+int Chatroom::addAgent(Agent * a) {
+	// add user from agent to list
+	this->_users.lock();
+	if (this->_users.unsafeget().contains(a->user())) {
+		BFRetain(a->user());
+		this->_users.unsafeget().add(a->user());
+	}
+	this->_users.unlock();
+
+	// finally add agent to list
+	BFRetain(a);
+	return this->_agents.get().add(a);
 }
 
 int Chatroom::sendBuffer(const InputBuffer * buf) {

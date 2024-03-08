@@ -144,7 +144,7 @@ void Agent::receivedPayloadTypeRequestInfo(const Packet * pkt) {
 	this->sendPacket(&p);
 }
 
-const User * Agent::user() {
+User * Agent::user() {
 	return this->_remoteuser;
 }
 
@@ -238,7 +238,7 @@ void Agent::receivedPayloadTypeChatroomEnrollment(const Packet * pkt) {
 	}
 
 	// get chatroom
-	ChatroomServer * chatroom = (ChatroomServer *) Chatroom::getChatroom(
+	Chatroom * chatroom = Chatroom::getChatroom(
 		pkt->payload.enrollment.chatroomuuid
 	);
 
@@ -249,7 +249,7 @@ void Agent::receivedPayloadTypeChatroomEnrollment(const Packet * pkt) {
 	}
 
 	BFRetain(chatroom);
-	chatroom->addAgent((AgentServer *) this);
+	chatroom->addAgent(this);
 	BFRelease(chatroom);
 }
 

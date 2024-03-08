@@ -11,14 +11,7 @@
 
 using namespace BF;
 
-void _AgentServerRelease(AgentServer * a) {
-	BFRelease(a);
-}
-
 ChatroomServer::ChatroomServer() : Chatroom() {
-	// we do not own these agents.  Their memory is management
-	// within its class
-	this->_agents.get().setReleaseCallback(_AgentServerRelease);
 }
 
 ChatroomServer::~ChatroomServer() {
@@ -38,19 +31,19 @@ ChatroomServer * ChatroomServer::create(const char * name) {
 	Chatroom::addRoomToChatrooms(cr);
 	return cr;
 }
-
-void ChatroomServer::addAgent(AgentServer * a) {
+/*
+int ChatroomServer::addAgent(Agent * a) {
 	// make sure we retain this object
 	BFRetain(a);
 
-	this->_agents.get().add(a);
+	return this->_agents.get().add(a);
 }
-
+*/
 int ChatroomServer::sendPacket(const Packet * pkt) {
 	this->_agents.lock();
-	List<AgentServer *>::Node * n = this->_agents.unsafeget().first();
+	List<Agent *>::Node * n = this->_agents.unsafeget().first();
 	for (; n; n = n->next()) {
-		AgentServer * a = n->object();
+		Agent * a = n->object();
 		a->sendPacket(pkt);
 	}
 	this->_agents.unlock();
@@ -64,9 +57,9 @@ int ChatroomServer::receiveMessagePacket(const Packet * pkt) {
 
 	// now sending packet to our agents
 	this->_agents.lock();
-	List<AgentServer *>::Node * n = this->_agents.unsafeget().first();
+	List<Agent *>::Node * n = this->_agents.unsafeget().first();
 	for (; n; n = n->next()) {
-		AgentServer * a = n->object();
+		Agent * a = n->object();
 		
 		uuid_t uuid;
 		a->user()->getuuid(uuid);
