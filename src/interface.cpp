@@ -204,6 +204,8 @@ int Interface::windowCreateModeLobby() {
 
 	keypad(this->_inputWin, true); // Enable special keys in input window
 	nodelay(this->_inputWin, false); // Set blocking input for input window
+	
+	this->_updatechatroomlist = true;
 
 	BFLockUnlock(&this->_winlock);
 
