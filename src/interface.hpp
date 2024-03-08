@@ -70,6 +70,7 @@ private:
 	static void displayWindowUpdateThread(void * in);
 
 	int windowWriteChatroomList();
+	int windowWriteConversation();
 
 	/**
 	 * process user input

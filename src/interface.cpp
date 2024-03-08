@@ -83,6 +83,37 @@ int InterfaceCraftChatLineFromMessage(const Message * msg, char * line) {
 	return 0;
 }
 
+int Interface::windowWriteConversation() {
+	this->_updateconversation.lock();
+	if (this->_updateconversation.unsafeget()) {
+		this->_chatroom->conversation.lock();
+		BFLockLock(&this->_winlock);
+
+		werase(this->_displayWin);
+		box(this->_displayWin, 0, 0);
+
+		// write messages
+		for (int i = 0; i < this->_chatroom->conversation.unsafeget().count(); i++) {
+			Message * m = this->_chatroom->conversation.unsafeget().objectAtIndex(i);
+
+			if (m) {
+				char line[linelen];
+				InterfaceCraftChatLineFromMessage(m, line);
+				mvwprintw(this->_displayWin, i+1, 1, line);
+			}
+		}
+
+		wrefresh(this->_displayWin);
+		
+		this->_updateconversation.unsafeset(false);
+
+		BFLockUnlock(&this->_winlock);
+		this->_chatroom->conversation.unlock();
+	}
+	this->_updateconversation.unlock();
+	return 0;
+}
+
 int Interface::windowWriteChatroomList() {
 	this->_updatechatroomlist.lock();
 	if (this->_updatechatroomlist.unsafeget()) {
@@ -141,33 +172,7 @@ void Interface::displayWindowUpdateThread(void * in) {
 			case kInterfaceStateChatroom:
 			case kInterfaceStateDraft: 
 			{
-				interface->_updateconversation.lock();
-				if (interface->_updateconversation.unsafeget()) {
-					interface->_chatroom->conversation.lock();
-					BFLockLock(&interface->_winlock);
-
-					werase(interface->_displayWin);
-					box(interface->_displayWin, 0, 0);
-
-					// write messages
-					for (int i = 0; i < interface->_chatroom->conversation.unsafeget().count(); i++) {
-						Message * m = interface->_chatroom->conversation.unsafeget().objectAtIndex(i);
-
-						if (m) {
-							char line[linelen];
-							InterfaceCraftChatLineFromMessage(m, line);
-							mvwprintw(interface->_displayWin, i+1, 1, line);
-						}
-					}
-
-					wrefresh(interface->_displayWin);
-					
-					interface->_updateconversation.unsafeset(false);
-
-					BFLockUnlock(&interface->_winlock);
-					interface->_chatroom->conversation.unlock();
-				}
-				interface->_updateconversation.unlock();
+				interface->windowWriteConversation();
 				break;
 			}
 		}
