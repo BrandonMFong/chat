@@ -94,10 +94,19 @@ int InterfaceCraftChatLineFromMessage(const Message * msg, char * line) {
 			strncpy(username, msg->username(), USER_NAME_SIZE);
 		}
 
-		snprintf(line, linelen, "%s joined the chat", username, msg->data());
+		snprintf(line, linelen, "<<%s joined the chat>>", username, msg->data());
 		return 0;
 	default:
 		return 31;
+	}
+}
+
+void _InterfaceDrawMessage(WINDOW * dispwin, int & row, int col, const Message * m) {
+	if (m) {
+		char line[linelen];
+		if (!InterfaceCraftChatLineFromMessage(m, line)) {
+			mvwprintw(dispwin, (row++) + 1, 1, line);
+		}
 	}
 }
 
@@ -114,13 +123,7 @@ int Interface::windowWriteConversation() {
 		int row = 0;
 		for (int i = 0; i < this->_chatroom->conversation.unsafeget().count(); i++) {
 			Message * m = this->_chatroom->conversation.unsafeget().objectAtIndex(i);
-
-			if (m) {
-				char line[linelen];
-				if (!InterfaceCraftChatLineFromMessage(m, line)) {
-					mvwprintw(this->_displayWin, (row++) + 1, 1, line);
-				}
-			}
+			_InterfaceDrawMessage(this->_displayWin, row, 1, m);
 		}
 
 		wrefresh(this->_displayWin);
