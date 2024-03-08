@@ -266,6 +266,8 @@ int Interface::windowCreateModeEdit() {
 
 	keypad(this->_inputWin, true); // Enable special keys in input window
 	nodelay(this->_inputWin, false); // Set blocking input for input window
+	
+	this->_updateconversation = true;
 
 	BFLockUnlock(&this->_winlock);
 
