@@ -19,14 +19,23 @@
 
 #define ARGUMENT_SERVER "server"
 #define ARGUMENT_CLIENT "client"
+#define ARGUMENT_IP4_ADDRESS "-ip4"
 
 LOG_INIT
 	
 Socket * skt = NULL;
-char sktmode = '\0';
+char sktmode = SOCKET_MODE_CLIENT;
 
 void Help(const char * toolname) {
-	printf("usage: %s\n", toolname);
+	printf("usage: %s <mode> [ %s <ip4 address> ]\n", toolname, ARGUMENT_IP4_ADDRESS);
+	printf("\n");
+	printf("Arguments:\n");
+	printf("  <mode>\tEither 'server' or 'client'. Server will mean hosting your\n");
+	printf("\t\town chat server with admin privileges. Client will mean you\n");
+	printf("\t\twill be a participant in a chatroom\n");
+	printf("  [ %s ]\tThe server's ip4 address. Server mode does not require this\n", ARGUMENT_IP4_ADDRESS);
+
+	printf("\nCopyright © 2024 Brando. All rights reserved.\n");
 }
 
 int ArgumentsRead(int argc, char * argv[], char * mode) {
