@@ -83,6 +83,45 @@ int InterfaceCraftChatLineFromMessage(const Message * msg, char * line) {
 	return 0;
 }
 
+int Interface::windowWriteChatroomList() {
+	this->_updatechatroomlist.lock();
+	if (this->_updatechatroomlist.unsafeget()) {
+		BFLockLock(&this->_winlock);
+		werase(this->_displayWin);
+		box(this->_displayWin, 0, 0);
+
+		// print title
+		int row = 1;
+		mvwprintw(this->_displayWin, row++, 1, "Chatrooms:");
+
+		// get list
+		int size = 0;
+		int error = 0;
+		PayloadChatInfo ** list = Chatroom::getChatroomList(&size, &error);
+		if (!list || error) {
+			LOG_DEBUG("could not get list of chatrooms: %d", error);
+		} else {
+
+			// show available rooms
+			for (int i = 0; i < size; i++) { 
+				char line[512];
+				snprintf(line, 512, "(%d) \"%s\"", i+1, list[i]->chatroomname);
+				mvwprintw(this->_displayWin, row++, 1, line);
+
+				BFFree(list[i]);
+			}
+			BFFree(list);
+		}
+
+		wrefresh(this->_displayWin);
+		this->_updatechatroomlist.unsafeset(false);
+		BFLockUnlock(&this->_winlock);
+	}
+	this->_updatechatroomlist.unlock();
+
+	return 0;
+}
+
 void Interface::displayWindowUpdateThread(void * in) {
 	int error = 0;
 	Interface * interface = (Interface *) in;
@@ -93,41 +132,7 @@ void Interface::displayWindowUpdateThread(void * in) {
 		{
 			case kInterfaceStateLobby:
 			{
-				interface->_updatechatroomlist.lock();
-				if (interface->_updatechatroomlist.unsafeget()) {
-
-					BFLockLock(&interface->_winlock);
-					werase(interface->_displayWin);
-					box(interface->_displayWin, 0, 0);
-
-					// print title
-					int row = 1;
-					mvwprintw(interface->_displayWin, row++, 1, "Chatrooms:");
-
-					// get list
-					int size = 0;
-					int error = 0;
-					PayloadChatInfo ** list = Chatroom::getChatroomList(&size, &error);
-					if (!list || error) {
-						LOG_DEBUG("could not get list of chatrooms: %d", error);
-					} else {
-
-						// show available rooms
-						for (int i = 0; i < size; i++) { 
-							char line[512];
-							snprintf(line, 512, "(%d) \"%s\"", i+1, list[i]->chatroomname);
-							mvwprintw(interface->_displayWin, row++, 1, line);
-
-							BFFree(list[i]);
-						}
-						BFFree(list);
-					}
-
-					wrefresh(interface->_displayWin);
-					interface->_updatechatroomlist.unsafeset(false);
-					BFLockUnlock(&interface->_winlock);
-				}
-				interface->_updatechatroomlist.unlock();
+				interface->windowWriteChatroomList();
 				break;
 			}
 

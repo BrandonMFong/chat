@@ -69,6 +69,8 @@ private:
 	int windowCreateModeCreateChatroom();
 	static void displayWindowUpdateThread(void * in);
 
+	int windowWriteChatroomList();
+
 	/**
 	 * process user input
 	 */
