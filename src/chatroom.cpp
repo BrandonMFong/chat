@@ -26,12 +26,18 @@ void _ChatroomRelease(Chatroom * cr) {
 	BFRelease(cr);
 }
 
+void _ChatroomRelease(User * u) {
+	BFRelease(u);
+}
+
 Chatroom::Chatroom() : Object() {
 	uuid_generate_random(this->_uuid);
 	memset(this->_name, 0, sizeof(this->_name));
 
 	// setup conversation thread
-	this->conversation.get().setDeallocateCallback(_ChatroomMessageFree);
+	this->conversation.get().setReleaseCallback(_ChatroomMessageFree);
+
+	this->_users.get().setReleaseCallback(_ChatroomRelease);
 }
 
 Chatroom::Chatroom(const uuid_t uuid) : Object() {
@@ -39,7 +45,7 @@ Chatroom::Chatroom(const uuid_t uuid) : Object() {
 	memset(this->_name, 0, sizeof(this->_name));
 
 	// setup conversation thread
-	this->conversation.get().setDeallocateCallback(_ChatroomMessageFree);
+	this->conversation.get().setReleaseCallback(_ChatroomMessageFree);
 }
 
 Chatroom::~Chatroom() {
@@ -100,7 +106,7 @@ void Chatroom::addRoomToChatrooms(Chatroom * cr) {
 	chatrooms.lock();
 
 	if (chatrooms.unsafeget().count() == 0) {
-		chatrooms.unsafeget().setDeallocateCallback(_ChatroomRelease);
+		chatrooms.unsafeget().setReleaseCallback(_ChatroomRelease);
 	}
 
 	BFRetain(cr);

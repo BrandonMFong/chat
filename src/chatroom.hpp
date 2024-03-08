@@ -102,6 +102,10 @@ protected:
 	char _name[CHAT_ROOM_NAME_SIZE];
 
 private:
+	/**
+	 * list of users in chatroom
+	 */
+	BF::Atomic<BF::List<User *>> _users;
 
 	int getinfo(PayloadChatInfo * info);
 };

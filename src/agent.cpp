@@ -72,7 +72,7 @@ Agent * Agent::create(SocketConnection * sc) {
 		// the callback hasn't been set yet
 		if (result) {
 			if (agents.unsafeget().count() == 0) {
-				agents.unsafeget().setDeallocateCallback(_AgentReleaseAgent);
+				agents.unsafeget().setReleaseCallback(_AgentReleaseAgent);
 			}
 
 			BFRetain(result);

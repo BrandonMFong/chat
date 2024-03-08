@@ -35,7 +35,7 @@ Socket::Socket() {
 
 	this->_bufferSize = 0;
 
-	this->_connections.get().setDeallocateCallback(SocketConnection::ReleaseConnection);
+	this->_connections.get().setReleaseCallback(SocketConnection::ReleaseConnection);
 
 	_sharedSocket = this;
 }

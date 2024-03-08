@@ -18,7 +18,7 @@ void _AgentServerRelease(AgentServer * a) {
 ChatroomServer::ChatroomServer() : Chatroom() {
 	// we do not own these agents.  Their memory is management
 	// within its class
-	this->_agents.get().setDeallocateCallback(_AgentServerRelease);
+	this->_agents.get().setReleaseCallback(_AgentServerRelease);
 }
 
 ChatroomServer::~ChatroomServer() {
