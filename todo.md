@@ -5,7 +5,7 @@
 [x] keep record of users in chatroom
 [x] finish help window
 [] create custom name
-[] use the correct index for join
+[x] use the correct index for join
 [] fix command line args
 [] make ip and port configurable
 
