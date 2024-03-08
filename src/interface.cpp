@@ -115,7 +115,7 @@ void Interface::displayWindowUpdateThread(void * in) {
 						// show available rooms
 						for (int i = 0; i < size; i++) { 
 							char line[512];
-							snprintf(line, 512, "(%d) \"%s\"", i, list[i]->chatroomname);
+							snprintf(line, 512, "(%d) \"%s\"", i+1, list[i]->chatroomname);
 							mvwprintw(interface->_displayWin, row++, 1, line);
 
 							BFFree(list[i]);
@@ -405,14 +405,18 @@ int Interface::processinput(InputBuffer & userInput) {
 				Chatroom * cr = ChatroomServer::create(chatroomname);
 				BFRelease(cr);
 			} else if (!cmd.op().compareString(INTERFACE_COMMAND_JOIN)) {
-				int index = String::toi(cmd[1]);
-				this->_chatroom = _InterfaceGetChatroomAtIndex(index);
-				BFRetain(this->_chatroom);
+				int index = String::toi(cmd[1]) - 1;
+				if ((index >= 0) && (index < Chatroom::getChatroomsCount())) {
+					this->_chatroom = _InterfaceGetChatroomAtIndex(index);
+					if (this->_chatroom) {
+						BFRetain(this->_chatroom);
 
-				// enrolls current user on this machine to the chatroom
-				this->_chatroom->enroll(this->_user.get());
+						// enrolls current user on this machine to the chatroom
+						this->_chatroom->enroll(this->_user.get());
 
-				this->_state = kInterfaceStateChatroom;
+						this->_state = kInterfaceStateChatroom;
+					}
+				}
 			}
 			userInput.reset();
 		}
