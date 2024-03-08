@@ -388,12 +388,12 @@ int Interface::processinput(InputBuffer & userInput) {
 	case kInterfaceStateLobby:
 		if (userInput.isready()) {
 			Command cmd(userInput);
-			if (!cmd.op().compareString("quit")) {
+			if (!cmd.op().compareString(INTERFACE_COMMAND_QUIT)) {
 				this->_state = kInterfaceStateQuit;
-			} else if (!cmd.op().compareString("help")) {
+			} else if (!cmd.op().compareString(INTERFACE_COMMAND_HELP)) {
 				this->_returnfromhelpstate = this->_state;
 				this->_state = kInterfaceStateHelp;
-			} else if (!cmd.op().compareString("create")) {
+			} else if (!cmd.op().compareString(INTERFACE_COMMAND_CREATE)) {
 				// set up chat room name
 				//
 				// right now we are automatically creating a chatroom. The
@@ -407,7 +407,7 @@ int Interface::processinput(InputBuffer & userInput) {
 				BFRelease(cr);
 				LOG_DEBUG("creating chatroom was %sa success",
 						cr == NULL ? "not " : "");
-			} else if (!cmd.op().compareString("join")) {
+			} else if (!cmd.op().compareString(INTERFACE_COMMAND_JOIN)) {
 				int index = String::toi(cmd[1]);
 				this->_chatroom = _InterfaceGetChatroomAtIndex(index);
 				BFRetain(this->_chatroom);
@@ -423,14 +423,14 @@ int Interface::processinput(InputBuffer & userInput) {
 	case kInterfaceStateChatroom:
 		if (userInput.isready()) { 
 			Command cmd(userInput);
-			if (!cmd.op().compareString("leave")) {
+			if (!cmd.op().compareString(INTERFACE_COMMAND_LEAVE)) {
 				BFRelease(this->_chatroom);
 				this->_chatroom = NULL;
 				this->_state = kInterfaceStateLobby;
-			} else if (!cmd.op().compareString("help")) {
+			} else if (!cmd.op().compareString(INTERFACE_COMMAND_HELP)) {
 				this->_returnfromhelpstate = this->_state;
 				this->_state = kInterfaceStateHelp;
-			} else if (!cmd.op().compareString("edit")) {
+			} else if (!cmd.op().compareString(INTERFACE_COMMAND_DRAFT)) {
 				this->_state = kInterfaceStateDraft;
 				this->_updateconversation = true;
 			} else {

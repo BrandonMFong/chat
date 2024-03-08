@@ -18,6 +18,7 @@
 #define INTERFACE_COMMAND_CREATE "create"
 #define INTERFACE_COMMAND_JOIN "join"
 #define INTERFACE_COMMAND_LEAVE "leave"
+#define INTERFACE_COMMAND_HELP "help"
 
 class User;
 class InputBuffer;
