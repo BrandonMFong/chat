@@ -1,4 +1,4 @@
 [x] chatrooms
 [x] create chatroom
-[] join chatroom
-[] keep record of users in chatroom
+[x] join chatroom
+[x] keep record of users in chatroom
