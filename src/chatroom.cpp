@@ -211,6 +211,42 @@ int Chatroom::enroll(User * user) {
 	return error;
 }
 
+int Chatroom::notifyAllServerUsersOfResignation(User * user) {
+	Packet p;
+	memset(&p, 0, sizeof(p));
+	PacketSetHeader(&p, kPayloadTypeChatroomEnrollment);
+
+	PayloadChatEnrollment enrollment;
+	this->getuuid(enrollment.chatroomuuid);
+	user->getuuid(enrollment.useruuid);
+	PacketSetPayload(&p, &enrollment);
+
+	// add user to list
+	this->_users.lock();
+	if (this->_users.unsafeget().contains(user)) {
+		BFRetain(user);
+		this->_users.unsafeget().add(user);
+	}
+	this->_users.unlock();
+
+	// send to all users on server that a user joined a chatroom
+	return Agent::broadcast(&p);
+}
+	
+int Chatroom::notifyAllChatroomUsersOfResignation(User * user) {
+	return 0;
+}
+
+int Chatroom::resign(User * user) {
+	int error = this->notifyAllServerUsersOfResignation(user);
+
+	if (!error) {
+		error = this->notifyAllChatroomUsersOfResignation(user);
+	}
+
+	return error;
+}
+
 int Chatroom::addAgent(Agent * a) {
 	// add user from agent to list
 	this->_users.lock();

@@ -3,6 +3,7 @@ x.x
 [] user typing
 [] list of users in lobby
 [] get list of users in chatroom
+[] encryption
 
 0.1
 [x] chatrooms
@@ -18,4 +19,5 @@ x.x
 [x] broadcast that chatroom list updated
 [] make sure command permissions are set
 [] make error window
+[] make sure multiple users can join
 

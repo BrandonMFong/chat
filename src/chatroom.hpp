@@ -76,6 +76,13 @@ public:
 	int enroll(User * user);
 
 	/**
+	 * opposite of `enroll`
+	 * 
+	 * removes user from chatroom and notifies all users regarding this
+	 */
+	int resign(User * user);
+
+	/**
 	 * +1 to agent's and its user's retain count
 	 */
 	int addAgent(Agent * a);
@@ -130,11 +137,15 @@ private:
 	 */
 	int notifyAllServerUsersOfEnrollment(User * user);
 
+	int notifyAllServerUsersOfResignation(User * user);
+
 	/**
 	 * sends out a message to all users that this
 	 * user has joined the chat
 	 */
 	int notifyAllChatroomUsersOfEnrollment(User * user);
+
+	int notifyAllChatroomUsersOfResignation(User * user);
 
 	/**
 	 * list of users in chatroom

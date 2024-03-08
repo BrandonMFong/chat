@@ -102,7 +102,7 @@ int InterfaceCraftChatLineFromMessage(const Message * msg, char * line) {
 }
 
 void _InterfaceDrawMessage(WINDOW * dispwin, int & row, int col, const Message * m) {
-	if (m) {
+	if (m && dispwin) {
 		char line[linelen];
 		if (!InterfaceCraftChatLineFromMessage(m, line)) {
 			mvwprintw(dispwin, (row++) + 1, 1, line);
@@ -421,12 +421,12 @@ int Interface::processinput(InputBuffer & userInput) {
 	case kInterfaceStateLobby:
 		if (userInput.isready()) {
 			Command cmd(userInput);
-			if (!cmd.op().compareString(INTERFACE_COMMAND_QUIT)) {
+			if (!cmd.op().compareString(INTERFACE_COMMAND_QUIT)) { // quit
 				this->_state = kInterfaceStateQuit;
-			} else if (!cmd.op().compareString(INTERFACE_COMMAND_HELP)) {
+			} else if (!cmd.op().compareString(INTERFACE_COMMAND_HELP)) { // help
 				this->_returnfromhelpstate = this->_state;
 				this->_state = kInterfaceStateHelp;
-			} else if (!cmd.op().compareString(INTERFACE_COMMAND_CREATE)) {
+			} else if (!cmd.op().compareString(INTERFACE_COMMAND_CREATE)) { // create
 				char chatroomname[CHAT_ROOM_NAME_SIZE];
 				if (cmd.count() > 1) {
 					strncpy(chatroomname, cmd[1], CHAT_ROOM_NAME_SIZE);
@@ -441,7 +441,7 @@ int Interface::processinput(InputBuffer & userInput) {
 
 				Chatroom * cr = ChatroomServer::create(chatroomname);
 				BFRelease(cr);
-			} else if (!cmd.op().compareString(INTERFACE_COMMAND_JOIN)) {
+			} else if (!cmd.op().compareString(INTERFACE_COMMAND_JOIN)) { // join
 				int index = String::toi(cmd[1]) - 1;
 				if ((index >= 0) && (index < Chatroom::getChatroomsCount())) {
 					this->_chatroom = _InterfaceGetChatroomAtIndex(index);
@@ -461,14 +461,18 @@ int Interface::processinput(InputBuffer & userInput) {
 	case kInterfaceStateChatroom:
 		if (userInput.isready()) { 
 			Command cmd(userInput);
-			if (!cmd.op().compareString(INTERFACE_COMMAND_LEAVE)) {
+			if (!cmd.op().compareString(INTERFACE_COMMAND_LEAVE)) { // leave
+				// tell chat room we are leaving
+				this->_chatroom->resign(this->_user);
+
 				BFRelease(this->_chatroom);
 				this->_chatroom = NULL;
+
 				this->_state = kInterfaceStateLobby;
-			} else if (!cmd.op().compareString(INTERFACE_COMMAND_HELP)) {
+			} else if (!cmd.op().compareString(INTERFACE_COMMAND_HELP)) { // help
 				this->_returnfromhelpstate = this->_state;
 				this->_state = kInterfaceStateHelp;
-			} else if (!cmd.op().compareString(INTERFACE_COMMAND_DRAFT)) {
+			} else if (!cmd.op().compareString(INTERFACE_COMMAND_DRAFT)) { // draft
 				this->_state = kInterfaceStateDraft;
 				this->_updateconversation = true;
 			} else {
