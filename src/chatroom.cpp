@@ -60,6 +60,10 @@ int Chatroom::getChatroomsCount() {
 	return chatrooms.get().count();
 }
 
+const char * Chatroom::name() {
+	return this->_name;
+}
+
 PayloadChatInfo ** Chatroom::getChatroomList(int * size, int * err) {
 	if (!err || !size)
 		return NULL;

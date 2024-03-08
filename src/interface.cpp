@@ -177,7 +177,10 @@ void Interface::displayWindowUpdateThread(void * in) {
 	if (this->_displayWin) \
 		delwin(this->_displayWin); \
 	if (this->_helpWin) \
-		delwin(this->_helpWin);
+		delwin(this->_helpWin); \
+	if (this->_headerWin) \
+		delwin(this->_headerWin);
+
 
 int Interface::windowCreateModeLobby() {
 	BFLockLock(&this->_winlock);
@@ -185,14 +188,21 @@ int Interface::windowCreateModeLobby() {
 	DELETE_WINDOWS;
 
 	// Create two windows
+	this->_headerWin = newwin(1, COLS, 0, 0);
+	this->_displayWin = newwin(LINES - 2, COLS, 1, 0);
 	this->_inputWin = newwin(1, COLS, LINES - 1, 0);
-	this->_displayWin = newwin(LINES - 1, COLS, 0, 0);
 
 	box(this->_displayWin, 0, 0); // Add a box around the display window
 
-	refresh(); // Refresh the main window to show the boxes
-	wrefresh(this->_inputWin); // Refresh the input window
-	wrefresh(this->_displayWin); // Refresh the display window
+	char title[COLS];
+	snprintf(title, COLS, "Lobby");
+	int y = (COLS - strlen(title)) / 2;
+	mvwprintw(this->_headerWin, 0, y, title);
+
+	refresh();
+	wrefresh(this->_inputWin);
+	wrefresh(this->_displayWin);
+	wrefresh(this->_headerWin);
 
 	keypad(this->_inputWin, true); // Enable special keys in input window
 	nodelay(this->_inputWin, false); // Set blocking input for input window
@@ -209,18 +219,58 @@ int Interface::windowCreateModeCommand() {
 	DELETE_WINDOWS;
 	
 	// Create two windows
+	this->_headerWin = newwin(1, COLS, 0, 0);
+	this->_displayWin = newwin(LINES - 2, COLS, 1, 0);
 	this->_inputWin = newwin(1, COLS, LINES - 1, 0);
-	this->_displayWin = newwin(LINES - 1, COLS, 0, 0);
 
 	box(this->_displayWin, 0, 0); // Add a box around the display window
 
-	refresh(); // Refresh the main window to show the boxes
-	wrefresh(this->_inputWin); // Refresh the input window
-	wrefresh(this->_displayWin); // Refresh the display window
+	char title[COLS];
+	snprintf(title, COLS, "%s", this->_chatroom->name());
+	int y = (COLS - strlen(title)) / 2;
+	mvwprintw(this->_headerWin, 0, y, title);
+
+	refresh();
+	wrefresh(this->_inputWin);
+	wrefresh(this->_displayWin);
+	wrefresh(this->_headerWin);
 
 	keypad(this->_inputWin, true); // Enable special keys in input window
 	nodelay(this->_inputWin, false); // Set blocking input for input window
 
+	this->_updateconversation = true;
+
+	BFLockUnlock(&this->_winlock);
+
+	return 0;
+}
+
+int Interface::windowCreateModeEdit() {
+	BFLockLock(&this->_winlock);
+
+	DELETE_WINDOWS;
+	
+	// Create two windows
+	this->_headerWin = newwin(1, COLS, 0, 0);
+	this->_displayWin = newwin(LINES - 4, COLS, 1, 0);
+	this->_inputWin = newwin(3, COLS, LINES - 3, 0);
+
+	box(this->_inputWin, 0, 0); // Add a box around the input window
+	box(this->_displayWin, 0, 0); // Add a box around the display window
+
+	char title[COLS];
+	snprintf(title, COLS, "%s - draft", this->_chatroom->name());
+	int y = (COLS - strlen(title)) / 2;
+	mvwprintw(this->_headerWin, 0, y, title);
+
+	refresh();
+	wrefresh(this->_inputWin);
+	wrefresh(this->_displayWin);
+	wrefresh(this->_headerWin);
+
+	keypad(this->_inputWin, true); // Enable special keys in input window
+	nodelay(this->_inputWin, false); // Set blocking input for input window
+	
 	this->_updateconversation = true;
 
 	BFLockUnlock(&this->_winlock);
@@ -245,32 +295,6 @@ int Interface::windowCreateModeHelp() {
 	wrefresh(this->_helpWin); // Refresh the help window
 
 	BFLockUnlock(&this->_winlock);
-	return 0;
-}
-
-int Interface::windowCreateModeEdit() {
-	BFLockLock(&this->_winlock);
-
-	DELETE_WINDOWS;
-	
-	// Create two windows
-	this->_inputWin = newwin(3, COLS, LINES - 3, 0);
-	this->_displayWin = newwin(LINES - 3, COLS, 0, 0);
-
-	box(this->_inputWin, 0, 0); // Add a box around the input window
-	box(this->_displayWin, 0, 0); // Add a box around the display window
-
-	refresh(); // Refresh the main window to show the boxes
-	wrefresh(this->_inputWin); // Refresh the input window
-	wrefresh(this->_displayWin); // Refresh the display window
-
-	keypad(this->_inputWin, true); // Enable special keys in input window
-	nodelay(this->_inputWin, false); // Set blocking input for input window
-	
-	this->_updateconversation = true;
-
-	BFLockUnlock(&this->_winlock);
-
 	return 0;
 }
 
@@ -433,10 +457,10 @@ int Interface::windowLoop() {
 	this->_prevstate = kInterfaceStateUnknown;
 	this->_state = kInterfaceStateLobby;
 	while (this->_state != kInterfaceStateQuit) {
-		this->windowUpdateInputWindowText(userInput);
-
 		// draw ui based on current state
 		this->draw();
+		
+		this->windowUpdateInputWindowText(userInput);
 
         int ch = wgetch(this->_inputWin); // Get user input
 		userInput.addChar(ch);

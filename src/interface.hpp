@@ -73,7 +73,9 @@ private:
 	BFLock _winlock;
 	WINDOW * _inputWin;
 	WINDOW * _displayWin;
+	WINDOW * _headerWin;
 	WINDOW * _helpWin;
+
 	Chatroom * _chatroom;
 	BF::Atomic<User *> _user;
 

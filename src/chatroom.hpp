@@ -75,6 +75,11 @@ public:
 	 */
 	int addAgent(Agent * a);
 
+	/**
+	 * chat room name
+	 */
+	const char * name();
+
 	BF::Atomic<BF::List<Message *>> conversation;
 
 protected:
