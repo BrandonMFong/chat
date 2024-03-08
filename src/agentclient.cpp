@@ -31,7 +31,6 @@ int AgentClient::start() {
 
 void AgentClient::receivedPayloadTypeRequestInfo(const Packet * pkt) {
 	this->Agent::receivedPayloadTypeRequestInfo(pkt);
-	LOG_DEBUG("we will now request the server for their information");
 
 	Packet p;
 	memset(&p, 0, sizeof(p));
@@ -49,7 +48,6 @@ void AgentClient::setmain(AgentClient * ac) {
 }
 
 int AgentClient::requestChatroomListUpdate(const User * user) {
-	LOG_DEBUG("pinging server to give us an up to date list of chatrooms we can join");
 	Packet p;
 	memset(&p, 0, sizeof(p));
 	PacketSetHeader(&p, kPayloadTypeRequestChatroomList);

@@ -153,7 +153,6 @@ void Chatroom::getuuid(uuid_t uuid) {
 // 
 // ^ lol and I was right
 int Chatroom::enroll(User * user) {
-	LOG_DEBUG("enrolling user into chatroom");
 	Packet p;
 	memset(&p, 0, sizeof(p));
 	PacketSetHeader(&p, kPayloadTypeChatroomEnrollment);

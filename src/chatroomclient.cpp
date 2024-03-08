@@ -29,12 +29,6 @@ int ChatroomClient::recordChatroom(const PayloadChatInfo * info, AgentClient * a
 
 	memcpy(chatroom->_name, info->chatroomname, sizeof(chatroom->_name));
 
-#ifdef DEBUG
-	char uuidstr[UUID_STR_LEN];
-	uuid_unparse(chatroom->_uuid, uuidstr);
-	LOG_DEBUG("new chat room: %s - %s", chatroom->_name, uuidstr);
-#endif
-
 	Chatroom::addRoomToChatrooms(chatroom);
 
 	BFRelease(chatroom);

@@ -62,7 +62,6 @@ void Server::pollthread(void * in) {
 
 	while (!BFThreadAsyncIsCanceled(s->_pollt)) {
 		int csock = accept(s->_mainSocket, NULL, NULL);
-		LOG_DEBUG("new connection: %d", csock);
 
 		int err = 0;
 		SocketConnection * sc = new SocketConnection(csock, s);

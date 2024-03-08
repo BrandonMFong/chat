@@ -30,13 +30,9 @@ int AgentServer::start() {
 void AgentServer::handshake(void * in) {
 	AgentServer * a = (AgentServer *) in;
 	
-	LOG_DEBUG("waiting for connection");
-
 	// wait for the connection to be ready before we
 	// start the conversation with the remote user
 	while (!a->connectionIsReady()) {}
-
-	LOG_DEBUG("connection is ready");
 
 	Packet p;
 	memset(&p, 0, sizeof(p));

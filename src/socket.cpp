@@ -41,8 +41,6 @@ Socket::Socket() {
 }
 
 Socket::~Socket() {
-	LOG_DEBUG("socket destroyed");
-	
 	this->_tidin.lock();
 	List<BFThreadAsyncID>::Node * n = this->_tidin.unsafeget().first();
 	for (; n != NULL; n = n->next()) {
@@ -94,7 +92,6 @@ void Socket::setInStreamCallback(void (* cb)(SocketConnection * sc, const void *
 
 // maybe this could be implemented by app and not by this 
 void Socket::queueCallback(void * in) {
-	LOG_DEBUG("> %s", __func__);
 	Socket * skt = (Socket *) in;
 
 	BFRetain(skt);
@@ -121,7 +118,6 @@ void Socket::queueCallback(void * in) {
 
 	BFRelease(skt);
 
-	LOG_DEBUG("< %s", __func__);
 }
 
 /**
@@ -136,7 +132,6 @@ public:
 };
 
 void Socket::inStream(void * in) {
-	LOG_DEBUG("> %s", __func__);
 	InStreamTools * tools = (InStreamTools *) in; // we own memory
 	SocketConnection * sc = tools->mainConnection;
 	Socket * skt = tools->socket;
@@ -164,12 +159,9 @@ void Socket::inStream(void * in) {
 
 	BFRelease(skt);
 	Delete(tools);
-
-	LOG_DEBUG("< %s", __func__);
 }
 
 void Socket::outStream(void * in) {
-	LOG_DEBUG("> %s", __func__);
 	Socket * skt = (Socket *) in;
 
 	BFRetain(skt);
@@ -194,7 +186,6 @@ void Socket::outStream(void * in) {
 	}
 
 	BFRelease(skt);
-	LOG_DEBUG("< %s", __func__);
 }
 
 // called by subclasses whenever they get a new connection

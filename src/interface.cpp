@@ -95,7 +95,6 @@ void Interface::displayWindowUpdateThread(void * in) {
 			{
 				interface->_updatechatroomlist.lock();
 				if (interface->_updatechatroomlist.unsafeget()) {
-					LOG_DEBUG("updating chatroom list");
 
 					BFLockLock(&interface->_winlock);
 					werase(interface->_displayWin);
@@ -112,7 +111,6 @@ void Interface::displayWindowUpdateThread(void * in) {
 					if (!list || error) {
 						LOG_DEBUG("could not get list of chatrooms: %d", error);
 					} else {
-						LOG_DEBUG("found %d rooms", size);
 
 						// show available rooms
 						for (int i = 0; i < size; i++) { 
@@ -402,11 +400,8 @@ int Interface::processinput(InputBuffer & userInput) {
 				snprintf(chatroomname, CHAT_ROOM_NAME_SIZE, "chatroom%d",
 						Chatroom::getChatroomsCount());
 
-				LOG_DEBUG("creating chatroom %s", chatroomname);
 				Chatroom * cr = ChatroomServer::create(chatroomname);
 				BFRelease(cr);
-				LOG_DEBUG("creating chatroom was %sa success",
-						cr == NULL ? "not " : "");
 			} else if (!cmd.op().compareString(INTERFACE_COMMAND_JOIN)) {
 				int index = String::toi(cmd[1]);
 				this->_chatroom = _InterfaceGetChatroomAtIndex(index);

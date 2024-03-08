@@ -35,16 +35,6 @@ void _UserAddUserToUsers(User * user) {
 	BFRetain(user);
 	users.unsafeget().add(user);
 	users.unlock();
-
-#if DEBUG
-	uuid_t uuid;
-	user->getuuid(uuid);
-	char uuidstr[UUID_STR_LEN];
-	uuid_unparse_lower(uuid, uuidstr);
-	LOG_DEBUG("created user: %s",
-		uuidstr
-	);
-#endif
 }
 
 User * User::create(const char * username) {
@@ -86,8 +76,6 @@ void User::getuuid(uuid_t uuid) const {
 
 void User::getuserinfo(PayloadUserInfo * ui) const {
 	if (!ui) return;
-
-	LOG_DEBUG("filling in user info");
 
 	strncpy(ui->username, this->_username, sizeof(this->_username));
 	this->getuuid(ui->useruuid);
