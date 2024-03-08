@@ -21,6 +21,8 @@
 #define ARGUMENT_CLIENT "client"
 #define ARGUMENT_IP4_ADDRESS "-ip4"
 
+#define PRINTF_ERR(...) printf("ERROR - " __VA_ARGS__)
+
 LOG_INIT
 	
 Socket * skt = NULL;
@@ -44,23 +46,33 @@ int ArgumentsRead(int argc, char * argv[], char * mode, char * ipaddr) {
 
 	bool modereqclient = false;
 	bool modereqserver = false;
+	bool ip4addrpassed = false;
 	for (int i = 1; i < argc; i++) {
 		if (!strcmp(argv[i], ARGUMENT_SERVER)) {
 			modereqserver = true;
 		} else if (!strcmp(argv[i], ARGUMENT_CLIENT)) {
 			modereqclient = true;
 		} else if (!strcmp(argv[i], ARGUMENT_IP4_ADDRESS)) {
+			ip4addrpassed = true;
 			strncpy(ipaddr, argv[i], SOCKET_IP4_ADDR_STRLEN);
 		}
 	}
 
+	// make sure server/client aren't both passed
 	if (modereqclient && modereqserver) {
-		printf("cannot request to be both server and client\n");
+		PRINTF_ERR("cannot request to be both server and client\n");
 		return 4;
 	} else if (modereqclient) {
 		*mode = SOCKET_MODE_CLIENT;
 	} else if (modereqserver) {
 		*mode = SOCKET_MODE_SERVER;
+	}
+
+	if (*mode == SOCKET_MODE_CLIENT) {
+		if (!ip4addrpassed) {
+			PRINTF_ERR("please provided an ip address of the server you want to join\n");
+			return 5;
+		}
 	}
 
 	return 0;
