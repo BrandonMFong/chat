@@ -10,14 +10,15 @@
 #include "inputbuffer.hpp"
 #include "connection.hpp"
 
+class User;
+
 /**
  * in charge of making packet
  */
 namespace Office {
 
-/**
- */
-int PacketSend(const Packet * pkt);
+int quitApplication(const User * user);
+
 }
 
 #endif // OFFICE_HPP

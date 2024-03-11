@@ -70,6 +70,17 @@ typedef enum {
 	 * gets sent when user left chatroom
 	 */
 	kPayloadTypeChatroomResignation = 8,
+
+	/**
+	 * when user `quit`s the app, a broadcast message
+	 * will be sent to all users to notify them that
+	 * user has left the server
+	 *
+	 * no payload data will be sent. all receivers
+	 * are assumed to already have an agent that represents
+	 * the quitting user
+	 */
+	kPayloadTypeNotifyQuitApp = 9,
 } PayloadType;
 
 typedef enum {

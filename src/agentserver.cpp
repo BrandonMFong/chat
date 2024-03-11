@@ -9,6 +9,8 @@
 #include "socket.hpp"
 #include <bflibcpp/bflibcpp.hpp>
 
+using namespace BF;
+
 AgentServer::AgentServer() {
 
 }
@@ -43,5 +45,20 @@ void AgentServer::handshake(void * in) {
 
 void AgentServer::receivedPayloadTypeNotifyChatroomListChanged(const Packet * pkt) {
 	LOG_DEBUG("this should not be invoked on servers");
+}
+
+void AgentServer::requestPayloadTypeNotifyQuitApp(const Packet * pkt) {
+	Atomic<List<Agent *>> * agents = Agent::agentlist();
+	agents->lock();
+
+	// forward packet to the other clients
+	List<Agent *>::Node * n = agents->unsafeget().first();
+	for (; n; n = n->next()) {
+		Agent * a = n->object();
+		if (a != this) {
+			a->sendPacket(pkt);
+		}
+	}
+	agents->unlock();
 }
 

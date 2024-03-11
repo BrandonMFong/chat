@@ -22,6 +22,10 @@ using namespace BF;
 
 Atomic<List<Agent *>> agents;
 
+Atomic<List<Agent *>> * Agent::agentlist() {
+	return &agents;
+}
+
 void _AgentReleaseAgent(Agent * a) {
 	BFRelease(a);
 }
@@ -262,6 +266,10 @@ void Agent::requestPayloadTypeChatroomResignation(const Packet * pkt) {
 	BFRelease(chatroom);
 }
 
+// agentserver overloads this function to handle the fowarding
+void Agent::requestPayloadTypeNotifyQuitApp(const Packet * pkt) {
+}
+
 void Agent::packetReceive(SocketConnection * sc, const void * buf, size_t size) {
 	if (!sc || !buf) 
 		return;
@@ -292,8 +300,12 @@ void Agent::packetReceive(SocketConnection * sc, const void * buf, size_t size) 
 		break;
 	case kPayloadTypeNotifyChatroomListChanged:
 		agent->receivedPayloadTypeNotifyChatroomListChanged(p);
+		break;
 	case kPayloadTypeChatroomResignation:
 		agent->requestPayloadTypeChatroomResignation(p);
+		break;
+	case kPayloadTypeNotifyQuitApp:
+		agent->requestPayloadTypeNotifyQuitApp(p);
 		break;
 	}
 }

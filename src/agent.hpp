@@ -7,6 +7,8 @@
 #define AGENT_HPP
 
 #include <bflibcpp/object.hpp>
+#include <bflibcpp/atomic.hpp>
+#include <bflibcpp/list.hpp>
 #include "typepacket.h"
 
 class SocketConnection;
@@ -78,6 +80,11 @@ protected:
 
 	virtual void receivedPayloadTypeRequestInfo(const Packet * pkt);
 
+	/**
+	 * returns agent list
+	 */
+	static BF::Atomic<BF::List<Agent *>> * agentlist();
+
 private:
 
 	void receivedPayloadTypeMessage(const Packet * pkt);
@@ -87,6 +94,7 @@ private:
 	void receivedPayloadTypeChatroomEnrollment(const Packet * pkt);
 	virtual void receivedPayloadTypeNotifyChatroomListChanged(const Packet * pkt) = 0;
 	void requestPayloadTypeChatroomResignation(const Packet * pkt);
+	virtual void requestPayloadTypeNotifyQuitApp(const Packet * pkt);
 
 	/*
 	 * socket connection

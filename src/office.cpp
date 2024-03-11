@@ -11,15 +11,17 @@
 #include "message.hpp"
 #include "agent.hpp"
 #include "log.hpp"
+#include "packet.hpp"
 #include <string.h>
 #include <bflibcpp/bflibcpp.hpp>
 
 using namespace BF;
 
-int Office::PacketSend(const Packet * p) {
-	// TODO: this is agent's job
-	//return Socket::shared()->sendData(p, sizeof(Packet));
-	return 0;
-}
+int Office::quitApplication(const User * user) {
+	Packet p;
+	memset(&p, 0, sizeof(p));
+	PacketSetHeader(&p, kPayloadTypeNotifyQuitApp);
 
+	return Agent::broadcast(&p);
+}
 

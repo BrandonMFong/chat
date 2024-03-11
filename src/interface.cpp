@@ -430,6 +430,7 @@ int Interface::processinput(InputBuffer & userInput) {
 		if (userInput.isready()) {
 			Command cmd(userInput);
 			if (!cmd.op().compareString(INTERFACE_COMMAND_QUIT)) { // quit
+				Office::quitApplication(this->_user.get());
 				this->_state = kInterfaceStateQuit;
 			} else if (!cmd.op().compareString(INTERFACE_COMMAND_HELP)) { // help
 				this->_returnfromhelpstate = this->_state;
