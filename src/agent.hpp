@@ -94,6 +94,19 @@ private:
 	void receivedPayloadTypeChatroomEnrollment(const Packet * pkt);
 	virtual void receivedPayloadTypeNotifyChatroomListChanged(const Packet * pkt) = 0;
 	void requestPayloadTypeChatroomResignation(const Packet * pkt);
+	
+	/**
+	 * required by agent servers and clients
+	 *
+	 * agent servers will forward the quit notification to the other agents.
+	 *
+	 * the agent server will remove itself from the agent list, thus releasing
+	 * itself from memory.
+	 *
+	 * Note when this function is called, retain count is 2. The `packetReceive`
+	 * function retains the agent and releases it before returning from function.
+	 * This ensures memory can be safely accessed and is appropriately cleaned up
+	 */
 	virtual void requestPayloadTypeNotifyQuitApp(const Packet * pkt) = 0;
 
 	/*

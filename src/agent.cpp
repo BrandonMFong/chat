@@ -20,6 +20,8 @@
 
 using namespace BF;
 
+// every agent in this list is retained with 
+// rc of 1
 Atomic<List<Agent *>> agents;
 
 Atomic<List<Agent *>> * Agent::agentlist() {
@@ -266,7 +268,6 @@ void Agent::requestPayloadTypeChatroomResignation(const Packet * pkt) {
 	BFRelease(chatroom);
 }
 
-// agentserver overloads this function to handle the fowarding
 void Agent::packetReceive(SocketConnection * sc, const void * buf, size_t size) {
 	if (!sc || !buf) 
 		return;

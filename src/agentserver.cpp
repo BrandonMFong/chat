@@ -59,6 +59,15 @@ void AgentServer::requestPayloadTypeNotifyQuitApp(const Packet * pkt) {
 			a->sendPacket(pkt);
 		}
 	}
+
+	// removes from list
+	agents->unsafeget().pluckObject(this);
+
+	// releases itself
+	//
+	// this is safe because Agent::packetReceive is still retaining us
+	Object::release(this);
+
 	agents->unlock();
 }
 
