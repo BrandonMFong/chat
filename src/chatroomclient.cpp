@@ -21,7 +21,6 @@ AgentClient * ChatroomClient::agent() {
 }
 
 int ChatroomClient::recordChatroom(const PayloadChatInfo * info, AgentClient * agent) {
-	LOG_DEBUG("got chatroom info");
 	if (!info || !agent)
 		return 1;
 

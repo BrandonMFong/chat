@@ -26,6 +26,14 @@ AgentClient::~AgentClient() {
 
 }
 
+User * AgentClient::user() {
+	return NULL;
+}
+
+void AgentClient::setRemoteUser(User * user) {
+
+}
+
 int AgentClient::start() {
 	return 0;
 }
@@ -75,7 +83,7 @@ void AgentClient::receivedPayloadTypeNotifyChatroomListChanged(const Packet * pk
 	this->sendPacket(&p);
 }
 
-void AgentClient::requestPayloadTypeNotifyQuitApp(const Packet * pkt) {
-// does nothing
+void AgentClient::receivedPayloadTypeNotifyQuitApp(const Packet * pkt) {
+// TODO: remove user
 }
 

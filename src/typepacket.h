@@ -76,9 +76,7 @@ typedef enum {
 	 * will be sent to all users to notify them that
 	 * user has left the server
 	 *
-	 * no payload data will be sent. all receivers
-	 * are assumed to already have an agent that represents
-	 * the quitting user
+	 * uses PayloadUserInfo payload
 	 */
 	kPayloadTypeNotifyQuitApp = 9,
 } PayloadType;

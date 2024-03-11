@@ -35,6 +35,14 @@ int PacketSetPayload(Packet * pkt, const void * buf) {
 		);
 		return 0;
 
+	case kPayloadTypeNotifyQuitApp:
+		memcpy(
+			&pkt->payload.userinfo,
+			buf,
+			sizeof(pkt->payload.userinfo)
+		);
+		return 0;
+
 	case kPayloadTypeChatInfo:
 		memcpy(
 			&pkt->payload.chatinfo,

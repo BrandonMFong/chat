@@ -7,16 +7,25 @@
 #include "log.hpp"
 #include "connection.hpp"
 #include "socket.hpp"
+#include "user.hpp"
 #include <bflibcpp/bflibcpp.hpp>
 
 using namespace BF;
 
 AgentServer::AgentServer() {
-
+	this->_remoteuser = NULL;
 }
 
 AgentServer::~AgentServer() {
+	BFRelease(this->_remoteuser);
+}
 
+User * AgentServer::user() {
+	return this->_remoteuser;
+}
+
+void AgentServer::setRemoteUser(User * user) {
+	this->_remoteuser = user;
 }
 
 int AgentServer::start() {
@@ -47,7 +56,7 @@ void AgentServer::receivedPayloadTypeNotifyChatroomListChanged(const Packet * pk
 	LOG_DEBUG("this should not be invoked on servers");
 }
 
-void AgentServer::requestPayloadTypeNotifyQuitApp(const Packet * pkt) {
+void AgentServer::receivedPayloadTypeNotifyQuitApp(const Packet * pkt) {
 	Atomic<List<Agent *>> * agents = Agent::agentlist();
 	agents->lock();
 
@@ -67,6 +76,25 @@ void AgentServer::requestPayloadTypeNotifyQuitApp(const Packet * pkt) {
 	//
 	// this is safe because Agent::packetReceive is still retaining us
 	Object::release(this);
+
+	agents->unlock();
+}
+
+void AgentServer::receivedPayloadTypeUserInfo(const Packet * pkt) {
+	// let base class create user 
+	this->Agent::receivedPayloadTypeUserInfo(pkt);
+
+	Atomic<List<Agent *>> * agents = Agent::agentlist();
+	agents->lock();
+
+	// forward packet to the other clients
+	List<Agent *>::Node * n = agents->unsafeget().first();
+	for (; n; n = n->next()) {
+		Agent * a = n->object();
+		if (a != this) {
+			a->sendPacket(pkt);
+		}
+	}
 
 	agents->unlock();
 }

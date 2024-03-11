@@ -31,6 +31,9 @@ public:
 	 */
 	int requestChatroomListUpdate(const User * user);
 
+	virtual User * user();
+	virtual void setRemoteUser(User * user);
+
 private:
 	AgentClient();
 	int start();
@@ -38,7 +41,7 @@ private:
 	static void setmain(AgentClient * ac);
 
 	virtual void receivedPayloadTypeNotifyChatroomListChanged(const Packet * pkt);
-	virtual void requestPayloadTypeNotifyQuitApp(const Packet * pkt);
+	virtual void receivedPayloadTypeNotifyQuitApp(const Packet * pkt);
 };
 
 #endif // AGENT_CLIENT_HPP

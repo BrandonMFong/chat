@@ -22,6 +22,10 @@ int Office::quitApplication(const User * user) {
 	memset(&p, 0, sizeof(p));
 	PacketSetHeader(&p, kPayloadTypeNotifyQuitApp);
 
+	PayloadUserInfo info;
+	user->getuserinfo(&info);
+	PacketSetPayload(&p, &info);
+
 	return Agent::broadcast(&p);
 }
 

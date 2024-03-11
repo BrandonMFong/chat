@@ -70,7 +70,9 @@ public:
 	/**
 	 * the remote user we are representing
 	 */
-	User * user();
+	virtual User * user() = 0;
+
+	virtual void setRemoteUser(User * user) = 0;
 
 protected:
 
@@ -93,7 +95,7 @@ private:
 	void receivedPayloadTypeChatroomInfo(const Packet * pkt);
 	void receivedPayloadTypeChatroomEnrollment(const Packet * pkt);
 	virtual void receivedPayloadTypeNotifyChatroomListChanged(const Packet * pkt) = 0;
-	void requestPayloadTypeChatroomResignation(const Packet * pkt);
+	void receivedPayloadTypeChatroomResignation(const Packet * pkt);
 	
 	/**
 	 * required by agent servers and clients
@@ -107,7 +109,7 @@ private:
 	 * function retains the agent and releases it before returning from function.
 	 * This ensures memory can be safely accessed and is appropriately cleaned up
 	 */
-	virtual void requestPayloadTypeNotifyQuitApp(const Packet * pkt) = 0;
+	virtual void receivedPayloadTypeNotifyQuitApp(const Packet * pkt) = 0;
 
 	/*
 	 * socket connection
@@ -124,16 +126,6 @@ private:
 	 */
 	static Agent * getAgentForConnection(SocketConnection * sc);
 
-	/**
-	 * the remote user we represent
-	 *
-	 * this doesn't provide a deep representation
-	 * of the actual remote user. This object should
-	 * hold enough information to work with
-	 *
-	 * See class header for more info
-	 */
-	User * _remoteuser;
 };
 
 #endif // AGENT_HPP
