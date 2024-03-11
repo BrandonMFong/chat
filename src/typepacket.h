@@ -65,6 +65,11 @@ typedef enum {
 	 * of updating their own list of chatrooms
 	 */
 	kPayloadTypeNotifyChatroomListChanged = 7,
+
+	/**
+	 * gets sent when user left chatroom
+	 */
+	kPayloadTypeChatroomResignation = 8,
 } PayloadType;
 
 typedef enum {

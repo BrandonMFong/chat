@@ -53,7 +53,7 @@ public:
 	 *
 	 * this function also calls `addMessage`
 	 */
-	int sendBuffer(const InputBuffer * buf);
+	int sendBuffer(const InputBuffer & buf);
 
 	/**
 	 * constructs message from packet and adds to our list of messages
@@ -76,9 +76,25 @@ public:
 	int enroll(User * user);
 
 	/**
+	 * opposite of `enroll`
+	 * 
+	 * removes user from chatroom and notifies all users regarding this
+	 */
+	int resign(User * user);
+
+	/**
+	 * Adds agent and its user to our list
+	 *
 	 * +1 to agent's and its user's retain count
 	 */
 	int addAgent(Agent * a);
+
+	/**
+	 * Removes agent and its user from our list
+	 *
+	 * release agent from chatroom list
+	 */
+	int removeAgent(Agent * a);
 
 	/**
 	 * chat room name
@@ -130,11 +146,27 @@ private:
 	 */
 	int notifyAllServerUsersOfEnrollment(User * user);
 
+	int notifyAllServerUsersOfResignation(User * user);
+
 	/**
 	 * sends out a message to all users that this
 	 * user has joined the chat
 	 */
 	int notifyAllChatroomUsersOfEnrollment(User * user);
+
+	int notifyAllChatroomUsersOfResignation(User * user);
+
+	/**
+	 * adds or removes agent from chatroom
+	 *
+	 * action : 'a' for add, 'r' for remove
+	 */
+	int agentAddRemove(const char action, Agent * a);
+
+	/**
+	 * sends buf with a type
+	 */
+	int sendBufferWithType(PayloadMessageType type, const InputBuffer & buf);
 
 	/**
 	 * list of users in chatroom

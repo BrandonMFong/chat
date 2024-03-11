@@ -86,7 +86,7 @@ private:
 	WINDOW * _headerWin;
 	WINDOW * _helpWin;
 
-	Chatroom * _chatroom;
+	BF::Atomic<Chatroom *> _chatroom;
 	BF::Atomic<User *> _user;
 
 	BF::Atomic<InterfaceState> _state;
