@@ -31,8 +31,10 @@ int AgentClient::start() {
 }
 
 void AgentClient::receivedPayloadTypeRequestInfo(const Packet * pkt) {
+	// we will send information back to sender
 	this->Agent::receivedPayloadTypeRequestInfo(pkt);
 
+	// we will also require them to send us information about them
 	Packet p;
 	memset(&p, 0, sizeof(p));
 	PacketSetHeader(&p, kPayloadTypeRequestUserInfo);

@@ -79,6 +79,7 @@ protected:
 	bool connectionIsReady();
 
 	virtual void receivedPayloadTypeRequestInfo(const Packet * pkt);
+	virtual void receivedPayloadTypeUserInfo(const Packet * pkt);
 
 	/**
 	 * returns agent list
@@ -88,7 +89,6 @@ protected:
 private:
 
 	void receivedPayloadTypeMessage(const Packet * pkt);
-	void receivedPayloadTypeUserInfo(const Packet * pkt);
 	void receivedPayloadTypeRequestAvailableChatrooms(const Packet * pkt);
 	void receivedPayloadTypeChatroomInfo(const Packet * pkt);
 	void receivedPayloadTypeChatroomEnrollment(const Packet * pkt);

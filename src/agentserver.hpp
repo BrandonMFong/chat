@@ -28,7 +28,6 @@ private:
 	static void handshake(void * in);
 
 	virtual void receivedPayloadTypeNotifyChatroomListChanged(const Packet * pkt);
-
 	virtual void requestPayloadTypeNotifyQuitApp(const Packet * pkt);
 };
 

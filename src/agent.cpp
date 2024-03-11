@@ -74,9 +74,9 @@ Agent * Agent::create(SocketConnection * sc) {
 			}
 		}
 		
-		// if agents are 0, then we can safely assume
-		// the callback hasn't been set yet
 		if (result) {
+			// if we have agents 0, then we can safely assume
+			// the callback hasn't been set yet
 			if (agents.unsafeget().count() == 0) {
 				agents.unsafeget().setReleaseCallback(_AgentReleaseAgent);
 			}

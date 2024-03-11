@@ -123,6 +123,12 @@ protected:
 	 */
 	Chatroom();
 
+	/**
+	 * assuming `cr` is newly created, this function will
+	 * add it to the `chatrooms` list
+	 *
+	 * this is defined to give access to sub classes
+	 */
 	static void addRoomToChatrooms(Chatroom * cr);
 
 	/**
