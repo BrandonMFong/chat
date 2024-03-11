@@ -38,6 +38,7 @@ private:
 	static void setmain(AgentClient * ac);
 
 	virtual void receivedPayloadTypeNotifyChatroomListChanged(const Packet * pkt);
+	virtual void requestPayloadTypeNotifyQuitApp(const Packet * pkt);
 };
 
 #endif // AGENT_CLIENT_HPP

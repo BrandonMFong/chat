@@ -71,3 +71,7 @@ void AgentClient::receivedPayloadTypeNotifyChatroomListChanged(const Packet * pk
 	this->sendPacket(&p);
 }
 
+void AgentClient::requestPayloadTypeNotifyQuitApp(const Packet * pkt) {
+// does nothing
+}
+

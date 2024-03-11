@@ -267,9 +267,6 @@ void Agent::requestPayloadTypeChatroomResignation(const Packet * pkt) {
 }
 
 // agentserver overloads this function to handle the fowarding
-void Agent::requestPayloadTypeNotifyQuitApp(const Packet * pkt) {
-}
-
 void Agent::packetReceive(SocketConnection * sc, const void * buf, size_t size) {
 	if (!sc || !buf) 
 		return;
@@ -278,6 +275,8 @@ void Agent::packetReceive(SocketConnection * sc, const void * buf, size_t size) 
 	Agent * agent = Agent::getAgentForConnection(sc);
 	if (!agent)
 		return;
+
+	BFRetain(agent);
 
 	switch (p->header.type) {
 	case kPayloadTypeMessage:
@@ -308,6 +307,8 @@ void Agent::packetReceive(SocketConnection * sc, const void * buf, size_t size) 
 		agent->requestPayloadTypeNotifyQuitApp(p);
 		break;
 	}
+
+	BFRelease(agent);
 }
 
 int Agent::sendPacket(const Packet * pkt) {

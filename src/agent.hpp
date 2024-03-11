@@ -94,7 +94,7 @@ private:
 	void receivedPayloadTypeChatroomEnrollment(const Packet * pkt);
 	virtual void receivedPayloadTypeNotifyChatroomListChanged(const Packet * pkt) = 0;
 	void requestPayloadTypeChatroomResignation(const Packet * pkt);
-	virtual void requestPayloadTypeNotifyQuitApp(const Packet * pkt);
+	virtual void requestPayloadTypeNotifyQuitApp(const Packet * pkt) = 0;
 
 	/*
 	 * socket connection
