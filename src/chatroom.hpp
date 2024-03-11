@@ -53,7 +53,7 @@ public:
 	 *
 	 * this function also calls `addMessage`
 	 */
-	int sendBuffer(const InputBuffer * buf);
+	int sendBuffer(const InputBuffer & buf);
 
 	/**
 	 * constructs message from packet and adds to our list of messages
@@ -162,6 +162,11 @@ private:
 	 * action : 'a' for add, 'r' for remove
 	 */
 	int agentAddRemove(const char action, Agent * a);
+
+	/**
+	 * sends buf with a type
+	 */
+	int sendBufferWithType(PayloadMessageType type, const InputBuffer & buf);
 
 	/**
 	 * list of users in chatroom

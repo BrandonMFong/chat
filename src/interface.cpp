@@ -488,7 +488,7 @@ int Interface::processinput(InputBuffer & userInput) {
 	case kInterfaceStateDraft:
 		if (userInput.isready()) {
 			// send buf
-			this->_chatroom.get()->sendBuffer(&userInput);
+			this->_chatroom.get()->sendBuffer(userInput);
 
 			this->_state = kInterfaceStateChatroom;
 

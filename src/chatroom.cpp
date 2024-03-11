@@ -193,8 +193,53 @@ int Chatroom::notifyAllServerUsersOfResignation(User * user) {
 	// send to all users on server that a user joined a chatroom
 	return Agent::broadcast(&p);
 }
-	
+
+int Chatroom::sendBufferWithType(PayloadMessageType type, const InputBuffer & buf) {
+	Packet p;
+	memset(&p, 0, sizeof(p));
+
+	p.payload.message.type = type;
+
+	// load buffer 
+	strncpy(
+		p.payload.message.data,
+		buf.cString(),
+		sizeof(p.payload.message.data)
+	);
+
+	// username
+	strncpy(
+		p.payload.message.username,
+		Interface::current()->getuser()->username(),
+		sizeof(p.payload.message.username)
+	);
+
+	// user uuid
+	Interface::current()->getuser()->getuuid(p.payload.message.useruuid);	
+
+	// chatroom uuid
+	uuid_copy(p.payload.message.chatuuid, this->_uuid);
+
+	// time
+	p.header.time = BFTimeGetCurrentTime();
+
+	// set payload type
+	p.header.type = kPayloadTypeMessage;
+
+	// give chatroom this message to add to 
+	// its list
+	this->addMessage(new Message(&p));
+
+	return this->sendPacket(&p);
+}
+
+int Chatroom::sendBuffer(const InputBuffer & buf) {
+	return this->sendBufferWithType(kPayloadMessageTypeData, buf);
+}
+
 int Chatroom::notifyAllChatroomUsersOfEnrollment(User * user) {
+	return this->sendBufferWithType(kPayloadMessageTypeUserJoined, "");
+	/*
 	Packet p;
 	memset(&p, 0, sizeof(p));
 	PacketSetHeader(&p, kPayloadTypeMessage);
@@ -219,9 +264,12 @@ int Chatroom::notifyAllChatroomUsersOfEnrollment(User * user) {
 	this->addMessage(new Message(&p));
 
 	return this->sendPacket(&p);
+	*/
 }
 
 int Chatroom::notifyAllChatroomUsersOfResignation(User * user) {
+	return this->sendBufferWithType(kPayloadMessageTypeUserLeft, "");
+	/*
 	Packet p;
 	memset(&p, 0, sizeof(p));
 	PacketSetHeader(&p, kPayloadTypeMessage);
@@ -246,7 +294,7 @@ int Chatroom::notifyAllChatroomUsersOfResignation(User * user) {
 	this->addMessage(new Message(&p));
 
 	return this->sendPacket(&p);
-
+	*/
 }
 
 int Chatroom::enroll(User * user) {
@@ -312,46 +360,6 @@ int Chatroom::addAgent(Agent * a) {
 
 int Chatroom::removeAgent(Agent * a) {
 	return this->agentAddRemove('r', a);
-}
-
-int Chatroom::sendBuffer(const InputBuffer * buf) {
-	Packet p;
-
-	memset(&p, 0, sizeof(p));
-
-	p.payload.message.type = kPayloadMessageTypeData;
-
-	// load buffer 
-	strncpy(
-		p.payload.message.data,
-		buf->cString(),
-		sizeof(p.payload.message.data)
-	);
-
-	// username
-	strncpy(
-		p.payload.message.username,
-		Interface::current()->getuser()->username(),
-		sizeof(p.payload.message.username)
-	);
-
-	// user uuid
-	Interface::current()->getuser()->getuuid(p.payload.message.useruuid);	
-
-	// chatroom uuid
-	uuid_copy(p.payload.message.chatuuid, this->_uuid);
-
-	// time
-	p.header.time = BFTimeGetCurrentTime();
-
-	// set payload type
-	p.header.type = kPayloadTypeMessage;
-
-	// give chatroom this message to add to 
-	// its list
-	this->addMessage(new Message(&p));
-
-	return this->sendPacket(&p);
 }
 
 int Chatroom::receiveMessagePacket(const Packet * pkt) {
