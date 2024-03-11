@@ -83,9 +83,18 @@ public:
 	int resign(User * user);
 
 	/**
+	 * Adds agent and its user to our list
+	 *
 	 * +1 to agent's and its user's retain count
 	 */
 	int addAgent(Agent * a);
+
+	/**
+	 * Removes agent and its user from our list
+	 *
+	 * release agent from chatroom list
+	 */
+	int removeAgent(Agent * a);
 
 	/**
 	 * chat room name

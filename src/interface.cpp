@@ -46,7 +46,8 @@ Interface::Interface() {
 
 Interface::~Interface() {
 	BFLockDestroy(&this->_winlock);
-	BFRelease(this->_chatroom);
+	Chatroom * c = this->_chatroom;
+	BFRelease(c);
 }
 
 Interface * Interface::create(char mode) {
@@ -112,8 +113,9 @@ void _InterfaceDrawMessage(WINDOW * dispwin, int & row, int col, const Message *
 
 int Interface::windowWriteConversation() {
 	this->_updateconversation.lock();
-	if (this->_updateconversation.unsafeget()) {
-		this->_chatroom->conversation.lock();
+	this->_chatroom.lock();
+	if (this->_updateconversation.unsafeget() && this->_chatroom.unsafeget()) {
+		this->_chatroom.unsafeget()->conversation.lock();
 		BFLockLock(&this->_winlock);
 
 		werase(this->_displayWin);
@@ -121,8 +123,8 @@ int Interface::windowWriteConversation() {
 
 		// write messages
 		int row = 0;
-		for (int i = 0; i < this->_chatroom->conversation.unsafeget().count(); i++) {
-			Message * m = this->_chatroom->conversation.unsafeget().objectAtIndex(i);
+		for (int i = 0; i < this->_chatroom.unsafeget()->conversation.unsafeget().count(); i++) {
+			Message * m = this->_chatroom.unsafeget()->conversation.unsafeget().objectAtIndex(i);
 			_InterfaceDrawMessage(this->_displayWin, row, 1, m);
 		}
 
@@ -131,8 +133,9 @@ int Interface::windowWriteConversation() {
 		this->_updateconversation.unsafeset(false);
 
 		BFLockUnlock(&this->_winlock);
-		this->_chatroom->conversation.unlock();
+		this->_chatroom.unsafeget()->conversation.unlock();
 	}
+	this->_chatroom.unlock();
 	this->_updateconversation.unlock();
 	return 0;
 }
@@ -259,7 +262,7 @@ int Interface::windowCreateModeCommand() {
 	box(this->_displayWin, 0, 0); // Add a box around the display window
 
 	char title[COLS];
-	snprintf(title, COLS, "%s", this->_chatroom->name());
+	snprintf(title, COLS, "%s", this->_chatroom.get()->name());
 	int y = (COLS - strlen(title)) / 2;
 	mvwprintw(this->_headerWin, 0, y, title);
 
@@ -292,7 +295,7 @@ int Interface::windowCreateModeEdit() {
 	box(this->_displayWin, 0, 0); // Add a box around the display window
 
 	char title[COLS];
-	snprintf(title, COLS, "%s - draft", this->_chatroom->name());
+	snprintf(title, COLS, "%s - draft", this->_chatroom.get()->name());
 	int y = (COLS - strlen(title)) / 2;
 	mvwprintw(this->_headerWin, 0, y, title);
 
@@ -446,10 +449,10 @@ int Interface::processinput(InputBuffer & userInput) {
 				if ((index >= 0) && (index < Chatroom::getChatroomsCount())) {
 					this->_chatroom = _InterfaceGetChatroomAtIndex(index);
 					if (this->_chatroom) {
-						BFRetain(this->_chatroom);
+						Object::retain(this->_chatroom.get());
 
 						// enrolls current user on this machine to the chatroom
-						this->_chatroom->enroll(this->_user.get());
+						this->_chatroom.get()->enroll(this->_user.get());
 
 						this->_state = kInterfaceStateChatroom;
 					}
@@ -463,9 +466,9 @@ int Interface::processinput(InputBuffer & userInput) {
 			Command cmd(userInput);
 			if (!cmd.op().compareString(INTERFACE_COMMAND_LEAVE)) { // leave
 				// tell chat room we are leaving
-				this->_chatroom->resign(this->_user);
+				this->_chatroom.get()->resign(this->_user);
 
-				BFRelease(this->_chatroom);
+				Object::release(this->_chatroom.get());
 				this->_chatroom = NULL;
 
 				this->_state = kInterfaceStateLobby;
@@ -485,7 +488,7 @@ int Interface::processinput(InputBuffer & userInput) {
 	case kInterfaceStateDraft:
 		if (userInput.isready()) {
 			// send buf
-			this->_chatroom->sendBuffer(&userInput);
+			this->_chatroom.get()->sendBuffer(&userInput);
 
 			this->_state = kInterfaceStateChatroom;
 

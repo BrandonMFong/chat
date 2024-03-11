@@ -230,6 +230,38 @@ void Agent::receivedPayloadTypeChatroomEnrollment(const Packet * pkt) {
 	BFRelease(chatroom);
 }
 
+void Agent::requestPayloadTypeChatroomResignation(const Packet * pkt) {
+	if (!pkt)
+		return;
+
+	// compare user record
+	//
+	// we want to make sure that we are representing the user that
+	// is trying to enroll
+	uuid_t uuid;
+	this->_remoteuser->getuuid(uuid);
+	if (uuid_compare(uuid, pkt->payload.enrollment.useruuid)) {
+		LOG_DEBUG("couldn't find user: %s",
+			pkt->payload.enrollment.useruuid);
+		return;
+	}
+
+	// get chatroom
+	Chatroom * chatroom = Chatroom::getChatroom(
+		pkt->payload.enrollment.chatroomuuid
+	);
+
+	if (!chatroom) {
+		LOG_DEBUG("couldn't find chatroom: %s",
+			pkt->payload.enrollment.chatroomuuid);
+		return;
+	}
+
+	BFRetain(chatroom);
+	chatroom->removeAgent(this);
+	BFRelease(chatroom);
+}
+
 void Agent::packetReceive(SocketConnection * sc, const void * buf, size_t size) {
 	if (!sc || !buf) 
 		return;
@@ -260,6 +292,8 @@ void Agent::packetReceive(SocketConnection * sc, const void * buf, size_t size) 
 		break;
 	case kPayloadTypeNotifyChatroomListChanged:
 		agent->receivedPayloadTypeNotifyChatroomListChanged(p);
+	case kPayloadTypeChatroomResignation:
+		agent->requestPayloadTypeChatroomResignation(p);
 		break;
 	}
 }
