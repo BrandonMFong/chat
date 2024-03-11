@@ -465,13 +465,18 @@ int Interface::processinput(InputBuffer & userInput) {
 		if (userInput.isready()) { 
 			Command cmd(userInput);
 			if (!cmd.op().compareString(INTERFACE_COMMAND_LEAVE)) { // leave
+				LOG_DEBUG("leaving chat");
 				// tell chat room we are leaving
 				this->_chatroom.get()->resign(this->_user);
+				LOG_DEBUG("resigning current user");
 
 				Object::release(this->_chatroom.get());
 				this->_chatroom = NULL;
+				LOG_DEBUG("releasing references to chatroom");
 
 				this->_state = kInterfaceStateLobby;
+				LOG_DEBUG("changing states to lobby");
+				LOG_FLUSH;
 			} else if (!cmd.op().compareString(INTERFACE_COMMAND_HELP)) { // help
 				this->_returnfromhelpstate = this->_state;
 				this->_state = kInterfaceStateHelp;
