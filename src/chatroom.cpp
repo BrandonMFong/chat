@@ -239,62 +239,10 @@ int Chatroom::sendBuffer(const InputBuffer & buf) {
 
 int Chatroom::notifyAllChatroomUsersOfEnrollment(User * user) {
 	return this->sendBufferWithType(kPayloadMessageTypeUserJoined, "");
-	/*
-	Packet p;
-	memset(&p, 0, sizeof(p));
-	PacketSetHeader(&p, kPayloadTypeMessage);
-	
-	p.payload.message.type = kPayloadMessageTypeUserJoined;
-
-	// username
-	strncpy(
-		p.payload.message.username,
-		user->username(),
-		sizeof(p.payload.message.username)
-	);
-
-	// user uuid
-	user->getuuid(p.payload.message.useruuid);	
-
-	// chatroom uuid
-	uuid_copy(p.payload.message.chatuuid, this->_uuid);
-
-	// give chatroom this message to add to 
-	// its list
-	this->addMessage(new Message(&p));
-
-	return this->sendPacket(&p);
-	*/
 }
 
 int Chatroom::notifyAllChatroomUsersOfResignation(User * user) {
 	return this->sendBufferWithType(kPayloadMessageTypeUserLeft, "");
-	/*
-	Packet p;
-	memset(&p, 0, sizeof(p));
-	PacketSetHeader(&p, kPayloadTypeMessage);
-	
-	p.payload.message.type = kPayloadMessageTypeUserLeft;
-
-	// username
-	strncpy(
-		p.payload.message.username,
-		user->username(),
-		sizeof(p.payload.message.username)
-	);
-
-	// user uuid
-	user->getuuid(p.payload.message.useruuid);	
-
-	// chatroom uuid
-	uuid_copy(p.payload.message.chatuuid, this->_uuid);
-
-	// give chatroom this message to add to 
-	// its list
-	this->addMessage(new Message(&p));
-
-	return this->sendPacket(&p);
-	*/
 }
 
 int Chatroom::enroll(User * user) {
