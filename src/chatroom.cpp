@@ -124,17 +124,6 @@ void Chatroom::addRoomToChatrooms(Chatroom * cr) {
 	BFRetain(cr);
 	chatrooms.unsafeget().add(cr);
 	chatrooms.unlock();
-
-	// tell the ui that our chatroom list
-	// changed so they can update the ui
-	Interface::current()->chatroomListHasChanged();
-
-	// broadcast to all clients that chatroom list changed
-	Packet p;
-	memset(&p, 0, sizeof(p));
-	PacketSetHeader(&p, kPayloadTypeNotifyChatroomListChanged);
-
-	Agent::broadcast(&p);
 }
 
 int Chatroom::addMessage(Message * msg) {

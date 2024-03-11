@@ -152,6 +152,7 @@ User * Agent::user() {
 	return this->_remoteuser;
 }
 
+// incoming user info to save
 void Agent::receivedPayloadTypeUserInfo(const Packet * pkt) {
 	if (!pkt)
 		return;

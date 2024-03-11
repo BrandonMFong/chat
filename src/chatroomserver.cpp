@@ -7,6 +7,8 @@
 #include "log.hpp"
 #include "agentserver.hpp"
 #include "user.hpp"
+#include "packet.hpp"
+#include "interface.hpp"
 #include <bflibcpp/bflibcpp.hpp>
 
 using namespace BF;
@@ -29,6 +31,18 @@ ChatroomServer * ChatroomServer::create(const char * name) {
 #endif
 
 	Chatroom::addRoomToChatrooms(cr);
+
+	// tell the ui that our chatroom list
+	// changed so they can update the ui
+	Interface::current()->chatroomListHasChanged();
+
+	// broadcast to all clients that chatroom list changed
+	Packet p;
+	memset(&p, 0, sizeof(p));
+	PacketSetHeader(&p, kPayloadTypeNotifyChatroomListChanged);
+
+	Agent::broadcast(&p);
+
 	return cr;
 }
 

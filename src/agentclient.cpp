@@ -62,6 +62,8 @@ void AgentClient::receivedPayloadTypeNotifyChatroomListChanged(const Packet * pk
 	if (!pkt)
 		return;
 
+	LOG_DEBUG("received a notification that chatroom list has changed");
+
 	// clear our chatrooms
 	Chatroom::clearChatroomList();
 

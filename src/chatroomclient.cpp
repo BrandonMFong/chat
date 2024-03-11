@@ -6,6 +6,7 @@
 #include "chatroomclient.hpp"
 #include <bflibcpp/bflibcpp.hpp>
 #include "log.hpp"
+#include "interface.hpp"
 #include "agentclient.hpp"
 
 ChatroomClient::ChatroomClient(AgentClient * a, const uuid_t chatroomuuid) : Chatroom(chatroomuuid) {
@@ -20,7 +21,8 @@ AgentClient * ChatroomClient::agent() {
 }
 
 int ChatroomClient::recordChatroom(const PayloadChatInfo * info, AgentClient * agent) {
-	if (!info)
+	LOG_DEBUG("got chatroom info");
+	if (!info || !agent)
 		return 1;
 
 	ChatroomClient * chatroom = new ChatroomClient(agent, info->chatroomuuid);
@@ -30,6 +32,10 @@ int ChatroomClient::recordChatroom(const PayloadChatInfo * info, AgentClient * a
 	memcpy(chatroom->_name, info->chatroomname, sizeof(chatroom->_name));
 
 	Chatroom::addRoomToChatrooms(chatroom);
+
+	// tell the ui that our chatroom list
+	// changed so they can update the ui
+	Interface::current()->chatroomListHasChanged();
 
 	BFRelease(chatroom);
 

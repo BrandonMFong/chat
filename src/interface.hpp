@@ -28,6 +28,8 @@ class Chatroom;
  * main functionality is a display window and prompt window
  */
 class Interface : public BF::Object {
+	friend class ChatroomServer;
+	friend class ChatroomClient;
 	friend class Chatroom;
 public:
 	static Interface * create(char mode);
