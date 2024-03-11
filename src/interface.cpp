@@ -46,8 +46,7 @@ Interface::Interface() {
 
 Interface::~Interface() {
 	BFLockDestroy(&this->_winlock);
-	Chatroom * c = this->_chatroom;
-	BFRelease(c);
+	Object::release(this->_chatroom.get());
 }
 
 Interface * Interface::create(char mode) {
@@ -85,6 +84,7 @@ int InterfaceCraftChatLineFromMessage(const Message * msg, char * line) {
 		snprintf(line, linelen, "%s> %s", msg->username(), msg->data());
 		return 0;
 	case kPayloadMessageTypeUserJoined:
+	case kPayloadMessageTypeUserLeft:
 		char username[USER_NAME_SIZE];
 		uuid_t u0, u1;
 		Interface::current()->getuser()->getuuid(u0);
@@ -95,7 +95,12 @@ int InterfaceCraftChatLineFromMessage(const Message * msg, char * line) {
 			strncpy(username, msg->username(), USER_NAME_SIZE);
 		}
 
-		snprintf(line, linelen, "<<%s joined the chat>>", username, msg->data());
+		if (msg->type() == kPayloadMessageTypeUserJoined) {
+			snprintf(line, linelen, "<<%s joined the chat>>", username, msg->data());
+		} else if (msg->type() == kPayloadMessageTypeUserLeft) {
+			snprintf(line, linelen, "<<%s left the chat>>", username, msg->data());
+		}
+
 		return 0;
 	default:
 		return 31;
