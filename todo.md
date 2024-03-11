@@ -19,7 +19,7 @@ x.x
 [x] broadcast that chatroom list updated
 [] make sure command permissions are set
 [] make error window
-[] make sure multiple users can join
+[x] make sure multiple users can join
 [] gracefully exit server after "quit"
 [] message character limit
 
