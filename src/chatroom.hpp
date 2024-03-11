@@ -157,6 +157,13 @@ private:
 	int notifyAllChatroomUsersOfResignation(User * user);
 
 	/**
+	 * adds or removes agent from chatroom
+	 *
+	 * action : 'a' for add, 'r' for remove
+	 */
+	int agentAddRemove(const char action, Agent * a);
+
+	/**
 	 * list of users in chatroom
 	 */
 	BF::Atomic<BF::List<User *>> _users;
