@@ -189,6 +189,21 @@ int Interface::windowWriteChatroomList() {
 	return 0;
 }
 
+int InterfaceCraftLobbyUserLine(PayloadUserInfo * userinfo, char * line, User * curruser) {
+	if (!userinfo || !line || !curruser)
+		return 1;
+
+	uuid_t uuid;
+	curruser->getuuid(uuid);
+	if (!uuid_compare(uuid, userinfo->useruuid)) {
+		snprintf(line, 512, "You (%s)", userinfo->username);
+	} else {
+		snprintf(line, 512, "%s", userinfo->username);
+	}
+
+	return 0;
+}
+
 int Interface::windowWriteUserList() {
 	int w, h;
     getmaxyx(this->_displayWin, h, w);
@@ -206,7 +221,7 @@ int Interface::windowWriteUserList() {
 	} else {
 		for (int i = 0; i < size; i++) { 
 			char line[512];
-			snprintf(line, 512, "%s", list[i]->username);
+			InterfaceCraftLobbyUserLine(list[i], line, this->_user.get());
 			mvwprintw(this->_displayWin, row++, (w/2) + 1, line);
 
 			BFFree(list[i]);
