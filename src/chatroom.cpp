@@ -128,6 +128,7 @@ void Chatroom::addRoomToChatrooms(Chatroom * cr) {
 int Chatroom::addMessage(Message * msg) {
 	if (!msg) return 2;
 
+	LOG_DEBUG("adding message: %s", msg->data());
 	// msg count should have a retain count of 1 
 	// so we don't need to retain	
 	this->conversation.get().add(msg);

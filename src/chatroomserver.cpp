@@ -71,7 +71,7 @@ int ChatroomServer::receiveMessagePacket(const Packet * pkt) {
 		
 		// if the agent represents the user we received our packet from,
 		// skip
-		if (a->representsUserWithUUID(pkt->payload.message.useruuid)) {
+		if (!a->representsUserWithUUID(pkt->payload.message.useruuid)) {
 			a->sendPacket(pkt);
 		}
 	}
