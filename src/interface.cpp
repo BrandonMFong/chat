@@ -37,7 +37,7 @@ Interface::Interface() {
 	this->_chatroom = NULL;
 	this->_state = kInterfaceStateUnknown;
 	this->_prevstate = kInterfaceStateUnknown;
-	this->_updatechatroomlist = false;
+	this->_updatelobby = false;
 	this->_updateconversation = false;
 	this->_user = NULL;
 
@@ -61,7 +61,7 @@ Interface * Interface::create(char mode) {
 }
 
 void Interface::chatroomListHasChanged() {
-	this->_updatechatroomlist = true;
+	this->_updatelobby = true;
 }
 
 void Interface::converstaionHasChanged() {
@@ -145,40 +145,74 @@ int Interface::windowWriteConversation() {
 	return 0;
 }
 
-int Interface::windowWriteChatroomList() {
-	this->_updatechatroomlist.lock();
-	if (this->_updatechatroomlist.unsafeget()) {
+int Interface::windowWriteContentLobby() {
+	this->_updatelobby.lock();
+	if (this->_updatelobby.unsafeget()) {
 		BFLockLock(&this->_winlock);
 		this->drawDisplayWindowLobby();
 
-		// print title
-		int row = 1;
-		mvwprintw(this->_displayWin, row++, 1, "Chatrooms:");
-
-		// get list
-		int size = 0;
-		int error = 0;
-		PayloadChatInfo ** list = Chatroom::getChatroomList(&size, &error);
-		if (!list || error) {
-			LOG_DEBUG("could not get list of chatrooms: %d", error);
-		} else {
-
-			// show available rooms
-			for (int i = 0; i < size; i++) { 
-				char line[512];
-				snprintf(line, 512, "(%d) \"%s\"", i+1, list[i]->chatroomname);
-				mvwprintw(this->_displayWin, row++, 1, line);
-
-				BFFree(list[i]);
-			}
-			BFFree(list);
-		}
+		this->windowWriteChatroomList();
+		this->windowWriteUserList();
 
 		wrefresh(this->_displayWin);
-		this->_updatechatroomlist.unsafeset(false);
+		this->_updatelobby.unsafeset(false);
 		BFLockUnlock(&this->_winlock);
 	}
-	this->_updatechatroomlist.unlock();
+	this->_updatelobby.unlock();
+
+	return 0;
+}
+
+int Interface::windowWriteChatroomList() {
+	// print title
+	int row = 1;
+	mvwprintw(this->_displayWin, row++, 1, "Chatrooms:");
+
+	// get list
+	int size = 0;
+	int error = 0;
+	PayloadChatInfo ** list = Chatroom::getChatroomList(&size, &error);
+	if (!list || error) {
+		LOG_DEBUG("could not get list of chatrooms: %d", error);
+	} else {
+
+		// show available rooms
+		for (int i = 0; i < size; i++) { 
+			char line[512];
+			snprintf(line, 512, "(%d) \"%s\"", i+1, list[i]->chatroomname);
+			mvwprintw(this->_displayWin, row++, 1, line);
+
+			BFFree(list[i]);
+		}
+		BFFree(list);
+	}
+	return 0;
+}
+
+int Interface::windowWriteUserList() {
+	int w, h;
+    getmaxyx(this->_displayWin, h, w);
+
+	// print title
+	int row = 1;
+	mvwprintw(this->_displayWin, row++, (w/2) + 1, "Users:");
+
+	// get list
+	int size = 0;
+	int error = 0;
+	PayloadUserInfo ** list = User::getUserList(&size, &error);
+	if (!list || error) {
+		LOG_DEBUG("could not get list of users: %d", error);
+	} else {
+		for (int i = 0; i < size; i++) { 
+			char line[512];
+			snprintf(line, 512, "%s", list[i]->username);
+			mvwprintw(this->_displayWin, row++, (w/2) + 1, line);
+
+			BFFree(list[i]);
+		}
+		BFFree(list);
+	}
 
 	return 0;
 }
@@ -193,7 +227,7 @@ void Interface::displayWindowUpdateThread(void * in) {
 		{
 			case kInterfaceStateLobby:
 			{
-				interface->windowWriteChatroomList();
+				interface->windowWriteContentLobby();
 				break;
 			}
 
@@ -220,10 +254,16 @@ void Interface::displayWindowUpdateThread(void * in) {
 		delwin(this->_headerWin);
 
 int Interface::drawDisplayWindowLobby() {
-	werase(this->_displayWin);
-	box(this->_displayWin, 0, 0);
 	int w, h;
     getmaxyx(this->_displayWin, h, w);
+
+	// clear
+	werase(this->_displayWin);
+
+	// draw a box around window
+	box(this->_displayWin, 0, 0);
+
+	// draw a line down the middle
 	mvwvline(this->_displayWin, 1, w/2, ACS_VLINE, h - 2);
 
 	return 0;
@@ -254,7 +294,7 @@ int Interface::windowCreateModeLobby() {
 	keypad(this->_inputWin, true); // Enable special keys in input window
 	nodelay(this->_inputWin, false); // Set blocking input for input window
 	
-	this->_updatechatroomlist = true;
+	this->_updatelobby = true;
 
 	BFLockUnlock(&this->_winlock);
 

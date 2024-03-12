@@ -53,6 +53,31 @@ void _UserAddUserToUsers(User * user) {
 	users.unlock();
 }
 
+PayloadUserInfo ** User::getUserList(int * size, int * err) {
+	if (!size)
+		return NULL;
+
+	users.lock();
+	*size = users.unsafeget().count();
+	PayloadUserInfo ** result = (PayloadUserInfo **) malloc(
+		sizeof(PayloadUserInfo *) * (*size)
+	);
+	List<User *>::Node * n = users.unsafeget().first();
+	for (int i = 0; n; n = n->next()) {
+		User * u = n->object();
+		if (u) {
+			result[i] = (PayloadUserInfo *) malloc(
+				sizeof(PayloadUserInfo)
+			);
+
+			u->getuserinfo(result[i++]);
+		}
+	}
+
+	users.unlock();
+	return result;
+}
+
 User * User::create(const char * username) {
 	if (!username)
 		return NULL;

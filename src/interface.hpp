@@ -72,7 +72,10 @@ private:
 	static void displayWindowUpdateThread(void * in);
 	int drawDisplayWindowLobby();
 
+	int windowWriteContentLobby();
 	int windowWriteChatroomList();
+	int windowWriteUserList();
+
 	int windowWriteConversation();
 
 	/**
@@ -95,7 +98,7 @@ private:
 	BF::Atomic<InterfaceState> _state;
 	BF::Atomic<InterfaceState> _prevstate;
 	InterfaceState _returnfromhelpstate;
-	BF::Atomic<bool> _updatechatroomlist;
+	BF::Atomic<bool> _updatelobby;
 	BF::Atomic<bool> _updateconversation;
 };
 
