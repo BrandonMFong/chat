@@ -31,6 +31,7 @@ class Interface : public BF::Object {
 	friend class ChatroomServer;
 	friend class ChatroomClient;
 	friend class Chatroom;
+	friend class User;
 public:
 	static Interface * create(char mode);
 
@@ -82,7 +83,8 @@ private:
 	 * process user input
 	 */
 	int processinput(InputBuffer & buf);
-
+	
+	void userListHasChanged();
 	void chatroomListHasChanged();
 	void converstaionHasChanged();
 	

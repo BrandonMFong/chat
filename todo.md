@@ -24,5 +24,6 @@ x.x
 [x] ensure user data is shared when joining server
 [] message character limit
 [] make user list
+[] review for any leaks
 
 
