@@ -52,11 +52,7 @@ void AgentServer::handshake(void * in) {
 	a->sendPacket(&p);
 }
 
-void AgentServer::receivedPayloadTypeNotifyChatroomListChanged(const Packet * pkt) {
-	LOG_DEBUG("this should not be invoked on servers");
-}
-
-void AgentServer::receivedPayloadTypeNotifyQuitApp(const Packet * pkt) {
+int AgentServer::forwardPacket(const Packet * pkt) {
 	Atomic<List<Agent *>> * agents = Agent::agentlist();
 	agents->lock();
 
@@ -69,6 +65,20 @@ void AgentServer::receivedPayloadTypeNotifyQuitApp(const Packet * pkt) {
 		}
 	}
 
+	agents->unlock();
+
+	return 0;
+}
+
+void AgentServer::receivedPayloadTypeNotifyChatroomListChanged(const Packet * pkt) {
+	LOG_DEBUG("this should not be invoked on servers");
+}
+
+void AgentServer::receivedPayloadTypeNotifyQuitApp(const Packet * pkt) {
+	this->forwardPacket(pkt);
+
+	Atomic<List<Agent *>> * agents = Agent::agentlist();
+	agents->lock();
 	// removes from list
 	agents->unsafeget().pluckObject(this);
 
@@ -83,23 +93,19 @@ void AgentServer::receivedPayloadTypeNotifyQuitApp(const Packet * pkt) {
 	agents->unlock();
 }
 
+void AgentServer::receivedPayloadTypeRequestInfo(const Packet * pkt) {
+	// let base class send back our info
+	this->Agent::receivedPayloadTypeRequestInfo(pkt);
+
+	// send this info request to the other agents
+	this->forwardPacket(pkt);
+}
+
 void AgentServer::receivedPayloadTypeUserInfo(const Packet * pkt) {
 	// let base class create user 
 	this->Agent::receivedPayloadTypeUserInfo(pkt);
 
-	Atomic<List<Agent *>> * agents = Agent::agentlist();
-	agents->lock();
-
-	// forward packet to the other clients
-	List<Agent *>::Node * n = agents->unsafeget().first();
-	for (; n; n = n->next()) {
-		Agent * a = n->object();
-		if (a != this) {
-			a->sendPacket(pkt);
-		}
-	}
-
-	agents->unlock();
+	this->forwardPacket(pkt);
 }
 
 bool AgentServer::representsUserWithUUID(const uuid_t uuid) {

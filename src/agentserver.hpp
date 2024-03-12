@@ -35,10 +35,13 @@ private:
 
 	virtual void receivedPayloadTypeNotifyChatroomListChanged(const Packet * pkt);
 	virtual void receivedPayloadTypeNotifyQuitApp(const Packet * pkt);
+	virtual void receivedPayloadTypeRequestInfo(const Packet * pkt);
 	virtual void receivedPayloadTypeUserInfo(const Packet * pkt);
 
 	virtual bool representsUserWithUUID(const uuid_t uuid);
 	virtual void updateremoteuser(const PayloadUserInfo * info);
+
+	int forwardPacket(const Packet * pkt);
 
 	/**
 	 * the remote user we represent
