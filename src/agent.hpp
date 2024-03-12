@@ -58,6 +58,8 @@ public:
 	virtual int start() = 0;
 
 	/**
+	 * sends pkt to the socket connection we are assigned to
+	 *
 	 * pkt : is copied
 	 */
 	int sendPacket(const Packet * pkt);
@@ -69,8 +71,16 @@ public:
 
 	/**
 	 * the remote user we are representing
+	 *
+	 * since an agent can represent more than one user,
+	 * we require the caller to know what user they are looking 
+	 * for
 	 */
-	User * user();
+	virtual User * getremoteuser(uuid_t uuid) = 0;
+
+	virtual void setremoteuser(User * user) = 0;
+	
+	virtual bool representsUserWithUUID(const uuid_t uuid) = 0;
 
 protected:
 
@@ -93,7 +103,7 @@ private:
 	void receivedPayloadTypeChatroomInfo(const Packet * pkt);
 	void receivedPayloadTypeChatroomEnrollment(const Packet * pkt);
 	virtual void receivedPayloadTypeNotifyChatroomListChanged(const Packet * pkt) = 0;
-	void requestPayloadTypeChatroomResignation(const Packet * pkt);
+	void receivedPayloadTypeChatroomResignation(const Packet * pkt);
 	
 	/**
 	 * required by agent servers and clients
@@ -107,7 +117,7 @@ private:
 	 * function retains the agent and releases it before returning from function.
 	 * This ensures memory can be safely accessed and is appropriately cleaned up
 	 */
-	virtual void requestPayloadTypeNotifyQuitApp(const Packet * pkt) = 0;
+	virtual void receivedPayloadTypeNotifyQuitApp(const Packet * pkt) = 0;
 
 	/*
 	 * socket connection
@@ -124,16 +134,6 @@ private:
 	 */
 	static Agent * getAgentForConnection(SocketConnection * sc);
 
-	/**
-	 * the remote user we represent
-	 *
-	 * this doesn't provide a deep representation
-	 * of the actual remote user. This object should
-	 * hold enough information to work with
-	 *
-	 * See class header for more info
-	 */
-	User * _remoteuser;
 };
 
 #endif // AGENT_HPP

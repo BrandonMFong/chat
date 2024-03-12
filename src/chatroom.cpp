@@ -34,7 +34,6 @@ void _ChatroomReleaseAgent(Agent * a) {
 	BFRelease(a);
 }
 
-
 Chatroom::Chatroom() : Object() {
 	uuid_generate_random(this->_uuid);
 	memset(this->_name, 0, sizeof(this->_name));
@@ -129,6 +128,7 @@ void Chatroom::addRoomToChatrooms(Chatroom * cr) {
 int Chatroom::addMessage(Message * msg) {
 	if (!msg) return 2;
 
+	LOG_DEBUG("adding message: %s", msg->data());
 	// msg count should have a retain count of 1 
 	// so we don't need to retain	
 	this->conversation.get().add(msg);
@@ -141,49 +141,7 @@ void Chatroom::getuuid(uuid_t uuid) {
 	uuid_copy(uuid, this->_uuid);
 }
 
-int Chatroom::notifyAllServerUsersOfEnrollment(User * user) {
-	Packet p;
-	memset(&p, 0, sizeof(p));
-	PacketSetHeader(&p, kPayloadTypeChatroomEnrollment);
-
-	PayloadChatEnrollment enrollment;
-	this->getuuid(enrollment.chatroomuuid);
-	user->getuuid(enrollment.useruuid);
-	PacketSetPayload(&p, &enrollment);
-
-	// add user to list
-	this->_users.lock();
-	if (!this->_users.unsafeget().contains(user)) {
-		BFRetain(user);
-		this->_users.unsafeget().add(user);
-	}
-	this->_users.unlock();
-
-	// send to all users on server that a user joined a chatroom
-	return Agent::broadcast(&p);
-}
-
-int Chatroom::notifyAllServerUsersOfResignation(User * user) {
-	Packet p;
-	memset(&p, 0, sizeof(p));
-	PacketSetHeader(&p, kPayloadTypeChatroomResignation);
-
-	PayloadChatEnrollment enrollment;
-	this->getuuid(enrollment.chatroomuuid);
-	user->getuuid(enrollment.useruuid);
-	PacketSetPayload(&p, &enrollment);
-
-	// add user to list
-	this->_users.lock();
-	this->_users.unsafeget().pluckObject(user);
-	BFRelease(user);
-	this->_users.unlock();
-
-	// send to all users on server that a user joined a chatroom
-	return Agent::broadcast(&p);
-}
-
-int Chatroom::sendBufferWithType(PayloadMessageType type, const InputBuffer & buf) {
+int Chatroom::sendBuffer(PayloadMessageType type, User * user, const InputBuffer & buf) {
 	Packet p;
 	memset(&p, 0, sizeof(p));
 
@@ -199,12 +157,12 @@ int Chatroom::sendBufferWithType(PayloadMessageType type, const InputBuffer & bu
 	// username
 	strncpy(
 		p.payload.message.username,
-		Interface::current()->getuser()->username(),
+		user->username(),
 		sizeof(p.payload.message.username)
 	);
 
 	// user uuid
-	Interface::current()->getuser()->getuuid(p.payload.message.useruuid);	
+	user->getuuid(p.payload.message.useruuid);	
 
 	// chatroom uuid
 	uuid_copy(p.payload.message.chatuuid, this->_uuid);
@@ -223,15 +181,43 @@ int Chatroom::sendBufferWithType(PayloadMessageType type, const InputBuffer & bu
 }
 
 int Chatroom::sendBuffer(const InputBuffer & buf) {
-	return this->sendBufferWithType(kPayloadMessageTypeData, buf);
+	return this->sendBuffer(kPayloadMessageTypeData, Interface::current()->getuser(), buf);
 }
 
 int Chatroom::notifyAllChatroomUsersOfEnrollment(User * user) {
-	return this->sendBufferWithType(kPayloadMessageTypeUserJoined, "");
+	return this->sendBuffer(kPayloadMessageTypeUserJoined, user, "");
+}
+
+int Chatroom::notifyAllServerUsersOfEnrollment(User * user) {
+	Packet p;
+	memset(&p, 0, sizeof(p));
+	PacketSetHeader(&p, kPayloadTypeChatroomEnrollment);
+
+	PayloadChatEnrollment enrollment;
+	this->getuuid(enrollment.chatroomuuid);
+	user->getuuid(enrollment.useruuid);
+	PacketSetPayload(&p, &enrollment);
+
+	// send to all users on server that a user joined a chatroom
+	return Agent::broadcast(&p);
 }
 
 int Chatroom::notifyAllChatroomUsersOfResignation(User * user) {
-	return this->sendBufferWithType(kPayloadMessageTypeUserLeft, "");
+	return this->sendBuffer(kPayloadMessageTypeUserLeft, user, "");
+}
+
+int Chatroom::notifyAllServerUsersOfResignation(User * user) {
+	Packet p;
+	memset(&p, 0, sizeof(p));
+	PacketSetHeader(&p, kPayloadTypeChatroomResignation);
+
+	PayloadChatEnrollment enrollment;
+	this->getuuid(enrollment.chatroomuuid);
+	user->getuuid(enrollment.useruuid);
+	PacketSetPayload(&p, &enrollment);
+
+	// send to all users on server that a user joined a chatroom
+	return Agent::broadcast(&p);
 }
 
 int Chatroom::enroll(User * user) {
@@ -239,6 +225,16 @@ int Chatroom::enroll(User * user) {
 
 	if (!error) {
 		error = this->notifyAllChatroomUsersOfEnrollment(user);
+	}
+
+	if (!error) {
+		// add user to list
+		this->_users.lock();
+		if (!this->_users.unsafeget().contains(user)) {
+			BFRetain(user);
+			this->_users.unsafeget().add(user);
+		}
+		this->_users.unlock();
 	}
 
 	return error;
@@ -251,52 +247,71 @@ int Chatroom::resign(User * user) {
 		error = this->notifyAllChatroomUsersOfResignation(user);
 	}
 
+	if (!error) {
+		// add user to list
+		this->_users.lock();
+		this->_users.unsafeget().pluckObject(user);
+		BFRelease(user);
+		this->_users.unlock();
+	}
+
 	return error;
 }
 
 int Chatroom::agentAddRemove(const char action, Agent * a) {
 	int error = 0;
-	// add user from agent to list
-	this->_users.lock();
+	// finally add agent to list
+	this->_agents.lock();
 	if (action == 'a') {
-		if (!this->_users.unsafeget().contains(a->user())) {
-			BFRetain(a->user());
-			error = this->_users.unsafeget().add(a->user());
+		if (!this->_agents.unsafeget().contains(a)) {
+			error = this->_agents.unsafeget().add(a);
+			BFRetain(a);
 		}
 	} else if (action == 'r') {
-		if (this->_users.unsafeget().contains(a->user())) {
-			Object::release(a->user());
-			error = this->_users.unsafeget().pluckObject(a->user());
+		if (this->_agents.unsafeget().contains(a)) {
+			error = this->_agents.unsafeget().pluckObject(a);
+			BFRelease(a);
 		}
 	}
-	this->_users.unlock();
-
-	// finally add agent to list
-	if (!error) {
-		this->_agents.lock();
-		if (action == 'a') {
-			if (!this->_agents.unsafeget().contains(a)) {
-				error = this->_agents.unsafeget().add(a);
-				BFRetain(a);
-			}
-		} else if (action == 'r') {
-			if (this->_agents.unsafeget().contains(a)) {
-				error = this->_agents.unsafeget().pluckObject(a);
-				BFRelease(a);
-			}
-		}
-		this->_agents.unlock();
-	}
+	this->_agents.unlock();
 
 	return error;
 }
+
+int Chatroom::userAddRemove(const char action, User * user) {
+	int error = 0;
+	// add user from agent to list
+	this->_users.lock();
+	if (action == 'a') {
+		if (!this->_users.unsafeget().contains(user)) {
+			error = this->_users.unsafeget().add(user);
+			BFRetain(user);
+		}
+	} else if (action == 'r') {
+		if (this->_users.unsafeget().contains(user)) {
+			error = this->_users.unsafeget().pluckObject(user);
+			BFRelease(user);
+		}
+	}
+	this->_users.unlock();
+	return error;
+}
+
 
 int Chatroom::addAgent(Agent * a) {
 	return this->agentAddRemove('a', a);
 }
 
+int Chatroom::addUser(User * u) {
+	return this->userAddRemove('a', u);
+}
+
 int Chatroom::removeAgent(Agent * a) {
 	return this->agentAddRemove('r', a);
+}
+
+int Chatroom::removeUser(User * u) {
+	return this->userAddRemove('r', u);
 }
 
 int Chatroom::receiveMessagePacket(const Packet * pkt) {

@@ -15,6 +15,8 @@
  */
 class User : public BF::Object {
 public:
+	static User * getuser(const uuid_t uuid);
+
 	/**
 	 * creates a new user
 	 *

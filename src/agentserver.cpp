@@ -7,16 +7,25 @@
 #include "log.hpp"
 #include "connection.hpp"
 #include "socket.hpp"
+#include "user.hpp"
 #include <bflibcpp/bflibcpp.hpp>
 
 using namespace BF;
 
 AgentServer::AgentServer() {
-
+	this->_remoteuser = NULL;
 }
 
 AgentServer::~AgentServer() {
+	BFRelease(this->_remoteuser);
+}
 
+User * AgentServer::getremoteuser(uuid_t uuid) {
+	return this->_remoteuser;
+}
+
+void AgentServer::setremoteuser(User * user) {
+	this->_remoteuser = user;
 }
 
 int AgentServer::start() {
@@ -47,7 +56,7 @@ void AgentServer::receivedPayloadTypeNotifyChatroomListChanged(const Packet * pk
 	LOG_DEBUG("this should not be invoked on servers");
 }
 
-void AgentServer::requestPayloadTypeNotifyQuitApp(const Packet * pkt) {
+void AgentServer::receivedPayloadTypeNotifyQuitApp(const Packet * pkt) {
 	Atomic<List<Agent *>> * agents = Agent::agentlist();
 	agents->lock();
 
@@ -69,5 +78,37 @@ void AgentServer::requestPayloadTypeNotifyQuitApp(const Packet * pkt) {
 	Object::release(this);
 
 	agents->unlock();
+}
+
+void AgentServer::receivedPayloadTypeUserInfo(const Packet * pkt) {
+	// let base class create user 
+	this->Agent::receivedPayloadTypeUserInfo(pkt);
+
+	Atomic<List<Agent *>> * agents = Agent::agentlist();
+	agents->lock();
+
+	// forward packet to the other clients
+	List<Agent *>::Node * n = agents->unsafeget().first();
+	for (; n; n = n->next()) {
+		Agent * a = n->object();
+		if (a != this) {
+			a->sendPacket(pkt);
+		}
+	}
+
+	agents->unlock();
+}
+
+bool AgentServer::representsUserWithUUID(const uuid_t uuid) {
+	uuid_t u;
+	this->_remoteuser->getuuid(u);
+	if (!uuid_compare(u, uuid)) {
+		return true;
+	}
+	
+	LOG_DEBUG("%s", __func__);
+	LOG_DEBUG("couldn't find user: %s", uuid);
+
+	return false;
 }
 

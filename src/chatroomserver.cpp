@@ -51,6 +51,7 @@ int ChatroomServer::sendPacket(const Packet * pkt) {
 	List<Agent *>::Node * n = this->_agents.unsafeget().first();
 	for (; n; n = n->next()) {
 		Agent * a = n->object();
+		LOG_DEBUG("sending packet to agent");
 		a->sendPacket(pkt);
 	}
 	this->_agents.unlock();
@@ -68,12 +69,9 @@ int ChatroomServer::receiveMessagePacket(const Packet * pkt) {
 	for (; n; n = n->next()) {
 		Agent * a = n->object();
 		
-		uuid_t uuid;
-		a->user()->getuuid(uuid);
-
 		// if the agent represents the user we received our packet from,
 		// skip
-		if (uuid_compare(uuid, pkt->payload.message.useruuid)) {
+		if (!a->representsUserWithUUID(pkt->payload.message.useruuid)) {
 			a->sendPacket(pkt);
 		}
 	}

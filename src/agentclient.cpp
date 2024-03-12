@@ -18,12 +18,42 @@ using namespace BF;
 
 Atomic<AgentClient *> agentclientmain;
 
-AgentClient::AgentClient() : Agent() {
+void _AgentClientReleaseUser(User * user) {
+	BFRelease(user);
+}
 
+AgentClient::AgentClient() : Agent() {
+	this->_remoteusers.get().setReleaseCallback(_AgentClientReleaseUser);
 }
 
 AgentClient::~AgentClient() {
 
+}
+
+User * AgentClient::getremoteuser(uuid_t uuid) {
+	User * result = NULL;
+	this->_remoteusers.lock();
+	List<User *>::Node * n = this->_remoteusers.unsafeget().first();
+	for(; n; n = n->next()) {
+		User * user = n->object();
+		uuid_t u;
+		user->getuuid(u);
+		if (!uuid_compare(u, uuid)) {
+			result = user;
+			break;
+		}
+	}
+	this->_remoteusers.unlock();
+
+	return result;
+}
+
+void AgentClient::setremoteuser(User * user) {
+	this->_remoteusers.lock();
+	if (!this->_remoteusers.unsafeget().contains(user)) {
+		this->_remoteusers.unsafeget().add(user);
+	}
+	this->_remoteusers.unlock();
 }
 
 int AgentClient::start() {
@@ -75,7 +105,25 @@ void AgentClient::receivedPayloadTypeNotifyChatroomListChanged(const Packet * pk
 	this->sendPacket(&p);
 }
 
-void AgentClient::requestPayloadTypeNotifyQuitApp(const Packet * pkt) {
-// does nothing
+void AgentClient::receivedPayloadTypeNotifyQuitApp(const Packet * pkt) {
+// TODO: remove user
+}
+
+bool AgentClient::representsUserWithUUID(const uuid_t uuid) {
+	bool result = false;
+	this->_remoteusers.lock();
+	List<User *>::Node * n = this->_remoteusers.unsafeget().first();
+	for(; n; n = n->next()) {
+		User * user = n->object();
+		uuid_t u;
+		user->getuuid(u);
+		if (!uuid_compare(u, uuid)) {
+			result = true;
+			break;
+		}
+	}
+	this->_remoteusers.unlock();
+
+	return result;
 }
 

@@ -34,12 +34,10 @@ void _AgentReleaseAgent(Agent * a) {
 
 Agent::Agent() {
 	this->_sc = NULL;
-	this->_remoteuser = NULL;
 }
 
 Agent::~Agent() {
 	this->_sc = NULL; // we don't own memory
-	BFRelease(this->_remoteuser);
 }
 
 Agent * Agent::create(SocketConnection * sc) {
@@ -148,20 +146,22 @@ void Agent::receivedPayloadTypeRequestInfo(const Packet * pkt) {
 	this->sendPacket(&p);
 }
 
-User * Agent::user() {
-	return this->_remoteuser;
-}
-
 // incoming user info to save
+//
+// this can be used if users wants to update their info for
+// some reason
 void Agent::receivedPayloadTypeUserInfo(const Packet * pkt) {
 	if (!pkt)
 		return;
 
 	// save user and save a record of the user
 	// 
-	// user is returned from create with retain count 2. We
-	// will own this object and release it in our destructor
-	this->_remoteuser = User::create(&pkt->payload.userinfo);
+	// user is returned from create with retain count 2 
+	// because the user class and this object owns it. We
+	// will own this object and release it in our destructor.
+	User * user = User::create(&pkt->payload.userinfo);
+
+	this->setremoteuser(user);
 }
 
 void Agent::receivedPayloadTypeRequestAvailableChatrooms(const Packet * pkt) {
@@ -202,24 +202,22 @@ void Agent::receivedPayloadTypeChatroomInfo(const Packet * pkt) {
 	if (!pkt)
 		return;
 	
-	ChatroomClient::recordChatroom(&pkt->payload.chatinfo, (AgentClient *) this);
+	ChatroomClient::recordChatroom(&pkt->payload.chatinfo, this);
 }
 
 void Agent::receivedPayloadTypeChatroomEnrollment(const Packet * pkt) {
 	if (!pkt)
 		return;
 
-	// compare user record
-	//
-	// we want to make sure that we are representing the user that
-	// is trying to enroll
-	uuid_t uuid;
-	this->_remoteuser->getuuid(uuid);
-	if (uuid_compare(uuid, pkt->payload.enrollment.useruuid)) {
+	if (!this->representsUserWithUUID(pkt->payload.enrollment.useruuid)) {
+		LOG_DEBUG("%s", __func__);
 		LOG_DEBUG("couldn't find user: %s",
 			pkt->payload.enrollment.useruuid);
 		return;
 	}
+
+	// get user with the uuid I got from the packet
+	User * user = User::getuser(pkt->payload.enrollment.useruuid);
 
 	// get chatroom
 	Chatroom * chatroom = Chatroom::getChatroom(
@@ -234,24 +232,23 @@ void Agent::receivedPayloadTypeChatroomEnrollment(const Packet * pkt) {
 
 	BFRetain(chatroom);
 	chatroom->addAgent(this);
+	chatroom->addUser(user);
 	BFRelease(chatroom);
 }
 
-void Agent::requestPayloadTypeChatroomResignation(const Packet * pkt) {
+void Agent::receivedPayloadTypeChatroomResignation(const Packet * pkt) {
 	if (!pkt)
 		return;
 
-	// compare user record
-	//
-	// we want to make sure that we are representing the user that
-	// is trying to enroll
-	uuid_t uuid;
-	this->_remoteuser->getuuid(uuid);
-	if (uuid_compare(uuid, pkt->payload.enrollment.useruuid)) {
+	if (!this->representsUserWithUUID(pkt->payload.enrollment.useruuid)) {
+		LOG_DEBUG("%s", __func__);
 		LOG_DEBUG("couldn't find user: %s",
 			pkt->payload.enrollment.useruuid);
 		return;
 	}
+
+	// get user with the uuid I got from the packet
+	User * user = User::getuser(pkt->payload.enrollment.useruuid);
 
 	// get chatroom
 	Chatroom * chatroom = Chatroom::getChatroom(
@@ -266,6 +263,7 @@ void Agent::requestPayloadTypeChatroomResignation(const Packet * pkt) {
 
 	BFRetain(chatroom);
 	chatroom->removeAgent(this);
+	chatroom->removeUser(user);
 	BFRelease(chatroom);
 }
 
@@ -303,10 +301,10 @@ void Agent::packetReceive(SocketConnection * sc, const void * buf, size_t size) 
 		agent->receivedPayloadTypeNotifyChatroomListChanged(p);
 		break;
 	case kPayloadTypeChatroomResignation:
-		agent->requestPayloadTypeChatroomResignation(p);
+		agent->receivedPayloadTypeChatroomResignation(p);
 		break;
 	case kPayloadTypeNotifyQuitApp:
-		agent->requestPayloadTypeNotifyQuitApp(p);
+		agent->receivedPayloadTypeNotifyQuitApp(p);
 		break;
 	}
 

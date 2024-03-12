@@ -7,6 +7,7 @@
 #include "chatroom_tests.hpp"
 #include "message_tests.hpp"
 #include "command_tests.hpp"
+#include "agent_tests.hpp"
 #include "log.hpp"
 
 LOG_INIT
@@ -18,6 +19,7 @@ int main() {
 	LAUNCH_TEST_SET(chatroom_tests);
 	LAUNCH_TEST_SET(message_tests);
 	LAUNCH_TEST_SET(command_tests);
+	LAUNCH_TEST_SET(agent_tests);
 
 	TEST_SUITE_END;
 
