@@ -87,8 +87,11 @@ private:
 	void userListHasChanged();
 	void chatroomListHasChanged();
 	void converstaionHasChanged();
-	
+
+	// might be wise to ensure we lock this 
+	// before locking other objects
 	BFLock _winlock;
+
 	WINDOW * _inputWin;
 	WINDOW * _displayWin;
 	WINDOW * _headerWin;
