@@ -31,10 +31,7 @@ public:
 	 */
 	int requestChatroomListUpdate(const User * user);
 
-	/*
-	virtual User * user();
-	*/
-	virtual void setRemoteUser(User * user);
+	virtual void setremoteuser(User * user);
 	
 	virtual User * getremoteuser(uuid_t uuid);
 

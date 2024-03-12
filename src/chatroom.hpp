@@ -175,7 +175,7 @@ private:
 	/**
 	 * sends buf with a type
 	 */
-	int sendBufferWithType(PayloadMessageType type, const InputBuffer & buf);
+	int sendBuffer(PayloadMessageType type, User * user, const InputBuffer & buf);
 
 	/**
 	 * list of users in chatroom

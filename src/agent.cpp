@@ -161,7 +161,7 @@ void Agent::receivedPayloadTypeUserInfo(const Packet * pkt) {
 	// will own this object and release it in our destructor.
 	User * user = User::create(&pkt->payload.userinfo);
 
-	this->setRemoteUser(user);
+	this->setremoteuser(user);
 }
 
 void Agent::receivedPayloadTypeRequestAvailableChatrooms(const Packet * pkt) {
@@ -202,27 +202,15 @@ void Agent::receivedPayloadTypeChatroomInfo(const Packet * pkt) {
 	if (!pkt)
 		return;
 	
-	ChatroomClient::recordChatroom(&pkt->payload.chatinfo);
+	ChatroomClient::recordChatroom(&pkt->payload.chatinfo, this);
 }
 
 void Agent::receivedPayloadTypeChatroomEnrollment(const Packet * pkt) {
 	if (!pkt)
 		return;
 
-	// compare user record
-	//
-	// we want to make sure that we are representing the user that
-	// is trying to enroll
-	/*
-	uuid_t uuid;
-	this->user()->getuuid(uuid);
-	if (uuid_compare(uuid, pkt->payload.enrollment.useruuid)) {
-		LOG_DEBUG("couldn't find user: %s",
-			pkt->payload.enrollment.useruuid);
-		return;
-	}
-	*/
 	if (!this->representsUserWithUUID(pkt->payload.enrollment.useruuid)) {
+		LOG_DEBUG("%s", __func__);
 		LOG_DEBUG("couldn't find user: %s",
 			pkt->payload.enrollment.useruuid);
 		return;
@@ -253,6 +241,7 @@ void Agent::receivedPayloadTypeChatroomResignation(const Packet * pkt) {
 		return;
 
 	if (!this->representsUserWithUUID(pkt->payload.enrollment.useruuid)) {
+		LOG_DEBUG("%s", __func__);
 		LOG_DEBUG("couldn't find user: %s",
 			pkt->payload.enrollment.useruuid);
 		return;

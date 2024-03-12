@@ -51,6 +51,7 @@ int ChatroomServer::sendPacket(const Packet * pkt) {
 	List<Agent *>::Node * n = this->_agents.unsafeget().first();
 	for (; n; n = n->next()) {
 		Agent * a = n->object();
+		LOG_DEBUG("sending packet to agent");
 		a->sendPacket(pkt);
 	}
 	this->_agents.unlock();

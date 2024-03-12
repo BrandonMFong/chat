@@ -78,7 +78,7 @@ public:
 	 */
 	virtual User * getremoteuser(uuid_t uuid) = 0;
 
-	virtual void setRemoteUser(User * user) = 0;
+	virtual void setremoteuser(User * user) = 0;
 	
 	virtual bool representsUserWithUUID(const uuid_t uuid) = 0;
 

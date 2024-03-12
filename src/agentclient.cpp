@@ -18,8 +18,12 @@ using namespace BF;
 
 Atomic<AgentClient *> agentclientmain;
 
-AgentClient::AgentClient() : Agent() {
+void _AgentClientReleaseUser(User * user) {
+	BFRelease(user);
+}
 
+AgentClient::AgentClient() : Agent() {
+	this->_remoteusers.get().setReleaseCallback(_AgentClientReleaseUser);
 }
 
 AgentClient::~AgentClient() {
@@ -44,8 +48,12 @@ User * AgentClient::getremoteuser(uuid_t uuid) {
 	return result;
 }
 
-void AgentClient::setRemoteUser(User * user) {
-
+void AgentClient::setremoteuser(User * user) {
+	this->_remoteusers.lock();
+	if (!this->_remoteusers.unsafeget().contains(user)) {
+		this->_remoteusers.unsafeget().add(user);
+	}
+	this->_remoteusers.unlock();
 }
 
 int AgentClient::start() {

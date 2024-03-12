@@ -27,7 +27,8 @@ int test_chatroominitclient() {
 	uuid_t u;
 	uuid_generate_random(u);	
 
-	ChatroomClient chatroom(u);
+	AgentClient ac;
+	ChatroomClient chatroom(u, &ac);
 
 	UNIT_TEST_END(!result, result);
 	return result;

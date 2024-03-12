@@ -140,49 +140,7 @@ void Chatroom::getuuid(uuid_t uuid) {
 	uuid_copy(uuid, this->_uuid);
 }
 
-int Chatroom::notifyAllServerUsersOfEnrollment(User * user) {
-	Packet p;
-	memset(&p, 0, sizeof(p));
-	PacketSetHeader(&p, kPayloadTypeChatroomEnrollment);
-
-	PayloadChatEnrollment enrollment;
-	this->getuuid(enrollment.chatroomuuid);
-	user->getuuid(enrollment.useruuid);
-	PacketSetPayload(&p, &enrollment);
-
-	// add user to list
-	this->_users.lock();
-	if (!this->_users.unsafeget().contains(user)) {
-		BFRetain(user);
-		this->_users.unsafeget().add(user);
-	}
-	this->_users.unlock();
-
-	// send to all users on server that a user joined a chatroom
-	return Agent::broadcast(&p);
-}
-
-int Chatroom::notifyAllServerUsersOfResignation(User * user) {
-	Packet p;
-	memset(&p, 0, sizeof(p));
-	PacketSetHeader(&p, kPayloadTypeChatroomResignation);
-
-	PayloadChatEnrollment enrollment;
-	this->getuuid(enrollment.chatroomuuid);
-	user->getuuid(enrollment.useruuid);
-	PacketSetPayload(&p, &enrollment);
-
-	// add user to list
-	this->_users.lock();
-	this->_users.unsafeget().pluckObject(user);
-	BFRelease(user);
-	this->_users.unlock();
-
-	// send to all users on server that a user joined a chatroom
-	return Agent::broadcast(&p);
-}
-
-int Chatroom::sendBufferWithType(PayloadMessageType type, const InputBuffer & buf) {
+int Chatroom::sendBuffer(PayloadMessageType type, User * user, const InputBuffer & buf) {
 	Packet p;
 	memset(&p, 0, sizeof(p));
 
@@ -198,12 +156,12 @@ int Chatroom::sendBufferWithType(PayloadMessageType type, const InputBuffer & bu
 	// username
 	strncpy(
 		p.payload.message.username,
-		Interface::current()->getuser()->username(),
+		user->username(),
 		sizeof(p.payload.message.username)
 	);
 
 	// user uuid
-	Interface::current()->getuser()->getuuid(p.payload.message.useruuid);	
+	user->getuuid(p.payload.message.useruuid);	
 
 	// chatroom uuid
 	uuid_copy(p.payload.message.chatuuid, this->_uuid);
@@ -222,15 +180,43 @@ int Chatroom::sendBufferWithType(PayloadMessageType type, const InputBuffer & bu
 }
 
 int Chatroom::sendBuffer(const InputBuffer & buf) {
-	return this->sendBufferWithType(kPayloadMessageTypeData, buf);
+	return this->sendBuffer(kPayloadMessageTypeData, Interface::current()->getuser(), buf);
 }
 
 int Chatroom::notifyAllChatroomUsersOfEnrollment(User * user) {
-	return this->sendBufferWithType(kPayloadMessageTypeUserJoined, "");
+	return this->sendBuffer(kPayloadMessageTypeUserJoined, user, "");
+}
+
+int Chatroom::notifyAllServerUsersOfEnrollment(User * user) {
+	Packet p;
+	memset(&p, 0, sizeof(p));
+	PacketSetHeader(&p, kPayloadTypeChatroomEnrollment);
+
+	PayloadChatEnrollment enrollment;
+	this->getuuid(enrollment.chatroomuuid);
+	user->getuuid(enrollment.useruuid);
+	PacketSetPayload(&p, &enrollment);
+
+	// send to all users on server that a user joined a chatroom
+	return Agent::broadcast(&p);
 }
 
 int Chatroom::notifyAllChatroomUsersOfResignation(User * user) {
-	return this->sendBufferWithType(kPayloadMessageTypeUserLeft, "");
+	return this->sendBuffer(kPayloadMessageTypeUserLeft, user, "");
+}
+
+int Chatroom::notifyAllServerUsersOfResignation(User * user) {
+	Packet p;
+	memset(&p, 0, sizeof(p));
+	PacketSetHeader(&p, kPayloadTypeChatroomResignation);
+
+	PayloadChatEnrollment enrollment;
+	this->getuuid(enrollment.chatroomuuid);
+	user->getuuid(enrollment.useruuid);
+	PacketSetPayload(&p, &enrollment);
+
+	// send to all users on server that a user joined a chatroom
+	return Agent::broadcast(&p);
 }
 
 int Chatroom::enroll(User * user) {
@@ -238,6 +224,16 @@ int Chatroom::enroll(User * user) {
 
 	if (!error) {
 		error = this->notifyAllChatroomUsersOfEnrollment(user);
+	}
+
+	if (!error) {
+		// add user to list
+		this->_users.lock();
+		if (!this->_users.unsafeget().contains(user)) {
+			BFRetain(user);
+			this->_users.unsafeget().add(user);
+		}
+		this->_users.unlock();
 	}
 
 	return error;
@@ -248,6 +244,14 @@ int Chatroom::resign(User * user) {
 
 	if (!error) {
 		error = this->notifyAllChatroomUsersOfResignation(user);
+	}
+
+	if (!error) {
+		// add user to list
+		this->_users.lock();
+		this->_users.unsafeget().pluckObject(user);
+		BFRelease(user);
+		this->_users.unlock();
 	}
 
 	return error;
