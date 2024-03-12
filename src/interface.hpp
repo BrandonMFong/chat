@@ -31,6 +31,7 @@ class Interface : public BF::Object {
 	friend class ChatroomServer;
 	friend class ChatroomClient;
 	friend class Chatroom;
+	friend class User;
 public:
 	static Interface * create(char mode);
 
@@ -70,19 +71,27 @@ private:
 	int windowCreateModeLobby();
 	int windowCreateModeCreateChatroom();
 	static void displayWindowUpdateThread(void * in);
+	int drawDisplayWindowLobby();
 
+	int windowWriteContentLobby();
 	int windowWriteChatroomList();
+	int windowWriteUserList();
+
 	int windowWriteConversation();
 
 	/**
 	 * process user input
 	 */
 	int processinput(InputBuffer & buf);
-
+	
+	void userListHasChanged();
 	void chatroomListHasChanged();
 	void converstaionHasChanged();
-	
+
+	// might be wise to ensure we lock this 
+	// before locking other objects
 	BFLock _winlock;
+
 	WINDOW * _inputWin;
 	WINDOW * _displayWin;
 	WINDOW * _headerWin;
@@ -94,7 +103,7 @@ private:
 	BF::Atomic<InterfaceState> _state;
 	BF::Atomic<InterfaceState> _prevstate;
 	InterfaceState _returnfromhelpstate;
-	BF::Atomic<bool> _updatechatroomlist;
+	BF::Atomic<bool> _updatelobby;
 	BF::Atomic<bool> _updateconversation;
 };
 

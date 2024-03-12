@@ -95,6 +95,8 @@ protected:
 	 * returns agent list
 	 */
 	static BF::Atomic<BF::List<Agent *>> * agentlist();
+	
+	virtual void updateremoteuser(const PayloadUserInfo * info) = 0;
 
 private:
 
@@ -112,6 +114,9 @@ private:
 	 *
 	 * the agent server will remove itself from the agent list, thus releasing
 	 * itself from memory.
+	 *
+	 * agent will also release the user memory from everywhere (even
+	 * the user internals)
 	 *
 	 * Note when this function is called, retain count is 2. The `packetReceive`
 	 * function retains the agent and releases it before returning from function.

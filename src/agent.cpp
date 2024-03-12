@@ -154,14 +154,17 @@ void Agent::receivedPayloadTypeUserInfo(const Packet * pkt) {
 	if (!pkt)
 		return;
 
-	// save user and save a record of the user
-	// 
-	// user is returned from create with retain count 2 
-	// because the user class and this object owns it. We
-	// will own this object and release it in our destructor.
-	User * user = User::create(&pkt->payload.userinfo);
-
-	this->setremoteuser(user);
+	if (this->representsUserWithUUID(pkt->payload.userinfo.useruuid)) {
+		this->updateremoteuser(&pkt->payload.userinfo);
+	} else {
+		// save user and save a record of the user
+		// 
+		// user is returned from create with retain count 2 
+		// because the user class and this object owns it. We
+		// will own this object and release it in our destructor.
+		User * user = User::create(&pkt->payload.userinfo);
+		this->setremoteuser(user);
+	}
 }
 
 void Agent::receivedPayloadTypeRequestAvailableChatrooms(const Packet * pkt) {

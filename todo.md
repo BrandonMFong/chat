@@ -21,7 +21,9 @@ x.x
 [] make error window
 [x] make sure multiple users can join
 [] gracefully exit server after "quit"
-[] ensure user data is shared when joining server
+[x] ensure user data is shared when joining server
 [] message character limit
+[x] make user list
+[] review for any leaks
 
 

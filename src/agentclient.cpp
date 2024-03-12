@@ -106,7 +106,15 @@ void AgentClient::receivedPayloadTypeNotifyChatroomListChanged(const Packet * pk
 }
 
 void AgentClient::receivedPayloadTypeNotifyQuitApp(const Packet * pkt) {
-// TODO: remove user
+	this->_remoteusers.lock();
+
+	User * user = User::getuser(pkt->payload.userinfo.useruuid);
+	this->_remoteusers.unsafeget().pluckObject(user);
+	BFRelease(user);
+	
+	User::destroy(user);
+
+	this->_remoteusers.unlock();
 }
 
 bool AgentClient::representsUserWithUUID(const uuid_t uuid) {
@@ -125,5 +133,9 @@ bool AgentClient::representsUserWithUUID(const uuid_t uuid) {
 	this->_remoteusers.unlock();
 
 	return result;
+}
+
+void AgentClient::updateremoteuser(const PayloadUserInfo * info) {
+// TODO: update user
 }
 

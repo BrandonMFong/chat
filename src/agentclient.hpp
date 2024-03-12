@@ -44,6 +44,7 @@ private:
 	virtual void receivedPayloadTypeNotifyChatroomListChanged(const Packet * pkt);
 	virtual void receivedPayloadTypeNotifyQuitApp(const Packet * pkt);
 	virtual bool representsUserWithUUID(const uuid_t uuid);
+	virtual void updateremoteuser(const PayloadUserInfo * info);
 
 	/**
 	 * an agent on the client end can represent many remote users

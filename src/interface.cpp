@@ -37,7 +37,7 @@ Interface::Interface() {
 	this->_chatroom = NULL;
 	this->_state = kInterfaceStateUnknown;
 	this->_prevstate = kInterfaceStateUnknown;
-	this->_updatechatroomlist = false;
+	this->_updatelobby = false;
 	this->_updateconversation = false;
 	this->_user = NULL;
 
@@ -60,8 +60,12 @@ Interface * Interface::create(char mode) {
 	}
 }
 
+void Interface::userListHasChanged() {
+	this->_updatelobby = true;
+}
+
 void Interface::chatroomListHasChanged() {
-	this->_updatechatroomlist = true;
+	this->_updatelobby = true;
 }
 
 void Interface::converstaionHasChanged() {
@@ -117,11 +121,11 @@ void _InterfaceDrawMessage(WINDOW * dispwin, int & row, int col, const Message *
 }
 
 int Interface::windowWriteConversation() {
-	this->_updateconversation.lock();
-	this->_chatroom.lock();
-	if (this->_updateconversation.unsafeget() && this->_chatroom.unsafeget()) {
-		this->_chatroom.unsafeget()->conversation.lock();
+	if (this->_updateconversation.get() && this->_chatroom.get()) {
 		BFLockLock(&this->_winlock);
+		this->_updateconversation.lock();
+		this->_chatroom.lock();
+		this->_chatroom.unsafeget()->conversation.lock();
 
 		werase(this->_displayWin);
 		box(this->_displayWin, 0, 0);
@@ -137,49 +141,97 @@ int Interface::windowWriteConversation() {
 		
 		this->_updateconversation.unsafeset(false);
 
-		BFLockUnlock(&this->_winlock);
 		this->_chatroom.unsafeget()->conversation.unlock();
+		this->_chatroom.unlock();
+		this->_updateconversation.unlock();
+		BFLockUnlock(&this->_winlock);
 	}
-	this->_chatroom.unlock();
-	this->_updateconversation.unlock();
+	return 0;
+}
+
+int Interface::windowWriteContentLobby() {
+	if (this->_updatelobby.get()) {
+		BFLockLock(&this->_winlock);
+		this->_updatelobby.lock();
+		this->drawDisplayWindowLobby();
+
+		this->windowWriteChatroomList();
+		this->windowWriteUserList();
+
+		wrefresh(this->_displayWin);
+		this->_updatelobby.unsafeset(false);
+		this->_updatelobby.unlock();
+		BFLockUnlock(&this->_winlock);
+	}
+
 	return 0;
 }
 
 int Interface::windowWriteChatroomList() {
-	this->_updatechatroomlist.lock();
-	if (this->_updatechatroomlist.unsafeget()) {
-		BFLockLock(&this->_winlock);
-		werase(this->_displayWin);
-		box(this->_displayWin, 0, 0);
+	// print title
+	int row = 1;
+	mvwprintw(this->_displayWin, row++, 1, "Chatrooms:");
 
-		// print title
-		int row = 1;
-		mvwprintw(this->_displayWin, row++, 1, "Chatrooms:");
+	// get list
+	int size = 0;
+	int error = 0;
+	PayloadChatInfo ** list = Chatroom::getChatroomList(&size, &error);
+	if (!list || error) {
+		LOG_DEBUG("could not get list of chatrooms: %d", error);
+	} else {
 
-		// get list
-		int size = 0;
-		int error = 0;
-		PayloadChatInfo ** list = Chatroom::getChatroomList(&size, &error);
-		if (!list || error) {
-			LOG_DEBUG("could not get list of chatrooms: %d", error);
-		} else {
+		// show available rooms
+		for (int i = 0; i < size; i++) { 
+			char line[512];
+			snprintf(line, 512, "(%d) \"%s\"", i+1, list[i]->chatroomname);
+			mvwprintw(this->_displayWin, row++, 1, line);
 
-			// show available rooms
-			for (int i = 0; i < size; i++) { 
-				char line[512];
-				snprintf(line, 512, "(%d) \"%s\"", i+1, list[i]->chatroomname);
-				mvwprintw(this->_displayWin, row++, 1, line);
-
-				BFFree(list[i]);
-			}
-			BFFree(list);
+			BFFree(list[i]);
 		}
-
-		wrefresh(this->_displayWin);
-		this->_updatechatroomlist.unsafeset(false);
-		BFLockUnlock(&this->_winlock);
+		BFFree(list);
 	}
-	this->_updatechatroomlist.unlock();
+	return 0;
+}
+
+int _InterfaceCraftLobbyUserLine(PayloadUserInfo * userinfo, char * line, User * curruser) {
+	if (!userinfo || !line || !curruser)
+		return 1;
+
+	uuid_t uuid;
+	curruser->getuuid(uuid);
+	if (!uuid_compare(uuid, userinfo->useruuid)) {
+		snprintf(line, 512, "You (%s)", userinfo->username);
+	} else {
+		snprintf(line, 512, "%s", userinfo->username);
+	}
+
+	return 0;
+}
+
+int Interface::windowWriteUserList() {
+	int w, h;
+    getmaxyx(this->_displayWin, h, w);
+
+	// print title
+	int row = 1;
+	mvwprintw(this->_displayWin, row++, (w/2) + 1, "Users:");
+
+	// get list
+	int size = 0;
+	int error = 0;
+	PayloadUserInfo ** list = User::getUserList(&size, &error);
+	if (!list || error) {
+		LOG_DEBUG("could not get list of users: %d", error);
+	} else {
+		for (int i = 0; i < size; i++) { 
+			char line[512];
+			_InterfaceCraftLobbyUserLine(list[i], line, this->_user.get());
+			mvwprintw(this->_displayWin, row++, (w/2) + 1, line);
+
+			BFFree(list[i]);
+		}
+		BFFree(list);
+	}
 
 	return 0;
 }
@@ -194,7 +246,7 @@ void Interface::displayWindowUpdateThread(void * in) {
 		{
 			case kInterfaceStateLobby:
 			{
-				interface->windowWriteChatroomList();
+				interface->windowWriteContentLobby();
 				break;
 			}
 
@@ -220,6 +272,21 @@ void Interface::displayWindowUpdateThread(void * in) {
 	if (this->_headerWin) \
 		delwin(this->_headerWin);
 
+int Interface::drawDisplayWindowLobby() {
+	int w, h;
+    getmaxyx(this->_displayWin, h, w);
+
+	// clear
+	werase(this->_displayWin);
+
+	// draw a box around window
+	box(this->_displayWin, 0, 0);
+
+	// draw a line down the middle
+	mvwvline(this->_displayWin, 1, w/2, ACS_VLINE, h - 2);
+
+	return 0;
+}
 
 int Interface::windowCreateModeLobby() {
 	BFLockLock(&this->_winlock);
@@ -231,7 +298,7 @@ int Interface::windowCreateModeLobby() {
 	this->_displayWin = newwin(LINES - 2, COLS, 1, 0);
 	this->_inputWin = newwin(1, COLS, LINES - 1, 0);
 
-	box(this->_displayWin, 0, 0); // Add a box around the display window
+	this->drawDisplayWindowLobby();
 
 	char title[COLS];
 	snprintf(title, COLS, "Lobby");
@@ -246,7 +313,7 @@ int Interface::windowCreateModeLobby() {
 	keypad(this->_inputWin, true); // Enable special keys in input window
 	nodelay(this->_inputWin, false); // Set blocking input for input window
 	
-	this->_updatechatroomlist = true;
+	this->_updatelobby = true;
 
 	BFLockUnlock(&this->_winlock);
 
@@ -471,18 +538,13 @@ int Interface::processinput(InputBuffer & userInput) {
 		if (userInput.isready()) { 
 			Command cmd(userInput);
 			if (!cmd.op().compareString(INTERFACE_COMMAND_LEAVE)) { // leave
-				LOG_DEBUG("leaving chat");
 				// tell chat room we are leaving
 				this->_chatroom.get()->resign(this->_user);
-				LOG_DEBUG("resigning current user");
 
 				Object::release(this->_chatroom.get());
 				this->_chatroom = NULL;
-				LOG_DEBUG("releasing references to chatroom");
 
 				this->_state = kInterfaceStateLobby;
-				LOG_DEBUG("changing states to lobby");
-				LOG_FLUSH;
 			} else if (!cmd.op().compareString(INTERFACE_COMMAND_HELP)) { // help
 				this->_returnfromhelpstate = this->_state;
 				this->_state = kInterfaceStateHelp;

@@ -18,6 +18,11 @@ public:
 	static User * getuser(const uuid_t uuid);
 
 	/**
+	 * caller owns memory
+	 */
+	static PayloadUserInfo ** getUserList(int * size, int * err);
+
+	/**
 	 * creates a new user
 	 *
 	 * retain count on return is +2. Caller is responsible for releasing object after they are done
@@ -30,6 +35,11 @@ public:
 	 * caller does not own memory
 	 */
 	static User * create(const PayloadUserInfo * ui);
+
+	/**
+	 * releases memory and removes from internal list
+	 */
+	static int destroy(User * user);
 	
 	virtual ~User();
 	const char * username() const;
