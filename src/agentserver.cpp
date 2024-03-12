@@ -72,6 +72,9 @@ void AgentServer::receivedPayloadTypeNotifyQuitApp(const Packet * pkt) {
 	// removes from list
 	agents->unsafeget().pluckObject(this);
 
+	// destroy our user
+	User::destroy(this->_remoteuser);
+
 	// releases itself
 	//
 	// this is safe because Agent::packetReceive is still retaining us

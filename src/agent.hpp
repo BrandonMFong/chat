@@ -113,6 +113,9 @@ private:
 	 * the agent server will remove itself from the agent list, thus releasing
 	 * itself from memory.
 	 *
+	 * agent will also release the user memory from everywhere (even
+	 * the user internals)
+	 *
 	 * Note when this function is called, retain count is 2. The `packetReceive`
 	 * function retains the agent and releases it before returning from function.
 	 * This ensures memory can be safely accessed and is appropriately cleaned up

@@ -106,14 +106,15 @@ void AgentClient::receivedPayloadTypeNotifyChatroomListChanged(const Packet * pk
 }
 
 void AgentClient::receivedPayloadTypeNotifyQuitApp(const Packet * pkt) {
-	LOG_DEBUG("> %s", __func__);
 	this->_remoteusers.lock();
+
 	User * user = User::getuser(pkt->payload.userinfo.useruuid);
 	this->_remoteusers.unsafeget().pluckObject(user);
-	LOG_DEBUG("user rc: %d", Object::retainCount(user));
 	BFRelease(user);
+	
+	User::destroy(user);
+
 	this->_remoteusers.unlock();
-	LOG_DEBUG("< %s", __func__);
 }
 
 bool AgentClient::representsUserWithUUID(const uuid_t uuid) {

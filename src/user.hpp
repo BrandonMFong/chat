@@ -35,6 +35,11 @@ public:
 	 * caller does not own memory
 	 */
 	static User * create(const PayloadUserInfo * ui);
+
+	/**
+	 * releases memory and removes from internal list
+	 */
+	static int destroy(User * user);
 	
 	virtual ~User();
 	const char * username() const;

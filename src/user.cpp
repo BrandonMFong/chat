@@ -110,6 +110,14 @@ User * User::create(const PayloadUserInfo * ui) {
 	return user;
 }
 
+int User::destroy(User * user) {
+	if (user) {
+		users.get().pluckObject(user);
+		BFRelease(user);
+		Interface::current()->userListHasChanged();
+	}
+}
+
 const char * User::username() const {
 	return this->_username;
 }
