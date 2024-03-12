@@ -99,6 +99,10 @@ int main(int argc, char * argv[]) {
 	LOG_DEBUG("============ App started ============");
 
 	if (!result) {
+		interface = Interface::create(mode);
+	}
+
+	if (!result) {
 		skt = Socket::create(mode, ipaddr, CHAT_SOCKET_SERVER_PORT_NUM, &result);
 
 		if (skt) {
@@ -110,10 +114,6 @@ int main(int argc, char * argv[]) {
 
 	if (!result) {
 		result = skt->start();
-	}
-
-	if (!result) {
-		interface = Interface::create(mode);
 	}
 
 	if (!result) {

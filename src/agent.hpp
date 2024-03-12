@@ -95,6 +95,8 @@ protected:
 	 * returns agent list
 	 */
 	static BF::Atomic<BF::List<Agent *>> * agentlist();
+	
+	virtual void updateremoteuser(const PayloadUserInfo * info) = 0;
 
 private:
 

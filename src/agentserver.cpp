@@ -103,15 +103,19 @@ void AgentServer::receivedPayloadTypeUserInfo(const Packet * pkt) {
 }
 
 bool AgentServer::representsUserWithUUID(const uuid_t uuid) {
+	if (!this->_remoteuser)
+		return false;
+
 	uuid_t u;
 	this->_remoteuser->getuuid(u);
 	if (!uuid_compare(u, uuid)) {
 		return true;
 	}
 	
-	LOG_DEBUG("%s", __func__);
-	LOG_DEBUG("couldn't find user: %s", uuid);
-
 	return false;
+}
+
+void AgentServer::updateremoteuser(const PayloadUserInfo * info) {
+// TODO: update user
 }
 

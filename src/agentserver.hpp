@@ -38,6 +38,7 @@ private:
 	virtual void receivedPayloadTypeUserInfo(const Packet * pkt);
 
 	virtual bool representsUserWithUUID(const uuid_t uuid);
+	virtual void updateremoteuser(const PayloadUserInfo * info);
 
 	/**
 	 * the remote user we represent

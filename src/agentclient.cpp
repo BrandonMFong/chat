@@ -135,3 +135,7 @@ bool AgentClient::representsUserWithUUID(const uuid_t uuid) {
 	return result;
 }
 
+void AgentClient::updateremoteuser(const PayloadUserInfo * info) {
+// TODO: update user
+}
+

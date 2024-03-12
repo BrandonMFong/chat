@@ -115,7 +115,9 @@ int User::destroy(User * user) {
 		users.get().pluckObject(user);
 		BFRelease(user);
 		Interface::current()->userListHasChanged();
+		return 0;
 	}
+	return 1;
 }
 
 const char * User::username() const {
