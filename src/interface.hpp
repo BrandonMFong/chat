@@ -70,6 +70,7 @@ private:
 	int windowCreateModeLobby();
 	int windowCreateModeCreateChatroom();
 	static void displayWindowUpdateThread(void * in);
+	int drawDisplayWindowLobby();
 
 	int windowWriteChatroomList();
 	int windowWriteConversation();

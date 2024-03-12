@@ -23,5 +23,6 @@ x.x
 [] gracefully exit server after "quit"
 [x] ensure user data is shared when joining server
 [] message character limit
+[] make user list
 
 

@@ -149,8 +149,7 @@ int Interface::windowWriteChatroomList() {
 	this->_updatechatroomlist.lock();
 	if (this->_updatechatroomlist.unsafeget()) {
 		BFLockLock(&this->_winlock);
-		werase(this->_displayWin);
-		box(this->_displayWin, 0, 0);
+		this->drawDisplayWindowLobby();
 
 		// print title
 		int row = 1;
@@ -220,6 +219,13 @@ void Interface::displayWindowUpdateThread(void * in) {
 	if (this->_headerWin) \
 		delwin(this->_headerWin);
 
+int Interface::drawDisplayWindowLobby() {
+	werase(this->_displayWin);
+	box(this->_displayWin, 0, 0);
+	mvwvline(this->_displayWin, 3, 14, ACS_VLINE, 10);
+
+	return 0;
+}
 
 int Interface::windowCreateModeLobby() {
 	BFLockLock(&this->_winlock);
@@ -231,7 +237,7 @@ int Interface::windowCreateModeLobby() {
 	this->_displayWin = newwin(LINES - 2, COLS, 1, 0);
 	this->_inputWin = newwin(1, COLS, LINES - 1, 0);
 
-	box(this->_displayWin, 0, 0); // Add a box around the display window
+	this->drawDisplayWindowLobby();
 
 	char title[COLS];
 	snprintf(title, COLS, "Lobby");
