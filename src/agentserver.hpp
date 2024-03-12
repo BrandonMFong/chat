@@ -15,8 +15,12 @@ class AgentServer : public Agent {
 	friend class Agent;
 public:
 	virtual ~AgentServer();
+	/*
 	virtual User * user();
+	*/
 	virtual void setRemoteUser(User * user);
+	
+	virtual User * getremoteuser(uuid_t uuid);
 
 private:
 	AgentServer();
@@ -33,6 +37,8 @@ private:
 	virtual void receivedPayloadTypeNotifyQuitApp(const Packet * pkt);
 	virtual void receivedPayloadTypeUserInfo(const Packet * pkt);
 
+	virtual bool representsUserWithUUID(const uuid_t uuid);
+
 	/**
 	 * the remote user we represent
 	 *
@@ -43,7 +49,6 @@ private:
 	 * See class header for more info
 	 */
 	User * _remoteuser;
-
 };
 
 #endif // AGENT_SERVER_HPP

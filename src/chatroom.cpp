@@ -34,7 +34,6 @@ void _ChatroomReleaseAgent(Agent * a) {
 	BFRelease(a);
 }
 
-
 Chatroom::Chatroom() : Object() {
 	uuid_generate_random(this->_uuid);
 	memset(this->_name, 0, sizeof(this->_name));
@@ -256,47 +255,58 @@ int Chatroom::resign(User * user) {
 
 int Chatroom::agentAddRemove(const char action, Agent * a) {
 	int error = 0;
-	// add user from agent to list
-	this->_users.lock();
+	// finally add agent to list
+	this->_agents.lock();
 	if (action == 'a') {
-		if (!this->_users.unsafeget().contains(a->user())) {
-			BFRetain(a->user());
-			error = this->_users.unsafeget().add(a->user());
+		if (!this->_agents.unsafeget().contains(a)) {
+			error = this->_agents.unsafeget().add(a);
+			BFRetain(a);
 		}
 	} else if (action == 'r') {
-		if (this->_users.unsafeget().contains(a->user())) {
-			Object::release(a->user());
-			error = this->_users.unsafeget().pluckObject(a->user());
+		if (this->_agents.unsafeget().contains(a)) {
+			error = this->_agents.unsafeget().pluckObject(a);
+			BFRelease(a);
 		}
 	}
-	this->_users.unlock();
-
-	// finally add agent to list
-	if (!error) {
-		this->_agents.lock();
-		if (action == 'a') {
-			if (!this->_agents.unsafeget().contains(a)) {
-				error = this->_agents.unsafeget().add(a);
-				BFRetain(a);
-			}
-		} else if (action == 'r') {
-			if (this->_agents.unsafeget().contains(a)) {
-				error = this->_agents.unsafeget().pluckObject(a);
-				BFRelease(a);
-			}
-		}
-		this->_agents.unlock();
-	}
+	this->_agents.unlock();
 
 	return error;
 }
+
+int Chatroom::userAddRemove(const char action, User * user) {
+	int error = 0;
+	// add user from agent to list
+	this->_users.lock();
+	if (action == 'a') {
+		if (!this->_users.unsafeget().contains(user)) {
+			error = this->_users.unsafeget().add(user);
+			BFRetain(user);
+		}
+	} else if (action == 'r') {
+		if (this->_users.unsafeget().contains(user)) {
+			error = this->_users.unsafeget().pluckObject(user);
+			BFRelease(user);
+		}
+	}
+	this->_users.unlock();
+	return error;
+}
+
 
 int Chatroom::addAgent(Agent * a) {
 	return this->agentAddRemove('a', a);
 }
 
+int Chatroom::addUser(User * u) {
+	return this->userAddRemove('a', u);
+}
+
 int Chatroom::removeAgent(Agent * a) {
 	return this->agentAddRemove('r', a);
+}
+
+int Chatroom::removeUser(User * u) {
+	return this->userAddRemove('r', u);
 }
 
 int Chatroom::receiveMessagePacket(const Packet * pkt) {

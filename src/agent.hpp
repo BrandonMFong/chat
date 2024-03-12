@@ -58,6 +58,8 @@ public:
 	virtual int start() = 0;
 
 	/**
+	 * sends pkt to the socket connection we are assigned to
+	 *
 	 * pkt : is copied
 	 */
 	int sendPacket(const Packet * pkt);
@@ -69,10 +71,16 @@ public:
 
 	/**
 	 * the remote user we are representing
+	 *
+	 * since an agent can represent more than one user,
+	 * we require the caller to know what user they are looking 
+	 * for
 	 */
-	virtual User * user() = 0;
+	virtual User * getremoteuser(uuid_t uuid) = 0;
 
 	virtual void setRemoteUser(User * user) = 0;
+	
+	virtual bool representsUserWithUUID(const uuid_t uuid) = 0;
 
 protected:
 

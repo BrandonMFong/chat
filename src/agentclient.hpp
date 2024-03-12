@@ -31,8 +31,12 @@ public:
 	 */
 	int requestChatroomListUpdate(const User * user);
 
+	/*
 	virtual User * user();
+	*/
 	virtual void setRemoteUser(User * user);
+	
+	virtual User * getremoteuser(uuid_t uuid);
 
 private:
 	AgentClient();
@@ -42,6 +46,15 @@ private:
 
 	virtual void receivedPayloadTypeNotifyChatroomListChanged(const Packet * pkt);
 	virtual void receivedPayloadTypeNotifyQuitApp(const Packet * pkt);
+	virtual bool representsUserWithUUID(const uuid_t uuid);
+
+	/**
+	 * an agent on the client end can represent many remote users
+	 *
+	 * this is because this agent's socket connection is to the server 
+	 * and the server has many users connected to it.
+	 */
+	BF::Atomic<BF::List<User *>> _remoteusers;
 };
 
 #endif // AGENT_CLIENT_HPP

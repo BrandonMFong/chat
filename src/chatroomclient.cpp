@@ -9,8 +9,7 @@
 #include "interface.hpp"
 #include "agentclient.hpp"
 
-ChatroomClient::ChatroomClient(AgentClient * a, const uuid_t chatroomuuid) : Chatroom(chatroomuuid) {
-	this->addAgent(a);
+ChatroomClient::ChatroomClient(const uuid_t chatroomuuid) : Chatroom(chatroomuuid) {
 }
 
 ChatroomClient::~ChatroomClient() {
@@ -20,11 +19,11 @@ AgentClient * ChatroomClient::agent() {
 	return (AgentClient *) this->_agents.get().first()->object();
 }
 
-int ChatroomClient::recordChatroom(const PayloadChatInfo * info, AgentClient * agent) {
-	if (!info || !agent)
+int ChatroomClient::recordChatroom(const PayloadChatInfo * info) {
+	if (!info)
 		return 1;
 
-	ChatroomClient * chatroom = new ChatroomClient(agent, info->chatroomuuid);
+	ChatroomClient * chatroom = new ChatroomClient(info->chatroomuuid);
 	if (!chatroom)
 		return 2;
 

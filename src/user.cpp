@@ -13,6 +13,22 @@ using namespace BF;
 
 Atomic<List<User * >> users;
 
+User * User::getuser(const uuid_t uuid) {
+	users.lock();
+	User * result = NULL;
+	List<User *>::Node * n = users.unsafeget().first();
+	for (; n; n = n->next()) {
+		result = n->object();
+		uuid_t u;
+		result->getuuid(u);
+		if (!uuid_compare(u, uuid))
+			break;
+		result = NULL;
+	}
+	users.unlock();
+	return result;
+}
+
 void _UserRelease(User * user) {
 	BFRelease(user);
 }

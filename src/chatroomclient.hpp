@@ -16,13 +16,13 @@ public:
 	 * creates a client chatroom that the main user
 	 * can join
 	 */
-	static int recordChatroom(const PayloadChatInfo * info, AgentClient * agent);
+	static int recordChatroom(const PayloadChatInfo * info);
 
 	virtual ~ChatroomClient();
 
 private:
 	AgentClient * agent();
-	ChatroomClient(AgentClient * a, const uuid_t chatroomuuid);
+	ChatroomClient(const uuid_t chatroomuuid);
 	int sendPacket(const Packet * pkt);
 };
 

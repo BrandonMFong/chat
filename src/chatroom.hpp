@@ -83,18 +83,20 @@ public:
 	int resign(User * user);
 
 	/**
-	 * Adds agent and its user to our list
+	 * Adds agent and user to our list
 	 *
-	 * +1 to agent's and its user's retain count
+	 * +1 to agent's and user's retain count
 	 */
 	int addAgent(Agent * a);
+	int addUser(User * u);
 
 	/**
-	 * Removes agent and its user from our list
+	 * Removes agent and user from our list
 	 *
-	 * release agent from chatroom list
+	 * release agent and user from chatroom list
 	 */
 	int removeAgent(Agent * a);
+	int removeUser(User * u);
 
 	/**
 	 * chat room name
@@ -168,6 +170,7 @@ private:
 	 * action : 'a' for add, 'r' for remove
 	 */
 	int agentAddRemove(const char action, Agent * a);
+	int userAddRemove(const char action, User * user);
 
 	/**
 	 * sends buf with a type

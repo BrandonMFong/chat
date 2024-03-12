@@ -19,8 +19,13 @@ AgentServer::AgentServer() {
 AgentServer::~AgentServer() {
 	BFRelease(this->_remoteuser);
 }
-
+/*
 User * AgentServer::user() {
+	return this->_remoteuser;
+}
+*/
+
+User * AgentServer::getremoteuser(uuid_t uuid) {
 	return this->_remoteuser;
 }
 
@@ -97,5 +102,16 @@ void AgentServer::receivedPayloadTypeUserInfo(const Packet * pkt) {
 	}
 
 	agents->unlock();
+}
+
+bool AgentServer::representsUserWithUUID(const uuid_t uuid) {
+	uuid_t u;
+	this->_remoteuser->getuuid(u);
+	if (uuid_compare(u, uuid)) {
+		LOG_DEBUG("couldn't find user: %s", uuid);
+		return true;
+	}
+
+	return false;
 }
 

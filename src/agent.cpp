@@ -202,7 +202,7 @@ void Agent::receivedPayloadTypeChatroomInfo(const Packet * pkt) {
 	if (!pkt)
 		return;
 	
-	ChatroomClient::recordChatroom(&pkt->payload.chatinfo, (AgentClient *) this);
+	ChatroomClient::recordChatroom(&pkt->payload.chatinfo);
 }
 
 void Agent::receivedPayloadTypeChatroomEnrollment(const Packet * pkt) {
@@ -213,6 +213,7 @@ void Agent::receivedPayloadTypeChatroomEnrollment(const Packet * pkt) {
 	//
 	// we want to make sure that we are representing the user that
 	// is trying to enroll
+	/*
 	uuid_t uuid;
 	this->user()->getuuid(uuid);
 	if (uuid_compare(uuid, pkt->payload.enrollment.useruuid)) {
@@ -220,6 +221,15 @@ void Agent::receivedPayloadTypeChatroomEnrollment(const Packet * pkt) {
 			pkt->payload.enrollment.useruuid);
 		return;
 	}
+	*/
+	if (!this->representsUserWithUUID(pkt->payload.enrollment.useruuid)) {
+		LOG_DEBUG("couldn't find user: %s",
+			pkt->payload.enrollment.useruuid);
+		return;
+	}
+
+	// get user with the uuid I got from the packet
+	User * user = User::getuser(pkt->payload.enrollment.useruuid);
 
 	// get chatroom
 	Chatroom * chatroom = Chatroom::getChatroom(
@@ -234,6 +244,7 @@ void Agent::receivedPayloadTypeChatroomEnrollment(const Packet * pkt) {
 
 	BFRetain(chatroom);
 	chatroom->addAgent(this);
+	chatroom->addUser(user);
 	BFRelease(chatroom);
 }
 
@@ -241,17 +252,14 @@ void Agent::receivedPayloadTypeChatroomResignation(const Packet * pkt) {
 	if (!pkt)
 		return;
 
-	// compare user record
-	//
-	// we want to make sure that we are representing the user that
-	// is trying to enroll
-	uuid_t uuid;
-	this->user()->getuuid(uuid);
-	if (uuid_compare(uuid, pkt->payload.enrollment.useruuid)) {
+	if (!this->representsUserWithUUID(pkt->payload.enrollment.useruuid)) {
 		LOG_DEBUG("couldn't find user: %s",
 			pkt->payload.enrollment.useruuid);
 		return;
 	}
+
+	// get user with the uuid I got from the packet
+	User * user = User::getuser(pkt->payload.enrollment.useruuid);
 
 	// get chatroom
 	Chatroom * chatroom = Chatroom::getChatroom(
@@ -266,6 +274,7 @@ void Agent::receivedPayloadTypeChatroomResignation(const Packet * pkt) {
 
 	BFRetain(chatroom);
 	chatroom->removeAgent(this);
+	chatroom->removeUser(user);
 	BFRelease(chatroom);
 }
 

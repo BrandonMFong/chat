@@ -26,8 +26,22 @@ AgentClient::~AgentClient() {
 
 }
 
-User * AgentClient::user() {
-	return NULL;
+User * AgentClient::getremoteuser(uuid_t uuid) {
+	User * result = NULL;
+	this->_remoteusers.lock();
+	List<User *>::Node * n = this->_remoteusers.unsafeget().first();
+	for(; n; n = n->next()) {
+		User * user = n->object();
+		uuid_t u;
+		user->getuuid(u);
+		if (!uuid_compare(u, uuid)) {
+			result = user;
+			break;
+		}
+	}
+	this->_remoteusers.unlock();
+
+	return result;
 }
 
 void AgentClient::setRemoteUser(User * user) {
@@ -85,5 +99,23 @@ void AgentClient::receivedPayloadTypeNotifyChatroomListChanged(const Packet * pk
 
 void AgentClient::receivedPayloadTypeNotifyQuitApp(const Packet * pkt) {
 // TODO: remove user
+}
+
+bool AgentClient::representsUserWithUUID(const uuid_t uuid) {
+	bool result = false;
+	this->_remoteusers.lock();
+	List<User *>::Node * n = this->_remoteusers.unsafeget().first();
+	for(; n; n = n->next()) {
+		User * user = n->object();
+		uuid_t u;
+		user->getuuid(u);
+		if (!uuid_compare(u, uuid)) {
+			result = true;
+			break;
+		}
+	}
+	this->_remoteusers.unlock();
+
+	return result;
 }
 
