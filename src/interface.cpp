@@ -222,7 +222,9 @@ void Interface::displayWindowUpdateThread(void * in) {
 int Interface::drawDisplayWindowLobby() {
 	werase(this->_displayWin);
 	box(this->_displayWin, 0, 0);
-	mvwvline(this->_displayWin, 3, 14, ACS_VLINE, 10);
+	int w, h;
+    getmaxyx(this->_displayWin, h, w);
+	mvwvline(this->_displayWin, 1, w/2, ACS_VLINE, h - 2);
 
 	return 0;
 }
