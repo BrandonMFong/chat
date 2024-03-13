@@ -13,6 +13,7 @@
 
 class SocketConnection;
 class User;
+class SocketEnvelope;
 
 /**
  * Represents the remote user
@@ -29,7 +30,7 @@ public:
 	 * sc : each agent should have this
 	 * bub : copy data if you need to use after function returns
 	 */
-	static void packetReceive(SocketConnection * sc, const void * buf, size_t size);
+	static void packetReceive(SocketEnvelope * envelope);
 
 	/**
 	 * this is a callback described by the Socket family

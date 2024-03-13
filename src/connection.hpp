@@ -13,6 +13,7 @@
 class Socket;
 class Client;
 class Client;
+class SocketBuffer;
 
 class SocketConnection : public BF::Object {
 	friend class Socket;
@@ -59,8 +60,8 @@ private:
 	 */
 	void closeConnection();
 
-	int sendData(const void * buf);
-	int recvData(void * buf);
+	int sendData(const SocketBuffer * buf);
+	int recvData(SocketBuffer * buf);
 
 	/**
 	 * uniquely ids the connection

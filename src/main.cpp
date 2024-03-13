@@ -110,7 +110,7 @@ int main(int argc, char * argv[]) {
 		skt = Socket::create(mode, ipaddr, CHAT_SOCKET_SERVER_PORT_NUM, &result);
 
 		if (skt) {
-			skt->setInStreamCallback(Agent::packetReceive);
+			skt->setInStreamCallback(Office::packetReceive);
 			skt->setNewConnectionCallback(Agent::newConnection);
 			skt->setBufferSize(sizeof(Packet));
 		}

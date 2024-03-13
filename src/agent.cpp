@@ -16,6 +16,7 @@
 #include "user.hpp"
 #include "interface.hpp"
 #include "packet.hpp"
+#include "envelope.hpp"
 #include <bflibcpp/bflibcpp.hpp>
 
 using namespace BF;
@@ -270,7 +271,16 @@ void Agent::receivedPayloadTypeChatroomResignation(const Packet * pkt) {
 	BFRelease(chatroom);
 }
 
-void Agent::packetReceive(SocketConnection * sc, const void * buf, size_t size) {
+void Agent::packetReceive(SocketEnvelope * envelope) {
+	if (!envelope)
+		return;
+
+	BFRetain(envelope);
+
+	SocketConnection * sc = envelope->connection();
+	const void * buf = envelope->buf()->data();
+	size_t size = envelope->buf()->size();
+
 	if (!sc || !buf) 
 		return;
 
@@ -312,6 +322,7 @@ void Agent::packetReceive(SocketConnection * sc, const void * buf, size_t size) 
 	}
 
 	BFRelease(agent);
+	BFRelease(envelope);
 }
 
 int Agent::sendPacket(const Packet * pkt) {

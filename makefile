@@ -14,7 +14,7 @@ log user inputbuffer office \
 chatroom message chatroomserver packet \
 connection agent agentclient agentserver \
 chatroomclient interfaceserver interfaceclient command \
-envelope
+envelope buffer
 
 ### Release settings
 R_CXXFLAGS += -Isrc/ -Iexternal/libs/$(BF_LIB_RPATH_RELEASE)

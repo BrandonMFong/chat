@@ -9,20 +9,14 @@
 #include <stdlib.h>
 
 class User;
-class SocketConnection;
+class SocketEnvelope;
 
 /**
  * in charge of making packet
  */
 namespace Office {
 
-typedef struct {
-	SocketConnection * sc;
-	void * buf;
-	size_t size;
-} InData;
-
-void packetReceive(SocketConnection * sc, const void * buf, size_t size);
+void packetReceive(SocketEnvelope * envelope);
 
 int start();
 int stop();
