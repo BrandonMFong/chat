@@ -135,7 +135,7 @@ void Socket::inStream(void * in) {
 	}
 
 	BFRelease(skt);
-	Delete(tools);
+	BFRelease(tools);
 }
 
 void Socket::outStream(void * in) {

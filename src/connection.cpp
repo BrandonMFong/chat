@@ -19,7 +19,7 @@
 using namespace BF;
 
 void SocketConnection::ReleaseConnection(SocketConnection * sc) {
-	Delete(sc);
+	BFRelease(sc);
 }
 
 SocketConnection::SocketConnection(int sd, Socket * sktref) : Object() {
