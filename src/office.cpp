@@ -18,7 +18,7 @@
 
 using namespace BF;
 
-Atomic<Queue<SocketEnvelope *>> _indataq;
+Atomic<Queue<SocketEnvelope *>> inbox;
 BFThreadAsyncID _tid = NULL;
 
 int Office::quitApplication(const User * user) {
@@ -36,27 +36,27 @@ int Office::quitApplication(const User * user) {
 void Office::packetReceive(SocketEnvelope * envelope) {
 	// push into queue
 	BFRetain(envelope);
-	_indataq.get().push(envelope);
+	inbox.get().push(envelope);
 }
 
 void _OfficeInDataWorkerThread(void * in) {
 	while (!BFThreadAsyncIsCanceled(_tid)) {
-		if (!_indataq.get().empty()) {
-			_indataq.lock();
+		if (!inbox.get().empty()) {
+			inbox.lock();
 
 			// get first item from the queue
-			SocketEnvelope * envelope = _indataq.unsafeget().front();
+			SocketEnvelope * envelope = inbox.unsafeget().front();
 
 			// send it over to the agents
 			Agent::packetReceive(envelope);
 
 			// pop off
-			_indataq.unsafeget().pop();
+			inbox.unsafeget().pop();
 
 			// release memory
 			BFRelease(envelope);
 
-			_indataq.unlock();
+			inbox.unlock();
 		}
 	}
 }
