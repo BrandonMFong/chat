@@ -13,6 +13,7 @@
 
 class SocketConnection;
 class User;
+class SocketEnvelope;
 
 /**
  * Represents the remote user
@@ -22,7 +23,14 @@ class User;
  */
 class Agent : public BF::Object {
 public:
-	static void packetReceive(SocketConnection * sc, const void * buf, size_t size);
+	/**
+	 * finds agent that is in charge of the socket connection to handle the buffered 
+	 * data that came through the socket connection
+	 *
+	 * sc : each agent should have this
+	 * bub : copy data if you need to use after function returns
+	 */
+	static void packetReceive(SocketEnvelope * envelope);
 
 	/**
 	 * this is a callback described by the Socket family

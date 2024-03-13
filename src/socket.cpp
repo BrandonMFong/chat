@@ -8,7 +8,7 @@
 #include "connection.hpp"
 #include "client.hpp"
 #include "log.hpp"
-#include "office.hpp"
+#include "envelope.hpp"
 #include <netinet/in.h> //structure for storing address information 
 #include <stdio.h> 
 #include <stdlib.h> 
@@ -27,7 +27,6 @@ Socket * Socket::shared() {
 }
 
 Socket::Socket() { 
-	this->_tidq = NULL;
 	this->_tidout = NULL;
 
 	this->_cbinstream = NULL;
@@ -51,7 +50,6 @@ Socket::~Socket() {
 	}
 	this->_tidin.unlock();
 
-	BFThreadAsyncDestroy(this->_tidq);
 	BFThreadAsyncDestroy(this->_tidout);
 }
 
@@ -92,7 +90,7 @@ void Socket::setNewConnectionCallback(int (* cb)(SocketConnection * sc)) {
 	this->_cbnewconn = cb;
 }
 
-void Socket::setInStreamCallback(void (* cb)(SocketConnection * sc, const void * buf, size_t size)) {
+void Socket::setInStreamCallback(void (* cb)(SocketEnvelope * envelope)) {
 	this->_cbinstream = cb;
 }
 
@@ -102,36 +100,6 @@ uint16_t Socket::port() const {
 
 const char * Socket::ipaddr() const {
 	return this->_ip4addr;
-}
-
-// maybe this could be implemented by app and not by this 
-void Socket::queueCallback(void * in) {
-	Socket * skt = (Socket *) in;
-
-	BFRetain(skt);
-
-	while (!BFThreadAsyncIsCanceled(skt->_tidq)) {
-		skt->_inq.lock();
-		// if queue is not empty, send the next message
-		if (!skt->_inq.unsafeget().empty()) {
-			// get first message
-			struct Socket::Envelope * envelope = skt->_inq.unsafeget().front();
-
-			if (envelope) {
-				skt->_cbinstream(envelope->sc, envelope->buf.data, envelope->buf.size);
-			}
-
-			// pop queue
-			skt->_inq.unsafeget().pop();
-
-			BFFree(envelope->buf.data);
-			BFFree(envelope);
-		}
-		skt->_inq.unlock();
-	}
-
-	BFRelease(skt);
-
 }
 
 /**
@@ -155,24 +123,19 @@ void Socket::inStream(void * in) {
 
 	sc->_isready = true;	
 	while (!BFThreadAsyncIsCanceled(tid)) {
-		// create buffer
-		struct Socket::Envelope * envelope = (struct Socket::Envelope *) malloc(sizeof(struct Socket::Envelope));
-		envelope->buf.data = malloc(skt->_bufferSize);
-		envelope->sc = sc;
+		SocketEnvelope * envelope = new SocketEnvelope(sc, skt->_bufferSize);
 
 		// receive data from connections using buffer
-		int err = sc->recvData(&envelope->buf);
-        if (!err) {
-			skt->_inq.get().push(envelope);
-		} else {
-			BFFree(envelope->buf.data);
-			BFFree(envelope);
-			break;
+		int err = sc->recvData(&envelope->_buf);
+        if (!err && skt->_cbinstream) {
+			skt->_cbinstream(envelope);
 		}
+
+		BFRelease(envelope);
 	}
 
 	BFRelease(skt);
-	Delete(tools);
+	BFRelease(tools);
 }
 
 void Socket::outStream(void * in) {
@@ -180,21 +143,18 @@ void Socket::outStream(void * in) {
 
 	BFRetain(skt);
 
-	while (!BFThreadAsyncIsCanceled(skt->_tidq)) {
+	while (!BFThreadAsyncIsCanceled(skt->_tidout)) {
 		skt->_outq.lock();
 		// if queue is not empty, send the next message
 		if (!skt->_outq.unsafeget().empty()) {
 			// get top data
-			struct Socket::Envelope * envelope = skt->_outq.unsafeget().front();
-			//struct Socket::Buffer * buf = &envelope->buf;
+			SocketEnvelope * envelope = skt->_outq.unsafeget().front();
 
 			// pop data from queue
 			skt->_outq.unsafeget().pop();
-
-			envelope->sc->sendData(&envelope->buf);
-
-			BFFree(envelope->buf.data);
-			BFFree(envelope);
+			
+			envelope->connection()->sendData(&envelope->_buf);
+			BFRelease(envelope);
 		}
 		skt->_outq.unlock();
 	}
@@ -219,8 +179,6 @@ int Socket::startInStreamForConnection(SocketConnection * sc) {
 int Socket::start() {
 	this->_start();
 
-	this->_tidq = BFThreadAsync(Socket::queueCallback, (void *) this);
-
 	// out stream uses `send`
 	//
 	// we can use this object and iterate through the connections
@@ -237,8 +195,6 @@ int Socket::stop() {
 	this->_connections.lock();
 	for (int i = 0; i < this->_connections.unsafeget().count(); i++) {
 		this->_connections.unsafeget().objectAtIndex(i)->closeConnection();
-		//shutdown(this->_connections.unsafeget().objectAtIndex(i)->descriptor(), SHUT_RDWR);
-		//close(this->_connections.unsafeget().objectAtIndex(i)->descriptor());
 	}
 	this->_connections.unlock();
 
@@ -259,11 +215,6 @@ int Socket::stop() {
 			}
 		}
 		this->_tidin.unlock();
-	}
-
-	if (!error && this->_tidq) {
-		error = BFThreadAsyncCancel(this->_tidq);
-		BFThreadAsyncWait(this->_tidq);
 	}
 
 	if (!error && this->_tidout) {

@@ -6,16 +6,20 @@
 #ifndef OFFICE_HPP
 #define OFFICE_HPP
 
-#include "typepacket.h"
-#include "inputbuffer.hpp"
-#include "connection.hpp"
+#include <stdlib.h>
 
 class User;
+class SocketEnvelope;
 
 /**
  * in charge of making packet
  */
 namespace Office {
+
+void packetReceive(SocketEnvelope * envelope);
+
+int start();
+int stop();
 
 int quitApplication(const User * user);
 

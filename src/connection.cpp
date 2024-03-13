@@ -5,6 +5,8 @@
 
 #include "connection.hpp"
 #include "socket.hpp"
+#include "envelope.hpp"
+#include "buffer.hpp"
 #include "log.hpp"
 #include <bflibcpp/bflibcpp.hpp>
 #include <netinet/in.h> //structure for storing address information 
@@ -17,7 +19,7 @@
 using namespace BF;
 
 void SocketConnection::ReleaseConnection(SocketConnection * sc) {
-	Delete(sc);
+	BFRelease(sc);
 }
 
 SocketConnection::SocketConnection(int sd, Socket * sktref) : Object() {
@@ -52,34 +54,34 @@ int SocketConnection::queueData(const void * data, size_t size) {
 	if (!data) return -2;
 
 	// make envelope
-	struct Socket::Envelope * envelope = (struct Socket::Envelope *) malloc(sizeof(struct Socket::Envelope));
+	SocketEnvelope * envelope = new SocketEnvelope(this, size);
 	if (!envelope) return -2;
 
-	memset(envelope, 0, sizeof(struct Socket::Envelope));
-	envelope->sc = this;
-	envelope->buf.data = malloc(size);
-	envelope->buf.size = size;
-	memcpy(envelope->buf.data, data, size);
+	memcpy(envelope->buf()->_data, data, envelope->buf()->size());
 
 	// queue up envelope
 	int error = this->_sktref->_outq.get().push(envelope);
 	return error;
 }
 
-int SocketConnection::sendData(const void * b) {
-	const Socket::Buffer * buf = (const Socket::Buffer *) b;
-	send(this->_sd, buf->data, buf->size, 0);
+int SocketConnection::sendData(const SocketBuffer * buf) {
+	if (!buf)
+		return 1;
+	
+	send(this->_sd, buf->data(), buf->size(), 0);
 
 	return 0;
 }
 
-int SocketConnection::recvData(void * b) {
-	Socket::Buffer * buf = (Socket::Buffer *) b;
-	buf->size = recv(this->_sd, buf->data, this->_sktref->_bufferSize, 0);
-	if (buf->size == -1) {
+int SocketConnection::recvData(SocketBuffer * buf) {
+	if (!buf)
+		return 1;
+
+	buf->_size = recv(this->_sd, buf->_data, this->_sktref->_bufferSize, 0);
+	if (buf->_size == -1) {
 		LOG_DEBUG("recv error %d", errno);
 		return errno;
-	} else if (buf->size == 0) {
+	} else if (buf->_size == 0) {
 		LOG_DEBUG("recv received 0");
 		return -1;
 	}

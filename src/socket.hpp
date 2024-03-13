@@ -21,10 +21,10 @@ extern "C" {
 #define SOCKET_IP4_ADDR_STRLEN 16
 
 class SocketConnection;
+class SocketEnvelope;
 
 class Socket : public BF::Object {
 	friend class SocketConnection;
-
 public: 
 	static Socket * shared();
 
@@ -41,19 +41,11 @@ public:
 	int stop();
 	
 	/**
-	 * queues up data to be sent
-	 *
-	 * data : data to be sent
-	 * size : size of data buffer
-	 */
-	//int sendData(const void * data, size_t size);
-
-	/**
 	 * sets callback that gets invoked when incoming data is ready to be handled
 	 *
 	 * callback owner MUST copy buffer data because the data will be lost when it returns
 	 */
-	void setInStreamCallback(void (* cb)(SocketConnection * sc, const void * buf, size_t size));
+	void setInStreamCallback(void (* cb)(SocketEnvelope * envelope));
 
 	/**
 	 * see _cbnewconn
@@ -101,15 +93,12 @@ protected:
 private:
 
 	/**
-	 * handles received packets from queue
-	 */
-	static void queueCallback(void * in);
-
-	/**
 	 * call back that gets called in `queueCallback` when it
 	 * pops data from in q
+	 *
+	 * envelope : retain if you plan to use after callback returns
 	 */
-	void (* _cbinstream)(SocketConnection * sc, const void * buf, size_t size);
+	void (* _cbinstream)(SocketEnvelope * envelope);
 
 	/**
 	 * receives packets and puts them in a queue
@@ -122,27 +111,7 @@ private:
 	static void outStream(void * in);
 
 	BF::Atomic<BF::List<BFThreadAsyncID>> _tidin;
-	BFThreadAsyncID _tidq;
 	BFThreadAsyncID _tidout;
-
-	/**
-	 * buffer for incoming and outgoing data
-	 */
-	struct Buffer {
-		void * data;
-		size_t size;
-	};
-
-	/**
-	 * ties relationship for buffer data with socket connection
-	 *
-	 * that way outStream thread knows who to send
-	 * buffer data to
-	 */
-	struct Envelope {
-		SocketConnection * sc;
-		struct Buffer buf;
-	};
 
 	/**
 	 * holds expected buffer size for all incoming and outcoming data
@@ -152,14 +121,11 @@ private:
 	size_t _bufferSize;
 
 	/**
-	 * queues incoming data from recv
-	 */	
-	BF::Atomic<BF::Queue<struct Envelope *>> _inq;
-
-	/**
 	 * queues outgoing data using send
+	 *
+	 * each envelope will get released after pop
 	 */
-	BF::Atomic<BF::Queue<struct Envelope *>> _outq;
+	BF::Atomic<BF::Queue<SocketEnvelope *>> _outq;
 
 	uint16_t _portnum;
 	char _ip4addr[SOCKET_IP4_ADDR_STRLEN];
