@@ -80,6 +80,10 @@ InterfaceState Interface::prevstate() {
 	return this->_prevstate.get();
 }
 
+void Interface::throwErrorMessage(String errmsg) {
+	this->_errorMessage = errmsg;
+}
+
 int InterfaceCraftChatLineFromMessage(const Message * msg, char * line) {
 	if (!msg || !line) return 30;
 
@@ -530,6 +534,10 @@ int Interface::processinput(InputBuffer & userInput) {
 						this->_state = kInterfaceStateChatroom;
 					}
 				}
+			} else {
+				String * errmsg = String::createWithFormat("unknown command: %s", cmd.op());
+				this->throwErrorMessage(*errmsg);
+				BFRelease(errmsg);
 			}
 			userInput.reset();
 		}

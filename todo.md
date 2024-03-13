@@ -25,5 +25,5 @@ x.x
 [] message character limit
 [x] make user list
 [] review for any leaks
-[] make instream packet queue be application specific
+[x] make instream packet queue be application specific
 

@@ -11,6 +11,7 @@
 #include "typeinterfacestate.hpp"
 #include <bflibcpp/object.hpp>
 #include <bflibcpp/atomic.hpp>
+#include <bflibcpp/string.hpp>
 #include <ncurses.h>
 
 #define INTERFACE_COMMAND_DRAFT "draft"
@@ -60,33 +61,50 @@ protected:
 	virtual int draw();
 
 private:
+
 	int windowStart();
 	int windowLoop();
 	int windowStop();
+
 	int gatherUserData();
+
 	int windowUpdateInputWindowText(InputBuffer & userInput);
+
 	int windowCreateModeEdit();
 	int windowCreateModeHelp();
 	int windowCreateModeCommand();
 	int windowCreateModeLobby();
 	int windowCreateModeCreateChatroom();
+	
 	static void displayWindowUpdateThread(void * in);
+
+	/**
+	 * draws lobby ui
+	 *
+	 * boxes, lines, etc.
+	 */
 	int drawDisplayWindowLobby();
 
+	// lobby content
 	int windowWriteContentLobby();
 	int windowWriteChatroomList();
 	int windowWriteUserList();
 
+	// chatroom content
 	int windowWriteConversation();
 
 	/**
 	 * process user input
 	 */
 	int processinput(InputBuffer & buf);
-	
+
+	// trigger events
 	void userListHasChanged();
 	void chatroomListHasChanged();
 	void converstaionHasChanged();
+
+	void throwErrorMessage(BF::String errmsg);
+	BF::String _errorMessage;
 
 	// might be wise to ensure we lock this 
 	// before locking other objects
