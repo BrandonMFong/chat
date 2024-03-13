@@ -80,7 +80,7 @@ InterfaceState Interface::prevstate() {
 	return this->_prevstate.get();
 }
 
-void Interface::throwErrorMessage(String errmsg) {
+void Interface::setErrorMessage(String errmsg) {
 	this->_errorMessage = errmsg;
 }
 
@@ -419,7 +419,12 @@ int Interface::windowUpdateInputWindowText(InputBuffer & userInput) {
 	case kInterfaceStateChatroom:
 	case kInterfaceStateLobby:
 		werase(this->_inputWin);
-		mvwprintw(this->_inputWin, 0, 0, userInput.cString());
+		if (this->_errorMessage.length() == 0) {
+			mvwprintw(this->_inputWin, 0, 0, userInput.cString());
+		} else {
+			mvwprintw(this->_inputWin, 0, 0, this->_errorMessage.cString());
+			this->_errorMessage.clear();
+		}
 		wmove(this->_inputWin, 0, userInput.cursorPosition());
 		wrefresh(this->_inputWin);
 		break;
@@ -535,8 +540,8 @@ int Interface::processinput(InputBuffer & userInput) {
 					}
 				}
 			} else {
-				String * errmsg = String::createWithFormat("unknown command: %s", cmd.op());
-				this->throwErrorMessage(*errmsg);
+				String * errmsg = String::createWithFormat("unknown command: %s", cmd.op().cString());
+				this->setErrorMessage(*errmsg);
 				BFRelease(errmsg);
 			}
 			userInput.reset();
@@ -560,7 +565,9 @@ int Interface::processinput(InputBuffer & userInput) {
 				this->_state = kInterfaceStateDraft;
 				this->_updateconversation = true;
 			} else {
-				LOG_DEBUG("unknown: '%s'", userInput.cString());
+				String * errmsg = String::createWithFormat("unknown command: %s", cmd.op());
+				this->setErrorMessage(*errmsg);
+				BFRelease(errmsg);
 			}
 
 			userInput.reset();

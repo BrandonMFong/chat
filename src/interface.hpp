@@ -103,7 +103,7 @@ private:
 	void chatroomListHasChanged();
 	void converstaionHasChanged();
 
-	void throwErrorMessage(BF::String errmsg);
+	void setErrorMessage(BF::String errmsg);
 	BF::String _errorMessage;
 
 	// might be wise to ensure we lock this 
