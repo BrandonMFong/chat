@@ -22,6 +22,13 @@ class User;
  */
 class Agent : public BF::Object {
 public:
+	/**
+	 * finds agent that is in charge of the socket connection to handle the buffered 
+	 * data that came through the socket connection
+	 *
+	 * sc : each agent should have this
+	 * bub : copy data if you need to use after function returns
+	 */
 	static void packetReceive(SocketConnection * sc, const void * buf, size_t size);
 
 	/**

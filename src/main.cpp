@@ -99,6 +99,10 @@ int main(int argc, char * argv[]) {
 	LOG_DEBUG("============ App started ============");
 
 	if (!result) {
+		result = Office::start();
+	}
+
+	if (!result) {
 		interface = Interface::create(mode);
 	}
 
@@ -122,6 +126,10 @@ int main(int argc, char * argv[]) {
 
 	if (!result) {
 		result = skt->stop();
+	}
+
+	if (!result) {
+		result = Office::stop();
 	}
 
 	if (result) {

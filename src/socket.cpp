@@ -27,7 +27,7 @@ Socket * Socket::shared() {
 }
 
 Socket::Socket() { 
-	this->_tidq = NULL;
+	//this->_tidq = NULL;
 	this->_tidout = NULL;
 
 	this->_cbinstream = NULL;
@@ -51,7 +51,7 @@ Socket::~Socket() {
 	}
 	this->_tidin.unlock();
 
-	BFThreadAsyncDestroy(this->_tidq);
+	//BFThreadAsyncDestroy(this->_tidq);
 	BFThreadAsyncDestroy(this->_tidout);
 }
 
@@ -104,6 +104,7 @@ const char * Socket::ipaddr() const {
 	return this->_ip4addr;
 }
 
+/*
 // maybe this could be implemented by app and not by this 
 void Socket::queueCallback(void * in) {
 	Socket * skt = (Socket *) in;
@@ -133,7 +134,7 @@ void Socket::queueCallback(void * in) {
 	BFRelease(skt);
 
 }
-
+*/
 /**
  * used for inStream
  *
@@ -162,12 +163,15 @@ void Socket::inStream(void * in) {
 
 		// receive data from connections using buffer
 		int err = sc->recvData(&envelope->buf);
-        if (!err) {
-			skt->_inq.get().push(envelope);
+        if (!err && skt->_cbinstream) {
+			skt->_cbinstream(
+				envelope->sc,
+				envelope->buf.data,
+				envelope->buf.size
+			);
 		} else {
 			BFFree(envelope->buf.data);
 			BFFree(envelope);
-			break;
 		}
 	}
 
@@ -180,13 +184,12 @@ void Socket::outStream(void * in) {
 
 	BFRetain(skt);
 
-	while (!BFThreadAsyncIsCanceled(skt->_tidq)) {
+	while (!BFThreadAsyncIsCanceled(skt->_tidout)) {
 		skt->_outq.lock();
 		// if queue is not empty, send the next message
 		if (!skt->_outq.unsafeget().empty()) {
 			// get top data
 			struct Socket::Envelope * envelope = skt->_outq.unsafeget().front();
-			//struct Socket::Buffer * buf = &envelope->buf;
 
 			// pop data from queue
 			skt->_outq.unsafeget().pop();
@@ -219,7 +222,7 @@ int Socket::startInStreamForConnection(SocketConnection * sc) {
 int Socket::start() {
 	this->_start();
 
-	this->_tidq = BFThreadAsync(Socket::queueCallback, (void *) this);
+	//this->_tidq = BFThreadAsync(Socket::queueCallback, (void *) this);
 
 	// out stream uses `send`
 	//
@@ -261,10 +264,12 @@ int Socket::stop() {
 		this->_tidin.unlock();
 	}
 
+	/*
 	if (!error && this->_tidq) {
 		error = BFThreadAsyncCancel(this->_tidq);
 		BFThreadAsyncWait(this->_tidq);
 	}
+	*/
 
 	if (!error && this->_tidout) {
 		error = BFThreadAsyncCancel(this->_tidout);

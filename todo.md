@@ -20,10 +20,10 @@ x.x
 [] make sure command permissions are set
 [] make error window
 [x] make sure multiple users can join
-[] gracefully exit server after "quit"
+[x] gracefully exit server after "quit"
 [x] ensure user data is shared when joining server
 [] message character limit
 [x] make user list
 [] review for any leaks
-
+[] make instream packet queue be application specific
 

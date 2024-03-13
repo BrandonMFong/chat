@@ -21,11 +21,32 @@ extern "C" {
 #define SOCKET_IP4_ADDR_STRLEN 16
 
 class SocketConnection;
+class SocketEnvelope;
 
 class Socket : public BF::Object {
 	friend class SocketConnection;
-
 public: 
+
+	/**
+	 * buffer for incoming and outgoing data
+	 */
+	struct Buffer {
+		void * data;
+		size_t size;
+	};
+
+	/**
+	 * ties relationship for buffer data with socket connection
+	 *
+	 * that way outStream thread knows who to send
+	 * buffer data to
+	 */
+	struct Envelope {
+		Envelope(SocketConnection * sc, size_t size);
+		SocketConnection * sc;
+		struct Buffer buf;
+	};
+
 	static Socket * shared();
 
 	static Socket * create(const char mode, const char * ipaddr, uint16_t port, int * err);
@@ -103,7 +124,7 @@ private:
 	/**
 	 * handles received packets from queue
 	 */
-	static void queueCallback(void * in);
+	//static void queueCallback(void * in);
 
 	/**
 	 * call back that gets called in `queueCallback` when it
@@ -122,27 +143,7 @@ private:
 	static void outStream(void * in);
 
 	BF::Atomic<BF::List<BFThreadAsyncID>> _tidin;
-	BFThreadAsyncID _tidq;
 	BFThreadAsyncID _tidout;
-
-	/**
-	 * buffer for incoming and outgoing data
-	 */
-	struct Buffer {
-		void * data;
-		size_t size;
-	};
-
-	/**
-	 * ties relationship for buffer data with socket connection
-	 *
-	 * that way outStream thread knows who to send
-	 * buffer data to
-	 */
-	struct Envelope {
-		SocketConnection * sc;
-		struct Buffer buf;
-	};
 
 	/**
 	 * holds expected buffer size for all incoming and outcoming data
@@ -154,7 +155,7 @@ private:
 	/**
 	 * queues incoming data from recv
 	 */	
-	BF::Atomic<BF::Queue<struct Envelope *>> _inq;
+	//BF::Atomic<BF::Queue<struct Envelope *>> _inq;
 
 	/**
 	 * queues outgoing data using send
