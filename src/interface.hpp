@@ -78,6 +78,10 @@ private:
 	
 	static void displayWindowUpdateThread(void * in);
 
+	int processinputStateDraft(InputBuffer & userInput);
+	int processinputStateChatroom(InputBuffer & userInput);
+	int processinputStateLobby(InputBuffer & userInput);
+
 	/**
 	 * draws lobby ui
 	 *

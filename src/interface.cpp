@@ -22,7 +22,7 @@
 
 using namespace BF;
 
-const size_t linelen = DATA_BUFFER_SIZE + USER_NAME_SIZE + (2 << 4);
+const size_t kConversationLineLength = DATA_BUFFER_SIZE + USER_NAME_SIZE + (2 << 4);
 Interface * interface = NULL;
 
 Interface * Interface::current() {
@@ -89,7 +89,7 @@ int InterfaceCraftChatLineFromMessage(const Message * msg, char * line) {
 
 	switch (msg->type()) {
 	case kPayloadMessageTypeData:
-		snprintf(line, linelen, "%s> %s", msg->username(), msg->data());
+		snprintf(line, kConversationLineLength, "%s> %s", msg->username(), msg->data());
 		return 0;
 	case kPayloadMessageTypeUserJoined:
 	case kPayloadMessageTypeUserLeft:
@@ -104,9 +104,9 @@ int InterfaceCraftChatLineFromMessage(const Message * msg, char * line) {
 		}
 
 		if (msg->type() == kPayloadMessageTypeUserJoined) {
-			snprintf(line, linelen, "<<%s joined the chat>>", username, msg->data());
+			snprintf(line, kConversationLineLength, "<<%s joined the chat>>", username, msg->data());
 		} else if (msg->type() == kPayloadMessageTypeUserLeft) {
-			snprintf(line, linelen, "<<%s left the chat>>", username, msg->data());
+			snprintf(line, kConversationLineLength, "<<%s left the chat>>", username, msg->data());
 		}
 
 		return 0;
@@ -117,7 +117,7 @@ int InterfaceCraftChatLineFromMessage(const Message * msg, char * line) {
 
 void _InterfaceDrawMessage(WINDOW * dispwin, int & row, int col, const Message * m) {
 	if (m && dispwin) {
-		char line[linelen];
+		char line[kConversationLineLength];
 		if (!InterfaceCraftChatLineFromMessage(m, line)) {
 			mvwprintw(dispwin, (row++) + 1, 1, line);
 		}
@@ -500,88 +500,105 @@ Chatroom * _InterfaceGetChatroomAtIndex(int i) {
 	return res;
 }
 
+int Interface::processinputStateLobby(InputBuffer & userInput) {
+	if (userInput.isready()) {
+		Command cmd(userInput);
+		if (!cmd.op().compareString(INTERFACE_COMMAND_QUIT)) { // quit
+			Office::quitApplication(this->_user.get());
+			this->_state = kInterfaceStateQuit;
+		} else if (!cmd.op().compareString(INTERFACE_COMMAND_HELP)) { // help
+			this->_returnfromhelpstate = this->_state;
+			this->_state = kInterfaceStateHelp;
+		} else if (!cmd.op().compareString(INTERFACE_COMMAND_CREATE)) { // create
+			char chatroomname[CHAT_ROOM_NAME_SIZE];
+			if (cmd.count() > 1) {
+				strncpy(chatroomname, cmd[1], CHAT_ROOM_NAME_SIZE);
+			} else {
+				// set up chat room name
+				//
+				// right now we are automatically creating a chatroom. The
+				// user should be able to customize the room name
+				snprintf(chatroomname, CHAT_ROOM_NAME_SIZE, "chatroom%d",
+						Chatroom::getChatroomsCount());
+			}
+
+			Chatroom * cr = ChatroomServer::create(chatroomname);
+			BFRelease(cr);
+		} else if (!cmd.op().compareString(INTERFACE_COMMAND_JOIN)) { // join
+			int index = String::toi(cmd[1]) - 1;
+			if ((index >= 0) && (index < Chatroom::getChatroomsCount())) {
+				this->_chatroom = _InterfaceGetChatroomAtIndex(index);
+				if (this->_chatroom) {
+					Object::retain(this->_chatroom.get());
+
+					// enrolls current user on this machine to the chatroom
+					this->_chatroom.get()->enroll(this->_user.get());
+
+					this->_state = kInterfaceStateChatroom;
+				}
+			}
+		} else {
+			String * errmsg = String::createWithFormat("unknown command: %s", cmd.op().cString());
+			this->setErrorMessage(*errmsg);
+			BFRelease(errmsg);
+		}
+		userInput.reset();
+	}
+
+	return 0;
+}
+
+int Interface::processinputStateChatroom(InputBuffer & userInput) {
+	if (userInput.isready()) { 
+		Command cmd(userInput);
+		if (!cmd.op().compareString(INTERFACE_COMMAND_LEAVE)) { // leave
+			// tell chat room we are leaving
+			this->_chatroom.get()->resign(this->_user);
+
+			Object::release(this->_chatroom.get());
+			this->_chatroom = NULL;
+
+			this->_state = kInterfaceStateLobby;
+		} else if (!cmd.op().compareString(INTERFACE_COMMAND_HELP)) { // help
+			this->_returnfromhelpstate = this->_state;
+			this->_state = kInterfaceStateHelp;
+		} else if (!cmd.op().compareString(INTERFACE_COMMAND_DRAFT)) { // draft
+			this->_state = kInterfaceStateDraft;
+			this->_updateconversation = true;
+		} else {
+			String * errmsg = String::createWithFormat("unknown command: %s", cmd.op());
+			this->setErrorMessage(*errmsg);
+			BFRelease(errmsg);
+		}
+
+		userInput.reset();
+	}
+	return 0;
+}
+
+int Interface::processinputStateDraft(InputBuffer & userInput) {
+	if (userInput.isready()) {
+		// send buf
+		this->_chatroom.get()->sendBuffer(userInput);
+
+		this->_state = kInterfaceStateChatroom;
+
+		userInput.reset();
+	}
+
+	return 0;
+}
+
 int Interface::processinput(InputBuffer & userInput) {
 	switch (this->_state.get()) {
 	case kInterfaceStateLobby:
-		if (userInput.isready()) {
-			Command cmd(userInput);
-			if (!cmd.op().compareString(INTERFACE_COMMAND_QUIT)) { // quit
-				Office::quitApplication(this->_user.get());
-				this->_state = kInterfaceStateQuit;
-			} else if (!cmd.op().compareString(INTERFACE_COMMAND_HELP)) { // help
-				this->_returnfromhelpstate = this->_state;
-				this->_state = kInterfaceStateHelp;
-			} else if (!cmd.op().compareString(INTERFACE_COMMAND_CREATE)) { // create
-				char chatroomname[CHAT_ROOM_NAME_SIZE];
-				if (cmd.count() > 1) {
-					strncpy(chatroomname, cmd[1], CHAT_ROOM_NAME_SIZE);
-				} else {
-					// set up chat room name
-					//
-					// right now we are automatically creating a chatroom. The
-					// user should be able to customize the room name
-					snprintf(chatroomname, CHAT_ROOM_NAME_SIZE, "chatroom%d",
-							Chatroom::getChatroomsCount());
-				}
-
-				Chatroom * cr = ChatroomServer::create(chatroomname);
-				BFRelease(cr);
-			} else if (!cmd.op().compareString(INTERFACE_COMMAND_JOIN)) { // join
-				int index = String::toi(cmd[1]) - 1;
-				if ((index >= 0) && (index < Chatroom::getChatroomsCount())) {
-					this->_chatroom = _InterfaceGetChatroomAtIndex(index);
-					if (this->_chatroom) {
-						Object::retain(this->_chatroom.get());
-
-						// enrolls current user on this machine to the chatroom
-						this->_chatroom.get()->enroll(this->_user.get());
-
-						this->_state = kInterfaceStateChatroom;
-					}
-				}
-			} else {
-				String * errmsg = String::createWithFormat("unknown command: %s", cmd.op().cString());
-				this->setErrorMessage(*errmsg);
-				BFRelease(errmsg);
-			}
-			userInput.reset();
-		}
+		this->processinputStateLobby(userInput);
 		break;
 	case kInterfaceStateChatroom:
-		if (userInput.isready()) { 
-			Command cmd(userInput);
-			if (!cmd.op().compareString(INTERFACE_COMMAND_LEAVE)) { // leave
-				// tell chat room we are leaving
-				this->_chatroom.get()->resign(this->_user);
-
-				Object::release(this->_chatroom.get());
-				this->_chatroom = NULL;
-
-				this->_state = kInterfaceStateLobby;
-			} else if (!cmd.op().compareString(INTERFACE_COMMAND_HELP)) { // help
-				this->_returnfromhelpstate = this->_state;
-				this->_state = kInterfaceStateHelp;
-			} else if (!cmd.op().compareString(INTERFACE_COMMAND_DRAFT)) { // draft
-				this->_state = kInterfaceStateDraft;
-				this->_updateconversation = true;
-			} else {
-				String * errmsg = String::createWithFormat("unknown command: %s", cmd.op());
-				this->setErrorMessage(*errmsg);
-				BFRelease(errmsg);
-			}
-
-			userInput.reset();
-		}
+		this->processinputStateChatroom(userInput);
 		break;
 	case kInterfaceStateDraft:
-		if (userInput.isready()) {
-			// send buf
-			this->_chatroom.get()->sendBuffer(userInput);
-
-			this->_state = kInterfaceStateChatroom;
-
-			userInput.reset();
-		}
+		this->processinputStateDraft(userInput);
 		break;
 	case kInterfaceStateHelp:
 		this->_state = this->_returnfromhelpstate;
