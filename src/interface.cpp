@@ -22,7 +22,8 @@
 
 using namespace BF;
 
-const size_t kConversationLineLength = DATA_BUFFER_SIZE + USER_NAME_SIZE + (2 << 4);
+const size_t kInterfaceConversationLineLength = DATA_BUFFER_SIZE + USER_NAME_SIZE + (2 << 4);
+const size_t kInterfaceMessageLengthLimit = DATA_BUFFER_SIZE;
 Interface * interface = NULL;
 
 Interface * Interface::current() {
@@ -89,7 +90,7 @@ int InterfaceCraftChatLineFromMessage(const Message * msg, char * line) {
 
 	switch (msg->type()) {
 	case kPayloadMessageTypeData:
-		snprintf(line, kConversationLineLength, "%s> %s", msg->username(), msg->data());
+		snprintf(line, kInterfaceConversationLineLength, "%s> %s", msg->username(), msg->data());
 		return 0;
 	case kPayloadMessageTypeUserJoined:
 	case kPayloadMessageTypeUserLeft:
@@ -104,9 +105,9 @@ int InterfaceCraftChatLineFromMessage(const Message * msg, char * line) {
 		}
 
 		if (msg->type() == kPayloadMessageTypeUserJoined) {
-			snprintf(line, kConversationLineLength, "<<%s joined the chat>>", username, msg->data());
+			snprintf(line, kInterfaceConversationLineLength, "<<%s joined the chat>>", username, msg->data());
 		} else if (msg->type() == kPayloadMessageTypeUserLeft) {
-			snprintf(line, kConversationLineLength, "<<%s left the chat>>", username, msg->data());
+			snprintf(line, kInterfaceConversationLineLength, "<<%s left the chat>>", username, msg->data());
 		}
 
 		return 0;
@@ -117,7 +118,7 @@ int InterfaceCraftChatLineFromMessage(const Message * msg, char * line) {
 
 void _InterfaceDrawMessage(WINDOW * dispwin, int & row, int col, const Message * m) {
 	if (m && dispwin) {
-		char line[kConversationLineLength];
+		char line[kInterfaceConversationLineLength];
 		if (!InterfaceCraftChatLineFromMessage(m, line)) {
 			mvwprintw(dispwin, (row++) + 1, 1, line);
 		}
@@ -566,7 +567,7 @@ int Interface::processinputStateChatroom(InputBuffer & userInput) {
 			this->_state = kInterfaceStateDraft;
 			this->_updateconversation = true;
 		} else {
-			String * errmsg = String::createWithFormat("unknown command: %s", cmd.op());
+			String * errmsg = String::createWithFormat("unknown command: %s", cmd.op().cString());
 			this->setErrorMessage(*errmsg);
 			BFRelease(errmsg);
 		}
@@ -584,6 +585,8 @@ int Interface::processinputStateDraft(InputBuffer & userInput) {
 		this->_state = kInterfaceStateChatroom;
 
 		userInput.reset();
+	} else if (userInput.length() >= kInterfaceMessageLengthLimit) {
+		userInput.remChar();
 	}
 
 	return 0;
