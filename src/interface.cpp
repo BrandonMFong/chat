@@ -439,20 +439,23 @@ int Interface::windowUpdateInputWindowText(InputBuffer & userInput) {
 	case kInterfaceStateDraft:
 		int w, h;
 		getmaxyx(this->_inputWin, h, w);
+
+		// see if we need to expand the height for the input window
 		int boxwidth = w - 2;
 		if (userInput.length() > boxwidth) { // change window to fit text
 			int off = (userInput.length() / boxwidth);
 			const int height = 3;
 			this->windowCreateModeEdit(w, height + off);
-		} else {
-			BFLockLock(&this->_winlock);
-			werase(this->_inputWin);
-			box(this->_inputWin, 0, 0); // Add a box around the display window
-			mvwprintw(this->_inputWin, 1, 1, userInput.cString());
-			wmove(this->_inputWin, 1, userInput.cursorPosition() + 1);
-			wrefresh(this->_inputWin);
-			BFLockUnlock(&this->_winlock);
 		}
+		
+		BFLockLock(&this->_winlock);
+		werase(this->_inputWin);
+		box(this->_inputWin, 0, 0); // Add a box around the display window
+		mvwprintw(this->_inputWin, 1, 1, userInput.cString());
+		wmove(this->_inputWin, 1, userInput.cursorPosition() + 1);
+		wrefresh(this->_inputWin);
+		BFLockUnlock(&this->_winlock);
+
 		break;
 	}
 
