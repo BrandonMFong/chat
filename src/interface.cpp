@@ -358,15 +358,15 @@ int Interface::windowCreateModeCommand() {
 	return 0;
 }
 
-int Interface::windowCreateModeEdit() {
+int Interface::windowCreateModeEdit(int inputWinWidth, int inputWinHeight) {
 	BFLockLock(&this->_winlock);
 
 	DELETE_WINDOWS;
 	
 	// Create two windows
 	this->_headerWin = newwin(1, COLS, 0, 0);
-	this->_displayWin = newwin(LINES - 4, COLS, 1, 0);
-	this->_inputWin = newwin(3, COLS, LINES - 3, 0);
+	this->_displayWin = newwin(LINES - inputWinHeight - 1, COLS, 1, 0);
+	this->_inputWin = newwin(inputWinHeight, inputWinWidth, LINES - inputWinHeight, 0);
 
 	box(this->_inputWin, 0, 0); // Add a box around the input window
 	box(this->_displayWin, 0, 0); // Add a box around the display window
@@ -389,6 +389,12 @@ int Interface::windowCreateModeEdit() {
 	BFLockUnlock(&this->_winlock);
 
 	return 0;
+}
+
+int Interface::windowCreateModeEdit() {
+	int inputWinWidth = COLS;
+   	int inputWinHeight = 3;
+	return this->windowCreateModeEdit(inputWinWidth, inputWinHeight);
 }
 
 int Interface::windowCreateModeHelp() {
@@ -415,10 +421,10 @@ int Interface::windowCreateModeHelp() {
 }
 
 int Interface::windowUpdateInputWindowText(InputBuffer & userInput) {
-	BFLockLock(&this->_winlock);
 	switch (this->_state.get()) {
 	case kInterfaceStateChatroom:
 	case kInterfaceStateLobby:
+		BFLockLock(&this->_winlock);
 		werase(this->_inputWin);
 		if (this->_errorMessage.length() == 0) {
 			mvwprintw(this->_inputWin, 0, 0, userInput.cString());
@@ -428,16 +434,27 @@ int Interface::windowUpdateInputWindowText(InputBuffer & userInput) {
 		}
 		wmove(this->_inputWin, 0, userInput.cursorPosition());
 		wrefresh(this->_inputWin);
+		BFLockUnlock(&this->_winlock);
 		break;
 	case kInterfaceStateDraft:
-		werase(this->_inputWin);
-		box(this->_inputWin, 0, 0); // Add a box around the display window
-		mvwprintw(this->_inputWin, 1, 1, userInput.cString());
-		wmove(this->_inputWin, 1, userInput.cursorPosition() + 1);
-		wrefresh(this->_inputWin);
+		int w, h;
+		getmaxyx(this->_inputWin, h, w);
+		int boxwidth = w - 2;
+		if (userInput.length() > boxwidth) { // change window to fit text
+			int off = (userInput.length() / boxwidth);
+			const int height = 3;
+			this->windowCreateModeEdit(w, height + off);
+		} else {
+			BFLockLock(&this->_winlock);
+			werase(this->_inputWin);
+			box(this->_inputWin, 0, 0); // Add a box around the display window
+			mvwprintw(this->_inputWin, 1, 1, userInput.cString());
+			wmove(this->_inputWin, 1, userInput.cursorPosition() + 1);
+			wrefresh(this->_inputWin);
+			BFLockUnlock(&this->_winlock);
+		}
 		break;
 	}
-	BFLockUnlock(&this->_winlock);
 
 	return 0;
 }

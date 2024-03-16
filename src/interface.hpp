@@ -71,10 +71,10 @@ private:
 	int windowUpdateInputWindowText(InputBuffer & userInput);
 
 	int windowCreateModeEdit();
+	int windowCreateModeEdit(int inputWinWidth, int inputWinHeight);
 	int windowCreateModeHelp();
 	int windowCreateModeCommand();
 	int windowCreateModeLobby();
-	int windowCreateModeCreateChatroom();
 	
 	static void displayWindowUpdateThread(void * in);
 
