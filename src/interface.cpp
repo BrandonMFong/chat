@@ -116,7 +116,7 @@ int InterfaceCraftChatLineFromMessage(const Message * msg, char * line) {
 	}
 }
 
-int _InterfaceFixTextInBoxedWindow(WINDOW * win, const char * text) {
+int _InterfaceFixTextInBoxedWindow(WINDOW * win, const char * text, int startingline) {
 	int w, h;
 	getmaxyx(win, h, w);
 	const int boxwidth = w - 2;
@@ -132,8 +132,8 @@ int _InterfaceFixTextInBoxedWindow(WINDOW * win, const char * text) {
 		}
 		strncpy(tmp, buf, num);
 		tmp[num] = '\0';
-		mvwprintw(win, i + 1, 1, tmp);
-		wmove(win, i + 1, strlen(tmp) + 1);
+		mvwprintw(win, i + startingline, 1, tmp);
+		wmove(win, i + startingline, strlen(tmp) + 1);
 
 		buf += boxwidth;
 	}
@@ -149,35 +149,10 @@ int _InterfaceDrawUserInputDraft(
 	InputBuffer & userInput
 ) {
 	BFLockLock(winlock);
-	/*
-	int w, h;
-	getmaxyx(inputwin, h, w);
-	const int boxwidth = w - 2;
-	const int lines = (userInput.length() / boxwidth) + 1;
-	*/
 	werase(inputwin);
 	box(inputwin, 0, 0);
 
-	/*
-	char * cstr = BFStringCopyString(userInput);
-	char * buf = cstr;
-	char tmp[boxwidth + 1];
-	for (int i = 0; i < lines; i++) {
-		int num = boxwidth;
-		if (strlen(buf) < num) {
-			num = strlen(buf);
-		}
-		strncpy(tmp, buf, num);
-		tmp[num] = '\0';
-		mvwprintw(inputwin, i + 1, 1, tmp);
-		wmove(inputwin, i + 1, strlen(tmp) + 1);
-
-		buf += boxwidth;
-	}
-
-	BFFree(cstr);
-	*/
-	_InterfaceFixTextInBoxedWindow(inputwin, userInput);
+	_InterfaceFixTextInBoxedWindow(inputwin, userInput, 1);
 
 	wrefresh(inputwin);
 
@@ -190,7 +165,14 @@ void _InterfaceDrawMessage(WINDOW * dispwin, int & row, int col, const Message *
 	if (m && dispwin) {
 		char line[kInterfaceConversationLineLength];
 		if (!InterfaceCraftChatLineFromMessage(m, line)) {
-			mvwprintw(dispwin, row--, 1, line);
+			int w, h;
+			getmaxyx(dispwin, h, w);
+			const int boxwidth = w - 2;
+			const int lines = (strlen(line) / boxwidth);
+			row -= lines;
+
+			_InterfaceFixTextInBoxedWindow(dispwin, line, row--);
+			//mvwprintw(dispwin, row--, 1, line);
 		}
 	}
 }
