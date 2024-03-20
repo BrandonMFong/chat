@@ -161,7 +161,15 @@ int _InterfaceDrawUserInputDraft(
 	return 0;
 }
 
-void _InterfaceDrawMessage(WINDOW * dispwin, int & row, int col, const Message * m) {
+/**
+ * row : gets modified 
+ */
+void _InterfaceDrawMessage(
+	WINDOW * dispwin,
+	int & row,
+	int col,
+	const Message * m
+) {
 	if (m && dispwin) {
 		char line[kInterfaceConversationLineLength];
 		if (!InterfaceCraftChatLineFromMessage(m, line)) {
@@ -171,12 +179,15 @@ void _InterfaceDrawMessage(WINDOW * dispwin, int & row, int col, const Message *
 			const int lines = (strlen(line) / boxwidth);
 			row -= lines;
 
-			_InterfaceFixTextInBoxedWindow(dispwin, line, row--);
-			//mvwprintw(dispwin, row--, 1, line);
+			// only print if we have space
+			if (row > 0) {
+				_InterfaceFixTextInBoxedWindow(dispwin, line, row--);
+			}
 		}
 	}
 }
 
+// this will write conversation from the bottom to the top
 int Interface::windowWriteConversation() {
 	if (this->_updateconversation.get() && this->_chatroom.get()) {
 		BFLockLock(&this->_winlock);
@@ -194,8 +205,9 @@ int Interface::windowWriteConversation() {
 
 		// write messages
 		int row = h - 2; // row to start the messages on (account for header and box)
+		const int rowtostop = 0;
 		List<Message *>::Node * n = this->_chatroom.unsafeget()->conversation.unsafeget().last();
-		while (n) {
+		while (n && (row > rowtostop)) {
 			Message * m = n->object();
 			
 			_InterfaceDrawMessage(this->_displayWin, row, 1, m);
