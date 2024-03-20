@@ -10,10 +10,15 @@
 
 #define CHAT_SOCKET_SERVER_PORT_NUM 9001
 
+namespace Chat {
 /**
  * returns our main socket
  */
-const char ChatSocketGetMode();
+const char SocketGetMode();
+
+int Main(int argc, char * argv[]);
+
+}
 
 #endif // CHAT_HPP
 

@@ -27,7 +27,7 @@ void _LogWriteEntry(BFFileWriter * filewriter, int mode, ...) {
 	BFDateTime dt = {0};
 	if (BFTimeGetCurrentDateTime(&dt)) return;
 
-	char sockmode = ChatSocketGetMode();
+	char sockmode = Chat::SocketGetMode();
 
 	switch (mode) {
 		case 'd': // debug

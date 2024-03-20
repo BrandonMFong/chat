@@ -19,6 +19,7 @@
 #include "message.hpp"
 #include "agentclient.hpp"
 #include "command.hpp"
+#include "permissions.hpp"
 
 using namespace BF;
 
@@ -598,20 +599,26 @@ int Interface::processinputStateLobby(InputBuffer & userInput) {
 			this->_returnfromhelpstate = this->_state;
 			this->_state = kInterfaceStateHelp;
 		} else if (!cmd.op().compareString(INTERFACE_COMMAND_CREATE)) { // create
-			char chatroomname[CHAT_ROOM_NAME_SIZE];
-			if (cmd.count() > 1) {
-				strncpy(chatroomname, cmd[1], CHAT_ROOM_NAME_SIZE);
+			if (!Permissions::CanCreateChatroom()) {
+				String * errmsg = String::createWithFormat("not permitted: you are not allowd to create a chatroom");
+				this->setErrorMessage(*errmsg);
+				BFRelease(errmsg);
 			} else {
-				// set up chat room name
-				//
-				// right now we are automatically creating a chatroom. The
-				// user should be able to customize the room name
-				snprintf(chatroomname, CHAT_ROOM_NAME_SIZE, "chatroom%d",
-						Chatroom::getChatroomsCount());
-			}
+				char chatroomname[CHAT_ROOM_NAME_SIZE];
+				if (cmd.count() > 1) {
+					strncpy(chatroomname, cmd[1], CHAT_ROOM_NAME_SIZE);
+				} else {
+					// set up chat room name
+					//
+					// right now we are automatically creating a chatroom. The
+					// user should be able to customize the room name
+					snprintf(chatroomname, CHAT_ROOM_NAME_SIZE, "chatroom%d",
+							Chatroom::getChatroomsCount());
+				}
 
-			Chatroom * cr = ChatroomServer::create(chatroomname);
-			BFRelease(cr);
+				Chatroom * cr = ChatroomServer::create(chatroomname);
+				BFRelease(cr);
+			}
 		} else if (!cmd.op().compareString(INTERFACE_COMMAND_JOIN)) { // join
 			int index = String::toi(cmd[1]) - 1;
 			if ((index >= 0) && (index < Chatroom::getChatroomsCount())) {

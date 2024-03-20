@@ -17,7 +17,7 @@ x.x
 [x] make ip and port configurable
 [x] notify when user joins/leaves chatroom
 [x] broadcast that chatroom list updated
-[] make sure command permissions are set
+[x] make sure command permissions are set
 [x] make error dialog
 [x] make sure multiple users can join
 [x] gracefully exit server after "quit"
