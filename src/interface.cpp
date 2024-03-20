@@ -120,7 +120,7 @@ void _InterfaceDrawMessage(WINDOW * dispwin, int & row, int col, const Message *
 	if (m && dispwin) {
 		char line[kInterfaceConversationLineLength];
 		if (!InterfaceCraftChatLineFromMessage(m, line)) {
-			mvwprintw(dispwin, (row++) + 1, 1, line);
+			mvwprintw(dispwin, row--, 1, line);
 		}
 	}
 }
@@ -132,18 +132,23 @@ int Interface::windowWriteConversation() {
 		this->_chatroom.lock();
 		this->_chatroom.unsafeget()->conversation.lock();
 
+		int w, h;
+		getmaxyx(this->_displayWin, h, w);
+		const int boxwidth = w - 2;
+		const int boxheight = h - 2;
+
 		werase(this->_displayWin);
 		box(this->_displayWin, 0, 0);
 
 		// write messages
-		int row = 0;
-		List<Message *>::Node * n = this->_chatroom.unsafeget()->conversation.unsafeget().first();
+		int row = h - 2; // row to start the messages on
+		List<Message *>::Node * n = this->_chatroom.unsafeget()->conversation.unsafeget().last();
 		while (n) {
 			Message * m = n->object();
 			
 			_InterfaceDrawMessage(this->_displayWin, row, 1, m);
 
-			n = n->next();
+			n = n->prev();
 		}
 
 		wrefresh(this->_displayWin);
