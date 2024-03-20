@@ -18,11 +18,11 @@ x.x
 [x] notify when user joins/leaves chatroom
 [x] broadcast that chatroom list updated
 [] make sure command permissions are set
-[] make error window
+[x] make error dialog
 [x] make sure multiple users can join
 [x] gracefully exit server after "quit"
 [x] ensure user data is shared when joining server
-[] message character limit
+[x] message character limit
 [x] make user list
 [] review for any leaks
 [x] make instream packet queue be application specific
