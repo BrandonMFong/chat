@@ -116,15 +116,78 @@ int InterfaceCraftChatLineFromMessage(const Message * msg, char * line) {
 	}
 }
 
-void _InterfaceDrawMessage(WINDOW * dispwin, int & row, int col, const Message * m) {
+int _InterfaceFixTextInBoxedWindow(WINDOW * win, const char * text, int startingline) {
+	int w, h;
+	getmaxyx(win, h, w);
+	const int boxwidth = w - 2;
+	const int lines = (strlen(text) / boxwidth) + 1;
+
+	char * cstr = BFStringCopyString(text);
+	char * buf = cstr;
+	char tmp[boxwidth + 1];
+	for (int i = 0; i < lines; i++) {
+		int num = boxwidth;
+		if (strlen(buf) < num) {
+			num = strlen(buf);
+		}
+		strncpy(tmp, buf, num);
+		tmp[num] = '\0';
+		mvwprintw(win, i + startingline, 1, tmp);
+		wmove(win, i + startingline, strlen(tmp) + 1);
+
+		buf += boxwidth;
+	}
+
+	BFFree(cstr);
+
+	return 0;
+}
+
+int _InterfaceDrawUserInputDraft(
+	BFLock * winlock,
+	WINDOW * inputwin,
+	InputBuffer & userInput
+) {
+	BFLockLock(winlock);
+	werase(inputwin);
+	box(inputwin, 0, 0);
+
+	_InterfaceFixTextInBoxedWindow(inputwin, userInput, 1);
+
+	wrefresh(inputwin);
+
+	BFLockUnlock(winlock);
+
+	return 0;
+}
+
+/**
+ * row : gets modified 
+ */
+void _InterfaceDrawMessage(
+	WINDOW * dispwin,
+	int & row,
+	int col,
+	const Message * m
+) {
 	if (m && dispwin) {
 		char line[kInterfaceConversationLineLength];
 		if (!InterfaceCraftChatLineFromMessage(m, line)) {
-			mvwprintw(dispwin, (row++) + 1, 1, line);
+			int w, h;
+			getmaxyx(dispwin, h, w);
+			const int boxwidth = w - 2;
+			const int lines = (strlen(line) / boxwidth);
+			row -= lines;
+
+			// only print if we have space
+			if (row > 0) {
+				_InterfaceFixTextInBoxedWindow(dispwin, line, row--);
+			}
 		}
 	}
 }
 
+// this will write conversation from the bottom to the top
 int Interface::windowWriteConversation() {
 	if (this->_updateconversation.get() && this->_chatroom.get()) {
 		BFLockLock(&this->_winlock);
@@ -132,18 +195,24 @@ int Interface::windowWriteConversation() {
 		this->_chatroom.lock();
 		this->_chatroom.unsafeget()->conversation.lock();
 
+		int w, h;
+		getmaxyx(this->_displayWin, h, w);
+		const int boxwidth = w - 2;
+		const int boxheight = h - 2;
+
 		werase(this->_displayWin);
 		box(this->_displayWin, 0, 0);
 
 		// write messages
-		int row = 0;
-		List<Message *>::Node * n = this->_chatroom.unsafeget()->conversation.unsafeget().first();
-		while (n) {
+		int row = h - 2; // row to start the messages on (account for header and box)
+		const int rowtostop = 0;
+		List<Message *>::Node * n = this->_chatroom.unsafeget()->conversation.unsafeget().last();
+		while (n && (row > rowtostop)) {
 			Message * m = n->object();
 			
 			_InterfaceDrawMessage(this->_displayWin, row, 1, m);
 
-			n = n->next();
+			n = n->prev();
 		}
 
 		wrefresh(this->_displayWin);
@@ -421,45 +490,6 @@ int Interface::windowCreateModeHelp() {
 	wrefresh(this->_helpWin); // Refresh the help window
 
 	BFLockUnlock(&this->_winlock);
-	return 0;
-}
-
-int _InterfaceDrawUserInputDraft(
-	BFLock * winlock,
-	WINDOW * inputwin,
-	InputBuffer & userInput
-) {
-	BFLockLock(winlock);
-	int w, h;
-	getmaxyx(inputwin, h, w);
-	const int boxwidth = w - 2;
-	const int lines = (userInput.length() / boxwidth) + 1;
-
-	werase(inputwin);
-	box(inputwin, 0, 0);
-
-	char * cstr = BFStringCopyString(userInput);
-	char * buf = cstr;
-	char tmp[boxwidth + 1];
-	for (int i = 0; i < lines; i++) {
-		int num = boxwidth;
-		if (strlen(buf) < num) {
-			num = strlen(buf);
-		}
-		strncpy(tmp, buf, num);
-		tmp[num] = '\0';
-		mvwprintw(inputwin, i + 1, 1, tmp);
-		wmove(inputwin, i + 1, strlen(tmp) + 1);
-
-		buf += boxwidth;
-	}
-
-	BFFree(cstr);
-
-	wrefresh(inputwin);
-
-	BFLockUnlock(winlock);
-
 	return 0;
 }
 
