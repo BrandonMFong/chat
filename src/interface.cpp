@@ -137,9 +137,13 @@ int Interface::windowWriteConversation() {
 
 		// write messages
 		int row = 0;
-		for (int i = 0; i < this->_chatroom.unsafeget()->conversation.unsafeget().count(); i++) {
-			Message * m = this->_chatroom.unsafeget()->conversation.unsafeget().objectAtIndex(i);
+		List<Message *>::Node * n = this->_chatroom.unsafeget()->conversation.unsafeget().first();
+		while (n) {
+			Message * m = n->object();
+			
 			_InterfaceDrawMessage(this->_displayWin, row, 1, m);
+
+			n = n->next();
 		}
 
 		wrefresh(this->_displayWin);
