@@ -420,6 +420,45 @@ int Interface::windowCreateModeHelp() {
 	return 0;
 }
 
+int _InterfaceDrawUserInputDraft(
+	BFLock * winlock,
+	WINDOW * inputwin,
+	InputBuffer & userInput
+) {
+	BFLockLock(winlock);
+	int w, h;
+	getmaxyx(inputwin, h, w);
+	const int boxwidth = w - 2;
+	const int lines = (userInput.length() / boxwidth) + 1;
+
+	werase(inputwin);
+	box(inputwin, 0, 0);
+
+	char * cstr = BFStringCopyString(userInput);
+	char * buf = cstr;
+	char tmp[boxwidth + 1];
+	for (int i = 0; i < lines; i++) {
+		int num = boxwidth;
+		if (strlen(buf) < num) {
+			num = strlen(buf);
+		}
+		strncpy(tmp, buf, num);
+		tmp[num] = '\0';
+		mvwprintw(inputwin, i + 1, 1, tmp);
+		wmove(inputwin, i + 1, strlen(tmp) + 1);
+
+		buf += boxwidth;
+	}
+
+	BFFree(cstr);
+
+	wrefresh(inputwin);
+
+	BFLockUnlock(winlock);
+
+	return 0;
+}
+
 int Interface::windowUpdateInputWindowText(InputBuffer & userInput) {
 	switch (this->_state.get()) {
 	case kInterfaceStateChatroom:
@@ -439,22 +478,16 @@ int Interface::windowUpdateInputWindowText(InputBuffer & userInput) {
 	case kInterfaceStateDraft:
 		int w, h;
 		getmaxyx(this->_inputWin, h, w);
+		const int boxwidth = w - 2;
+		const int lines = (userInput.length() / boxwidth) + 1;
 
 		// see if we need to expand the height for the input window
-		int boxwidth = w - 2;
-		if (userInput.length() > boxwidth) { // change window to fit text
-			int off = (userInput.length() / boxwidth);
-			const int height = 3;
-			this->windowCreateModeEdit(w, height + off);
+		if (lines > 1) { // change window to fit text
+			const int off = 2;
+			this->windowCreateModeEdit(w, lines + off);
 		}
-		
-		BFLockLock(&this->_winlock);
-		werase(this->_inputWin);
-		box(this->_inputWin, 0, 0); // Add a box around the display window
-		mvwprintw(this->_inputWin, 1, 1, userInput.cString());
-		wmove(this->_inputWin, 1, userInput.cursorPosition() + 1);
-		wrefresh(this->_inputWin);
-		BFLockUnlock(&this->_winlock);
+
+		_InterfaceDrawUserInputDraft(&this->_winlock, this->_inputWin, userInput);
 
 		break;
 	}
