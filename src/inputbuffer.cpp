@@ -28,6 +28,8 @@ int InputBuffer::addChar(int ch) {
 		this->_isready = true;
 		break;
 	case KEY_BACKSPACE:
+	case 127:
+	case '\b':
 		if (this->_cursorpos > 0) {
 			this->String::remCharAtIndex(this->_cursorpos - 1);
 			this->_cursorpos--;
