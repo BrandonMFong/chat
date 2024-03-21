@@ -90,7 +90,7 @@ int Chat::Main(int argc, char * argv[]) {
 	char ipaddr[SOCKET_IP4_ADDR_STRLEN];
 
 	// default ip addr is localhost
-	strncpy(ipaddr, INADDR_ANY, SOCKET_IP4_ADDR_STRLEN);
+	strncpy(ipaddr, "0.0.0.0", SOCKET_IP4_ADDR_STRLEN);
 
 	result = ArgumentsRead(argc, argv, &mode, ipaddr);
 
