@@ -4,6 +4,7 @@
  */
 
 #include "chatroomserver.hpp"
+#include "chat.hpp"
 #include "log.hpp"
 #include "agentserver.hpp"
 #include "user.hpp"

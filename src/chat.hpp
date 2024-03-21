@@ -10,6 +10,13 @@
 
 #define CHAT_SOCKET_SERVER_PORT_NUM 9001
 
+#ifdef MACOS
+#ifndef UUID_STR_LEN
+#include <uuid/uuid.h>
+#define UUID_STR_LEN sizeof(uuid_string_t)
+#endif // UUID_STR_LEN
+#endif
+
 namespace Chat {
 /**
  * returns our main socket
