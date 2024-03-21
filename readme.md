@@ -11,3 +11,8 @@ I always wanted to make a chat server. I want to make the experience easy such t
 	- Client asks server who they are
 	- Server responds with information
 
+## Development
+- Dependencies
+    - create an `external` folder at the base of the repo and clone these repos
+        - https://github.com/BrandonMFong/libs
+
