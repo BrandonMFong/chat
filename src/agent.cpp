@@ -319,6 +319,8 @@ void Agent::packetReceive(SocketEnvelope * envelope) {
 	case kPayloadTypeNotifyQuitApp:
 		agent->receivedPayloadTypeNotifyQuitApp(p);
 		break;
+	default:
+		break;
 	}
 
 	BFRelease(agent);

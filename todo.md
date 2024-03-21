@@ -24,6 +24,7 @@ x.x
 [x] ensure user data is shared when joining server
 [x] message character limit
 [x] make user list
-[] review for any leaks
+[x] review for any leaks
 [x] make instream packet queue be application specific
+[] backspace does not work on macos machines
 

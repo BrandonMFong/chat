@@ -106,9 +106,9 @@ int InterfaceCraftChatLineFromMessage(const Message * msg, char * line) {
 		}
 
 		if (msg->type() == kPayloadMessageTypeUserJoined) {
-			snprintf(line, kInterfaceConversationLineLength, "<<%s joined the chat>>", username, msg->data());
+			snprintf(line, kInterfaceConversationLineLength, "<<%s joined the chat>>", username);
 		} else if (msg->type() == kPayloadMessageTypeUserLeft) {
-			snprintf(line, kInterfaceConversationLineLength, "<<%s left the chat>>", username, msg->data());
+			snprintf(line, kInterfaceConversationLineLength, "<<%s left the chat>>", username);
 		}
 
 		return 0;
@@ -337,6 +337,8 @@ void Interface::displayWindowUpdateThread(void * in) {
 				interface->windowWriteConversation();
 				break;
 			}
+			default:
+				break;
 		}
 	}
 }
@@ -498,6 +500,7 @@ int Interface::windowUpdateInputWindowText(InputBuffer & userInput) {
 	switch (this->_state.get()) {
 	case kInterfaceStateChatroom:
 	case kInterfaceStateLobby:
+	{
 		BFLockLock(&this->_winlock);
 		werase(this->_inputWin);
 		if (this->_errorMessage.length() == 0) {
@@ -510,7 +513,9 @@ int Interface::windowUpdateInputWindowText(InputBuffer & userInput) {
 		wrefresh(this->_inputWin);
 		BFLockUnlock(&this->_winlock);
 		break;
+	}
 	case kInterfaceStateDraft:
+	{
 		int w, h;
 		getmaxyx(this->_inputWin, h, w);
 		const int boxwidth = w - 2;
@@ -526,21 +531,9 @@ int Interface::windowUpdateInputWindowText(InputBuffer & userInput) {
 
 		break;
 	}
-
-	return 0;
-}
-
-int Interface::windowStart() {
-	initscr(); // Initialize the library
-    cbreak();  // Line buffering disabled, pass on everything to me
-    noecho();  // Don't echo user input
-
-	return 0;
-}
-
-int Interface::windowStop() {
-	DELETE_WINDOWS;
-    endwin(); // End curses mode
+	default:
+		break;
+	}
 
 	return 0;
 }
@@ -561,6 +554,8 @@ int Interface::draw() {
 			break;
 		case kInterfaceStateHelp:
 			this->windowCreateModeHelp();
+			break;
+		default:
 			break;
 		}
 	}
@@ -701,6 +696,8 @@ int Interface::processinput(InputBuffer & userInput) {
 		this->_state = this->_returnfromhelpstate;
 		userInput.reset();
 		break;
+	default:
+		break;
 	}
 
 	return 0;
@@ -767,6 +764,21 @@ int Interface::gatherUserData() {
 
 	this->_user = User::create(username);
 	BFRelease(this->_user.get());
+
+	return 0;
+}
+
+int Interface::windowStart() {
+	initscr(); // Initialize the library
+    cbreak();  // Line buffering disabled, pass on everything to me
+    noecho();  // Don't echo user input
+
+	return 0;
+}
+
+int Interface::windowStop() {
+	DELETE_WINDOWS;
+    endwin(); // End curses mode
 
 	return 0;
 }

@@ -37,6 +37,8 @@ int InterfaceClient::draw() {
 			break;
 		case kInterfaceStateHelp:
 			break;
+		default:
+			break;
 		}
 	}
 
