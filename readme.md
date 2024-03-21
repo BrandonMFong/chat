@@ -3,13 +3,24 @@
 ## Description
 I always wanted to make a chat server. I want to make the experience easy such that people that want to chat can just use nc or telnet
 
+## Usage
+Lobby:
+![lobby](docs/lobby.png)
+
+Chatroom:
+![chatroom](docs/chatroom.png)
+
+- launch
+	- as server: `chat server`
+	- as client: `chat -ip4 <server's ip address>`
+- for help, enter `help` command
+
 ## Protocol
 - Handshake
-	- Client connects to server
-	- Server asks client who they are
-	- Client responds with information
-	- Client asks server who they are
-	- Server responds with information
+    - Server and Client exchange information
+- Message exchange
+- Termination
+    - User intending to leave will notify all users on server that they are leaving
 
 ## Development
 - Dependencies
