@@ -16,7 +16,7 @@
 #include "office.hpp"
 #include "agent.hpp"
 #include <bflibcpp/bflibcpp.hpp>
-
+#include <netinet/ip.h>
 #define ARGUMENT_SERVER "server"
 #define ARGUMENT_CLIENT "client"
 #define ARGUMENT_IP4_ADDRESS "-ip4"
@@ -90,7 +90,7 @@ int Chat::Main(int argc, char * argv[]) {
 	char ipaddr[SOCKET_IP4_ADDR_STRLEN];
 
 	// default ip addr is localhost
-	strncpy(ipaddr, "0.0.0.0", SOCKET_IP4_ADDR_STRLEN);
+	strncpy(ipaddr, INADDR_ANY, SOCKET_IP4_ADDR_STRLEN);
 
 	result = ArgumentsRead(argc, argv, &mode, ipaddr);
 
