@@ -26,5 +26,5 @@ x.x
 [x] make user list
 [x] review for any leaks
 [x] make instream packet queue be application specific
-[] backspace does not work on macos machines
+[x] backspace does not work on macos machines
 
