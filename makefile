@@ -7,6 +7,7 @@ include external/libs/makefiles/libpaths.mk
 ### Global
 BUILD_PATH = build
 CXXLINKS = -lpthread -lncurses -luuid
+CXXSTD = -std=c++20
 
 FILES = \
 server client interface socket \
@@ -17,7 +18,7 @@ chatroomclient interfaceserver interfaceclient command \
 envelope buffer permissions chat
 
 ### Release settings
-R_CXXFLAGS += -Isrc/ -Iexternal/libs/$(BF_LIB_RPATH_RELEASE)
+R_CXXFLAGS += -Isrc/ -Iexternal/libs/$(BF_LIB_RPATH_RELEASE) $(CXXSTD)
 R_BIN_NAME = chat
 R_BUILD_PATH = $(BUILD_PATH)/release
 R_MAIN_FILE = src/main.cpp
@@ -26,7 +27,7 @@ R_OBJECTS = $(patsubst %, $(R_BUILD_PATH)/%.o, $(FILES))
 
 ### Debug settings
 D_ADDR_SANITIZER = -fsanitize=address
-D_CXXFLAGS = -DDEBUG -g -Isrc/ -Iexternal/libs/$(BF_LIB_RPATH_DEBUG) $(D_ADDR_SANITIZER)
+D_CXXFLAGS = -DDEBUG -g -Isrc/ -Iexternal/libs/$(BF_LIB_RPATH_DEBUG) $(D_ADDR_SANITIZER) $(CXXSTD)
 D_BIN_NAME = $(R_BIN_NAME)-debug
 D_BUILD_PATH = $(BUILD_PATH)/debug
 D_MAIN_FILE = $(R_MAIN_FILE)
