@@ -144,24 +144,6 @@ int _InterfaceFixTextInBoxedWindow(WINDOW * win, const char * text, int starting
 	return 0;
 }
 
-int _InterfaceDrawUserInputDraft(
-	BFLock * winlock,
-	WINDOW * inputwin,
-	InputBuffer & userInput
-) {
-	BFLockLock(winlock);
-	werase(inputwin);
-	box(inputwin, 0, 0);
-
-	_InterfaceFixTextInBoxedWindow(inputwin, userInput, 1);
-
-	wrefresh(inputwin);
-
-	BFLockUnlock(winlock);
-
-	return 0;
-}
-
 /**
  * row : gets modified 
  */
@@ -171,19 +153,20 @@ void _InterfaceDrawMessage(
 	int col,
 	const Message * m
 ) {
-	if (m && dispwin) {
-		char line[kInterfaceConversationLineLength];
-		if (!InterfaceCraftChatLineFromMessage(m, line)) {
-			int w, h;
-			getmaxyx(dispwin, h, w);
-			const int boxwidth = w - 2;
-			const int lines = (strlen(line) / boxwidth);
-			row -= lines;
+	if (m && dispwin)
+		return;
 
-			// only print if we have space
-			if (row > 0) {
-				_InterfaceFixTextInBoxedWindow(dispwin, line, row--);
-			}
+	char line[kInterfaceConversationLineLength];
+	if (!InterfaceCraftChatLineFromMessage(m, line)) {
+		int w, h;
+		getmaxyx(dispwin, h, w);
+		const int boxwidth = w - 2;
+		const int lines = (strlen(line) / boxwidth);
+		row -= lines;
+
+		// only print if we have space
+		if (row > 0) {
+			_InterfaceFixTextInBoxedWindow(dispwin, line, row--);
 		}
 	}
 }
@@ -493,6 +476,24 @@ int Interface::windowCreateModeHelp() {
 	wrefresh(this->_helpWin); // Refresh the help window
 
 	BFLockUnlock(&this->_winlock);
+	return 0;
+}
+
+int _InterfaceDrawUserInputDraft(
+	BFLock * winlock,
+	WINDOW * inputwin,
+	InputBuffer & userInput
+) {
+	BFLockLock(winlock);
+	werase(inputwin);
+	box(inputwin, 0, 0);
+
+	_InterfaceFixTextInBoxedWindow(inputwin, userInput, 1);
+
+	wrefresh(inputwin);
+
+	BFLockUnlock(winlock);
+
 	return 0;
 }
 
