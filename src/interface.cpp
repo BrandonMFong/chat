@@ -434,7 +434,7 @@ int Interface::windowCreateModeCommand() {
 	return 0;
 }
 
-int Interface::windowCreateModeEdit(int inputWinWidth, int inputWinHeight) {
+int Interface::windowCreateStateDraft(int inputWinWidth, int inputWinHeight) {
 	BFLockLock(&this->_winlock);
 
 	DELETE_WINDOWS;
@@ -467,10 +467,10 @@ int Interface::windowCreateModeEdit(int inputWinWidth, int inputWinHeight) {
 	return 0;
 }
 
-int Interface::windowCreateModeEdit() {
+int Interface::windowCreateStateDraft() {
 	int inputWinWidth = COLS;
    	int inputWinHeight = 3;
-	return this->windowCreateModeEdit(inputWinWidth, inputWinHeight);
+	return this->windowCreateStateDraft(inputWinWidth, inputWinHeight);
 }
 
 int Interface::windowCreateModeHelp() {
@@ -524,7 +524,7 @@ int Interface::windowUpdateInputWindowText(InputBuffer & userInput) {
 		// see if we need to expand the height for the input window
 		if (lines > 1) { // change window to fit text
 			const int off = 2;
-			this->windowCreateModeEdit(w, lines + off);
+			this->windowCreateStateDraft(w, lines + off);
 		}
 
 		_InterfaceDrawUserInputDraft(&this->_winlock, this->_inputWin, userInput);
@@ -550,7 +550,7 @@ int Interface::draw() {
 			this->windowCreateModeCommand();
 			break;
 		case kInterfaceStateDraft:
-			this->windowCreateModeEdit();
+			this->windowCreateStateDraft();
 			break;
 		case kInterfaceStateHelp:
 			this->windowCreateModeHelp();

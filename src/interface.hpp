@@ -70,8 +70,8 @@ private:
 
 	int windowUpdateInputWindowText(InputBuffer & userInput);
 
-	int windowCreateModeEdit();
-	int windowCreateModeEdit(int inputWinWidth, int inputWinHeight);
+	int windowCreateStateDraft();
+	int windowCreateStateDraft(int inputWinWidth, int inputWinHeight);
 	int windowCreateModeHelp();
 	int windowCreateModeCommand();
 	int windowCreateModeLobby();
