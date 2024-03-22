@@ -185,7 +185,6 @@ int Interface::windowWriteConversation() {
 		const int boxheight = h - 2;
 
 		werase(this->_displayWin);
-		box(this->_displayWin, 0, 0);
 
 		// write messages
 		int row = h - 2; // row to start the messages on (account for header and box)
@@ -199,6 +198,7 @@ int Interface::windowWriteConversation() {
 			n = n->prev();
 		}
 
+		box(this->_displayWin, 0, 0);
 		wrefresh(this->_displayWin);
 		
 		this->_updateconversation.unsafeset(false);
