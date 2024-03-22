@@ -166,6 +166,12 @@ void Socket::outStream(void * in) {
 	BFRelease(skt);
 }
 
+int Socket::queueEnvelope(SocketEnvelope * e) {
+	int error = this->_outq.get().push(e);
+	BFLockRelease(&this->_outqlock);
+	return error;
+}
+
 // called by subclasses whenever they get a new connection
 int Socket::startInStreamForConnection(SocketConnection * sc) {
 	if (!sc) return 1;

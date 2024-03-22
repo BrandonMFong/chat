@@ -6,6 +6,8 @@ x.x
 [] encryption
 
 0.1
+[] fix cpu usage
+[] figure out why macos ui is buggy when message is sent
 [x] chatrooms
 [x] create chatroom
 [x] join chatroom

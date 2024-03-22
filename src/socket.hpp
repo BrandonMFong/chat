@@ -115,6 +115,8 @@ private:
 	 * sends packets out
 	 */
 	static void outStream(void * in);
+	
+	int queueEnvelope(SocketEnvelope * e);
 
 	BF::Atomic<BF::List<BFThreadAsyncID>> _tidin;
 	BFThreadAsyncID _tidout;

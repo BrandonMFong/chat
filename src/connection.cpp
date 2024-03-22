@@ -60,8 +60,7 @@ int SocketConnection::queueData(const void * data, size_t size) {
 	memcpy(envelope->buf()->_data, data, envelope->buf()->size());
 
 	// queue up envelope
-	int error = this->_sktref->_outq.get().push(envelope);
-	BFLockRelease(&this->_sktref->_outqlock);
+	int error = this->_sktref->queueEnvelope(envelope);
 
 	return error;
 }
