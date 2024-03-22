@@ -61,6 +61,8 @@ int SocketConnection::queueData(const void * data, size_t size) {
 
 	// queue up envelope
 	int error = this->_sktref->_outq.get().push(envelope);
+	BFLockRelease(&this->_sktref->_outqlock);
+
 	return error;
 }
 

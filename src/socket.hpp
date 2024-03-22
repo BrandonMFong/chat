@@ -28,7 +28,13 @@ class Socket : public BF::Object {
 public: 
 	static Socket * shared();
 
-	static Socket * create(const char mode, const char * ipaddr, uint16_t port, int * err);
+	static Socket * create(
+		const char mode,
+		const char * ipaddr,
+		uint16_t port,
+		int * err
+	);
+
 	virtual ~Socket();
 
 	/**
@@ -126,6 +132,7 @@ private:
 	 * each envelope will get released after pop
 	 */
 	BF::Atomic<BF::Queue<SocketEnvelope *>> _outq;
+	BFLock _outqlock;
 
 	uint16_t _portnum;
 	char _ip4addr[SOCKET_IP4_ADDR_STRLEN];

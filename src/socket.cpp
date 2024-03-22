@@ -39,6 +39,8 @@ Socket::Socket() {
 	this->_portnum = 0;
 	memset(this->_ip4addr, 0, SOCKET_IP4_ADDR_STRLEN);
 
+	BFLockCreate(&this->_outqlock);
+
 	_sharedSocket = this;
 }
 
@@ -51,6 +53,7 @@ Socket::~Socket() {
 	this->_tidin.unlock();
 
 	BFThreadAsyncDestroy(this->_tidout);
+	BFLockDestroy(&this->_outqlock);
 }
 
 Socket * Socket::create(const char mode, const char * ipaddr, uint16_t port, int * err) {
@@ -144,6 +147,7 @@ void Socket::outStream(void * in) {
 	BFRetain(skt);
 
 	while (!BFThreadAsyncIsCanceled(skt->_tidout)) {
+		BFLockWait(&skt->_outqlock);
 		skt->_outq.lock();
 		// if queue is not empty, send the next message
 		if (!skt->_outq.unsafeget().empty()) {
