@@ -401,7 +401,7 @@ int Interface::windowCreateModeLobby() {
 	return 0;
 }
 
-int Interface::windowCreateModeCommand() {
+int Interface::windowCreateStateChatroom() {
 	// change to normal mode
 	BFLockLock(&this->_winlock);
 
@@ -547,7 +547,7 @@ int Interface::draw() {
 			this->windowCreateModeLobby();
 			break;
 		case kInterfaceStateChatroom:
-			this->windowCreateModeCommand();
+			this->windowCreateStateChatroom();
 			break;
 		case kInterfaceStateDraft:
 			this->windowCreateStateDraft();

@@ -73,7 +73,7 @@ private:
 	int windowCreateStateDraft();
 	int windowCreateStateDraft(int inputWinWidth, int inputWinHeight);
 	int windowCreateModeHelp();
-	int windowCreateModeCommand();
+	int windowCreateStateChatroom();
 	int windowCreateModeLobby();
 	
 	static void displayWindowUpdateThread(void * in);
