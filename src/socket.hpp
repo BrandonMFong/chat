@@ -116,7 +116,7 @@ private:
 	 */
 	//static void outStream(void * in);
 	
-	int queueEnvelope(SocketEnvelope & e);
+	//int queueEnvelope(SocketEnvelope & e);
 
 	BF::Atomic<BF::List<BFThreadAsyncID>> _tidin;
 	//BFThreadAsyncID _tidout;

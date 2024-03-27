@@ -54,12 +54,10 @@ int SocketConnection::queueData(const void * data, size_t size) {
 	if (!data) return -2;
 
 	// make envelope
-	SocketEnvelope envelope(this, size);
-
-	memcpy(envelope.buf()->_data, data, envelope.buf()->size());
+	SocketBuffer buf(data, size);
 
 	// queue up envelope
-	int error = this->_sktref->queueEnvelope(envelope);
+	int error = this->sendData(&buf);
 
 	return error;
 }

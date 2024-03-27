@@ -13,7 +13,7 @@ class SocketConnection;
 class SocketBuffer : public BF::Object {
 	friend class SocketConnection;
 public:
-	SocketBuffer(size_t size);
+	SocketBuffer(const void * data, size_t size);
 	virtual ~SocketBuffer();
 
 	const void * data() const;

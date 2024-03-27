@@ -27,8 +27,6 @@ Socket * Socket::shared() {
 }
 
 Socket::Socket() { 
-	//this->_tidout = NULL;
-
 	this->_cbinstream = NULL;
 	this->_cbnewconn = NULL;
 
@@ -52,7 +50,6 @@ Socket::~Socket() {
 	}
 	this->_tidin.unlock();
 
-	//BFThreadAsyncDestroy(this->_tidout);
 	BFLockDestroy(&this->_outqlock);
 }
 
@@ -141,44 +138,6 @@ void Socket::inStream(void * in) {
 	BFRelease(tools);
 }
 
-/*
-void Socket::outStream(void * in) {
-	Socket * skt = (Socket *) in;
-	const BFTime waitfreq = 1.0;
-	BFRetain(skt);
-
-	while (!BFThreadAsyncIsCanceled(skt->_tidout)) {
-		skt->_outq.lock();
-		// if queue is not empty, send the next message
-		if (!skt->_outq.unsafeget().empty()) {
-			// get top data
-			SocketEnvelope * envelope = skt->_outq.unsafeget().front();
-
-			// pop data from queue
-			skt->_outq.unsafeget().pop();
-			
-			envelope->connection()->sendData(&envelope->_buf);
-			BFRelease(envelope);
-		}
-		skt->_outq.unlock();
-	}
-
-	BFRelease(skt);
-}
-*/
-
-int Socket::queueEnvelope(SocketEnvelope & e) {
-	/*
-	int error = this->_outq.get().push(e);
-	BFLockRelease(&this->_outqlock);
-	*/
-	BFLockLock(&this->_outqlock);
-	e.connection()->sendData(&e._buf);
-	BFLockUnlock(&this->_outqlock);
-
-	return 0;
-}
-
 // called by subclasses whenever they get a new connection
 int Socket::startInStreamForConnection(SocketConnection * sc) {
 	if (!sc) return 1;
@@ -195,13 +154,6 @@ int Socket::startInStreamForConnection(SocketConnection * sc) {
 
 int Socket::start() {
 	this->_start();
-
-	// out stream uses `send`
-	//
-	// we can use this object and iterate through the connections
-	// array to send the same packet at the top of the queue
-	//this->_tidout = BFThreadAsync(Socket::outStream, (void *) this);
-
 	return 0;
 }
 
@@ -233,13 +185,6 @@ int Socket::stop() {
 		}
 		this->_tidin.unlock();
 	}
-
-	/*
-	if (!error && this->_tidout) {
-		error = BFThreadAsyncCancel(this->_tidout);
-		BFThreadAsyncWait(this->_tidout);
-	}
-	*/
 
 	return error;
 }
