@@ -153,7 +153,7 @@ void _InterfaceDrawMessage(
 	int col,
 	const Message * m
 ) {
-	if (m && dispwin)
+	if (!m || !dispwin)
 		return;
 
 	char line[kInterfaceConversationLineLength];
