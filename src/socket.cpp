@@ -27,7 +27,7 @@ Socket * Socket::shared() {
 }
 
 Socket::Socket() { 
-	this->_tidout = NULL;
+	//this->_tidout = NULL;
 
 	this->_cbinstream = NULL;
 	this->_cbnewconn = NULL;
@@ -52,7 +52,7 @@ Socket::~Socket() {
 	}
 	this->_tidin.unlock();
 
-	BFThreadAsyncDestroy(this->_tidout);
+	//BFThreadAsyncDestroy(this->_tidout);
 	BFLockDestroy(&this->_outqlock);
 }
 
@@ -141,13 +141,13 @@ void Socket::inStream(void * in) {
 	BFRelease(tools);
 }
 
+/*
 void Socket::outStream(void * in) {
 	Socket * skt = (Socket *) in;
-
+	const BFTime waitfreq = 1.0;
 	BFRetain(skt);
 
 	while (!BFThreadAsyncIsCanceled(skt->_tidout)) {
-		BFLockWait(&skt->_outqlock);
 		skt->_outq.lock();
 		// if queue is not empty, send the next message
 		if (!skt->_outq.unsafeget().empty()) {
@@ -165,11 +165,18 @@ void Socket::outStream(void * in) {
 
 	BFRelease(skt);
 }
+*/
 
-int Socket::queueEnvelope(SocketEnvelope * e) {
+int Socket::queueEnvelope(SocketEnvelope & e) {
+	/*
 	int error = this->_outq.get().push(e);
 	BFLockRelease(&this->_outqlock);
-	return error;
+	*/
+	BFLockLock(&this->_outqlock);
+	e.connection()->sendData(&e._buf);
+	BFLockUnlock(&this->_outqlock);
+
+	return 0;
 }
 
 // called by subclasses whenever they get a new connection
@@ -193,7 +200,7 @@ int Socket::start() {
 	//
 	// we can use this object and iterate through the connections
 	// array to send the same packet at the top of the queue
-	this->_tidout = BFThreadAsync(Socket::outStream, (void *) this);
+	//this->_tidout = BFThreadAsync(Socket::outStream, (void *) this);
 
 	return 0;
 }
@@ -227,10 +234,12 @@ int Socket::stop() {
 		this->_tidin.unlock();
 	}
 
+	/*
 	if (!error && this->_tidout) {
 		error = BFThreadAsyncCancel(this->_tidout);
 		BFThreadAsyncWait(this->_tidout);
 	}
+	*/
 
 	return error;
 }

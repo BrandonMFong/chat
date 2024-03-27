@@ -114,12 +114,12 @@ private:
 	/**
 	 * sends packets out
 	 */
-	static void outStream(void * in);
+	//static void outStream(void * in);
 	
-	int queueEnvelope(SocketEnvelope * e);
+	int queueEnvelope(SocketEnvelope & e);
 
 	BF::Atomic<BF::List<BFThreadAsyncID>> _tidin;
-	BFThreadAsyncID _tidout;
+	//BFThreadAsyncID _tidout;
 
 	/**
 	 * holds expected buffer size for all incoming and outcoming data
@@ -133,7 +133,7 @@ private:
 	 *
 	 * each envelope will get released after pop
 	 */
-	BF::Atomic<BF::Queue<SocketEnvelope *>> _outq;
+	//BF::Atomic<BF::Queue<SocketEnvelope *>> _outq;
 	BFLock _outqlock;
 
 	uint16_t _portnum;
