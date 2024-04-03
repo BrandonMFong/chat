@@ -19,6 +19,7 @@
 using namespace BF;
 
 Atomic<Queue<SocketEnvelope *>> inbox;
+BFLock inboxlock;
 BFThreadAsyncID _tid = NULL;
 
 int Office::quitApplication(const User * user) {
@@ -37,11 +38,14 @@ void Office::packetReceive(SocketEnvelope * envelope) {
 	// push into queue
 	BFRetain(envelope);
 	inbox.get().push(envelope);
+	BFLockRelease(&inboxlock);
 }
 
 void _OfficeInDataWorkerThread(void * in) {
 	while (!BFThreadAsyncIsCanceled(_tid)) {
-		if (!inbox.get().empty()) {
+		if (inbox.get().empty()) { 
+			BFLockWait(&inboxlock);
+		} else {
 			inbox.lock();
 
 			// get first item from the queue
@@ -63,13 +67,16 @@ void _OfficeInDataWorkerThread(void * in) {
 
 int Office::start() {
 	_tid = BFThreadAsync(_OfficeInDataWorkerThread, NULL);
+	BFLockCreate(&inboxlock);
 	return 0;
 }
 
 int Office::stop() {
+	BFLockRelease(&inboxlock);
 	BFThreadAsyncCancel(_tid);
 	BFThreadAsyncWait(_tid);
 	BFThreadAsyncDestroy(_tid);
+	BFLockDestroy(&inboxlock);
 	return 0;
 }
 

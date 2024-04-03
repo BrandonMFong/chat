@@ -10,8 +10,6 @@
 #include "agent_tests.hpp"
 #include "log.hpp"
 
-LOG_INIT
-
 int main() {
 	TEST_SUITE_START;
 
