@@ -126,6 +126,8 @@ void Socket::inStream(void * in) {
 		SocketEnvelope * envelope = new SocketEnvelope(sc, skt->_bufferSize);
 
 		// receive data from connections using buffer
+		//
+		// this gets blocked until we receive something
 		int err = sc->recvData(&envelope->_buf);
         if (!err && skt->_cbinstream) {
 			skt->_cbinstream(envelope);

@@ -44,10 +44,12 @@ Interface::Interface() {
 	this->_user = NULL;
 
 	BFLockCreate(&this->_winlock);
+	BFLockCreate(&this->_uistoplight);
 }
 
 Interface::~Interface() {
 	BFLockDestroy(&this->_winlock);
+	BFLockDestroy(&this->_uistoplight);
 	Object::release(this->_chatroom.get());
 }
 
@@ -63,15 +65,21 @@ Interface * Interface::create(char mode) {
 }
 
 void Interface::userListHasChanged() {
-	this->_updatelobby = true;
+	this->lobbyHasChanged();
 }
 
 void Interface::chatroomListHasChanged() {
+	this->lobbyHasChanged();
+}
+
+void Interface::lobbyHasChanged() {
 	this->_updatelobby = true;
+	BFLockRelease(&this->_uistoplight);
 }
 
 void Interface::converstaionHasChanged() {
 	this->_updateconversation = true;
+	BFLockRelease(&this->_uistoplight);
 }
 
 InterfaceState Interface::currstate() {
@@ -323,6 +331,11 @@ void Interface::displayWindowUpdateThread(void * in) {
 			default:
 				break;
 		}
+
+		// this should get released when something has changed
+		//
+		// see header
+		BFLockWait(&interface->_uistoplight);
 	}
 }
 
@@ -378,6 +391,7 @@ int Interface::windowCreateModeLobby() {
 	nodelay(this->_inputWin, false); // Set blocking input for input window
 	
 	this->_updatelobby = true;
+	BFLockRelease(&this->_uistoplight);
 
 	BFLockUnlock(&this->_winlock);
 
@@ -410,7 +424,7 @@ int Interface::windowCreateStateChatroom() {
 	keypad(this->_inputWin, true); // Enable special keys in input window
 	nodelay(this->_inputWin, false); // Set blocking input for input window
 
-	this->_updateconversation = true;
+	this->converstaionHasChanged();
 
 	BFLockUnlock(&this->_winlock);
 
@@ -443,7 +457,7 @@ int Interface::windowCreateStateDraft(int inputWinWidth, int inputWinHeight) {
 	keypad(this->_inputWin, true); // Enable special keys in input window
 	nodelay(this->_inputWin, false); // Set blocking input for input window
 	
-	this->_updateconversation = true;
+	this->converstaionHasChanged();
 
 	BFLockUnlock(&this->_winlock);
 
@@ -655,7 +669,7 @@ int Interface::processinputStateChatroom(InputBuffer & userInput) {
 			this->_state = kInterfaceStateHelp;
 		} else if (!cmd.op().compareString(INTERFACE_COMMAND_DRAFT)) { // draft
 			this->_state = kInterfaceStateDraft;
-			this->_updateconversation = true;
+			this->converstaionHasChanged();
 		} else {
 			String * errmsg = String::createWithFormat("unknown command: %s", cmd.op().cString());
 			this->setErrorMessage(*errmsg);
@@ -725,6 +739,8 @@ int Interface::windowLoop() {
 		// act on current input state
 		this->processinput(userInput);
     }
+
+	BFLockRelease(&this->_uistoplight);
 
 	BFThreadAsyncCancel(tid);
 	BFThreadAsyncWait(tid);
