@@ -2,3 +2,5 @@
 * Decided to isolate the `Socket` class. May be a good idea to pluck this work out into its own library
 * Each socket connection will have their own dedicated thread that polls the `recv` call.  This allows us to concurrently handle incoming data from multiple correspondents
 * Each socket connection will have an agent representing the remote user on the other end. Having an agent seems to be the best way to id a user by the socket connection. I view an agent like a lawyer representing a client.
+* I was using while loops to poll events like ui changes, incoming packets, etc. However, I make it efficient. The loops would constantly loop without any sort of waiting on an event. This made my computer overheat put the cpu usage up to 300% percent. To overcome this, I used my BFLock objects to do a wait/release on the loops/events. This reduced the cpu usage to 5% lol
+
