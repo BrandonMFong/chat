@@ -36,6 +36,7 @@ Interface::Interface() {
 	this->_inputWin = NULL;
 	this->_displayWin = NULL;
 	this->_helpWin = NULL;
+	this->_headerWin = NULL;
 	this->_chatroom = NULL;
 	this->_state = kInterfaceStateUnknown;
 	this->_prevstate = kInterfaceStateUnknown;
@@ -340,14 +341,14 @@ void Interface::displayWindowUpdateThread(void * in) {
 }
 
 #define DELETE_WINDOWS \
-	if (this->_inputWin) \
-		delwin(this->_inputWin); \
-	if (this->_displayWin) \
-		delwin(this->_displayWin); \
-	if (this->_helpWin) \
-		delwin(this->_helpWin); \
-	if (this->_headerWin) \
-		delwin(this->_headerWin);
+	if (this->_inputWin) {\
+		werase(this->_inputWin);delwin(this->_inputWin); }\
+	if (this->_displayWin) {\
+		werase(this->_displayWin);delwin(this->_displayWin); }\
+	if (this->_helpWin) {\
+		werase(this->_helpWin);delwin(this->_helpWin); }\
+	if (this->_headerWin) {\
+		werase(this->_headerWin);delwin(this->_headerWin);}
 
 int Interface::drawDisplayWindowLobby() {
 	int w, h;
