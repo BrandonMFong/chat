@@ -62,7 +62,7 @@ void Server::pollthread(void * in) {
 	BFRetain(s);
 
 	while (!BFThreadAsyncIsCanceled(s->_pollt)) {
-		int csock = accept(s->_mainSocket, NULL, NULL);
+		int csock = accept(s->_mainSocket, NULL, NULL); // this blocks
 
 		int err = 0;
 		SocketConnection * sc = new SocketConnection(csock, s);

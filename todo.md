@@ -6,6 +6,8 @@ x.x
 [] encryption
 
 0.1
+[x] fix cpu usage. possibly make all while loops more efficient by using locks
+[] figure out why macos ui is buggy when message is sent
 [x] chatrooms
 [x] create chatroom
 [x] join chatroom

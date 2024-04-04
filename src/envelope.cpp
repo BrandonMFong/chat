@@ -8,7 +8,7 @@
 #include "buffer.hpp"
 #include <bflibcpp/bflibcpp.hpp>
 
-SocketEnvelope::SocketEnvelope(SocketConnection * sc, size_t bufsize) : _buf(bufsize) {
+SocketEnvelope::SocketEnvelope(SocketConnection * sc, size_t bufsize) : _buf(0, bufsize) {
 	this->_sc = sc;
 	BFRetain(this->_sc);
 }

@@ -44,10 +44,12 @@ Interface::Interface() {
 	this->_user = NULL;
 
 	BFLockCreate(&this->_winlock);
+	BFLockCreate(&this->_uistoplight);
 }
 
 Interface::~Interface() {
 	BFLockDestroy(&this->_winlock);
+	BFLockDestroy(&this->_uistoplight);
 	Object::release(this->_chatroom.get());
 }
 
@@ -63,15 +65,21 @@ Interface * Interface::create(char mode) {
 }
 
 void Interface::userListHasChanged() {
-	this->_updatelobby = true;
+	this->lobbyHasChanged();
 }
 
 void Interface::chatroomListHasChanged() {
+	this->lobbyHasChanged();
+}
+
+void Interface::lobbyHasChanged() {
 	this->_updatelobby = true;
+	BFLockRelease(&this->_uistoplight);
 }
 
 void Interface::converstaionHasChanged() {
 	this->_updateconversation = true;
+	BFLockRelease(&this->_uistoplight);
 }
 
 InterfaceState Interface::currstate() {
@@ -144,24 +152,6 @@ int _InterfaceFixTextInBoxedWindow(WINDOW * win, const char * text, int starting
 	return 0;
 }
 
-int _InterfaceDrawUserInputDraft(
-	BFLock * winlock,
-	WINDOW * inputwin,
-	InputBuffer & userInput
-) {
-	BFLockLock(winlock);
-	werase(inputwin);
-	box(inputwin, 0, 0);
-
-	_InterfaceFixTextInBoxedWindow(inputwin, userInput, 1);
-
-	wrefresh(inputwin);
-
-	BFLockUnlock(winlock);
-
-	return 0;
-}
-
 /**
  * row : gets modified 
  */
@@ -171,19 +161,20 @@ void _InterfaceDrawMessage(
 	int col,
 	const Message * m
 ) {
-	if (m && dispwin) {
-		char line[kInterfaceConversationLineLength];
-		if (!InterfaceCraftChatLineFromMessage(m, line)) {
-			int w, h;
-			getmaxyx(dispwin, h, w);
-			const int boxwidth = w - 2;
-			const int lines = (strlen(line) / boxwidth);
-			row -= lines;
+	if (!m || !dispwin)
+		return;
 
-			// only print if we have space
-			if (row > 0) {
-				_InterfaceFixTextInBoxedWindow(dispwin, line, row--);
-			}
+	char line[kInterfaceConversationLineLength];
+	if (!InterfaceCraftChatLineFromMessage(m, line)) {
+		int w, h;
+		getmaxyx(dispwin, h, w);
+		const int boxwidth = w - 2;
+		const int lines = (strlen(line) / boxwidth);
+		row -= lines;
+
+		// only print if we have space
+		if (row > 0) {
+			_InterfaceFixTextInBoxedWindow(dispwin, line, row--);
 		}
 	}
 }
@@ -202,7 +193,6 @@ int Interface::windowWriteConversation() {
 		const int boxheight = h - 2;
 
 		werase(this->_displayWin);
-		box(this->_displayWin, 0, 0);
 
 		// write messages
 		int row = h - 2; // row to start the messages on (account for header and box)
@@ -216,6 +206,7 @@ int Interface::windowWriteConversation() {
 			n = n->prev();
 		}
 
+		box(this->_displayWin, 0, 0);
 		wrefresh(this->_displayWin);
 		
 		this->_updateconversation.unsafeset(false);
@@ -340,6 +331,11 @@ void Interface::displayWindowUpdateThread(void * in) {
 			default:
 				break;
 		}
+
+		// this should get released when something has changed
+		//
+		// see header
+		BFLockWait(&interface->_uistoplight);
 	}
 }
 
@@ -395,13 +391,14 @@ int Interface::windowCreateModeLobby() {
 	nodelay(this->_inputWin, false); // Set blocking input for input window
 	
 	this->_updatelobby = true;
+	BFLockRelease(&this->_uistoplight);
 
 	BFLockUnlock(&this->_winlock);
 
 	return 0;
 }
 
-int Interface::windowCreateModeCommand() {
+int Interface::windowCreateStateChatroom() {
 	// change to normal mode
 	BFLockLock(&this->_winlock);
 
@@ -427,14 +424,14 @@ int Interface::windowCreateModeCommand() {
 	keypad(this->_inputWin, true); // Enable special keys in input window
 	nodelay(this->_inputWin, false); // Set blocking input for input window
 
-	this->_updateconversation = true;
+	this->converstaionHasChanged();
 
 	BFLockUnlock(&this->_winlock);
 
 	return 0;
 }
 
-int Interface::windowCreateModeEdit(int inputWinWidth, int inputWinHeight) {
+int Interface::windowCreateStateDraft(int inputWinWidth, int inputWinHeight) {
 	BFLockLock(&this->_winlock);
 
 	DELETE_WINDOWS;
@@ -460,17 +457,17 @@ int Interface::windowCreateModeEdit(int inputWinWidth, int inputWinHeight) {
 	keypad(this->_inputWin, true); // Enable special keys in input window
 	nodelay(this->_inputWin, false); // Set blocking input for input window
 	
-	this->_updateconversation = true;
+	this->converstaionHasChanged();
 
 	BFLockUnlock(&this->_winlock);
 
 	return 0;
 }
 
-int Interface::windowCreateModeEdit() {
+int Interface::windowCreateStateDraft() {
 	int inputWinWidth = COLS;
    	int inputWinHeight = 3;
-	return this->windowCreateModeEdit(inputWinWidth, inputWinHeight);
+	return this->windowCreateStateDraft(inputWinWidth, inputWinHeight);
 }
 
 int Interface::windowCreateModeHelp() {
@@ -493,6 +490,24 @@ int Interface::windowCreateModeHelp() {
 	wrefresh(this->_helpWin); // Refresh the help window
 
 	BFLockUnlock(&this->_winlock);
+	return 0;
+}
+
+int _InterfaceDrawUserInputDraft(
+	BFLock * winlock,
+	WINDOW * inputwin,
+	InputBuffer & userInput
+) {
+	BFLockLock(winlock);
+	werase(inputwin);
+	box(inputwin, 0, 0);
+
+	_InterfaceFixTextInBoxedWindow(inputwin, userInput, 1);
+
+	wrefresh(inputwin);
+
+	BFLockUnlock(winlock);
+
 	return 0;
 }
 
@@ -524,7 +539,7 @@ int Interface::windowUpdateInputWindowText(InputBuffer & userInput) {
 		// see if we need to expand the height for the input window
 		if (lines > 1) { // change window to fit text
 			const int off = 2;
-			this->windowCreateModeEdit(w, lines + off);
+			this->windowCreateStateDraft(w, lines + off);
 		}
 
 		_InterfaceDrawUserInputDraft(&this->_winlock, this->_inputWin, userInput);
@@ -547,10 +562,10 @@ int Interface::draw() {
 			this->windowCreateModeLobby();
 			break;
 		case kInterfaceStateChatroom:
-			this->windowCreateModeCommand();
+			this->windowCreateStateChatroom();
 			break;
 		case kInterfaceStateDraft:
-			this->windowCreateModeEdit();
+			this->windowCreateStateDraft();
 			break;
 		case kInterfaceStateHelp:
 			this->windowCreateModeHelp();
@@ -654,7 +669,7 @@ int Interface::processinputStateChatroom(InputBuffer & userInput) {
 			this->_state = kInterfaceStateHelp;
 		} else if (!cmd.op().compareString(INTERFACE_COMMAND_DRAFT)) { // draft
 			this->_state = kInterfaceStateDraft;
-			this->_updateconversation = true;
+			this->converstaionHasChanged();
 		} else {
 			String * errmsg = String::createWithFormat("unknown command: %s", cmd.op().cString());
 			this->setErrorMessage(*errmsg);
@@ -714,6 +729,7 @@ int Interface::windowLoop() {
 		
 		this->windowUpdateInputWindowText(userInput);
 
+		// this gets blocked
         int ch = wgetch(this->_inputWin); // Get user input
 		userInput.addChar(ch);
 
@@ -723,6 +739,8 @@ int Interface::windowLoop() {
 		// act on current input state
 		this->processinput(userInput);
     }
+
+	BFLockRelease(&this->_uistoplight);
 
 	BFThreadAsyncCancel(tid);
 	BFThreadAsyncWait(tid);

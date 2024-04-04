@@ -70,10 +70,10 @@ private:
 
 	int windowUpdateInputWindowText(InputBuffer & userInput);
 
-	int windowCreateModeEdit();
-	int windowCreateModeEdit(int inputWinWidth, int inputWinHeight);
+	int windowCreateStateDraft();
+	int windowCreateStateDraft(int inputWinWidth, int inputWinHeight);
 	int windowCreateModeHelp();
-	int windowCreateModeCommand();
+	int windowCreateStateChatroom();
 	int windowCreateModeLobby();
 	
 	static void displayWindowUpdateThread(void * in);
@@ -104,8 +104,16 @@ private:
 
 	// trigger events
 	void userListHasChanged();
-	void chatroomListHasChanged();
+	void chatroomListHasChanged();	
 	void converstaionHasChanged();
+	void lobbyHasChanged();
+
+	/**
+	 * this will halt the workloop that drives the interface
+	 * updates. This should be released when something has changed
+	 * that requires a ui redraw
+	 */
+	BFLock _uistoplight;
 
 	void setErrorMessage(BF::String errmsg);
 	BF::String _errorMessage;

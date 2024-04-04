@@ -6,8 +6,12 @@
 #include "buffer.hpp"
 #include <bflibcpp/bflibcpp.hpp>
 
-SocketBuffer::SocketBuffer(size_t size) {
+SocketBuffer::SocketBuffer(const void * data, size_t size) {
 	this->_data = malloc(size);
+
+	if (data)
+		memcpy(this->_data, data, size);
+
 	this->_size = size;
 }
 
