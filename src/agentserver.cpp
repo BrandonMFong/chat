@@ -9,6 +9,7 @@
 #include "socket.hpp"
 #include "user.hpp"
 #include <bflibcpp/bflibcpp.hpp>
+#include <unistd.h>
 
 using namespace BF;
 
@@ -43,7 +44,7 @@ void AgentServer::handshake(void * in) {
 	
 	// wait for the connection to be ready before we
 	// start the conversation with the remote user
-	while (!a->connectionIsReady()) {}
+	while (!a->connectionIsReady()) { usleep(500); }
 
 	Packet p;
 	memset(&p, 0, sizeof(p));

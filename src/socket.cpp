@@ -27,8 +27,6 @@ Socket * Socket::shared() {
 }
 
 Socket::Socket() { 
-	this->_tidout = NULL;
-
 	this->_cbinstream = NULL;
 	this->_cbnewconn = NULL;
 
@@ -38,6 +36,8 @@ Socket::Socket() {
 
 	this->_portnum = 0;
 	memset(this->_ip4addr, 0, SOCKET_IP4_ADDR_STRLEN);
+
+	BFLockCreate(&this->_outqlock);
 
 	_sharedSocket = this;
 }
@@ -50,7 +50,7 @@ Socket::~Socket() {
 	}
 	this->_tidin.unlock();
 
-	BFThreadAsyncDestroy(this->_tidout);
+	BFLockDestroy(&this->_outqlock);
 }
 
 Socket * Socket::create(const char mode, const char * ipaddr, uint16_t port, int * err) {
@@ -126,6 +126,8 @@ void Socket::inStream(void * in) {
 		SocketEnvelope * envelope = new SocketEnvelope(sc, skt->_bufferSize);
 
 		// receive data from connections using buffer
+		//
+		// this gets blocked until we receive something
 		int err = sc->recvData(&envelope->_buf);
         if (!err && skt->_cbinstream) {
 			skt->_cbinstream(envelope);
@@ -136,30 +138,6 @@ void Socket::inStream(void * in) {
 
 	BFRelease(skt);
 	BFRelease(tools);
-}
-
-void Socket::outStream(void * in) {
-	Socket * skt = (Socket *) in;
-
-	BFRetain(skt);
-
-	while (!BFThreadAsyncIsCanceled(skt->_tidout)) {
-		skt->_outq.lock();
-		// if queue is not empty, send the next message
-		if (!skt->_outq.unsafeget().empty()) {
-			// get top data
-			SocketEnvelope * envelope = skt->_outq.unsafeget().front();
-
-			// pop data from queue
-			skt->_outq.unsafeget().pop();
-			
-			envelope->connection()->sendData(&envelope->_buf);
-			BFRelease(envelope);
-		}
-		skt->_outq.unlock();
-	}
-
-	BFRelease(skt);
 }
 
 // called by subclasses whenever they get a new connection
@@ -178,13 +156,6 @@ int Socket::startInStreamForConnection(SocketConnection * sc) {
 
 int Socket::start() {
 	this->_start();
-
-	// out stream uses `send`
-	//
-	// we can use this object and iterate through the connections
-	// array to send the same packet at the top of the queue
-	this->_tidout = BFThreadAsync(Socket::outStream, (void *) this);
-
 	return 0;
 }
 
@@ -215,11 +186,6 @@ int Socket::stop() {
 			}
 		}
 		this->_tidin.unlock();
-	}
-
-	if (!error && this->_tidout) {
-		error = BFThreadAsyncCancel(this->_tidout);
-		BFThreadAsyncWait(this->_tidout);
 	}
 
 	return error;
