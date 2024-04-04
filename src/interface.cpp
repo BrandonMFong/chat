@@ -182,16 +182,15 @@ void _InterfaceDrawMessage(
 
 // this will write conversation from the bottom to the top
 int Interface::windowWriteConversation() {
-	if (this->_updateconversation.get() && this->_chatroom.get()) {
-		BFLockLock(&this->_winlock);
-		this->_updateconversation.lock();
+	LOG_DEBUG("%s", __func__);
+	BFLockLock(&this->_winlock);
+	this->_updateconversation.lock();
+	if (this->_updateconversation.unsafeget() && this->_chatroom.get()) {
 		this->_chatroom.lock();
 		this->_chatroom.unsafeget()->conversation.lock();
 
 		int w, h;
 		getmaxyx(this->_displayWin, h, w);
-		const int boxwidth = w - 2;
-		const int boxheight = h - 2;
 
 		werase(this->_displayWin);
 
@@ -214,16 +213,16 @@ int Interface::windowWriteConversation() {
 
 		this->_chatroom.unsafeget()->conversation.unlock();
 		this->_chatroom.unlock();
-		this->_updateconversation.unlock();
-		BFLockUnlock(&this->_winlock);
 	}
+	this->_updateconversation.unlock();
+	BFLockUnlock(&this->_winlock);
 	return 0;
 }
 
 int Interface::windowWriteContentLobby() {
-	if (this->_updatelobby.get()) {
-		BFLockLock(&this->_winlock);
-		this->_updatelobby.lock();
+	BFLockLock(&this->_winlock);
+	this->_updatelobby.lock();
+	if (this->_updatelobby.unsafeget()) {
 		this->drawDisplayWindowLobby();
 
 		this->windowWriteChatroomList();
@@ -231,9 +230,9 @@ int Interface::windowWriteContentLobby() {
 
 		wrefresh(this->_displayWin);
 		this->_updatelobby.unsafeset(false);
-		this->_updatelobby.unlock();
-		BFLockUnlock(&this->_winlock);
 	}
+	this->_updatelobby.unlock();
+	BFLockUnlock(&this->_winlock);
 
 	return 0;
 }
@@ -342,13 +341,13 @@ void Interface::displayWindowUpdateThread(void * in) {
 
 #define DELETE_WINDOWS \
 	if (this->_inputWin) {\
-		werase(this->_inputWin);delwin(this->_inputWin); }\
+		wclear(this->_inputWin);delwin(this->_inputWin);this->_inputWin = NULL; }\
 	if (this->_displayWin) {\
-		werase(this->_displayWin);delwin(this->_displayWin); }\
+		wclear(this->_displayWin);delwin(this->_displayWin);this->_displayWin = NULL; }\
 	if (this->_helpWin) {\
-		werase(this->_helpWin);delwin(this->_helpWin); }\
+		wclear(this->_helpWin);delwin(this->_helpWin);this->_helpWin = NULL; }\
 	if (this->_headerWin) {\
-		werase(this->_headerWin);delwin(this->_headerWin);}
+		wclear(this->_headerWin);delwin(this->_headerWin);this->_headerWin = NULL; }
 
 int Interface::drawDisplayWindowLobby() {
 	int w, h;
@@ -400,6 +399,7 @@ int Interface::windowCreateModeLobby() {
 }
 
 int Interface::windowCreateStateChatroom() {
+	LOG_DEBUG("%s", __func__);
 	// change to normal mode
 	BFLockLock(&this->_winlock);
 
@@ -433,6 +433,7 @@ int Interface::windowCreateStateChatroom() {
 }
 
 int Interface::windowCreateStateDraft(int inputWinWidth, int inputWinHeight) {
+	LOG_DEBUG("%s", __func__);
 	BFLockLock(&this->_winlock);
 
 	DELETE_WINDOWS;
