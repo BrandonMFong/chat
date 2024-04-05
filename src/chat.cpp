@@ -15,6 +15,7 @@
 #include "user.hpp"
 #include "office.hpp"
 #include "agent.hpp"
+#include "version.hpp"
 #include <bflibcpp/bflibcpp.hpp>
 #include <netinet/ip.h>
 
@@ -63,20 +64,22 @@ int ArgumentsRead(int argc, char * argv[], char * mode, char * ipaddr, bool * sh
 		}
 	}
 
-	// make sure server/client aren't both passed
-	if (modereqclient && modereqserver) {
-		PRINTF_ERR("cannot request to be both server and client\n");
-		return 4;
-	} else if (modereqclient) {
-		*mode = SOCKET_MODE_CLIENT;
-	} else if (modereqserver) {
-		*mode = SOCKET_MODE_SERVER;
-	}
+	if (!(*showvers)) {
+		// make sure server/client aren't both passed
+		if (modereqclient && modereqserver) {
+			PRINTF_ERR("cannot request to be both server and client\n");
+			return 4;
+		} else if (modereqclient) {
+			*mode = SOCKET_MODE_CLIENT;
+		} else if (modereqserver) {
+			*mode = SOCKET_MODE_SERVER;
+		}
 
-	if (*mode == SOCKET_MODE_CLIENT) {
-		if (!ip4addrpassed) {
-			PRINTF_ERR("please provided an ip address of the server you want to join\n");
-			return 5;
+		if (*mode == SOCKET_MODE_CLIENT) {
+			if (!ip4addrpassed) {
+				PRINTF_ERR("please provided an ip address of the server you want to join\n");
+				return 5;
+			}
 		}
 	}
 
@@ -132,6 +135,10 @@ int _ChatRun(char mode, const char * ipaddr) {
 	return result;
 }
 
+void _ChatShowVersion(const char * toolname) {
+	printf("%s version %s\n", toolname, VERSION_WHOLE_STRING);
+}
+
 int Chat::Main(int argc, char * argv[]) {
 	int result = 0;
 	char mode = SOCKET_MODE_CLIENT;
@@ -148,12 +155,16 @@ int Chat::Main(int argc, char * argv[]) {
 
 	LOG_DEBUG("============ App started ============");
 
-	if (!result) {
-		_ChatRun(mode, ipaddr);
-	}
+	if (showversion) {
+		_ChatShowVersion(argv[0]);
+	} else {
+		if (!result) {
+			result = _ChatRun(mode, ipaddr);
+		}
 
-	if (result) {
-		Help(argv[0]);
+		if (result) {
+			Help(argv[0]);
+		}
 	}
 
 	LOG_DEBUG("============ App ended ============");
