@@ -23,6 +23,7 @@
 #define ARGUMENT_CLIENT "client"
 #define ARGUMENT_IP4_ADDRESS "-ip4"
 #define ARGUMENT_VERSION "--version"
+#define ARGUMENT_HELP "--help"
 
 #define PRINTF_ERR(...) printf("ERROR - " __VA_ARGS__)
 
@@ -40,12 +41,18 @@ void Help(const char * toolname) {
 	printf("\t\tis implied so you don't have to pass `client`.\n");
 	printf("  [ %s ]\tThe server's ip4 address. Server mode does not require this\n", ARGUMENT_IP4_ADDRESS);
 	printf("  [ %s ]\tReturns version\n", ARGUMENT_VERSION);
+	printf("  [ %s ]\tShows help\n", ARGUMENT_HELP);
 
 	printf("\nCopyright © 2024 Brando. All rights reserved.\n");
 }
 
-int ArgumentsRead(int argc, char * argv[], char * mode, char * ipaddr, bool * showvers) {
-	if (!argv || !mode || !ipaddr || !showvers) return 2;
+int ArgumentsRead(
+	int argc, char * argv[],
+	char * mode, char * ipaddr,
+	bool * showvers, bool * showhelp
+) {
+	if (!argv || !mode || !ipaddr 
+		|| !showvers || !showhelp) return 2;
 	else if (argc < 1) return 3;
 
 	bool modereqclient = false;
@@ -61,10 +68,12 @@ int ArgumentsRead(int argc, char * argv[], char * mode, char * ipaddr, bool * sh
 			strncpy(ipaddr, argv[++i], SOCKET_IP4_ADDR_STRLEN);
 		} else if (!strcmp(argv[i], ARGUMENT_VERSION)) {
 			*showvers = true;
+		} else if (!strcmp(argv[i], ARGUMENT_HELP)) {
+			*showhelp = true;
 		}
 	}
 
-	if (!(*showvers)) {
+	if (!(*showvers) && !(*showhelp)) {
 		// make sure server/client aren't both passed
 		if (modereqclient && modereqserver) {
 			PRINTF_ERR("cannot request to be both server and client\n");
@@ -143,13 +152,14 @@ int Chat::Main(int argc, char * argv[]) {
 	int result = 0;
 	char mode = SOCKET_MODE_CLIENT;
 	bool showversion = false;
+	bool showhelp = false;
 	Interface * interface = NULL;
 	char ipaddr[SOCKET_IP4_ADDR_STRLEN];
 
 	// default ip addr is localhost
 	strncpy(ipaddr, "0.0.0.0", SOCKET_IP4_ADDR_STRLEN);
 
-	result = ArgumentsRead(argc, argv, &mode, ipaddr, &showversion);
+	result = ArgumentsRead(argc, argv, &mode, ipaddr, &showversion, &showhelp);
 
 	LOG_OPEN;
 
@@ -157,6 +167,8 @@ int Chat::Main(int argc, char * argv[]) {
 
 	if (showversion) {
 		_ChatShowVersion(argv[0]);
+	} else if (showhelp) {
+		Help(argv[0]);
 	} else {
 		if (!result) {
 			result = _ChatRun(mode, ipaddr);
