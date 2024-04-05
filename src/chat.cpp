@@ -17,9 +17,11 @@
 #include "agent.hpp"
 #include <bflibcpp/bflibcpp.hpp>
 #include <netinet/ip.h>
+
 #define ARGUMENT_SERVER "server"
 #define ARGUMENT_CLIENT "client"
 #define ARGUMENT_IP4_ADDRESS "-ip4"
+#define ARGUMENT_VERSION "--version"
 
 #define PRINTF_ERR(...) printf("ERROR - " __VA_ARGS__)
 
@@ -36,12 +38,13 @@ void Help(const char * toolname) {
 	printf("\t\twill be a participant in a chatroom.  Additionally, client mode\n");
 	printf("\t\tis implied so you don't have to pass `client`.\n");
 	printf("  [ %s ]\tThe server's ip4 address. Server mode does not require this\n", ARGUMENT_IP4_ADDRESS);
+	printf("  [ %s ]\tReturns version\n", ARGUMENT_VERSION);
 
 	printf("\nCopyright © 2024 Brando. All rights reserved.\n");
 }
 
-int ArgumentsRead(int argc, char * argv[], char * mode, char * ipaddr) {
-	if (!argv || !mode || !ipaddr) return 2;
+int ArgumentsRead(int argc, char * argv[], char * mode, char * ipaddr, bool * showvers) {
+	if (!argv || !mode || !ipaddr || !showvers) return 2;
 	else if (argc < 1) return 3;
 
 	bool modereqclient = false;
@@ -55,6 +58,8 @@ int ArgumentsRead(int argc, char * argv[], char * mode, char * ipaddr) {
 		} else if (!strcmp(argv[i], ARGUMENT_IP4_ADDRESS)) {
 			ip4addrpassed = true;
 			strncpy(ipaddr, argv[++i], SOCKET_IP4_ADDR_STRLEN);
+		} else if (!strcmp(argv[i], ARGUMENT_VERSION)) {
+			*showvers = true;
 		}
 	}
 
@@ -83,20 +88,9 @@ const char Chat::SocketGetMode() {
 	return ' ';
 }
 
-int Chat::Main(int argc, char * argv[]) {
+int _ChatRun(char mode, const char * ipaddr) {
 	int result = 0;
-	char mode = SOCKET_MODE_CLIENT;
 	Interface * interface = NULL;
-	char ipaddr[SOCKET_IP4_ADDR_STRLEN];
-
-	// default ip addr is localhost
-	strncpy(ipaddr, "0.0.0.0", SOCKET_IP4_ADDR_STRLEN);
-
-	result = ArgumentsRead(argc, argv, &mode, ipaddr);
-
-	LOG_OPEN;
-
-	LOG_DEBUG("============ App started ============");
 
 	if (!result) {
 		result = Office::start();
@@ -132,12 +126,35 @@ int Chat::Main(int argc, char * argv[]) {
 		result = Office::stop();
 	}
 
+	BFRelease(skt);
+	BFRelease(interface);
+
+	return result;
+}
+
+int Chat::Main(int argc, char * argv[]) {
+	int result = 0;
+	char mode = SOCKET_MODE_CLIENT;
+	bool showversion = false;
+	Interface * interface = NULL;
+	char ipaddr[SOCKET_IP4_ADDR_STRLEN];
+
+	// default ip addr is localhost
+	strncpy(ipaddr, "0.0.0.0", SOCKET_IP4_ADDR_STRLEN);
+
+	result = ArgumentsRead(argc, argv, &mode, ipaddr, &showversion);
+
+	LOG_OPEN;
+
+	LOG_DEBUG("============ App started ============");
+
+	if (!result) {
+		_ChatRun(mode, ipaddr);
+	}
+
 	if (result) {
 		Help(argv[0]);
 	}
-
-	BFRelease(skt);
-	BFRelease(interface);
 
 	LOG_DEBUG("============ App ended ============");
 	LOG_CLOSE;
