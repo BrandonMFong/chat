@@ -11,7 +11,7 @@ x.x
 0.1
 [] make linux build
 [] make macos build
-[] test release builds
+[x] test release builds
 [x] versioning mechanism
 [x] license
 [x] fix cpu usage. possibly make all while loops more efficient by using locks
