@@ -13,7 +13,7 @@ x.x
 [] make macos build
 [] test release builds
 [x] versioning mechanism
-[] license
+[x] license
 [x] fix cpu usage. possibly make all while loops more efficient by using locks
 [x] figure out why macos ui is buggy when message is sent
 [x] chatrooms
