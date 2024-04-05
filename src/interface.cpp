@@ -341,13 +341,13 @@ void Interface::displayWindowUpdateThread(void * in) {
 
 #define DELETE_WINDOWS \
 	if (this->_inputWin) {\
-		wclear(this->_inputWin);delwin(this->_inputWin);this->_inputWin = NULL; }\
+		delwin(this->_inputWin);this->_inputWin = NULL; }\
 	if (this->_displayWin) {\
-		wclear(this->_displayWin);delwin(this->_displayWin);this->_displayWin = NULL; }\
+		delwin(this->_displayWin);this->_displayWin = NULL; }\
 	if (this->_helpWin) {\
-		wclear(this->_helpWin);delwin(this->_helpWin);this->_helpWin = NULL; }\
+		delwin(this->_helpWin);this->_helpWin = NULL; }\
 	if (this->_headerWin) {\
-		wclear(this->_headerWin);delwin(this->_headerWin);this->_headerWin = NULL; }
+		delwin(this->_headerWin);this->_headerWin = NULL; }
 
 int Interface::drawDisplayWindowLobby() {
 	int w, h;
@@ -403,6 +403,7 @@ int Interface::windowCreateStateChatroom() {
 	// change to normal mode
 	BFLockLock(&this->_winlock);
 
+	erase();
 	DELETE_WINDOWS;
 	
 	// Create two windows
