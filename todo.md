@@ -4,10 +4,18 @@ x.x
 [] list of users in lobby
 [] get list of users in chatroom
 [] encryption
+[] ability to change user name
+[] user data window editor
+[] installer script
 
 0.1
+[x] make linux build
+[x] make macos build
+[x] test release builds
+[x] versioning mechanism
+[x] license
 [x] fix cpu usage. possibly make all while loops more efficient by using locks
-[] figure out why macos ui is buggy when message is sent
+[x] figure out why macos ui is buggy when message is sent
 [x] chatrooms
 [x] create chatroom
 [x] join chatroom
