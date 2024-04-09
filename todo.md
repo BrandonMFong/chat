@@ -9,8 +9,8 @@ x.x
 [] installer script
 
 0.1
-[] make linux build
-[] make macos build
+[x] make linux build
+[x] make macos build
 [x] test release builds
 [x] versioning mechanism
 [x] license
