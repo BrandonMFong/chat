@@ -8,6 +8,8 @@ x.x
 [] user data window editor
 [] installer script
 
+0.2
+
 0.1
 [x] make linux build
 [x] make macos build
