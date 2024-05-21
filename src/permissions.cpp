@@ -5,7 +5,7 @@
 
 #include "permissions.hpp"
 #include "chat.hpp"
-#include "socket.hpp"
+#include <bfnet/bfnet.hpp>
 
 bool Permissions::CanCreateChatroom() {
 	return Chat::SocketGetMode() == SOCKET_MODE_SERVER;

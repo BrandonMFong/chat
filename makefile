@@ -12,28 +12,32 @@ CPPLINKS = -lpthread -lncurses $(BF_LIB_C_UUID_FLAGS)
 CPPSTD = -std=c++20
 
 FILES = \
-server client interface socket \
+interface \
 log user inputbuffer office \
 chatroom message chatroomserver packet \
-connection agent agentclient agentserver \
+agent agentclient agentserver \
 chatroomclient interfaceserver interfaceclient command \
-envelope buffer permissions chat
+permissions chat
 
 ### Release settings
-R_CPPFLAGS += $(CPPFLAGS) -Isrc/ -Iexternal/libs/$(BF_LIB_RPATH_RELEASE) $(CPPSTD)
+R_CPPFLAGS += $(CPPFLAGS) -Isrc/ \
+			  -Iexternal/libs/$(BF_LIB_RPATH_RELEASE) \
+			  $(CPPSTD)
 R_BIN_NAME = chat
 R_BUILD_PATH = $(BUILD_PATH)/release
 R_MAIN_FILE = src/main.cpp
-R_LIBRARIES = external/libs/$(BF_LIB_RPATH_RELEASE_CPP)
+R_LIBRARIES = external/libs/$(BF_LIB_RPATH_RELEASE_CPP) external/libs/$(BF_LIB_RPATH_RELEASE_NET)
 R_OBJECTS = $(patsubst %, $(R_BUILD_PATH)/%.o, $(FILES))
 
 ### Debug settings
 D_ADDR_SANITIZER = -fsanitize=address
-D_CPPFLAGS = $(CPPFLAGS) -DDEBUG -g -Isrc/ -Iexternal/libs/$(BF_LIB_RPATH_DEBUG) $(D_ADDR_SANITIZER) $(CPPSTD)
+D_CPPFLAGS = $(CPPFLAGS) -DDEBUG -g -Isrc/ \
+			 -Iexternal/libs/$(BF_LIB_RPATH_DEBUG) \
+			 $(D_ADDR_SANITIZER) $(CPPSTD)
 D_BIN_NAME = $(R_BIN_NAME)-debug
 D_BUILD_PATH = $(BUILD_PATH)/debug
 D_MAIN_FILE = $(R_MAIN_FILE)
-D_LIBRARIES = external/libs/$(BF_LIB_RPATH_DEBUG_CPP)
+D_LIBRARIES = external/libs/$(BF_LIB_RPATH_DEBUG_CPP) external/libs/$(BF_LIB_RPATH_DEBUG_NET)
 D_OBJECTS = $(patsubst %, $(D_BUILD_PATH)/%.o, $(FILES))
 
 ### Test settings
@@ -47,7 +51,9 @@ T_OBJECTS = $(patsubst %, $(T_BUILD_PATH)/%.o, $(FILES))
 ### Instructions
 
 # Default
-all: release
+build: release
+
+all: release debug
 
 clean:
 	rm -rfv build

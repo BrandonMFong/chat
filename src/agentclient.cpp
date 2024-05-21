@@ -5,7 +5,6 @@
 
 #include "agentclient.hpp"
 #include "log.hpp"
-#include "connection.hpp"
 #include "packet.hpp"
 #include "interface.hpp"
 #include "chatroom.hpp"
@@ -13,8 +12,10 @@
 #include <string.h>
 #include <unistd.h>
 #include <bflibcpp/bflibcpp.hpp>
+#include <bfnet/bfnet.hpp>
 
 using namespace BF;
+using namespace BF::Net;
 
 Atomic<AgentClient *> agentclientmain;
 

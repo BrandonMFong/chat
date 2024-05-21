@@ -6,7 +6,7 @@
 #ifndef INTERFACE_HPP
 #define INTERFACE_HPP
 
-#include "socket.hpp"
+#include <bfnet/socket.hpp>
 #include "typepacket.h"
 #include "typeinterfacestate.hpp"
 #include <bflibcpp/object.hpp>
