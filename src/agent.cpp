@@ -7,8 +7,6 @@
 #include "agentserver.hpp"
 #include "agentclient.hpp"
 #include "log.hpp"
-#include "socket.hpp"
-#include "connection.hpp"
 #include "message.hpp"
 #include "chatroom.hpp"
 #include "chatroomclient.hpp"
@@ -16,10 +14,11 @@
 #include "user.hpp"
 #include "interface.hpp"
 #include "packet.hpp"
-#include "envelope.hpp"
 #include <bflibcpp/bflibcpp.hpp>
+#include <bfnet/bfnet.hpp>
 
 using namespace BF;
+using namespace BF::Net;
 
 // every agent in this list is retained with 
 // rc of 1

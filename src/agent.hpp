@@ -11,9 +11,14 @@
 #include <bflibcpp/list.hpp>
 #include "typepacket.h"
 
-class SocketConnection;
 class User;
-class SocketEnvelope;
+
+namespace BF {
+	namespace Net {
+		class SocketEnvelope;
+		class SocketConnection;
+	}
+}
 
 /**
  * Represents the remote user
@@ -30,7 +35,7 @@ public:
 	 * sc : each agent should have this
 	 * bub : copy data if you need to use after function returns
 	 */
-	static void packetReceive(SocketEnvelope * envelope);
+	static void packetReceive(BF::Net::SocketEnvelope * envelope);
 
 	/**
 	 * this is a callback described by the Socket family
@@ -44,7 +49,7 @@ public:
 	 * Once created, the agent will get to know the user on ther
 	 * other end and get them ready to join a conversation.
 	 */
-	static int newConnection(SocketConnection * sc);
+	static int newConnection(BF::Net::SocketConnection * sc);
 
 	/**
 	 * creates new agent	
@@ -55,7 +60,7 @@ public:
 	 *
 	 * returns NULL if there is an error
 	 */
-	static Agent * create(SocketConnection * sc);
+	static Agent * create(BF::Net::SocketConnection * sc);
 
 	virtual ~Agent();
 
@@ -138,14 +143,14 @@ private:
 	 * the socket descriptor that is wrapped within this object
 	 * represents to user on other end we are representing
 	 */
-	SocketConnection * _sc;
+	BF::Net::SocketConnection * _sc;
 	
 	/**
 	 * returns null if no agent was found for connection
 	 *
 	 * caller does not own memory
 	 */
-	static Agent * getAgentForConnection(SocketConnection * sc);
+	static Agent * getAgentForConnection(BF::Net::SocketConnection * sc);
 
 };
 

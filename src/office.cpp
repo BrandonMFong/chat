@@ -5,18 +5,18 @@
 
 #include "office.hpp"
 #include "chat.hpp"
-#include "socket.hpp"
+#include <bfnet/bfnet.hpp>
 #include "user.hpp"
 #include "chatroom.hpp"
 #include "message.hpp"
 #include "agent.hpp"
 #include "log.hpp"
 #include "packet.hpp"
-#include "envelope.hpp"
 #include <string.h>
 #include <bflibcpp/bflibcpp.hpp>
 
 using namespace BF;
+using namespace BF::Net;
 
 Atomic<Queue<SocketEnvelope *>> inbox;
 BFLock inboxlock;
