@@ -3,4 +3,4 @@
 * Each socket connection will have their own dedicated thread that polls the `recv` call.  This allows us to concurrently handle incoming data from multiple correspondents
 * Each socket connection will have an agent representing the remote user on the other end. Having an agent seems to be the best way to id a user by the socket connection. I view an agent like a lawyer representing a client.
 * I was using while loops to poll events like ui changes, incoming packets, etc. However, I make it efficient. The loops would constantly loop without any sort of waiting on an event. This made my computer overheat put the cpu usage up to 300% percent. To overcome this, I used my BFLock objects to do a wait/release on the loops/events. This reduced the cpu usage to 5% lol
-
+* Encryption is an interesting task. After implementating encryption I think I can be proud of this project. There are different ways according to gemini: symmetric keys using secure key exchange or ratchet tree. I have never heard of ratchet tree. Sounds interesting
