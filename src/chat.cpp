@@ -8,8 +8,6 @@
 #include "chat.hpp"
 #include <stdio.h>
 #include <string.h>
-#include "server.hpp"
-#include "client.hpp"
 #include "interface.hpp"
 #include "log.hpp"
 #include "user.hpp"
@@ -17,6 +15,7 @@
 #include "agent.hpp"
 #include "version.hpp"
 #include <bflibcpp/bflibcpp.hpp>
+#include <bfnet/bfnet.hpp>
 #include <netinet/ip.h>
 
 #define ARGUMENT_SERVER "server"
@@ -26,6 +25,9 @@
 #define ARGUMENT_HELP "--help"
 
 #define PRINTF_ERR(...) printf("ERROR - " __VA_ARGS__)
+
+using namespace BF;
+using namespace BF::Net;
 
 LOG_INIT
 	

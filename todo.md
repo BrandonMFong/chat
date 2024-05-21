@@ -1,4 +1,4 @@
-x.x
+0.2
 [] window dynamic resizing
 [] user typing
 [] list of users in lobby
@@ -7,8 +7,7 @@ x.x
 [] ability to change user name
 [] user data window editor
 [] installer script
-
-0.2
+[] separate sources for libs
 
 0.1
 [x] make linux build

@@ -7,16 +7,22 @@
 #define OFFICE_HPP
 
 #include <stdlib.h>
+#include <bfnet/envelope.hpp>
 
 class User;
-class SocketEnvelope;
+
+namespace BF {
+	namespace Net {
+		class SocketEnvelope;
+	}
+}
 
 /**
  * in charge of making packet
  */
 namespace Office {
 
-void packetReceive(SocketEnvelope * envelope);
+void packetReceive(BF::Net::SocketEnvelope * envelope);
 
 int start();
 int stop();

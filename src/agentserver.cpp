@@ -5,13 +5,13 @@
 
 #include "agentserver.hpp"
 #include "log.hpp"
-#include "connection.hpp"
-#include "socket.hpp"
 #include "user.hpp"
 #include <bflibcpp/bflibcpp.hpp>
+#include <bfnet/bfnet.hpp>
 #include <unistd.h>
 
 using namespace BF;
+using namespace BF::Net;
 
 AgentServer::AgentServer() {
 	this->_remoteuser = NULL;
