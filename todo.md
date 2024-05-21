@@ -7,7 +7,7 @@
 [] ability to change user name
 [] user data window editor
 [] installer script
-[] separate sources for libs
+[x] separate sources for libs
 
 0.1
 [x] make linux build
