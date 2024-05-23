@@ -277,13 +277,16 @@ void Agent::packetReceive(SocketEnvelope * envelope) {
 	BFRetain(envelope);
 
 	SocketConnection * sc = envelope->connection();
-	const void * buf = envelope->buf()->data();
+	const Packet * p = (const Packet *) envelope->buf()->data();
 	size_t size = envelope->buf()->size();
 
-	if (!sc || !buf) 
+	if (!sc || !p) 
 		return;
+	else if (size != sizeof(Packet)) {
+		LOG_WRITE("size of incoming data does not meet expectations: %ld != %ld", size, sizeof(Packet));
+		return;
+	}
 
-	const Packet * p = (const Packet *) buf;
 	Agent * agent = Agent::getAgentForConnection(sc);
 	if (!agent)
 		return;
