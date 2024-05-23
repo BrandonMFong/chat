@@ -270,6 +270,10 @@ void Agent::receivedPayloadTypeChatroomResignation(const Packet * pkt) {
 	BFRelease(chatroom);
 }
 
+int Agent::sendPacket(const Packet * pkt) {
+	return this->_sc->queueData(pkt, sizeof(Packet));
+}
+
 void Agent::packetReceive(SocketEnvelope * envelope) {
 	if (!envelope)
 		return;
@@ -327,10 +331,6 @@ void Agent::packetReceive(SocketEnvelope * envelope) {
 
 	BFRelease(agent);
 	BFRelease(envelope);
-}
-
-int Agent::sendPacket(const Packet * pkt) {
-	return this->_sc->queueData(pkt, sizeof(Packet));
 }
 
 int Agent::broadcast(const Packet * pkt) {
