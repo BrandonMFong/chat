@@ -30,6 +30,13 @@ extern BFFileWriter gFileWriter;
 void _LogWriteEntry(BFFileWriter * filewriter, int mode, ...);
 
 /**
+ * LOG_WRITE vs LOG_DEBUG vs LOG_ERROR
+ *
+ * - each writes a line into the same log file
+ * - each log entry will explicitly tell you what type of log entry it is
+ */
+
+/**
  * writes ent (line) to log file
  */
 #define LOG_WRITE(...) _LogWriteEntry(&gFileWriter, 0, __VA_ARGS__)
