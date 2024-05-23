@@ -18,21 +18,10 @@ using namespace BF;
 
 Atomic<List<Chatroom *>> chatrooms;
 
-void _ChatroomMessageFree(Message * m) {
-	BFRelease(m);
-}
-
-void _ChatroomRelease(Chatroom * cr) {
-	BFRelease(cr);
-}
-
-void _ChatroomReleaseUser(User * u) {
-	BFRelease(u);
-}
-
-void _ChatroomReleaseAgent(Agent * a) {
-	BFRelease(a);
-}
+void _ChatroomMessageFree(Message * m) { BFRelease(m); }
+void _ChatroomRelease(Chatroom * cr) { BFRelease(cr); }
+void _ChatroomReleaseUser(User * u) { BFRelease(u); }
+void _ChatroomReleaseAgent(Agent * a) { BFRelease(a); }
 
 Chatroom::Chatroom() : Object() {
 	uuid_generate_random(this->_uuid);
@@ -51,9 +40,7 @@ Chatroom::Chatroom(const uuid_t uuid) : Object() {
 	this->conversation.get().setReleaseCallback(_ChatroomMessageFree);
 }
 
-Chatroom::~Chatroom() {
-
-}
+Chatroom::~Chatroom() { }
 
 int Chatroom::getChatroomsCount() {
 	return chatrooms.get().count();
@@ -181,7 +168,11 @@ int Chatroom::sendBuffer(PayloadMessageType type, User * user, const InputBuffer
 }
 
 int Chatroom::sendBuffer(const InputBuffer & buf) {
-	return this->sendBuffer(kPayloadMessageTypeData, Interface::current()->getuser(), buf);
+	return this->sendBuffer(
+		kPayloadMessageTypeData,
+		Interface::current()->getuser(),
+		buf
+	);
 }
 
 int Chatroom::notifyAllChatroomUsersOfEnrollment(User * user) {
