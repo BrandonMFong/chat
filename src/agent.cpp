@@ -271,6 +271,7 @@ void Agent::receivedPayloadTypeChatroomResignation(const Packet * pkt) {
 }
 
 int Agent::sendPacket(const Packet * pkt) {
+	// TODO: encrypt
 	return this->_sc->queueData(pkt, sizeof(Packet));
 }
 
@@ -280,6 +281,7 @@ void Agent::packetReceive(SocketEnvelope * envelope) {
 
 	BFRetain(envelope);
 
+	// TODO: decrypt
 	SocketConnection * sc = envelope->connection();
 	const Packet * p = (const Packet *) envelope->buf()->data();
 	size_t size = envelope->buf()->size();
