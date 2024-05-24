@@ -16,6 +16,7 @@
 #include "packet.hpp"
 #include <bflibcpp/bflibcpp.hpp>
 #include <bfnet/bfnet.hpp>
+#include "cipher.hpp"
 
 using namespace BF;
 using namespace BF::Net;
@@ -271,8 +272,9 @@ void Agent::receivedPayloadTypeChatroomResignation(const Packet * pkt) {
 }
 
 int Agent::sendPacket(const Packet * pkt) {
-	// TODO: encrypt
-	return this->_sc->queueData(pkt, sizeof(Packet));
+	Cipher c(pkt, sizeof(Packet));
+
+	return this->_sc->queueData(c.data(), c.size());
 }
 
 void Agent::packetReceive(SocketEnvelope * envelope) {
@@ -281,10 +283,11 @@ void Agent::packetReceive(SocketEnvelope * envelope) {
 
 	BFRetain(envelope);
 
-	// TODO: decrypt
+	Cipher c(envelope->buf()->data(), envelope->buf()->size());
+
 	SocketConnection * sc = envelope->connection();
-	const Packet * p = (const Packet *) envelope->buf()->data();
-	size_t size = envelope->buf()->size();
+	const Packet * p = (const Packet *) c.data();
+	size_t size = c.size();
 
 	if (!sc || !p) 
 		return;
