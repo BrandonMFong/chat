@@ -5,15 +5,15 @@
  * assists in encryption
  */
 
-#ifndef CIPHER_HPP
-#define CIPHER_HPP
+#ifndef SEALED_PACKET_HPP
+#define SEALED_PACKET_HPP
 
 #include <bflibcpp/object.hpp>
 
-class Cipher : public BF::Object {
+class SealedPacket : public BF::Object {
 public:
-	Cipher(const void * data, size_t size);
-	~Cipher();
+	SealedPacket(const void * data, size_t size);
+	~SealedPacket();
 
 	bool isEncrypted();
 	const void * data();
@@ -24,5 +24,5 @@ private:
 	size_t _dataPlainSize;
 };
 
-#endif // CIPHER_HPP
+#endif // SEALED_PACKET_HPP
 

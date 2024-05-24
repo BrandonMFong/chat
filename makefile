@@ -12,7 +12,7 @@ CPPLINKS = -lpthread -lncurses $(BF_LIB_C_UUID_FLAGS)
 CPPSTD = -std=c++20
 
 FILES = \
-interface cipher \
+interface sealedpacket \
 log user inputbuffer office \
 chatroom message chatroomserver packet \
 agent agentclient agentserver \

@@ -4,11 +4,11 @@
  */
 
 #include <bflibcpp/bflibcpp.hpp>
-#include "cipher.hpp"
+#include "sealedpacket.hpp"
 #include <string.h>
 #include <stdlib.h>
 
-Cipher::Cipher(const void * data, size_t size) {
+SealedPacket::SealedPacket(const void * data, size_t size) {
 	this->_dataPlainSize = size;
 	
 	this->_dataPlain = malloc(sizeof(char) * size);
@@ -18,19 +18,19 @@ Cipher::Cipher(const void * data, size_t size) {
 	memcpy(this->_dataPlain, data, size);
 }
 
-Cipher::~Cipher() { 
+SealedPacket::~SealedPacket() { 
 	BFFree(this->_dataPlain);
 }
 
-bool Cipher::isEncrypted() {
+bool SealedPacket::isEncrypted() {
 	return false;
 }
 
-const void * Cipher::data() {
+const void * SealedPacket::data() {
 	return this->_dataPlain;
 }
 
-size_t Cipher::size() {
+size_t SealedPacket::size() {
 	return this->_dataPlainSize;
 }
 
