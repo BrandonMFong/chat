@@ -1,9 +1,13 @@
+```
 0.2
 [] window dynamic resizing
 [] user typing
 [] list of users in lobby
 [] get list of users in chatroom
 [] encryption
+	[] make chatroom symmetric key
+	[] make user assymetic keys
+	[] symmetric key for chatroom exchange
 [] ability to change user name
 [] user data window editor
 [] installer script
@@ -38,4 +42,5 @@
 [x] review for any leaks
 [x] make instream packet queue be application specific
 [x] backspace does not work on macos machines
+```
 
