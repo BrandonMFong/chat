@@ -11,10 +11,12 @@
 #include "packet.hpp"
 #include "interface.hpp"
 #include <bflibcpp/bflibcpp.hpp>
+#include "cipher.hpp"
 
 using namespace BF;
 
 ChatroomServer::ChatroomServer() : Chatroom() {
+	this->_cipher = Cipher::create(kCipherTypeSymmetric);
 }
 
 ChatroomServer::~ChatroomServer() {

@@ -19,6 +19,7 @@ extern "C" {
 class Message;
 class User;
 class Agent;
+class Cipher;
 
 /**
  * In charge of creating message
@@ -146,6 +147,11 @@ protected:
 	char _name[CHAT_ROOM_NAME_SIZE];
 
 	BF::Atomic<BF::List<Agent *>> _agents;
+
+	/**
+	 * helps encrypting messages
+	 */
+	Cipher * _cipher;
 
 private:
 
