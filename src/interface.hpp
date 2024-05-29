@@ -102,6 +102,11 @@ private:
 	 */
 	int processinput(InputBuffer & buf);
 
+	/**
+	 * reads user input from modal window
+	 */
+	int readUserInput(InputBuffer & userInput);
+
 	// trigger events
 	void userListHasChanged();
 	void chatroomListHasChanged();	

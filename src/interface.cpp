@@ -434,7 +434,6 @@ int Interface::windowCreateStateChatroom() {
 }
 
 int Interface::windowCreateStateDraft(int inputWinWidth, int inputWinHeight) {
-	LOG_DEBUG("%s", __func__);
 	BFLockLock(&this->_winlock);
 
 	DELETE_WINDOWS;
@@ -721,6 +720,24 @@ int Interface::processinput(InputBuffer & userInput) {
 	return 0;
 }
 
+int Interface::readUserInput(InputBuffer & userInput) {
+	WINDOW * win = NULL;
+	switch (this->_state.get()) {
+	case kInterfaceStateHelp:
+		win = this->_helpWin;
+		break;
+	default:
+		win = this->_inputWin;
+		break;
+	}
+	
+	// this gets blocked
+	int ch = wgetch(win); // Get user input
+	userInput.addChar(ch);
+
+	return 0;
+}
+
 int Interface::windowLoop() {
 	BFThreadAsyncID tid = BFThreadAsync(Interface::displayWindowUpdateThread, (void *) this);
     InputBuffer userInput;
@@ -732,9 +749,7 @@ int Interface::windowLoop() {
 		
 		this->windowUpdateInputWindowText(userInput);
 
-		// this gets blocked
-        int ch = wgetch(this->_inputWin); // Get user input
-		userInput.addChar(ch);
+		this->readUserInput(userInput);
 
 		// `processinput` changes the current state of the interface
 		this->_prevstate = this->_state;
