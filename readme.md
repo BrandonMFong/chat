@@ -34,6 +34,8 @@ Chatroom:
 	- `make` - build tool
 	- `g++` - compiler
 	- `vim` - file editor
+- Debugging
+	- run `make clean debug` and point your debugger to the product
 - Supported OS
 	- Linux (debian)
 	- macOS (arm64)
