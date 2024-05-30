@@ -6,6 +6,7 @@
 #include "user.hpp"
 #include "log.hpp"
 #include "interface.hpp"
+#include "cipher.hpp"
 #include <string.h>
 #include <unistd.h>
 #include <bflibcpp/bflibcpp.hpp>
@@ -92,9 +93,28 @@ User * User::create(const char * username) {
 	);
 	_UserAddUserToUsers(user);
 
+	if (user->initCipher()) {
+		LOG_DEBUG("couldn't init cipher");
+	}
+
 	Interface::current()->userListHasChanged();
 
 	return user;
+}
+
+int User::initCipher() {
+	this->_cipher = Cipher::create(kCipherTypeAsymmetric);
+	if (!this->_cipher) {
+		LOG_DEBUG("cipher is null");
+		return 1;
+	}
+
+	if (this->_cipher->init()) {
+		LOG_DEBUG("couldn't initiate cipher");
+		return 1;
+	}
+
+	return 0;
 }
 
 User * User::create(const PayloadUserInfo * ui) {
