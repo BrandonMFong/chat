@@ -16,7 +16,7 @@
 using namespace BF;
 
 ChatroomServer::ChatroomServer() : Chatroom() {
-	this->_cipher = Cipher::create(kCipherTypeSymmetric);
+	this->_cipher = NULL;
 }
 
 ChatroomServer::~ChatroomServer() {
@@ -26,6 +26,10 @@ ChatroomServer::~ChatroomServer() {
 ChatroomServer * ChatroomServer::create(const char * name) {
 	ChatroomServer * cr = new ChatroomServer;
 	strncpy(cr->_name, name, sizeof(cr->_name));
+
+	if (cr->initCipher()) {
+		LOG_WRITE("could not establish encrypted chatroom");
+	}
 
 #ifdef DEBUG
 	char uuidstr[UUID_STR_LEN];
@@ -47,6 +51,14 @@ ChatroomServer * ChatroomServer::create(const char * name) {
 	Agent::broadcast(&p);
 
 	return cr;
+}
+
+int ChatroomServer::initCipher() {
+	this->_cipher = Cipher::create(kCipherTypeSymmetric);
+	if (!this->_cipher)
+		return 1;
+
+	return 0;
 }
 
 int ChatroomServer::sendPacket(const Packet * pkt) {

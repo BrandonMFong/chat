@@ -12,7 +12,7 @@ class CipherAsymmetric : public Cipher {
 	friend class Cipher;
 public:
 	~CipherAsymmetric();
-	int generate();
+	int init();
 
 private:
 	CipherAsymmetric();

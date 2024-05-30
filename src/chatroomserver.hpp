@@ -42,6 +42,7 @@ public:
 private:
 	ChatroomServer();
 	int sendPacket(const Packet * pkt);
+	int initCipher();
 };
 
 #endif // CHATROOM_SERVER_HPP

@@ -15,7 +15,11 @@ class CipherSymmetric : public Cipher {
 	friend class Cipher;
 public:
 	~CipherSymmetric();
-	int generate();
+
+	/**
+	 * generates symm key
+	 */
+	int init();
 
 private:
 	CipherSymmetric();

@@ -13,7 +13,7 @@ CipherAsymmetric::~CipherAsymmetric() {
 
 }
 
-int CipherAsymmetric::generate() {
+int CipherAsymmetric::init() {
 	return 0;
 }
 
