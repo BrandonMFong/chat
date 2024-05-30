@@ -18,6 +18,7 @@ public:
 	static Cipher * create(CipherType type);
 	~Cipher();
 
+	virtual int generate() = 0;
 protected:	
 	Cipher();
 };

@@ -8,7 +8,7 @@ include external/libs/bflibc/makefiles/uuid.mk
 
 ### Global
 BUILD_PATH = build
-CPPLINKS = -lpthread -lncurses $(BF_LIB_C_UUID_FLAGS)
+CPPLINKS = -lpthread -lncurses $(BF_LIB_C_UUID_FLAGS) -lssl -lcrypto
 CPPSTD = -std=c++20
 
 FILES = \

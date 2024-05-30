@@ -9,9 +9,13 @@
 #include "cipher.hpp"
 
 class CipherAsymmetric : public Cipher {
+	friend class Cipher;
 public:
-	CipherAsymmetric();
 	~CipherAsymmetric();
+	int generate();
+
+private:
+	CipherAsymmetric();
 };
 
 #endif // CIPHER_ASYMMETRIC_HPP

@@ -20,7 +20,7 @@ ChatroomServer::ChatroomServer() : Chatroom() {
 }
 
 ChatroomServer::~ChatroomServer() {
-
+	BFDelete(this->_cipher);
 }
 
 ChatroomServer * ChatroomServer::create(const char * name) {
