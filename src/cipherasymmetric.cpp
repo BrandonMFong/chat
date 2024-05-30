@@ -17,3 +17,11 @@ int CipherAsymmetric::init() {
 	return 0;
 }
 
+int CipherAsymmetric::encrypt() {
+	return 0;
+}
+
+int CipherAsymmetric::decrypt() {
+	return 0;
+}
+

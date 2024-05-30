@@ -13,6 +13,8 @@ class CipherAsymmetric : public Cipher {
 public:
 	~CipherAsymmetric();
 	int init();
+	int encrypt();
+	int decrypt();
 
 private:
 	CipherAsymmetric();

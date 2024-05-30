@@ -19,6 +19,8 @@ public:
 	~Cipher();
 
 	virtual int init() = 0;
+	virtual int encrypt() = 0;
+	virtual int decrypt() = 0;
 protected:	
 	Cipher();
 };

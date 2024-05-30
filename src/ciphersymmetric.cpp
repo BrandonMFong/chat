@@ -136,3 +136,11 @@ int decrypt(unsigned char *ciphertext, int ciphertext_len, unsigned char *key,
     return plaintext_len;
 }
 
+int CipherSymmetric::encrypt() {
+	return 0;
+}
+
+int CipherSymmetric::decrypt() {
+	return 0;
+}
+

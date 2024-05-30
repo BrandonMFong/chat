@@ -24,6 +24,8 @@ public:
 	 * generates symm key
 	 */
 	int init();
+	int encrypt();
+	int decrypt();
 
 private:
 	CipherSymmetric();
