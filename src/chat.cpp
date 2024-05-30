@@ -120,7 +120,7 @@ int _ChatRun(char mode, const char * ipaddr) {
 		if (skt) {
 			skt->setInStreamCallback(Office::packetReceive);
 			skt->setNewConnectionCallback(Agent::newConnection);
-			skt->setBufferSize(sizeof(Packet));
+			skt->setBufferSize(CHAT_SOCKET_BUFFER_SIZE);
 		}
 	}
 

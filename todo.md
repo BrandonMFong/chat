@@ -5,9 +5,10 @@
 [] list of users in lobby
 [] get list of users in chatroom
 [] encryption
-	[] make chatroom symmetric key
+	[x] make chatroom symmetric key
 	[] make user assymetic keys
 	[] symmetric key for chatroom exchange
+	[] encrypt chatroom message
 [] ability to change user name
 [] user data window editor
 [] installer script
