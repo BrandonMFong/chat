@@ -91,6 +91,7 @@ User * User::create(const char * username) {
 		uuid
 	);
 	_UserAddUserToUsers(user);
+
 	Interface::current()->userListHasChanged();
 
 	return user;
@@ -105,6 +106,7 @@ User * User::create(const PayloadUserInfo * ui) {
 		ui->useruuid
 	);
 	_UserAddUserToUsers(user);
+
 	Interface::current()->userListHasChanged();
 
 	return user;

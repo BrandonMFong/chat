@@ -128,6 +128,7 @@ int _ChatRun(char mode, const char * ipaddr) {
 		result = skt->start();
 	}
 
+	// this will start user interaction
 	if (!result) {
 		result = interface->run();
 	}

@@ -58,6 +58,11 @@ int ChatroomServer::initCipher() {
 	if (!this->_cipher)
 		return 1;
 
+	if (this->_cipher->init()) {
+		LOG_DEBUG("couldn't initialize cipher");
+		return 1;
+	}
+
 	return 0;
 }
 
