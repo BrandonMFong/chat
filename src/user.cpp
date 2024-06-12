@@ -1,6 +1,8 @@
 /**
  * author: brando
  * date: 2/13/24
+ *
+ * https://medium.com/@amit.kulkarni/encrypting-decrypting-a-file-using-openssl-evp-b26e0e4d28d4
  */
 
 #include "user.hpp"

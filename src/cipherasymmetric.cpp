@@ -3,6 +3,7 @@
  * date: 5/29/24
  *
  * https://www.openssl.org/docs/manmaster/man3/EVP_PKEY_encrypt_init_ex.html
+ * https://medium.com/@amit.kulkarni/encrypting-decrypting-a-file-using-openssl-evp-b26e0e4d28d4
  */
 
 #include "cipherasymmetric.hpp"
@@ -20,6 +21,7 @@ CipherAsymmetric::~CipherAsymmetric() {
 	}
 }
 
+// TODO: make the asymmetric keys
 int CipherAsymmetric::init() {
 	this->_evpkey = EVP_PKEY_new();
 	if (!this->_evpkey) {
