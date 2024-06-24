@@ -9,6 +9,7 @@
 	[] make user assymetic keys
 	[] symmetric key for chatroom exchange
 	[] encrypt chatroom message
+[] make git submodules
 [] ability to change user name
 [] user data window editor
 [] installer script

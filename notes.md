@@ -5,3 +5,5 @@
 * I was using while loops to poll events like ui changes, incoming packets, etc. However, I make it efficient. The loops would constantly loop without any sort of waiting on an event. This made my computer overheat put the cpu usage up to 300% percent. To overcome this, I used my BFLock objects to do a wait/release on the loops/events. This reduced the cpu usage to 5% lol
 * Encryption is an interesting task. After implementating encryption I think I can be proud of this project. There are different ways according to gemini: symmetric keys using secure key exchange or ratchet tree. I have never heard of ratchet tree. Sounds interesting
 * Working forward with encryption, I will be doing the hybrid encryption from this post: https://security.stackexchange.com/a/204300
+* I am looking for a way to implement asymmetric cryptography. Seeing this geeksforgeeks post: https://www.geeksforgeeks.org/rsa-algorithm-cryptography/. Could I use openssl?
+* Found demo code on the openssl source code https://github.com/openssl/openssl/blob/master/demos/encrypt/rsa_encrypt.c
