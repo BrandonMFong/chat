@@ -20,25 +20,36 @@ using namespace BF;
 int test_SimpleString() {
 	UNIT_TEST_START;
 	int result = 0;
+	int max = 2 << 4;
 
-	Cipher * c = Cipher::create(kCipherTypeSymmetric);
-	if (c == 0) {
-		result = 1;
+	while (!result && max--) {
+		Cipher * c = Cipher::create(kCipherTypeSymmetric);
+		if (c == 0) {
+			result = 1;
+		}
+
+		const char * str = "Hello world!";
+		Data plain(strlen(str)+1, (unsigned char *) str);
+		Data enc;
+		if (!result) {
+			result = c->encrypt(plain, enc);
+		}
+
+		Data dec;
+		if (!result) {
+			result = c->decrypt(enc, dec);
+		}
+
+		if (!result) {
+			const char * res = (char *) dec.buffer();
+			if (strcmp(res, str)) {
+				printf("%s != %s\n", res, str);
+				result = 2;
+			}
+		}
+
+		BFDelete(c);
 	}
-
-	const char * str = "Hello world!";
-	Data plain(strlen(str)+1, (unsigned char *) str);
-	Data enc;
-	if (!result) {
-		result = c->encrypt(plain, enc);
-	}
-
-	Data dec;
-	if (!result) {
-		result = c->decrypt(enc, dec);
-	}
-
-	BFDelete(c);
 
 	UNIT_TEST_END(!result, result);
 	return result;
