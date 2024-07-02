@@ -28,7 +28,7 @@ int CipherAsymmetric::encrypt(BF::Data & in, BF::Data & out) {
 	return 0;
 }
 
-int CipherAsymmetric::decrypt() {
+int CipherAsymmetric::decrypt(BF::Data & in, BF::Data & out) {
 	return 0;
 }
 

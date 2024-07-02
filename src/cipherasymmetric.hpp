@@ -154,7 +154,7 @@ public:
 	~CipherAsymmetric();
 	int init();
 	int encrypt(BF::Data & in, BF::Data & out);
-	int decrypt();
+	int decrypt(BF::Data & in, BF::Data & out);
 
 private:
 	CipherAsymmetric();

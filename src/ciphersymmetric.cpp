@@ -10,6 +10,8 @@
 
 int _encrypt(unsigned char *plaintext, int plaintext_len, unsigned char *key,
             unsigned char *iv, unsigned char *ciphertext);
+int _decrypt(unsigned char *ciphertext, int ciphertext_len, unsigned char *key,
+            unsigned char *iv, unsigned char *plaintext);
 
 CipherSymmetric::CipherSymmetric() : Cipher() {
 
@@ -33,7 +35,7 @@ int CipherSymmetric::init() {
 
 int CipherSymmetric::encrypt(BF::Data & in, BF::Data & out) {
 	unsigned char ciphertext[CIPHER_SYMMETRIC_CIPHER_TEXT_SIZE];
-	int cipherlen = _encrypt((unsigned char *) in.buffer(), in.size(), this->_key, this->_iv, (unsigned char *) out.buffer());
+	int cipherlen = _encrypt((unsigned char *) in.buffer(), in.size(), this->_key, this->_iv, (unsigned char *) ciphertext);
 	if (cipherlen == -1) {
 		return -1;
 	}
@@ -94,18 +96,28 @@ int _encrypt(unsigned char *plaintext, int plaintext_len, unsigned char *key,
     return ciphertext_len;
 }
 
-int decrypt(unsigned char *ciphertext, int ciphertext_len, unsigned char *key,
+int CipherSymmetric::decrypt(BF::Data & in, BF::Data & out) {
+	unsigned char plaintext[CIPHER_SYMMETRIC_PLAIN_TEXT_SIZE];
+	int plainlen = _decrypt((unsigned char *) in.buffer(), in.size(), this->_key, this->_iv, plaintext);
+
+	if (plainlen == -1) {
+		return -1;
+	}
+
+	out.alloc(plainlen, plaintext);
+	return 0;
+}
+
+int _decrypt(unsigned char *ciphertext, int ciphertext_len, unsigned char *key,
             unsigned char *iv, unsigned char *plaintext) {
     EVP_CIPHER_CTX *ctx;
-
     int len;
-
     int plaintext_len;
 
     /* Create and initialise the context */
     if(!(ctx = EVP_CIPHER_CTX_new())) {
 		LOG_DEBUG("%s:%d", __FILE__, __LINE__);
-		return 1;
+		return -1;
 	}
 
     /*
@@ -117,7 +129,7 @@ int decrypt(unsigned char *ciphertext, int ciphertext_len, unsigned char *key,
      */
     if(1 != EVP_DecryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, key, iv)) {
 		LOG_DEBUG("%s:%d", __FILE__, __LINE__);
-		return 1;
+		return -1;
 	}
 
     /*
@@ -126,7 +138,7 @@ int decrypt(unsigned char *ciphertext, int ciphertext_len, unsigned char *key,
      */
     if(1 != EVP_DecryptUpdate(ctx, plaintext, &len, ciphertext, ciphertext_len)) {
 		LOG_DEBUG("%s:%d", __FILE__, __LINE__);
-		return 1;
+		return -1;
 	}
     
 	plaintext_len = len;
@@ -137,7 +149,7 @@ int decrypt(unsigned char *ciphertext, int ciphertext_len, unsigned char *key,
      */
     if(1 != EVP_DecryptFinal_ex(ctx, plaintext + len, &len)) {
 		LOG_DEBUG("%s:%d", __FILE__, __LINE__);
-		return 1;
+		return -1;
 	}
 
     plaintext_len += len;
@@ -146,9 +158,5 @@ int decrypt(unsigned char *ciphertext, int ciphertext_len, unsigned char *key,
     EVP_CIPHER_CTX_free(ctx);
 
     return plaintext_len;
-}
-
-int CipherSymmetric::decrypt() {
-	return 0;
 }
 

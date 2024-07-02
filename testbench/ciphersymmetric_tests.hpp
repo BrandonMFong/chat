@@ -33,6 +33,11 @@ int test_SimpleString() {
 		result = c->encrypt(plain, enc);
 	}
 
+	Data dec;
+	if (!result) {
+		result = c->decrypt(enc, dec);
+	}
+
 	BFDelete(c);
 
 	UNIT_TEST_END(!result, result);
