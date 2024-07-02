@@ -153,7 +153,7 @@ class CipherAsymmetric : public Cipher {
 public:
 	~CipherAsymmetric();
 	int init();
-	int encrypt();
+	int encrypt(BF::Data & in, BF::Data & out);
 	int decrypt();
 
 private:

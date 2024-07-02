@@ -7,6 +7,7 @@
 #define CIPHER_HPP
 
 #include <bflibcpp/object.hpp>
+#include <bflibcpp/data.hpp>
 
 typedef enum {
 kCipherTypeSymmetric = 0,
@@ -19,7 +20,7 @@ public:
 	~Cipher();
 
 	virtual int init() = 0;
-	virtual int encrypt() = 0;
+	virtual int encrypt(BF::Data & in, BF::Data & out) = 0;
 	virtual int decrypt() = 0;
 protected:	
 	Cipher();

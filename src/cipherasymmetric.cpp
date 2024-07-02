@@ -24,7 +24,7 @@ int CipherAsymmetric::init() {
 	return 0;
 }
 
-int CipherAsymmetric::encrypt() {
+int CipherAsymmetric::encrypt(BF::Data & in, BF::Data & out) {
 	return 0;
 }
 

@@ -136,7 +136,7 @@ int decrypt(unsigned char *ciphertext, int ciphertext_len, unsigned char *key,
     return plaintext_len;
 }
 
-int CipherSymmetric::encrypt() {
+int CipherSymmetric::encrypt(BF::Data & in, BF::Data & out) {
 	return 0;
 }
 

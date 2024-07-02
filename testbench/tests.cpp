@@ -8,6 +8,8 @@
 #include "message_tests.hpp"
 #include "command_tests.hpp"
 #include "agent_tests.hpp"
+#include "ciphersymmetric_tests.hpp"
+#include "cipherasymmetric_tests.hpp"
 #include "log.hpp"
 
 int main() {
@@ -18,6 +20,8 @@ int main() {
 	LAUNCH_TEST_SET(message_tests);
 	LAUNCH_TEST_SET(command_tests);
 	LAUNCH_TEST_SET(agent_tests);
+	LAUNCH_TEST_SET(ciphersymmetric_tests);
+	LAUNCH_TEST_SET(cipherasymmetric_tests);
 
 	TEST_SUITE_END;
 
