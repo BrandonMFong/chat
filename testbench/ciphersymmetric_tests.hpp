@@ -8,7 +8,7 @@
 
 #define ASSERT_PUBLIC_MEMBER_ACCESS
 
-#include "ciphersymmetric.hpp"
+#include "cipher.hpp"
 
 extern "C" {
 #include <bflibc/bflibc.h>
@@ -17,10 +17,29 @@ extern "C" {
 
 using namespace BF;
 
+int test_SimpleString() {
+	UNIT_TEST_START;
+	int result = 0;
+
+	Cipher * c = Cipher::create(kCipherTypeSymmetric);
+	const char * str = "Hello world!";
+	Data plain(strlen(str)+1, (unsigned char *) str);
+
+	Data enc;
+	c->encrypt(plain, enc);
+
+	BFDelete(c);
+
+	UNIT_TEST_END(!result, result);
+	return result;
+}
+
 void ciphersymmetric_tests(int * pass, int * fail) {
 	int p = 0, f = 0;
 	
 	INTRO_TEST_FUNCTION;
+	
+	LAUNCH_TEST(test_SimpleString, p, f);
 
 	if (pass) *pass += p;
 	if (fail) *fail += f;
