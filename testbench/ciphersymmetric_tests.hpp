@@ -22,11 +22,16 @@ int test_SimpleString() {
 	int result = 0;
 
 	Cipher * c = Cipher::create(kCipherTypeSymmetric);
+	if (c == 0) {
+		result = 1;
+	}
+
 	const char * str = "Hello world!";
 	Data plain(strlen(str)+1, (unsigned char *) str);
-
 	Data enc;
-	c->encrypt(plain, enc);
+	if (!result) {
+		result = c->encrypt(plain, enc);
+	}
 
 	BFDelete(c);
 

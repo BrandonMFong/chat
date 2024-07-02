@@ -11,6 +11,7 @@
 /// in bytes
 #define CIPHER_SYMMETRIC_KEY_SIZE 32
 #define CIPHER_SYMMETRIC_IV_SIZE 16
+#define CIPHER_SYMMETRIC_CIPHER_TEXT_SIZE 128
 
 /**
  * will follow https://wiki.openssl.org/index.php/EVP_Symmetric_Encryption_and_Decryption
