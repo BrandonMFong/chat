@@ -17,10 +17,51 @@ extern "C" {
 
 using namespace BF;
 
+int test_AsymSimpleString() {
+	UNIT_TEST_START;
+	int result = 0;
+	int max = 2 << 16;
+
+	while (!result && max--) {
+		Cipher * c = Cipher::create(kCipherTypeSymmetric);
+		if (c == 0) {
+			result = 1;
+		}
+
+		const char * str = "Hello world!";
+		Data plain(strlen(str)+1, (unsigned char *) str);
+		Data enc;
+		if (!result) {
+			result = c->encrypt(plain, enc);
+		}
+
+		Data dec;
+		if (!result) {
+			result = c->decrypt(enc, dec);
+		}
+
+		if (!result) {
+			const char * res = (char *) dec.buffer();
+			if (strcmp(res, str)) {
+				printf("%s != %s\n", res, str);
+				result = 2;
+			}
+		}
+
+		BFDelete(c);
+	}
+
+	UNIT_TEST_END(!result, result);
+	return result;
+}
+
+
 void cipherasymmetric_tests(int * pass, int * fail) {
 	int p = 0, f = 0;
 	
 	INTRO_TEST_FUNCTION;
+
+	LAUNCH_TEST(test_AsymSimpleString, p, f);
 
 	if (pass) *pass += p;
 	if (fail) *fail += f;
