@@ -12,9 +12,9 @@
 
 using namespace BF;
 
-int _encrypt(unsigned char *plaintext, int plaintext_len, unsigned char *key,
+int _encrypt(Data & in, unsigned char *key,
             unsigned char *iv, Data & out);
-int _decrypt(unsigned char *ciphertext, int ciphertext_len, unsigned char *key,
+int _decrypt(Data & in, unsigned char *key,
             unsigned char *iv, Data & out);
 
 CipherSymmetric::CipherSymmetric() : Cipher() {
@@ -38,10 +38,10 @@ int CipherSymmetric::init() {
 }
 
 int CipherSymmetric::encrypt(Data & in, Data & out) {
-	return _encrypt((unsigned char *) in.buffer(), in.size(), this->_key, this->_iv, out);
+	return _encrypt(in, this->_key, this->_iv, out);
 }
 
-int _encrypt(unsigned char *plaintext, int plaintext_len, unsigned char *key,
+int _encrypt(Data & in, unsigned char *key,
             unsigned char *iv, Data & out) {
 	int result = 0;
     EVP_CIPHER_CTX *ctx;
@@ -52,7 +52,7 @@ int _encrypt(unsigned char *plaintext, int plaintext_len, unsigned char *key,
 	/* 
 	 * figure out cipher buffer length
 	 */
-	size_t newsize = ((plaintext_len / blocksize) + 1) * blocksize;
+	size_t newsize = ((in.size() / blocksize) + 1) * blocksize;
 	out.alloc(newsize);
 
     /* Create and initialise the context */
@@ -78,12 +78,11 @@ int _encrypt(unsigned char *plaintext, int plaintext_len, unsigned char *key,
 	}
 
 	if (!result) {
-		//EVP_CIPHER_CTX_set_padding(ctx, 1);
 		/*
 		 * Provide the message to be encrypted, and obtain the encrypted output.
 		 * EVP_EncryptUpdate can be called multiple times if necessary
 		 */
-		if(1 != EVP_EncryptUpdate(ctx, (unsigned char *) out.buffer(), &len, plaintext, plaintext_len)) {
+		if(1 != EVP_EncryptUpdate(ctx, (unsigned char *) out.buffer(), &len, (unsigned char *) in.buffer(), in.size())) {
 			LOG_DEBUG("%s:%d", __FILE__, __LINE__);
 			result = -1;
 		}
@@ -117,11 +116,11 @@ int _encrypt(unsigned char *plaintext, int plaintext_len, unsigned char *key,
     return result;
 }
 
-int CipherSymmetric::decrypt(BF::Data & in, BF::Data & out) {
-	return _decrypt((unsigned char *) in.buffer(), in.size(), this->_key, this->_iv, out);
+int CipherSymmetric::decrypt(Data & in, Data & out) {
+	return _decrypt(in, this->_key, this->_iv, out);
 }
 
-int _decrypt(unsigned char *ciphertext, int ciphertext_len, unsigned char *key,
+int _decrypt(Data & in, unsigned char *key,
             unsigned char *iv, Data & out) {
 	int result = 0;
     EVP_CIPHER_CTX *ctx;
@@ -131,7 +130,7 @@ int _decrypt(unsigned char *ciphertext, int ciphertext_len, unsigned char *key,
 	/*
 	 * out text should be as long as in text
 	 */
-	out.alloc(ciphertext_len);
+	out.alloc(in.size());
 
     /* Create and initialise the context */
 	if (!result) {
@@ -161,7 +160,7 @@ int _decrypt(unsigned char *ciphertext, int ciphertext_len, unsigned char *key,
 		 * Provide the message to be decrypted, and obtain the plaintext output.
 		 * EVP_DecryptUpdate can be called multiple times if necessary.
 		 */
-		if(1 != EVP_DecryptUpdate(ctx, (unsigned char *) out.buffer(), &len, ciphertext, ciphertext_len)) {
+		if(1 != EVP_DecryptUpdate(ctx, (unsigned char *) out.buffer(), &len, (unsigned char *) in.buffer(), in.size())) {
 			LOG_DEBUG("%s:%d", __FILE__, __LINE__);
 			result = -1;
 		}
