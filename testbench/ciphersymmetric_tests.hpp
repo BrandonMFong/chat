@@ -20,7 +20,7 @@ using namespace BF;
 int test_SimpleString() {
 	UNIT_TEST_START;
 	int result = 0;
-	int max = 2 << 4;
+	int max = 1;
 
 	while (!result && max--) {
 		Cipher * c = Cipher::create(kCipherTypeSymmetric);

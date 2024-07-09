@@ -101,7 +101,7 @@ int _encrypt(unsigned char *plaintext, int plaintext_len, unsigned char *key,
 		 * Finalise the encryption. Further ciphertext bytes may be written at
 		 * this stage.
 		 */
-		if(1 != EVP_EncryptFinal_ex(ctx, (unsigned char *) out.buffer() + out.size(), &len)) {
+		if(1 != EVP_EncryptFinal_ex(ctx, (unsigned char *) out.buffer() + len, &len)) {
 			LOG_DEBUG("%s:%d", __FILE__, __LINE__);
 			result = -1;
 		} else {
