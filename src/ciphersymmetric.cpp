@@ -51,6 +51,12 @@ int _encrypt(unsigned char *plaintext, int plaintext_len, unsigned char *key,
     int len;
     int ciphertext_len;
 	const size_t blocksize = 16;
+	
+	/* 
+	 * figure out cipher buffer length
+	 */
+	size_t newsize = ((plaintext_len % blocksize) + 1) * blocksize;
+	out.alloc(newsize);
 
     /* Create and initialise the context */
 	if (!result) {
@@ -75,12 +81,7 @@ int _encrypt(unsigned char *plaintext, int plaintext_len, unsigned char *key,
 	}
 
 	if (!result) {
-		/* 
-		 * figure out cipher buffer length
-		 */
-		size_t newsize = ((plaintext_len % blocksize) + 1) * blocksize;
-		out.alloc(newsize);
-
+		EVP_CIPHER_CTX_set_padding(ctx, 1);
 		/*
 		 * Provide the message to be encrypted, and obtain the encrypted output.
 		 * EVP_EncryptUpdate can be called multiple times if necessary
@@ -94,8 +95,6 @@ int _encrypt(unsigned char *plaintext, int plaintext_len, unsigned char *key,
 	if (!result) {
 		ciphertext_len = len;
 
-		out.resize(out.size() + len);
-
 		/*
 		 * Finalise the encryption. Further ciphertext bytes may be written at
 		 * this stage.
@@ -108,6 +107,10 @@ int _encrypt(unsigned char *plaintext, int plaintext_len, unsigned char *key,
 
 			size_t newsize = ((ciphertext_len % blocksize) + 1) * blocksize;
 			out.resize(ciphertext_len);
+
+			if (out.size() % blocksize) {
+				result = 1;
+			}
 		}
 	}
 
@@ -128,6 +131,11 @@ int _decrypt(unsigned char *ciphertext, int ciphertext_len, unsigned char *key,
     EVP_CIPHER_CTX *ctx;
     int len;
     int plaintext_len;
+	
+	/*
+	 * out text should be as long as in text
+	 */
+	out.alloc(ciphertext_len);
 
     /* Create and initialise the context */
 	if (!result) {
@@ -154,11 +162,6 @@ int _decrypt(unsigned char *ciphertext, int ciphertext_len, unsigned char *key,
 	if (!result) {
 		EVP_CIPHER_CTX_set_padding(ctx, 0);
 		/*
-		 * out text should be as long as in text
-		 */
-		out.alloc(ciphertext_len);
-
-		/*
 		 * Provide the message to be decrypted, and obtain the plaintext output.
 		 * EVP_DecryptUpdate can be called multiple times if necessary.
 		 */
@@ -180,7 +183,7 @@ int _decrypt(unsigned char *ciphertext, int ciphertext_len, unsigned char *key,
 			result = -1;
 		} else {
 			plaintext_len += len;
-			out.resize(plaintext_len);
+			//out.resize(plaintext_len);
 		}
 	}
 
