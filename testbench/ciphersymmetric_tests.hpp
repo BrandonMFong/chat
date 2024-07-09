@@ -20,7 +20,7 @@ using namespace BF;
 int test_SimpleString() {
 	UNIT_TEST_START;
 	int result = 0;
-	int max = 2 << 8;
+	int max = 2 << 16;
 
 	while (!result && max--) {
 		Cipher * c = Cipher::create(kCipherTypeSymmetric);
@@ -58,7 +58,7 @@ int test_SimpleString() {
 int test_LongString() {
 	UNIT_TEST_START;
 	int result = 0;
-	int max = 2 << 8;
+	int max = 2 << 16;
 
 	while (!result && max--) {
 		Cipher * c = Cipher::create(kCipherTypeSymmetric);
@@ -66,8 +66,8 @@ int test_LongString() {
 			result = 1;
 		}
 
-		const char * str = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
-		Data plain(strlen(str)+1, (unsigned char *) str);
+		String str = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
+		Data plain(str);
 		Data enc;
 		if (!result) {
 			result = c->encrypt(plain, enc);
@@ -79,10 +79,10 @@ int test_LongString() {
 		}
 
 		if (!result) {
-			const char * res = (char *) dec.buffer();
-			if (strlen(res) != strlen(str)) {
+			const char * res = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
+			if (strlen(res) != str.length()) {
 				result = 3;
-			} else if (strcmp(res, str)) {
+			} else if (str.compareString(res)) {
 				printf("%s != %s\n", res, str);
 				result = 2;
 			}
