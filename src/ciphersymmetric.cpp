@@ -50,6 +50,7 @@ int _encrypt(unsigned char *plaintext, int plaintext_len, unsigned char *key,
     EVP_CIPHER_CTX *ctx;
     int len;
     int ciphertext_len;
+	const size_t blocksize = 16;
 
     /* Create and initialise the context */
 	if (!result) {
@@ -77,9 +78,8 @@ int _encrypt(unsigned char *plaintext, int plaintext_len, unsigned char *key,
 		/* 
 		 * figure out cipher buffer length
 		 */
-		const size_t blocksize = 16;
-		const size_t cs = ((plaintext_len % blocksize) + 1) * blocksize;
-		out.alloc(cs);
+		size_t newsize = ((plaintext_len % blocksize) + 1) * blocksize;
+		out.alloc(newsize);
 
 		/*
 		 * Provide the message to be encrypted, and obtain the encrypted output.
@@ -95,7 +95,6 @@ int _encrypt(unsigned char *plaintext, int plaintext_len, unsigned char *key,
 		ciphertext_len = len;
 
 		out.resize(out.size() + len);
-		//out.resize(ciphertext_len);
 
 		/*
 		 * Finalise the encryption. Further ciphertext bytes may be written at
@@ -107,6 +106,7 @@ int _encrypt(unsigned char *plaintext, int plaintext_len, unsigned char *key,
 		} else {
 			ciphertext_len += len;
 
+			size_t newsize = ((ciphertext_len % blocksize) + 1) * blocksize;
 			out.resize(ciphertext_len);
 		}
 	}
@@ -152,7 +152,7 @@ int _decrypt(unsigned char *ciphertext, int ciphertext_len, unsigned char *key,
 	}
 
 	if (!result) {
-		//EVP_CIPHER_CTX_set_padding(ctx, 0);
+		EVP_CIPHER_CTX_set_padding(ctx, 0);
 		/*
 		 * out text should be as long as in text
 		 */
