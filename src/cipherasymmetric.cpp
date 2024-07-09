@@ -22,6 +22,10 @@ CipherAsymmetric::CipherAsymmetric() : Cipher() {
 CipherAsymmetric::~CipherAsymmetric() {
 }
 
+CipherType CipherAsymmetric::type() {
+	return kCipherTypeAsymmetric;
+}
+
 // TODO: make the asymmetric keys
 int CipherAsymmetric::init() {
 	EVP_PKEY * pkey = pkey = EVP_RSA_gen(4096);

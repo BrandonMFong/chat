@@ -25,6 +25,10 @@ CipherSymmetric::~CipherSymmetric() {
 
 }
 
+CipherType CipherSymmetric::type() {
+	return kCipherTypeSymmetric;
+}
+
 int CipherSymmetric::init() {
 	if (RAND_bytes(this->_key, CIPHER_SYMMETRIC_KEY_SIZE) != 1) {
 		LOG_DEBUG("couldn't generate key");

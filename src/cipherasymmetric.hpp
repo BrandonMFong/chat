@@ -156,6 +156,7 @@ public:
 	int encrypt(BF::Data & in, BF::Data & out);
 	int decrypt(BF::Data & in, BF::Data & out);
 
+	CipherType type();
 private:
 	CipherAsymmetric();
 	
