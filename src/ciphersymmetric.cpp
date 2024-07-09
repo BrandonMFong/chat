@@ -100,10 +100,7 @@ int _encrypt(Data & in, unsigned char *key,
 			result = -1;
 		} else {
 			ciphertext_len += len;
-
-			size_t newsize = ((ciphertext_len / blocksize) + 1) * blocksize;
 			out.resize(ciphertext_len);
-
 			if (out.size() % blocksize) {
 				result = 1;
 			}
