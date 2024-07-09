@@ -20,7 +20,7 @@ using namespace BF;
 int test_SimpleString() {
 	UNIT_TEST_START;
 	int result = 0;
-	int max = 1;
+	int max = 2 << 8;
 
 	while (!result && max--) {
 		Cipher * c = Cipher::create(kCipherTypeSymmetric);
@@ -58,7 +58,7 @@ int test_SimpleString() {
 int test_LongString() {
 	UNIT_TEST_START;
 	int result = 0;
-	int max = 1;
+	int max = 2 << 8;
 
 	while (!result && max--) {
 		Cipher * c = Cipher::create(kCipherTypeSymmetric);
@@ -80,7 +80,9 @@ int test_LongString() {
 
 		if (!result) {
 			const char * res = (char *) dec.buffer();
-			if (strcmp(res, str)) {
+			if (strlen(res) != strlen(str)) {
+				result = 3;
+			} else if (strcmp(res, str)) {
 				printf("%s != %s\n", res, str);
 				result = 2;
 			}
@@ -98,7 +100,7 @@ void ciphersymmetric_tests(int * pass, int * fail) {
 	
 	INTRO_TEST_FUNCTION;
 	
-	//LAUNCH_TEST(test_SimpleString, p, f);
+	LAUNCH_TEST(test_SimpleString, p, f);
 	LAUNCH_TEST(test_LongString, p, f);
 
 	if (pass) *pass += p;
