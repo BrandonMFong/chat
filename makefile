@@ -13,10 +13,10 @@ CPPSTD = -std=c++20
 LIBRARIES = /usr/local/lib64/libssl.a /usr/local/lib64/libcrypto.a 
 
 FILES = \
-interface sealedpacket cipher cipherasymmetric \
+interface cipher cipherasymmetric ciphersymmetric \
 log user inputbuffer office \
 chatroom message chatroomserver packet \
-agent agentclient agentserver ciphersymmetric \
+agent agentclient agentserver sealedpacket \
 chatroomclient interfaceserver interfaceclient command \
 permissions chat
 
