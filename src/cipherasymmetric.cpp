@@ -11,6 +11,7 @@
 #include "log.hpp"
 #include <openssl/rsa.h>
 #include <openssl/err.h>
+#include <openssl/pem.h>
 #include <string.h>
 
 CipherAsymmetric::CipherAsymmetric() : Cipher() {
@@ -21,6 +22,7 @@ CipherAsymmetric::~CipherAsymmetric() {
 
 // TODO: make the asymmetric keys
 int CipherAsymmetric::init() {
+	EVP_PKEY * pkey = pkey = EVP_RSA_gen(4096);
 	return 0;
 }
 
