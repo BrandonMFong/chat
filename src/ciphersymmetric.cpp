@@ -78,7 +78,7 @@ int _encrypt(unsigned char *plaintext, int plaintext_len, unsigned char *key,
 	}
 
 	if (!result) {
-		EVP_CIPHER_CTX_set_padding(ctx, 1);
+		//EVP_CIPHER_CTX_set_padding(ctx, 1);
 		/*
 		 * Provide the message to be encrypted, and obtain the encrypted output.
 		 * EVP_EncryptUpdate can be called multiple times if necessary
@@ -156,7 +156,7 @@ int _decrypt(unsigned char *ciphertext, int ciphertext_len, unsigned char *key,
 	}
 
 	if (!result) {
-		EVP_CIPHER_CTX_set_padding(ctx, 0);
+		//EVP_CIPHER_CTX_set_padding(ctx, 0);
 		/*
 		 * Provide the message to be decrypted, and obtain the plaintext output.
 		 * EVP_DecryptUpdate can be called multiple times if necessary.
