@@ -30,7 +30,6 @@ int test_AsymSimpleString() {
 			result = 2;
 		}
 
-		/*
 		const char * str = "Hello world!";
 		Data plain(strlen(str)+1, (unsigned char *) str);
 		Data enc;
@@ -38,6 +37,7 @@ int test_AsymSimpleString() {
 			result = c->encrypt(plain, enc);
 		}
 
+		/*
 		Data dec;
 		if (!result) {
 			result = c->decrypt(enc, dec);
