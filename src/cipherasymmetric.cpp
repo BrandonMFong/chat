@@ -375,6 +375,13 @@ int CipherAsymmetric::encrypt(BF::Data & in, BF::Data & out) {
 }
 
 int CipherAsymmetric::decrypt(BF::Data & in, BF::Data & out) {
-	return 0;
+    size_t decrypted_len = 0;
+    unsigned char *decrypted = NULL;
+	int result = do_decrypt(this->_libctx, (const unsigned char *) in.buffer(), in.size(),
+                      &decrypted, &decrypted_len);
+	out.alloc(decrypted_len, decrypted);
+	OPENSSL_free(decrypted);
+
+	return result;
 }
 

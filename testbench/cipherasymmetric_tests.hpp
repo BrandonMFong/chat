@@ -36,7 +36,7 @@ int test_AsymSimpleString() {
 		if (!result) {
 			result = c->encrypt(plain, enc);
 		}
-		/*
+		
 		Data dec;
 		if (!result) {
 			result = c->decrypt(enc, dec);
@@ -49,7 +49,6 @@ int test_AsymSimpleString() {
 				result = 2;
 			}
 		}
-		*/
 
 		c->deinit();
 		BFDelete(c);
