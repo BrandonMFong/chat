@@ -7,8 +7,9 @@
 [] encryption
 	[x] make chatroom symmetric key
 	[x] make user assymetic keys
-	[] symmetric key for chatroom exchange
+	[x] symmetric key for chatroom exchange
 	[] encrypt chatroom message
+		[] create a step before joining a chatroom. Use it to ask for permission and grant chat key
 [] make git submodules
 [] ability to change user name
 [] user data window editor
