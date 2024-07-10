@@ -60,7 +60,7 @@ int test_AsymSimpleString() {
 int test_AsymLongString() {
 	UNIT_TEST_START;
 	int result = 0;
-	int max = 2 << 1;
+	int max = 2 << 2;
 
 	while (!result && max--) {
 		Cipher * c = Cipher::create(kCipherTypeAsymmetric);
@@ -102,7 +102,7 @@ int test_AsymLongString() {
 int test_HandingOffPublicKeyToEncrypt() {
 	UNIT_TEST_START;
 	int result = 0;
-	int max = 1;
+	int max = 2 << 4;
 
 	while (!result && max--) {
 		Data pub;
