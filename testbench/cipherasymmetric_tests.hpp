@@ -83,11 +83,11 @@ int test_AsymLongString() {
 		}
 
 		if (!result) {
-			const char * res = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
-			if (strlen(res) != str.length()) {
+			String decstr(dec);
+			if (decstr.length() != str.length()) {
 				result = 3;
-			} else if (str.compareString(res)) {
-				printf("%s != %s\n", res, str);
+			} else if (decstr != str) {
+				printf("%s != %s\n", decstr, str);
 				result = 2;
 			}
 		}
@@ -144,6 +144,15 @@ int test_HandingOffPublicKeyToEncrypt() {
 			result = user1->decrypt(enc, dec);
 		}
 
+		if (!result) {
+			String str(dec);
+			if (str.length() != strlen(msg)) {
+				result = 10;
+			} else if (str.compareString(msg)) {
+				result = 11;
+			}
+		}
+
 		BFDelete(user1);
 		BFDelete(user2);
 	}
@@ -157,8 +166,8 @@ void cipherasymmetric_tests(int * pass, int * fail) {
 	
 	INTRO_TEST_FUNCTION;
 
-	//LAUNCH_TEST(test_AsymSimpleString, p, f);
-	//LAUNCH_TEST(test_AsymLongString, p, f);
+	LAUNCH_TEST(test_AsymSimpleString, p, f);
+	LAUNCH_TEST(test_AsymLongString, p, f);
 	LAUNCH_TEST(test_HandingOffPublicKeyToEncrypt, p, f);
 
 	if (pass) *pass += p;
