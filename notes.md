@@ -7,3 +7,5 @@
 * Working forward with encryption, I will be doing the hybrid encryption from this post: https://security.stackexchange.com/a/204300
 * I am looking for a way to implement asymmetric cryptography. Seeing this geeksforgeeks post: https://www.geeksforgeeks.org/rsa-algorithm-cryptography/. Could I use openssl?
 * Found demo code on the openssl source code https://github.com/openssl/openssl/blob/master/demos/encrypt/rsa_encrypt.c
+* Took me a while to get the encryption code to work. Had some simple math errors when trying to calculate the correct buffer size of cipher/plain text. Implementing the asymmetric code was straightforward. Openssl has good examples on their github.
+ 
