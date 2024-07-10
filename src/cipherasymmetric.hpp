@@ -157,6 +157,9 @@ public:
 	int decrypt(BF::Data & in, BF::Data & out);
 
 	CipherType type();
+
+	int getPublicKey(BF::Data & key);
+	int getPrivateKey(BF::Data & key);
 private:
 	CipherAsymmetric();
 	EVP_PKEY * _keys;

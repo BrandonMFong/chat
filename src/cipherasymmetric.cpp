@@ -19,6 +19,9 @@
 #include <openssl/core_names.h>
 #include <openssl/rsa.h>
 #include <openssl/pem.h>
+#include <openssl/encoder.h>
+
+using namespace BF;
 
 CipherAsymmetric::CipherAsymmetric() : Cipher() {
 	this->_libctx = NULL;
@@ -170,7 +173,7 @@ cleanup:
     return ret;
 }
 
-int CipherAsymmetric::encrypt(BF::Data & in, BF::Data & out) {
+int CipherAsymmetric::encrypt(Data & in, Data & out) {
     size_t encrypted_len = 0;
     unsigned char * encrypted = NULL;
 	int result = do_encrypt(
@@ -187,7 +190,7 @@ int CipherAsymmetric::encrypt(BF::Data & in, BF::Data & out) {
 	return result;
 }
 
-int CipherAsymmetric::decrypt(BF::Data & in, BF::Data & out) {
+int CipherAsymmetric::decrypt(Data & in, Data & out) {
     size_t decrypted_len = 0;
     unsigned char * decrypted = NULL;
 	int result = do_decrypt(
@@ -202,5 +205,56 @@ int CipherAsymmetric::decrypt(BF::Data & in, BF::Data & out) {
 	OPENSSL_free(decrypted);
 
 	return result;
+}
+
+int _EVPKeyGetData(EVP_PKEY * pkey, const char * pass, Data & data) {
+	if (!pkey)
+		return 1;
+	
+	OSSL_ENCODER_CTX * ectx = NULL;
+	const char * format = "DER";
+	const char * structure = "PrivateKeyInfo"; /* PKCS#8 structure */
+	//const unsigned char *pass = "my password";
+	unsigned char * d = NULL;
+	size_t dlen= 0;	
+
+	ectx = OSSL_ENCODER_CTX_new_for_pkey(pkey,
+										 OSSL_KEYMGMT_SELECT_KEYPAIR
+										 | OSSL_KEYMGMT_SELECT_DOMAIN_PARAMETERS,
+										 format, structure,
+										 NULL);
+
+	/* error: no suitable potential encoders found */
+	if (ectx == NULL) {
+		return 2;
+	}
+
+	if (pass != NULL) {
+		OSSL_ENCODER_CTX_set_passphrase(ectx, (const unsigned char *) pass, strlen(pass));
+		OSSL_ENCODER_CTX_set_cipher(ectx, "AES-256-CBC", NULL);
+	}
+
+	if (OSSL_ENCODER_to_data(ectx, &d, &dlen)) {
+		/*
+		 * pkey was successfully encoded into a newly allocated
+		 * data buffer
+		 */
+		data.alloc(dlen, d);
+		OPENSSL_free(d);
+	} else {
+		/* encoding failure */
+		return 3;
+	}
+	OSSL_ENCODER_CTX_free(ectx);
+	
+	return 0;
+}
+
+int CipherAsymmetric::getPublicKey(Data & key) {
+	return _EVPKeyGetData(this->_keys, NULL, key);
+}
+
+int CipherAsymmetric::getPrivateKey(Data & key) {
+	return _EVPKeyGetData(this->_keys, "", key);
 }
 
