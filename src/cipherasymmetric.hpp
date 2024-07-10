@@ -159,7 +159,7 @@ public:
 	CipherType type();
 private:
 	CipherAsymmetric();
-	
+	EVP_PKEY * _keys;
     /*
      * Setting libctx to NULL uses the default library context
      * Use OSSL_LIB_CTX_new() to create a non default library context

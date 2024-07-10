@@ -21,6 +21,7 @@
 
 CipherAsymmetric::CipherAsymmetric() : Cipher() {
 	this->_libctx = NULL;
+	this->_keys = NULL;
 }
 
 CipherAsymmetric::~CipherAsymmetric() {
@@ -32,76 +33,6 @@ CipherType CipherAsymmetric::type() {
 
 /* A property query used for selecting algorithm implementations. */
 static const char *propq = NULL;
-
-/*
- * Generates an RSA public-private key pair and returns it.
- * The number of bits is specified by the bits argument.
- *
- * This uses the long way of generating an RSA key.
- */
-static EVP_PKEY *generate_rsa_key_long(OSSL_LIB_CTX *libctx, unsigned int bits)
-{
-    EVP_PKEY_CTX *genctx = NULL;
-    EVP_PKEY *pkey = NULL;
-    unsigned int primes = 2;
-
-    /* Create context using RSA algorithm. "RSA-PSS" could also be used here. */
-    genctx = EVP_PKEY_CTX_new_from_name(libctx, "RSA", propq);
-    if (genctx == NULL) {
-        fprintf(stderr, "EVP_PKEY_CTX_new_from_name() failed\n");
-        goto cleanup;
-    }
-
-    /* Initialize context for key generation purposes. */
-    if (EVP_PKEY_keygen_init(genctx) <= 0) {
-        fprintf(stderr, "EVP_PKEY_keygen_init() failed\n");
-        goto cleanup;
-    }
-
-    /*
-     * Here we set the number of bits to use in the RSA key.
-     * See comment at top of file for information on appropriate values.
-     */
-    if (EVP_PKEY_CTX_set_rsa_keygen_bits(genctx, bits) <= 0) {
-        fprintf(stderr, "EVP_PKEY_CTX_set_rsa_keygen_bits() failed\n");
-        goto cleanup;
-    }
-
-    /*
-     * It is possible to create an RSA key using more than two primes.
-     * Do not do this unless you know why you need this.
-     * You ordinarily do not need to specify this, as the default is two.
-     *
-     * Both of these parameters can also be set via EVP_PKEY_CTX_set_params, but
-     * these functions provide a more concise way to do so.
-     */
-    if (EVP_PKEY_CTX_set_rsa_keygen_primes(genctx, primes) <= 0) {
-        fprintf(stderr, "EVP_PKEY_CTX_set_rsa_keygen_primes() failed\n");
-        goto cleanup;
-    }
-
-    /*
-     * Generating an RSA key with a number of bits large enough to be secure for
-     * modern applications can take a fairly substantial amount of time (e.g.
-     * one second). If you require fast key generation, consider using an EC key
-     * instead.
-     *
-     * If you require progress information during the key generation process,
-     * you can set a progress callback using EVP_PKEY_set_cb; see the example in
-     * EVP_PKEY_generate(3).
-     */
-    fprintf(stdout, "Generating RSA key, this may take some time...\n");
-    if (EVP_PKEY_generate(genctx, &pkey) <= 0) {
-        fprintf(stderr, "EVP_PKEY_generate() failed\n");
-        goto cleanup;
-    }
-
-    /* pkey is now set to an object representing the generated key pair. */
-
-cleanup:
-    EVP_PKEY_CTX_free(genctx);
-    return pkey;
-}
 
 /*
  * Generates an RSA public-private key pair and returns it.
@@ -245,10 +176,13 @@ cleanup:
 }
 
 int CipherAsymmetric::init() {
+	this->_keys = generate_rsa_key_short(this->_libctx, 4096);
 	return 0;
 }
 
 int CipherAsymmetric::deinit() {
+	EVP_PKEY_free(this->_keys);
+	OSSL_LIB_CTX_free(this->_libctx);
 	return 0;
 }
 /*
@@ -317,7 +251,7 @@ static void set_optional_params(OSSL_PARAM *p, const char *propq)
  * RSA key length minus some additional bytes that depends on the padding mode.
  *
  */
-static int do_encrypt(OSSL_LIB_CTX *libctx,
+static int do_encrypt(OSSL_LIB_CTX *libctx, EVP_PKEY *pub_key,
                       const unsigned char *in, size_t in_len,
                       unsigned char **out, size_t *out_len)
 {
@@ -326,11 +260,11 @@ static int do_encrypt(OSSL_LIB_CTX *libctx,
     unsigned char *buf = NULL;
     const char *propq = NULL;
     EVP_PKEY_CTX *ctx = NULL;
-    EVP_PKEY *pub_key = NULL;
+    //EVP_PKEY *pub_key = NULL;
     OSSL_PARAM params[5];
 
     /* Get public key */
-    pub_key = get_key(libctx, propq, pub);
+    //pub_key = get_key(libctx, propq, pub);
     if (pub_key == NULL) {
         fprintf(stderr, "Get public key failed.\n");
         goto cleanup;
@@ -370,12 +304,12 @@ static int do_encrypt(OSSL_LIB_CTX *libctx,
 cleanup:
     if (ret)
         OPENSSL_free(buf);
-    EVP_PKEY_free(pub_key);
+    //EVP_PKEY_free(pub_key);
     EVP_PKEY_CTX_free(ctx);
     return ret;
 }
 
-static int do_decrypt(OSSL_LIB_CTX *libctx, const unsigned char *in, size_t in_len,
+static int do_decrypt(OSSL_LIB_CTX *libctx, EVP_PKEY *priv_key, const unsigned char *in, size_t in_len,
                       unsigned char **out, size_t *out_len)
 {
     int ret = 1, pub = 0;
@@ -383,11 +317,11 @@ static int do_decrypt(OSSL_LIB_CTX *libctx, const unsigned char *in, size_t in_l
     unsigned char *buf = NULL;
     const char *propq = NULL;
     EVP_PKEY_CTX *ctx = NULL;
-    EVP_PKEY *priv_key = NULL;
+    //EVP_PKEY *priv_key = NULL;
     OSSL_PARAM params[5];
 
     /* Get private key */
-    priv_key = get_key(libctx, propq, pub);
+    //priv_key = get_key(libctx, propq, pub);
     if (priv_key == NULL) {
         fprintf(stderr, "Get private key failed.\n");
         goto cleanup;
@@ -429,7 +363,7 @@ static int do_decrypt(OSSL_LIB_CTX *libctx, const unsigned char *in, size_t in_l
 cleanup:
     if (ret)
         OPENSSL_free(buf);
-    EVP_PKEY_free(priv_key);
+    //EVP_PKEY_free(priv_key);
     EVP_PKEY_CTX_free(ctx);
     return ret;
 }
@@ -437,7 +371,7 @@ cleanup:
 int CipherAsymmetric::encrypt(BF::Data & in, BF::Data & out) {
     size_t encrypted_len = 0;
     unsigned char * encrypted = NULL;
-	int result = do_encrypt(this->_libctx,
+	int result = do_encrypt(this->_libctx, this->_keys,
                       (const unsigned char *) in.buffer(), in.size(),
                       &encrypted, &encrypted_len);
 
@@ -450,7 +384,7 @@ int CipherAsymmetric::encrypt(BF::Data & in, BF::Data & out) {
 int CipherAsymmetric::decrypt(BF::Data & in, BF::Data & out) {
     size_t decrypted_len = 0;
     unsigned char *decrypted = NULL;
-	int result = do_decrypt(this->_libctx, (const unsigned char *) in.buffer(), in.size(),
+	int result = do_decrypt(this->_libctx, this->_keys, (const unsigned char *) in.buffer(), in.size(),
                       &decrypted, &decrypted_len);
 	out.alloc(decrypted_len, decrypted);
 	OPENSSL_free(decrypted);
