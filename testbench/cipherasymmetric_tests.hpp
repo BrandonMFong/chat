@@ -20,7 +20,7 @@ using namespace BF;
 int test_AsymSimpleString() {
 	UNIT_TEST_START;
 	int result = 0;
-	int max = 2 << 8;
+	int max = 2 << 2;
 
 	while (!result && max--) {
 		Cipher * c = Cipher::create(kCipherTypeAsymmetric);
@@ -61,7 +61,7 @@ int test_AsymSimpleString() {
 int test_AsymLongString() {
 	UNIT_TEST_START;
 	int result = 0;
-	int max = 1;
+	int max = 2 << 1;
 
 	while (!result && max--) {
 		Cipher * c = Cipher::create(kCipherTypeAsymmetric);
@@ -106,7 +106,7 @@ void cipherasymmetric_tests(int * pass, int * fail) {
 	
 	INTRO_TEST_FUNCTION;
 
-	//LAUNCH_TEST(test_AsymSimpleString, p, f);
+	LAUNCH_TEST(test_AsymSimpleString, p, f);
 	LAUNCH_TEST(test_AsymLongString, p, f);
 
 	if (pass) *pass += p;
