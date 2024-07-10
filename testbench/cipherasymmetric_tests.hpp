@@ -106,32 +106,46 @@ int test_HandingOffPublicKeyToEncrypt() {
 
 	while (!result && max--) {
 		Data pub;
-		Cipher * c = Cipher::create(kCipherTypeAsymmetric);
-		if (c == 0) {
+		Cipher * user1 = Cipher::create(kCipherTypeAsymmetric);
+		if (user1 == 0) {
 			result = 1;
-		} else if (c->genkey()) {
+		} else if (user1->genkey()) {
 			result = 2;
 		}
 
-		CipherAsymmetric * ca = (CipherAsymmetric *) c;
 		if (!result) {
-			result = ca->getPublicKey(pub);
+			CipherAsymmetric * c = (CipherAsymmetric *) user1;
+			result = c->getPublicKey(pub);
 		}
 
 		// now this is where we should hand off the public key
-		CipherAsymmetric * cr = NULL;
+		Cipher * user2 = NULL;
 		if (!result) {
-			cr = (CipherAsymmetric *) Cipher::create(kCipherTypeAsymmetric);
-			if (cr == 0) {
+			user2 = Cipher::create(kCipherTypeAsymmetric);
+			if (user2 == 0) {
 				result = 3;
-			} else if (cr->setPublicKey(pub)) {
-				result = 4;
 			}
 		}
-		
 
-		BFDelete(c);
-		BFDelete(cr);
+		if (!result) {
+			CipherAsymmetric * c = (CipherAsymmetric *) user2;
+			result = c->setPublicKey(pub);
+		}
+
+		const char * msg = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
+		Data pt(strlen(msg)+1, (const unsigned char *) msg);
+		Data enc;
+		if (!result) {
+			result = user2->encrypt(pt, enc);
+		}
+
+		Data dec;
+		if (!result) {
+			result = user1->decrypt(enc, dec);
+		}
+
+		BFDelete(user1);
+		BFDelete(user2);
 	}
 
 	UNIT_TEST_END(!result, result);

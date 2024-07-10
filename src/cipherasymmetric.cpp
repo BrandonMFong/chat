@@ -255,32 +255,27 @@ int CipherAsymmetric::getPublicKey(Data & key) {
 	return _EVPKeyGetData(this->_keys, NULL, key);
 }
 
-static EVP_PKEY * get_key(OSSL_LIB_CTX * libctx, const char * propq, int pub)
-{
+static EVP_PKEY * get_key(OSSL_LIB_CTX * libctx, const char * propq, int pub, Data & data) {
     OSSL_DECODER_CTX *dctx = NULL;
     EVP_PKEY *pkey = NULL;
     int selection;
-    const unsigned char *data;
-    size_t data_len;
+    const unsigned char * d = (const unsigned char *) data.buffer();
+    size_t dlen = data.size();
 
     if (pub) {
         selection = EVP_PKEY_PUBLIC_KEY;
-        data = pub_key_der;
-        data_len = sizeof(pub_key_der);
     } else {
         selection = EVP_PKEY_KEYPAIR;
-        data = priv_key_der;
-        data_len = sizeof(priv_key_der);
     }
     dctx = OSSL_DECODER_CTX_new_for_pkey(&pkey, "DER", NULL, "RSA",
                                          selection, libctx, propq);
-    (void)OSSL_DECODER_from_data(dctx, &data, &data_len);
+    (void)OSSL_DECODER_from_data(dctx, &d, &dlen);
     OSSL_DECODER_CTX_free(dctx);
     return pkey;
 }
 
-int CipherAsymmetric::setPublicKey(BF::Data & key) {
-	this->_keys = get_key(this->_libctx, propq, 1);
+int CipherAsymmetric::setPublicKey(Data & key) {
+	this->_keys = get_key(this->_libctx, propq, 1, key);
 	if (!this->_keys)
 		return 1;
 	return 0;
