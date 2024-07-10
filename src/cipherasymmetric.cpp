@@ -248,7 +248,7 @@ static int do_encrypt(OSSL_LIB_CTX *libctx,
                       const unsigned char *in, size_t in_len,
                       unsigned char **out, size_t *out_len)
 {
-    int ret = 0, pub = 1;
+    int ret = 1, pub = 1;
     size_t buf_len = 0;
     unsigned char *buf = NULL;
     const char *propq = NULL;
@@ -292,10 +292,10 @@ static int do_encrypt(OSSL_LIB_CTX *libctx,
     fprintf(stdout, "Encrypted:\n");
     BIO_dump_indent_fp(stdout, buf, buf_len, 2);
     fprintf(stdout, "\n");
-    ret = 1;
+    ret = 0;
 
 cleanup:
-    if (!ret)
+    if (ret)
         OPENSSL_free(buf);
     EVP_PKEY_free(pub_key);
     EVP_PKEY_CTX_free(ctx);
@@ -305,7 +305,7 @@ cleanup:
 static int do_decrypt(OSSL_LIB_CTX *libctx, const unsigned char *in, size_t in_len,
                       unsigned char **out, size_t *out_len)
 {
-    int ret = 0, pub = 0;
+    int ret = 1, pub = 0;
     size_t buf_len = 0;
     unsigned char *buf = NULL;
     const char *propq = NULL;
@@ -351,10 +351,10 @@ static int do_decrypt(OSSL_LIB_CTX *libctx, const unsigned char *in, size_t in_l
     fprintf(stdout, "Decrypted:\n");
     BIO_dump_indent_fp(stdout, buf, buf_len, 2);
     fprintf(stdout, "\n");
-    ret = 1;
+    ret = 0;
 
 cleanup:
-    if (!ret)
+    if (ret)
         OPENSSL_free(buf);
     EVP_PKEY_free(priv_key);
     EVP_PKEY_CTX_free(ctx);
@@ -364,14 +364,14 @@ cleanup:
 int CipherAsymmetric::encrypt(BF::Data & in, BF::Data & out) {
     size_t encrypted_len = 0;
     unsigned char * encrypted = NULL;
-	do_encrypt(this->_libctx,
+	int result = do_encrypt(this->_libctx,
                       (const unsigned char *) in.buffer(), in.size(),
                       &encrypted, &encrypted_len);
 
-	//out.alloc(encrypted_len, encrypted);
+	out.alloc(encrypted_len, encrypted);
 	OPENSSL_free(encrypted);
 
-	return 0;
+	return result;
 }
 
 int CipherAsymmetric::decrypt(BF::Data & in, BF::Data & out) {

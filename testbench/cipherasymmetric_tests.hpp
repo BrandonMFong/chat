@@ -36,7 +36,6 @@ int test_AsymSimpleString() {
 		if (!result) {
 			result = c->encrypt(plain, enc);
 		}
-
 		/*
 		Data dec;
 		if (!result) {

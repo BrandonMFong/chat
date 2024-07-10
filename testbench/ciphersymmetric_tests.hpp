@@ -50,6 +50,7 @@ int test_SimpleString() {
 			}
 		}
 
+		c->deinit();
 		BFDelete(c);
 	}
 
@@ -92,6 +93,7 @@ int test_LongString() {
 			}
 		}
 
+		c->deinit();
 		BFDelete(c);
 	}
 
