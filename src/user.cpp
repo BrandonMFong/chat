@@ -111,7 +111,7 @@ int User::initCipher() {
 		return 1;
 	}
 
-	if (this->_cipher->init()) {
+	if (this->_cipher->genkey()) {
 		LOG_DEBUG("couldn't initiate cipher");
 		return 1;
 	}

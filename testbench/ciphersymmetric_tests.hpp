@@ -26,7 +26,7 @@ int test_SimpleString() {
 		Cipher * c = Cipher::create(kCipherTypeSymmetric);
 		if (c == 0) {
 			result = 1;
-		} else if (c->init()) {
+		} else if (c->genkey()) {
 			result = 2;
 		}
 
@@ -50,7 +50,6 @@ int test_SimpleString() {
 			}
 		}
 
-		c->deinit();
 		BFDelete(c);
 	}
 
@@ -67,7 +66,7 @@ int test_LongString() {
 		Cipher * c = Cipher::create(kCipherTypeSymmetric);
 		if (c == 0) {
 			result = 1;
-		} else if (c->init()) {
+		} else if (c->genkey()) {
 			result = 2;
 		}
 
@@ -93,7 +92,6 @@ int test_LongString() {
 			}
 		}
 
-		c->deinit();
 		BFDelete(c);
 	}
 

@@ -58,7 +58,7 @@ int ChatroomServer::initCipher() {
 	if (!this->_cipher)
 		return 1;
 
-	if (this->_cipher->init()) {
+	if (this->_cipher->genkey()) {
 		LOG_DEBUG("couldn't initialize cipher");
 		return 1;
 	}

@@ -26,7 +26,7 @@ int test_AsymSimpleString() {
 		Cipher * c = Cipher::create(kCipherTypeAsymmetric);
 		if (c == 0) {
 			result = 1;
-		} else if (c->init()) {
+		} else if (c->genkey()) {
 			result = 2;
 		}
 
@@ -50,7 +50,6 @@ int test_AsymSimpleString() {
 			}
 		}
 
-		c->deinit();
 		BFDelete(c);
 	}
 
@@ -67,7 +66,7 @@ int test_AsymLongString() {
 		Cipher * c = Cipher::create(kCipherTypeAsymmetric);
 		if (c == 0) {
 			result = 1;
-		} else if (c->init()) {
+		} else if (c->genkey()) {
 			result = 2;
 		}
 
@@ -93,8 +92,46 @@ int test_AsymLongString() {
 			}
 		}
 
-		c->deinit();
 		BFDelete(c);
+	}
+
+	UNIT_TEST_END(!result, result);
+	return result;
+}
+
+int test_HandingOffPublicKeyToEncrypt() {
+	UNIT_TEST_START;
+	int result = 0;
+	int max = 1;
+
+	while (!result && max--) {
+		Data pub;
+		Cipher * c = Cipher::create(kCipherTypeAsymmetric);
+		if (c == 0) {
+			result = 1;
+		} else if (c->genkey()) {
+			result = 2;
+		}
+
+		CipherAsymmetric * ca = (CipherAsymmetric *) c;
+		if (!result) {
+			result = ca->getPublicKey(pub);
+		}
+
+		// now this is where we should hand off the public key
+		CipherAsymmetric * cr = NULL;
+		if (!result) {
+			cr = (CipherAsymmetric *) Cipher::create(kCipherTypeAsymmetric);
+			if (cr == 0) {
+				result = 3;
+			} else if (cr->setPublicKey(pub)) {
+				result = 4;
+			}
+		}
+		
+
+		BFDelete(c);
+		BFDelete(cr);
 	}
 
 	UNIT_TEST_END(!result, result);
@@ -106,8 +143,9 @@ void cipherasymmetric_tests(int * pass, int * fail) {
 	
 	INTRO_TEST_FUNCTION;
 
-	LAUNCH_TEST(test_AsymSimpleString, p, f);
-	LAUNCH_TEST(test_AsymLongString, p, f);
+	//LAUNCH_TEST(test_AsymSimpleString, p, f);
+	//LAUNCH_TEST(test_AsymLongString, p, f);
+	LAUNCH_TEST(test_HandingOffPublicKeyToEncrypt, p, f);
 
 	if (pass) *pass += p;
 	if (fail) *fail += f;

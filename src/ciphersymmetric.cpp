@@ -29,7 +29,7 @@ CipherType CipherSymmetric::type() {
 	return kCipherTypeSymmetric;
 }
 
-int CipherSymmetric::init() {
+int CipherSymmetric::genkey() {
 	if (RAND_bytes(this->_key, CIPHER_SYMMETRIC_KEY_SIZE) != 1) {
 		LOG_DEBUG("couldn't generate key");
 		return 1;
@@ -38,10 +38,6 @@ int CipherSymmetric::init() {
 		return 2;
 	}
 
-	return 0;
-}
-
-int CipherSymmetric::deinit() {
 	return 0;
 }
 

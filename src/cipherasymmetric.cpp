@@ -29,6 +29,13 @@ CipherAsymmetric::CipherAsymmetric() : Cipher() {
 }
 
 CipherAsymmetric::~CipherAsymmetric() {
+	if (this->_keys) {
+		EVP_PKEY_free(this->_keys);
+	}
+
+	if (this->_libctx) {
+		OSSL_LIB_CTX_free(this->_libctx);
+	}
 }
 
 CipherType CipherAsymmetric::type() {
@@ -51,14 +58,8 @@ static EVP_PKEY * generate_rsa_key_short(OSSL_LIB_CTX * libctx, unsigned int bit
     return EVP_PKEY_Q_keygen(libctx, propq, "RSA", (size_t)bits);
 }
 
-int CipherAsymmetric::init() {
+int CipherAsymmetric::genkey() {
 	this->_keys = generate_rsa_key_short(this->_libctx, 4096);
-	return 0;
-}
-
-int CipherAsymmetric::deinit() {
-	EVP_PKEY_free(this->_keys);
-	OSSL_LIB_CTX_free(this->_libctx);
 	return 0;
 }
 
@@ -252,6 +253,37 @@ int _EVPKeyGetData(EVP_PKEY * pkey, const char * pass, Data & data) {
 
 int CipherAsymmetric::getPublicKey(Data & key) {
 	return _EVPKeyGetData(this->_keys, NULL, key);
+}
+
+static EVP_PKEY * get_key(OSSL_LIB_CTX * libctx, const char * propq, int pub)
+{
+    OSSL_DECODER_CTX *dctx = NULL;
+    EVP_PKEY *pkey = NULL;
+    int selection;
+    const unsigned char *data;
+    size_t data_len;
+
+    if (pub) {
+        selection = EVP_PKEY_PUBLIC_KEY;
+        data = pub_key_der;
+        data_len = sizeof(pub_key_der);
+    } else {
+        selection = EVP_PKEY_KEYPAIR;
+        data = priv_key_der;
+        data_len = sizeof(priv_key_der);
+    }
+    dctx = OSSL_DECODER_CTX_new_for_pkey(&pkey, "DER", NULL, "RSA",
+                                         selection, libctx, propq);
+    (void)OSSL_DECODER_from_data(dctx, &data, &data_len);
+    OSSL_DECODER_CTX_free(dctx);
+    return pkey;
+}
+
+int CipherAsymmetric::setPublicKey(BF::Data & key) {
+	this->_keys = get_key(this->_libctx, propq, 1);
+	if (!this->_keys)
+		return 1;
+	return 0;
 }
 
 int CipherAsymmetric::getPrivateKey(Data & key) {

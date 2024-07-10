@@ -151,14 +151,16 @@ class CipherAsymmetric : public Cipher {
 	friend class Cipher;
 public:
 	~CipherAsymmetric();
-	int init();
-	int deinit();
+	int genkey();
+	//int init();
+	//int deinit();
 	int encrypt(BF::Data & in, BF::Data & out);
 	int decrypt(BF::Data & in, BF::Data & out);
 
 	CipherType type();
 
 	int getPublicKey(BF::Data & key);
+	int setPublicKey(BF::Data & key);
 	int getPrivateKey(BF::Data & key);
 private:
 	CipherAsymmetric();
