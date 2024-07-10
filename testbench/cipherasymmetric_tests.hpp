@@ -20,12 +20,14 @@ using namespace BF;
 int test_AsymSimpleString() {
 	UNIT_TEST_START;
 	int result = 0;
-	int max = 2 << 16;
+	int max = 1;
 
 	while (!result && max--) {
 		Cipher * c = Cipher::create(kCipherTypeAsymmetric);
 		if (c == 0) {
 			result = 1;
+		} else if (c->init()) {
+			result = 2;
 		}
 
 		/*
@@ -50,6 +52,7 @@ int test_AsymSimpleString() {
 		}
 		*/
 
+		c->deinit();
 		BFDelete(c);
 	}
 

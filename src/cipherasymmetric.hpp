@@ -7,12 +7,20 @@
 #define CIPHER_ASYMMETRIC_HPP
 
 #include "cipher.hpp"
-#include <openssl/evp.h>
 
-#include <openssl/err.h>
-#include <openssl/evp.h>
-#include <openssl/decoder.h>
 #include <openssl/core_names.h>
+#include <openssl/evp.h>
+#include <openssl/err.h>
+
+/* Object used to store information for a single Peer */
+typedef struct peer_data_st {
+    const char *name;               /* name of peer */
+    const char *curvename;          /* The shared curve name */
+    EVP_PKEY *priv;                 /* private keypair */
+    EVP_PKEY *pub;                  /* public key to send to other peer */
+    unsigned char *secret;          /* allocated shared secret buffer */
+    size_t secretlen;
+} PEER_DATA;
 
 /// in bytes
 #define CIPHER_ASYMMETRIC_KEY_SIZE 32
@@ -153,6 +161,7 @@ class CipherAsymmetric : public Cipher {
 public:
 	~CipherAsymmetric();
 	int init();
+	int deinit();
 	int encrypt(BF::Data & in, BF::Data & out);
 	int decrypt(BF::Data & in, BF::Data & out);
 
@@ -160,13 +169,13 @@ public:
 private:
 	CipherAsymmetric();
 	
-	EVP_PKEY * get_key(OSSL_LIB_CTX *libctx, const char *propq, int pub);
-	void set_optional_params(OSSL_PARAM *p, const char *propq);
-	int do_encrypt(OSSL_LIB_CTX *libctx,
-						  const unsigned char *in, size_t in_len,
-						  unsigned char **out, size_t *out_len);
-	int do_decrypt(OSSL_LIB_CTX *libctx, const unsigned char *in, size_t in_len,
-						  unsigned char **out, size_t *out_len);
+	PEER_DATA _peerdata;
+
+    /*
+     * Setting libctx to NULL uses the default library context
+     * Use OSSL_LIB_CTX_new() to create a non default library context
+     */
+    OSSL_LIB_CTX * _libctx;
 };
 
 #endif // CIPHER_ASYMMETRIC_HPP

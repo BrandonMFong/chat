@@ -41,6 +41,10 @@ int CipherSymmetric::init() {
 	return 0;
 }
 
+int CipherSymmetric::deinit() {
+	return 0;
+}
+
 int CipherSymmetric::encrypt(Data & in, Data & out) {
 	return _encrypt(in, this->_key, this->_iv, out);
 }

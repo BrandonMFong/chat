@@ -20,6 +20,7 @@ public:
 	~Cipher();
 
 	virtual int init() = 0;
+	virtual int deinit() = 0;
 	virtual int encrypt(BF::Data & in, BF::Data & out) = 0;
 	virtual int decrypt(BF::Data & in, BF::Data & out) = 0;
 
