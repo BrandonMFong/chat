@@ -12,18 +12,9 @@
 #include <openssl/evp.h>
 #include <openssl/err.h>
 
-/* Object used to store information for a single Peer */
-typedef struct peer_data_st {
-    const char *name;               /* name of peer */
-    const char *curvename;          /* The shared curve name */
-    EVP_PKEY *priv;                 /* private keypair */
-    EVP_PKEY *pub;                  /* public key to send to other peer */
-    unsigned char *secret;          /* allocated shared secret buffer */
-    size_t secretlen;
-} PEER_DATA;
-
 /// in bytes
 #define CIPHER_ASYMMETRIC_KEY_SIZE 32
+
 /* Private RSA key used for decryption */
 static const unsigned char priv_key_der[] = {
     0x30, 0x82, 0x04, 0xa4, 0x02, 0x01, 0x00, 0x02, 0x82, 0x01, 0x01, 0x00,
@@ -169,8 +160,6 @@ public:
 private:
 	CipherAsymmetric();
 	
-	PEER_DATA _peerdata;
-
     /*
      * Setting libctx to NULL uses the default library context
      * Use OSSL_LIB_CTX_new() to create a non default library context
