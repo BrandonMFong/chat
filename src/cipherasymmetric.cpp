@@ -213,15 +213,18 @@ int _EVPKeyGetData(EVP_PKEY * pkey, const char * pass, Data & data) {
 		return 1;
 	
 	OSSL_ENCODER_CTX * ectx = NULL;
-	const char * format = "DER";
-	const char * structure = "PrivateKeyInfo"; /* PKCS#8 structure */
+	const char * format = "PEM";
+	const char * structure = NULL; /* PKCS#8 structure */
 	//const unsigned char *pass = "my password";
 	unsigned char * d = NULL;
-	size_t dlen= 0;	
+	size_t dlen = 0;	
+    
+	int selection = (pass != NULL)
+        ? EVP_PKEY_KEYPAIR
+        : EVP_PKEY_PUBLIC_KEY;
 
 	ectx = OSSL_ENCODER_CTX_new_for_pkey(pkey,
-										 OSSL_KEYMGMT_SELECT_KEYPAIR
-										 | OSSL_KEYMGMT_SELECT_DOMAIN_PARAMETERS,
+										 selection,
 										 format, structure,
 										 NULL);
 
@@ -267,7 +270,7 @@ static EVP_PKEY * get_key(OSSL_LIB_CTX * libctx, const char * propq, int pub, Da
     } else {
         selection = EVP_PKEY_KEYPAIR;
     }
-    dctx = OSSL_DECODER_CTX_new_for_pkey(&pkey, "DER", NULL, "RSA",
+    dctx = OSSL_DECODER_CTX_new_for_pkey(&pkey, "PEM", NULL, "RSA",
                                          selection, libctx, propq);
     (void)OSSL_DECODER_from_data(dctx, &d, &dlen);
     OSSL_DECODER_CTX_free(dctx);
