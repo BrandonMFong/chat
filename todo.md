@@ -6,7 +6,7 @@
 [] get list of users in chatroom
 [] encryption
 	[x] make chatroom symmetric key
-	[] make user assymetic keys
+	[x] make user assymetic keys
 	[] symmetric key for chatroom exchange
 	[] encrypt chatroom message
 [] make git submodules

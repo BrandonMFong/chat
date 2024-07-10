@@ -7,6 +7,7 @@
  * https://github.com/openssl/openssl/blob/master/demos/encrypt/rsa_encrypt.c
  *
  * https://www.openssl.org/docs/manmaster/man7/EVP_PKEY-RSA.html
+ * https://www.openssl.org/docs/man3.0/man3/OSSL_ENCODER_to_bio.html
  */
 
 #include "cipherasymmetric.hpp"
@@ -43,7 +44,7 @@ static const char *propq = NULL;
  * long method above is used. The ability to choose between these two methods is
  * shown here only for demonstration; the results are equivalent.
  */
-static EVP_PKEY *generate_rsa_key_short(OSSL_LIB_CTX * libctx, unsigned int bits) {
+static EVP_PKEY * generate_rsa_key_short(OSSL_LIB_CTX * libctx, unsigned int bits) {
     return EVP_PKEY_Q_keygen(libctx, propq, "RSA", (size_t)bits);
 }
 
