@@ -50,6 +50,14 @@ int PacketSetPayload(Packet * pkt, const void * buf) {
 			sizeof(pkt->payload.chatinfo)
 		);
 		return 0;
+
+	case kPayloadTypeChatroomEnrollmentRequest:
+		memcpy(
+			&pkt->payload.enrollreq,
+			buf,
+			sizeof(pkt->payload.enrollreq)
+		);
+		return 0;
 	default:
 		return 3;
 	}

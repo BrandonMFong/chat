@@ -79,6 +79,11 @@ typedef enum {
 	 * uses PayloadUserInfo payload
 	 */
 	kPayloadTypeNotifyQuitApp = 9,
+
+	/**
+	 * requests the chatroom to allow user join
+	 */
+	kPayloadTypeChatroomEnrollmentRequest = 10,
 } PayloadType;
 
 typedef enum {
@@ -159,6 +164,15 @@ typedef struct {
 } PayloadChatEnrollment;
 
 typedef struct {
+	/**
+	 * user asking to join
+	 */
+	uuid_t useruuid;
+
+
+} PayloadChatroomEnrollmentRequest;
+
+typedef struct {
 	struct {
 		// struct version
 		unsigned char version;
@@ -179,6 +193,7 @@ typedef struct {
 		PayloadUserInfo userinfo;
 		PayloadChatInfo chatinfo;
 		PayloadChatEnrollment enrollment;
+		PayloadChatroomEnrollmentRequest enrollreq;
 	} payload;
 } Packet;
 
