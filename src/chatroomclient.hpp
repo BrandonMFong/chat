@@ -26,6 +26,7 @@ private:
 	AgentClient * agent();
 	ChatroomClient(const uuid_t chatroomuuid, AgentClient * agent);
 	int sendPacket(const Packet * pkt);
+	int requestEnrollment(User * user);
 };
 
 #endif // CHATROOM_CLIENT_HPP

@@ -212,6 +212,11 @@ int Chatroom::notifyAllServerUsersOfResignation(User * user) {
 }
 
 int Chatroom::enroll(User * user) {
+	return this->requestEnrollment(user);
+}
+
+int Chatroom::finalizeEnrollment() {
+	User * user = NULL; // TODO: GET USER
 	int error = this->notifyAllServerUsersOfEnrollment(user);
 
 	if (!error) {

@@ -45,3 +45,7 @@ int ChatroomClient::sendPacket(const Packet * pkt) {
 	return this->agent()->sendPacket(pkt);
 }
 
+int ChatroomClient::requestEnrollment(User * user) {
+	return 0;
+}
+

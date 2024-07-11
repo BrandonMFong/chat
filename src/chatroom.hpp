@@ -162,6 +162,9 @@ private:
 
 	int notifyAllServerUsersOfResignation(User * user);
 
+	virtual int requestEnrollment(User * user) = 0;
+	int finalizeEnrollment();
+
 	/**
 	 * sends out a message to all users that this
 	 * user has joined the chat

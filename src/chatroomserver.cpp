@@ -100,3 +100,7 @@ int ChatroomServer::receiveMessagePacket(const Packet * pkt) {
 	return 0;
 }
 
+int ChatroomServer::requestEnrollment(User * user) {
+	return 0;
+}
+
