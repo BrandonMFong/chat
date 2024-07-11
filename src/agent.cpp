@@ -17,6 +17,8 @@
 #include <bflibcpp/bflibcpp.hpp>
 #include <bfnet/bfnet.hpp>
 #include "sealedpacket.hpp"
+#include "chat.hpp"
+#include "exception.hpp"
 
 using namespace BF;
 using namespace BF::Net;
@@ -204,7 +206,7 @@ void Agent::receivedPayloadTypeRequestAvailableChatrooms(const Packet * pkt) {
 
 void Agent::receivedPayloadTypeChatroomEnrollmentRequest(const Packet * pkt) {
 	if (Chat::SocketGetMode() != SOCKET_MODE_SERVER) {
-
+		throw Exception("incorrect mode");
 	}
 
 	if (!pkt)

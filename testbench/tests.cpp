@@ -10,6 +10,7 @@
 #include "agent_tests.hpp"
 #include "ciphersymmetric_tests.hpp"
 #include "cipherasymmetric_tests.hpp"
+#include "exception_tests.hpp"
 #include "log.hpp"
 
 int main() {
@@ -22,6 +23,7 @@ int main() {
 	LAUNCH_TEST_SET(agent_tests);
 	LAUNCH_TEST_SET(ciphersymmetric_tests);
 	LAUNCH_TEST_SET(cipherasymmetric_tests);
+	LAUNCH_TEST_SET(exception_tests);
 
 	TEST_SUITE_END;
 

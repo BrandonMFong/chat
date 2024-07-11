@@ -18,7 +18,8 @@ log user inputbuffer office \
 chatroom message chatroomserver packet \
 agent agentclient agentserver sealedpacket \
 chatroomclient interfaceserver interfaceclient command \
-permissions chat
+permissions exception \
+chat 
 
 ### Release settings
 R_CPPFLAGS += $(CPPFLAGS) -Isrc/ \
