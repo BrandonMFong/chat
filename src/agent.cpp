@@ -202,6 +202,15 @@ void Agent::receivedPayloadTypeRequestAvailableChatrooms(const Packet * pkt) {
 	BFFree(info);
 }
 
+void Agent::receivedPayloadTypeChatroomEnrollmentRequest(const Packet * pkt) {
+	if (Chat::SocketGetMode() != SOCKET_MODE_SERVER) {
+
+	}
+
+	if (!pkt)
+		return;
+}
+
 void Agent::receivedPayloadTypeChatroomInfo(const Packet * pkt) {
 	if (!pkt)
 		return;
@@ -329,6 +338,9 @@ void Agent::packetReceive(SocketEnvelope * envelope) {
 		break;
 	case kPayloadTypeNotifyQuitApp:
 		agent->receivedPayloadTypeNotifyQuitApp(p);
+		break;
+	case kPayloadTypeChatroomEnrollmentRequest:
+		agent->receivedPayloadTypeChatroomEnrollmentRequest(p);
 		break;
 	default:
 		break;

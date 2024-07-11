@@ -119,7 +119,8 @@ private:
 	void receivedPayloadTypeChatroomEnrollment(const Packet * pkt);
 	virtual void receivedPayloadTypeNotifyChatroomListChanged(const Packet * pkt) = 0;
 	void receivedPayloadTypeChatroomResignation(const Packet * pkt);
-	
+	void receivedPayloadTypeChatroomEnrollmentRequest(const Packet * pkt);
+
 	/**
 	 * required by agent servers and clients
 	 *
@@ -151,7 +152,6 @@ private:
 	 * caller does not own memory
 	 */
 	static Agent * getAgentForConnection(BF::Net::SocketConnection * sc);
-
 };
 
 #endif // AGENT_HPP

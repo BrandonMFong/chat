@@ -8,6 +8,8 @@
 #include "log.hpp"
 #include "interface.hpp"
 #include "agentclient.hpp"
+#include "packet.hpp"
+#include "user.hpp"
 
 ChatroomClient::ChatroomClient(const uuid_t chatroomuuid, AgentClient * agent) : Chatroom(chatroomuuid) {
 	this->addAgent(agent);
@@ -46,6 +48,14 @@ int ChatroomClient::sendPacket(const Packet * pkt) {
 }
 
 int ChatroomClient::requestEnrollment(User * user) {
-	return 0;
+	Packet p;
+	memset(&p, 0, sizeof(p));
+	PacketSetHeader(&p, kPayloadTypeChatroomEnrollmentRequest);
+
+	PayloadChatroomEnrollmentRequest req;
+	user->getuuid(req.useruuid);
+	// TODO: send public key
+
+	return this->sendPacket(&p);
 }
 

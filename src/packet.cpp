@@ -18,6 +18,7 @@ int PacketSetHeader(Packet * pkt, PayloadType type) {
 	pkt->header.version = 0;
 	pkt->header.time = BFTimeGetCurrentTime();
 	pkt->header.type = type;
+	pkt->header.frameno = 0xff;
 
 	return 0;
 }

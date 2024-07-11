@@ -186,6 +186,15 @@ typedef struct {
 		 * determines the payload
 		 */
 		PayloadType type;
+
+		/**
+		 * default 0xff to signify this
+		 * packet is not part of a series of
+		 * frames
+		 *
+		 * 0xfe will signify the last frame
+		 */
+		unsigned char frameno;
 	} header;
 
 	union {
