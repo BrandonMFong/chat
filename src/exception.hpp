@@ -14,7 +14,7 @@ public:
 	Exception(BF::String msg);
 	virtual ~Exception();
 
-	virtual const char * msg() const throw();
+	virtual const BF::String & msg() const throw();
 
 private:
 	BF::String _msg;

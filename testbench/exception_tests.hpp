@@ -23,11 +23,11 @@ int test_exceptions() {
 	int max = 2 << 16;
 
 	while (!result && max--) {
-		const char * msg = "hello world! i threw an exception!";
+		String msg("hello world! i threw an exception! %d", max);
 		try {
 			throw Exception(msg);
 		} catch (Exception & e) {
-			if (strcmp(e.msg(), msg)) {
+			if (msg != e.msg()) {
 				result = max;
 			}
 		}

@@ -8,7 +8,7 @@
 Exception::Exception(BF::String msg) : _msg(msg) { }
 Exception::~Exception() { }
 
-const char * Exception::msg() const throw() {
-	return this->_msg.cString();
+const BF::String & Exception::msg() const throw() {
+	return this->_msg;
 }
 
