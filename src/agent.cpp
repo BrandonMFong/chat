@@ -212,7 +212,10 @@ void Agent::receivedPayloadTypeChatroomEnrollmentRequest(const Packet * pkt) {
 		return;
 	}
 
-	
+	// get public key
+	//
+	// if public key is in frames, we will need some sort of counter
+	// or state machine here
 }
 
 void Agent::receivedPayloadTypeChatroomInfo(const Packet * pkt) {
