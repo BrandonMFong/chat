@@ -14,6 +14,7 @@
 [] ability to change user name
 [] user data window editor
 [] installer script
+[] configure a local openssl usage in this repo
 [x] separate sources for libs
 
 0.1
