@@ -52,11 +52,11 @@ int PacketSetPayload(Packet * pkt, const void * buf) {
 		);
 		return 0;
 
-	case kPayloadTypeChatroomEnrollmentRequest:
+	case kPayloadTypeChatroomEnrollmentForm:
 		memcpy(
-			&pkt->payload.enrollreq,
+			&pkt->payload.enrollform,
 			buf,
-			sizeof(pkt->payload.enrollreq)
+			sizeof(pkt->payload.enrollform)
 		);
 		return 0;
 	default:

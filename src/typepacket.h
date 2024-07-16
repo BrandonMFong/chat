@@ -81,9 +81,10 @@ typedef enum {
 	kPayloadTypeNotifyQuitApp = 9,
 
 	/**
-	 * requests the chatroom to allow user join
+	 * a form that bundles requests/responses 
+	 * for enrollment
 	 */
-	kPayloadTypeChatroomEnrollmentRequest = 10,
+	kPayloadTypeChatroomEnrollmentForm = 10,
 } PayloadType;
 
 typedef enum {
@@ -169,8 +170,20 @@ typedef struct {
 	 */
 	uuid_t useruuid;
 
+	/**
+	 * chatroom requested to join
+	 */
+	uuid_t chatroomuuid;
 
-} PayloadChatroomEnrollmentRequest;
+	/**
+	 * 0 : request
+	 * 1 : response
+	 */
+	unsigned char type;
+
+	bool approved;
+
+} PayloadChatroomEnrollmentForm;
 
 typedef struct {
 	struct {
@@ -202,7 +215,7 @@ typedef struct {
 		PayloadUserInfo userinfo;
 		PayloadChatInfo chatinfo;
 		PayloadChatEnrollment enrollment;
-		PayloadChatroomEnrollmentRequest enrollreq;
+		PayloadChatroomEnrollmentForm enrollform;
 	} payload;
 } Packet;
 

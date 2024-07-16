@@ -100,6 +100,12 @@ public:
 	int removeUser(User * u);
 
 	/**
+	 * Notifies all users of this user's enrollment to this
+	 * chatroom. As well as  sends out a joined message
+	 */
+	int finalizeEnrollment(User * user);
+
+	/**
 	 * chat room name
 	 */
 	const char * name();
@@ -163,7 +169,6 @@ private:
 	int notifyAllServerUsersOfResignation(User * user);
 
 	virtual int requestEnrollment(User * user) = 0;
-	int finalizeEnrollment();
 
 	/**
 	 * sends out a message to all users that this

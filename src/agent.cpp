@@ -204,7 +204,7 @@ void Agent::receivedPayloadTypeRequestAvailableChatrooms(const Packet * pkt) {
 	BFFree(info);
 }
 
-void Agent::receivedPayloadTypeChatroomEnrollmentRequest(const Packet * pkt) {
+void Agent::receivedPayloadTypeChatroomEnrollmentForm(const Packet * pkt) {
 	if (Chat::SocketGetMode() != SOCKET_MODE_SERVER) {
 		String m("incorrect mode: %c", Chat::SocketGetMode());
 		throw Exception(m);
@@ -212,10 +212,43 @@ void Agent::receivedPayloadTypeChatroomEnrollmentRequest(const Packet * pkt) {
 		return;
 	}
 
-	// get public key
-	//
-	// if public key is in frames, we will need some sort of counter
-	// or state machine here
+	if (pkt->payload.enrollform.type == 1) { // response
+		if (!this->representsUserWithUUID(pkt->payload.enrollform.useruuid)) {
+			LOG_DEBUG("%s", __func__);
+			LOG_DEBUG("couldn't find user: %s",
+				pkt->payload.enrollform.useruuid);
+			return;
+		}
+
+		// get user with the uuid I got from the packet
+		User * user = User::getuser(pkt->payload.enrollform.useruuid);
+
+		// get chatroom
+		Chatroom * chatroom = Chatroom::getChatroom(
+			pkt->payload.enrollform.chatroomuuid
+		);
+
+		if (!chatroom) {
+			LOG_DEBUG("couldn't find chatroom: %s",
+				pkt->payload.enrollform.chatroomuuid);
+			return;
+		}
+
+		BFRetain(chatroom);
+		chatroom->finalizeEnrollment(user);
+		BFRelease(chatroom);
+	} else if (pkt->payload.enrollform.type == 0) { // request
+		Packet p;
+		PacketSetHeader(&p, kPayloadTypeChatroomEnrollmentForm);
+
+		PayloadChatroomEnrollmentForm form;
+		memcpy(&form, &pkt->payload.enrollform, sizeof(PayloadChatroomEnrollmentForm));
+		form.type = 1; // response
+		form.approved = true;
+		PacketSetPayload(&p, &form);
+
+		this->sendPacket(&p);
+	}
 }
 
 void Agent::receivedPayloadTypeChatroomInfo(const Packet * pkt) {
@@ -312,6 +345,10 @@ void Agent::packetReceive(SocketEnvelope * envelope) {
 		return;
 	}
 
+	// this agent represents the recipient on the other end
+	//
+	// you are allowed to send packets using this agent's
+	// sendPacket() method to communicate to end user
 	Agent * agent = Agent::getAgentForConnection(sc);
 	if (!agent)
 		return;
@@ -346,8 +383,8 @@ void Agent::packetReceive(SocketEnvelope * envelope) {
 	case kPayloadTypeNotifyQuitApp:
 		agent->receivedPayloadTypeNotifyQuitApp(p);
 		break;
-	case kPayloadTypeChatroomEnrollmentRequest:
-		agent->receivedPayloadTypeChatroomEnrollmentRequest(p);
+	case kPayloadTypeChatroomEnrollmentForm:
+		agent->receivedPayloadTypeChatroomEnrollmentForm(p);
 		break;
 	default:
 		break;

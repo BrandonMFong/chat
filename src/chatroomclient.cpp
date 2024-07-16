@@ -50,11 +50,16 @@ int ChatroomClient::sendPacket(const Packet * pkt) {
 int ChatroomClient::requestEnrollment(User * user) {
 	Packet p;
 	memset(&p, 0, sizeof(p));
-	PacketSetHeader(&p, kPayloadTypeChatroomEnrollmentRequest);
+	PacketSetHeader(&p, kPayloadTypeChatroomEnrollmentForm);
 
-	PayloadChatroomEnrollmentRequest req;
-	user->getuuid(req.useruuid);
+	PayloadChatroomEnrollmentForm form;
+	form.type = 0; // request
+	user->getuuid(form.useruuid);
+	this->getuuid(form.chatroomuuid);
 	// TODO: send public key
+	//
+	
+	PacketSetPayload(&p, &form);
 
 	return this->sendPacket(&p);
 }

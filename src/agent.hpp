@@ -116,10 +116,14 @@ private:
 	void receivedPayloadTypeMessage(const Packet * pkt);
 	void receivedPayloadTypeRequestAvailableChatrooms(const Packet * pkt);
 	void receivedPayloadTypeChatroomInfo(const Packet * pkt);
-	void receivedPayloadTypeChatroomEnrollment(const Packet * pkt);
 	virtual void receivedPayloadTypeNotifyChatroomListChanged(const Packet * pkt) = 0;
 	void receivedPayloadTypeChatroomResignation(const Packet * pkt);
-	void receivedPayloadTypeChatroomEnrollmentRequest(const Packet * pkt);
+	void receivedPayloadTypeChatroomEnrollmentForm(const Packet * pkt);
+
+	/**
+	 * this contains information of a user that has joined a chatroom
+	 */
+	void receivedPayloadTypeChatroomEnrollment(const Packet * pkt);
 
 	/**
 	 * required by agent servers and clients
