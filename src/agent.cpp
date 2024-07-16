@@ -205,10 +205,7 @@ void Agent::receivedPayloadTypeRequestAvailableChatrooms(const Packet * pkt) {
 }
 
 void Agent::receivedPayloadTypeChatroomEnrollmentForm(const Packet * pkt) {
-	if (Chat::SocketGetMode() != SOCKET_MODE_SERVER) {
-		String m("incorrect mode: %c", Chat::SocketGetMode());
-		throw Exception(m);
-	} else if (!pkt) {
+	if (!pkt) {
 		return;
 	}
 

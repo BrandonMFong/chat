@@ -187,7 +187,7 @@ int Chat::Main(int argc, char * argv[]) {
 		LOG_DEBUG("============ App ended ============");
 		LOG_CLOSE;
 	} catch (Exception & e) {
-		std::cout << e.msg() << '\n';
+		std::cout << e.msg().cString() << '\n';
 	}
 
 	return result;
