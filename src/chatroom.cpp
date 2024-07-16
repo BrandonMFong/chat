@@ -215,7 +215,16 @@ int Chatroom::enroll(User * user) {
 	return this->requestEnrollment(user);
 }
 
-int Chatroom::finalizeEnrollment(User * user) {
+int Chatroom::finalizeEnrollment(const PayloadChatroomEnrollmentForm * form) {
+	if (!form) {
+		return 1;
+	}
+
+	// get user with the uuid I got from the packet
+	User * user = User::getuser(form->useruuid);
+
+	// TODO: capture private key for chatroom
+
 	int error = this->notifyAllServerUsersOfEnrollment(user);
 
 	if (!error) {
@@ -233,6 +242,18 @@ int Chatroom::finalizeEnrollment(User * user) {
 	}
 
 	return error;
+}
+
+int Chatroom::fillOutEnrollmentForm(PayloadChatroomEnrollmentForm * form) {
+	if (!form) {
+		return 1;
+	} else if (form->type != 0) {
+		return 2;
+	}
+	form->type = 1; // response
+	form->approved = true;
+
+	return 0;
 }
 
 int Chatroom::resign(User * user) {

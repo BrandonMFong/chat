@@ -57,7 +57,6 @@ int ChatroomClient::requestEnrollment(User * user) {
 	user->getuuid(form.useruuid);
 	this->getuuid(form.chatroomuuid);
 	// TODO: send public key
-	//
 	
 	PacketSetPayload(&p, &form);
 

@@ -212,6 +212,17 @@ void Agent::receivedPayloadTypeChatroomEnrollmentForm(const Packet * pkt) {
 		return;
 	}
 
+	// get chatroom
+	Chatroom * chatroom = Chatroom::getChatroom(
+		pkt->payload.enrollform.chatroomuuid
+	);
+
+	if (!chatroom) {
+		LOG_DEBUG("couldn't find chatroom: %s",
+			pkt->payload.enrollform.chatroomuuid);
+		return;
+	}
+
 	if (pkt->payload.enrollform.type == 1) { // response
 		if (!this->representsUserWithUUID(pkt->payload.enrollform.useruuid)) {
 			LOG_DEBUG("%s", __func__);
@@ -220,31 +231,25 @@ void Agent::receivedPayloadTypeChatroomEnrollmentForm(const Packet * pkt) {
 			return;
 		}
 
-		// get user with the uuid I got from the packet
-		User * user = User::getuser(pkt->payload.enrollform.useruuid);
-
-		// get chatroom
-		Chatroom * chatroom = Chatroom::getChatroom(
-			pkt->payload.enrollform.chatroomuuid
-		);
-
-		if (!chatroom) {
-			LOG_DEBUG("couldn't find chatroom: %s",
-				pkt->payload.enrollform.chatroomuuid);
-			return;
-		}
-
 		BFRetain(chatroom);
-		chatroom->finalizeEnrollment(user);
+		chatroom->finalizeEnrollment(&pkt->payload.enrollform);
 		BFRelease(chatroom);
 	} else if (pkt->payload.enrollform.type == 0) { // request
 		Packet p;
 		PacketSetHeader(&p, kPayloadTypeChatroomEnrollmentForm);
 
+		// copy form from requestee
 		PayloadChatroomEnrollmentForm form;
 		memcpy(&form, &pkt->payload.enrollform, sizeof(PayloadChatroomEnrollmentForm));
-		form.type = 1; // response
-		form.approved = true;
+
+		// have the chatroom fill out the form
+		//
+		// here we should receive the public key
+		if (chatroom->fillOutEnrollmentForm(&form)) {
+			LOG_DEBUG("couldn't fill out enrollment form");
+			return;
+		}
+
 		PacketSetPayload(&p, &form);
 
 		this->sendPacket(&p);

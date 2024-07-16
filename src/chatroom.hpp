@@ -103,7 +103,17 @@ public:
 	 * Notifies all users of this user's enrollment to this
 	 * chatroom. As well as  sends out a joined message
 	 */
-	int finalizeEnrollment(User * user);
+	int finalizeEnrollment(const PayloadChatroomEnrollmentForm * form);
+
+	/**
+	 * Upon request, we must fill out the enrollment form
+	 *
+	 * This function determines whether or not the requestee is allowed
+	 * to be in our chatroom. If allowed, we will return our private key
+	 *
+	 * form : we expect the form with the request information
+	 */
+	int fillOutEnrollmentForm(PayloadChatroomEnrollmentForm * form);
 
 	/**
 	 * chat room name
