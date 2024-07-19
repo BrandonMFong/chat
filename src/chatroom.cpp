@@ -222,6 +222,10 @@ int Chatroom::finalizeEnrollment(const PayloadChatroomEnrollmentForm * form) {
 
 	// get user with the uuid I got from the packet
 	User * user = User::getuser(form->useruuid);
+	if (!user) {
+		LOG_DEBUG("no user with %s", form->useruuid);
+		return 1;
+	}
 
 	// TODO: capture private key for chatroom
 
@@ -248,8 +252,11 @@ int Chatroom::fillOutEnrollmentForm(PayloadChatroomEnrollmentForm * form) {
 	if (!form) {
 		return 1;
 	} else if (form->type != 0) {
+		// we should only receive a request type form
 		return 2;
 	}
+
+	// modify form to reflect response type
 	form->type = 1; // response
 	form->approved = true;
 

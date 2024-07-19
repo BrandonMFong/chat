@@ -220,6 +220,7 @@ void Agent::receivedPayloadTypeChatroomEnrollmentForm(const Packet * pkt) {
 		return;
 	}
 
+	BFRetain(chatroom);
 	if (pkt->payload.enrollform.type == 1) { // response
 		if (!this->representsUserWithUUID(pkt->payload.enrollform.useruuid)) {
 			LOG_DEBUG("%s", __func__);
@@ -228,13 +229,8 @@ void Agent::receivedPayloadTypeChatroomEnrollmentForm(const Packet * pkt) {
 			return;
 		}
 
-		BFRetain(chatroom);
 		chatroom->finalizeEnrollment(&pkt->payload.enrollform);
-		BFRelease(chatroom);
 	} else if (pkt->payload.enrollform.type == 0) { // request
-		Packet p;
-		PacketSetHeader(&p, kPayloadTypeChatroomEnrollmentForm);
-
 		// copy form from requestee
 		PayloadChatroomEnrollmentForm form;
 		memcpy(&form, &pkt->payload.enrollform, sizeof(PayloadChatroomEnrollmentForm));
@@ -246,11 +242,14 @@ void Agent::receivedPayloadTypeChatroomEnrollmentForm(const Packet * pkt) {
 			LOG_DEBUG("couldn't fill out enrollment form");
 			return;
 		}
-
+		
+		Packet p;
+		PacketSetHeader(&p, kPayloadTypeChatroomEnrollmentForm);
 		PacketSetPayload(&p, &form);
 
 		this->sendPacket(&p);
 	}
+	BFRelease(chatroom);
 }
 
 void Agent::receivedPayloadTypeChatroomInfo(const Packet * pkt) {
