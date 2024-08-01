@@ -212,6 +212,7 @@ int Chatroom::notifyAllServerUsersOfResignation(User * user) {
 }
 
 int Chatroom::enroll(User * user) {
+	LOG_DEBUG("making subclasses request enrollment");
 	return this->requestEnrollment(user);
 }
 

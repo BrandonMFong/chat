@@ -111,11 +111,13 @@ int ChatroomServer::requestEnrollment(User * user) {
 	this->getuuid(form.chatroomuuid);
 	// TODO: send public key
 	
+	LOG_DEBUG("manually filling out form");
 	if (this->fillOutEnrollmentForm(&form)) {
 		LOG_DEBUG("for some reason couldn't approve form");
 		return 1;
 	}
 
+	LOG_DEBUG("finalizing enrollment");
 	return this->finalizeEnrollment(&form);
 }
 

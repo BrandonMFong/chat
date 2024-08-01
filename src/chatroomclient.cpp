@@ -61,6 +61,7 @@ int ChatroomClient::requestEnrollment(User * user) {
 	
 	PacketSetPayload(&p, &form);
 
+	LOG_DEBUG("sending enrollment form: %d", kPayloadTypeChatroomEnrollmentForm);
 	return this->sendPacket(&p);
 }
 

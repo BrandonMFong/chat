@@ -10,6 +10,7 @@
 	[x] symmetric key for chatroom exchange
 	[] encrypt chatroom message
 		[] create a step before joining a chatroom. Use it to ask for permission and grant chat key
+		[] add logging to the enrollment logging
 [] make git submodules
 [] ability to change user name
 [] user data window editor
