@@ -224,6 +224,7 @@ int Chatroom::finalizeEnrollment(const PayloadChatroomEnrollmentForm * form) {
 	// get user with the uuid I got from the packet
 	User * user = User::getuser(form->useruuid);
 	if (!user) {
+		LOG_FLUSH;
 		LOG_DEBUG("no user with %s", form->useruuid);
 		return 1;
 	}
@@ -245,6 +246,8 @@ int Chatroom::finalizeEnrollment(const PayloadChatroomEnrollmentForm * form) {
 		}
 		this->_users.unlock();
 	}
+	
+	LOG_FLUSH;
 
 	return error;
 }
@@ -274,8 +277,10 @@ int Chatroom::resign(User * user) {
 	if (!error) {
 		// add user to list
 		this->_users.lock();
-		this->_users.unsafeget().pluckObject(user);
-		BFRelease(user);
+		if (this->_users.unsafeget().contains(user)) {
+			this->_users.unsafeget().pluckObject(user);
+			BFRelease(user);
+		}
 		this->_users.unlock();
 	}
 

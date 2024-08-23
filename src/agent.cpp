@@ -227,12 +227,14 @@ void Agent::receivedPayloadTypeChatroomEnrollmentForm(const Packet * pkt) {
 	if (pkt->payload.enrollform.type == 1) { // response
 		LOG_DEBUG("received response enrollment form");
 
+		/*
 		if (!this->representsUserWithUUID(pkt->payload.enrollform.useruuid)) {
 			LOG_DEBUG("%s", __func__);
 			LOG_DEBUG("couldn't find user: %s",
 				pkt->payload.enrollform.useruuid);
 			return;
 		}
+		*/
 
 		LOG_DEBUG("finalizing enrollment");
 		chatroom->finalizeEnrollment(&pkt->payload.enrollform);
@@ -354,8 +356,8 @@ void Agent::packetReceive(SocketEnvelope * envelope) {
 
 	if (!sc || !p) 
 		return;
-	else if (size != sizeof(Packet)) {
-		LOG_WRITE("size of incoming data does not meet expectations: %ld != %ld", size, sizeof(Packet));
+	else if (size != CHAT_SOCKET_BUFFER_SIZE) {
+		LOG_WRITE("size of incoming data does not meet expectations: %ld != %ld", size, CHAT_SOCKET_BUFFER_SIZE);
 		return;
 	}
 
