@@ -280,8 +280,10 @@ void Agent::receivedPayloadTypeChatroomEnrollment(const Packet * pkt) {
 
 	if (!this->representsUserWithUUID(pkt->payload.enrollment.useruuid)) {
 		LOG_DEBUG("%s", __func__);
+		char buf[UUID_STR_LEN];
+		uuid_unparse(pkt->payload.enrollment.useruuid, buf);
 		LOG_DEBUG("couldn't find user: %s",
-			pkt->payload.enrollment.useruuid);
+			buf);
 		return;
 	}
 
@@ -311,8 +313,10 @@ void Agent::receivedPayloadTypeChatroomResignation(const Packet * pkt) {
 
 	if (!this->representsUserWithUUID(pkt->payload.enrollment.useruuid)) {
 		LOG_DEBUG("%s", __func__);
+		char buf[UUID_STR_LEN];
+		uuid_unparse(pkt->payload.enrollment.useruuid, buf);
 		LOG_DEBUG("couldn't find user: %s",
-			pkt->payload.enrollment.useruuid);
+			buf);
 		return;
 	}
 
