@@ -166,7 +166,9 @@ void Agent::receivedPayloadTypeUserInfo(const Packet * pkt) {
 		// because the user class and this object owns it. We
 		// will own this object and release it in our destructor.
 		User * user = User::create(&pkt->payload.userinfo);
-		this->setremoteuser(user);
+		if (user) {
+			this->setremoteuser(user);
+		}
 	}
 }
 

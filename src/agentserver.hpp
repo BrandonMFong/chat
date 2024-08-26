@@ -15,11 +15,7 @@ class AgentServer : public Agent {
 	friend class Agent;
 public:
 	virtual ~AgentServer();
-	/*
-	virtual User * user();
-	*/
 	virtual void setremoteuser(User * user);
-	
 	virtual User * getremoteuser(uuid_t uuid);
 
 private:

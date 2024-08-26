@@ -40,6 +40,7 @@ void _UserRelease(User * user) {
 User::User(const char * username, const uuid_t uuid) {
 	strncpy(this->_username, username, sizeof(this->_username));
 	uuid_copy(this->_uuid, uuid);
+	this->_cipher = NULL;
 }
 
 User::~User() {
