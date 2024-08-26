@@ -9,7 +9,7 @@
 	[x] make user assymetic keys
 	[x] symmetric key for chatroom exchange
 	[] encrypt chatroom message
-		[] create a step before joining a chatroom. Use it to ask for permission and grant chat key
+		[x] create a step before joining a chatroom. Use it to ask for permission and grant chat key
 		[x] add logging to the enrollment logging
 		[x] fix issue with packet size
 [] make git submodules
