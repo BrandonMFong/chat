@@ -20,8 +20,6 @@ class CipherAsymmetric : public Cipher {
 public:
 	~CipherAsymmetric();
 	int genkey();
-	//int init();
-	//int deinit();
 	int encrypt(BF::Data & in, BF::Data & out);
 	int decrypt(BF::Data & in, BF::Data & out);
 

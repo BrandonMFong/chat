@@ -224,8 +224,8 @@ int Chatroom::finalizeEnrollment(const PayloadChatroomEnrollmentForm * form) {
 	// get user with the uuid I got from the packet
 	User * user = User::getuser(form->useruuid);
 	if (!user) {
-		LOG_FLUSH;
 		LOG_DEBUG("no user with %s", form->useruuid);
+		LOG_FLUSH;
 		return 1;
 	}
 
