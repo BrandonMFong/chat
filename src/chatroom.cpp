@@ -13,6 +13,7 @@
 #include "packet.hpp"
 #include <string.h>
 #include <bflibcpp/bflibcpp.hpp>
+#include "cipherasymmetric.hpp"
 
 using namespace BF;
 
@@ -250,6 +251,35 @@ int Chatroom::finalizeEnrollment(const PayloadChatroomEnrollmentForm * form) {
 	LOG_FLUSH;
 
 	return error;
+}
+
+int Chatroom::fillOutEnrollmentFormRequest(User * user, Packet * p) {
+	if (!user || !p) return 2;
+
+	memset(p, 0, sizeof(Packet));
+	PacketSetHeader(p, kPayloadTypeChatroomEnrollmentForm);
+
+	PayloadChatroomEnrollmentForm form;
+	form.type = 0; // request
+	user->getuuid(form.useruuid);
+	this->getuuid(form.chatroomuuid);
+
+	Data pub;
+	const CipherAsymmetric * c = (const CipherAsymmetric *) user->cipher();
+	c->getPublicKey(pub);
+
+	// i am afraid of this
+	if (pub.size() > sizeof(form.data)) {
+		LOG_WRITE("pub key size vs available buffer size in packet, %ld != %ld", pub.size(), sizeof(form.data));
+		return 1;
+	}
+
+	// transfer the public key
+	memcpy(form.data, pub.buffer(), pub.size());
+	
+	PacketSetPayload(p, &form);
+
+	return 0;
 }
 
 int Chatroom::fillOutEnrollmentForm(PayloadChatroomEnrollmentForm * form) {

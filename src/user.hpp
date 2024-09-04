@@ -49,6 +49,8 @@ public:
 
 	void getuserinfo(PayloadUserInfo * ui) const;
 
+	const Cipher * cipher();
+
 private:
 	User(const char * username, const uuid_t uuid);
 	char _username[USER_NAME_SIZE];

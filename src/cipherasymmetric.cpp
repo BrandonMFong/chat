@@ -254,7 +254,7 @@ int _EVPKeyGetData(EVP_PKEY * pkey, const char * pass, Data & data) {
 	return 0;
 }
 
-int CipherAsymmetric::getPublicKey(Data & key) {
+int CipherAsymmetric::getPublicKey(Data & key) const {
 	return _EVPKeyGetData(this->_keys, NULL, key);
 }
 
@@ -284,7 +284,7 @@ int CipherAsymmetric::setPublicKey(Data & key) {
 	return 0;
 }
 
-int CipherAsymmetric::getPrivateKey(Data & key) {
+int CipherAsymmetric::getPrivateKey(Data & key) const {
 	return _EVPKeyGetData(this->_keys, "", key);
 }
 

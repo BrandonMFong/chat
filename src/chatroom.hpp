@@ -151,6 +151,12 @@ protected:
 	static void addRoomToChatrooms(Chatroom * cr);
 
 	/**
+	 * fills out packet for PayloadChatroomEnrollmentForm for
+	 * request type
+	 */
+	int fillOutEnrollmentFormRequest(User * user, Packet * p);
+
+	/**
 	 * the two subclasses have different amount of
 	 * agents
 	 *

@@ -146,6 +146,10 @@ int User::destroy(User * user) {
 	return 1;
 }
 
+const Cipher * User::cipher() {
+	return this->_cipher;
+}
+
 const char * User::username() const {
 	return this->_username;
 }

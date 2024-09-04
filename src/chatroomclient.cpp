@@ -11,6 +11,8 @@
 #include "packet.hpp"
 #include "user.hpp"
 
+using namespace BF;
+
 ChatroomClient::ChatroomClient(const uuid_t chatroomuuid, AgentClient * agent) : Chatroom(chatroomuuid) {
 	this->addAgent(agent);
 }
@@ -49,17 +51,8 @@ int ChatroomClient::sendPacket(const Packet * pkt) {
 
 int ChatroomClient::requestEnrollment(User * user) {
 	Packet p;
-	memset(&p, 0, sizeof(p));
-	PacketSetHeader(&p, kPayloadTypeChatroomEnrollmentForm);
-
-	PayloadChatroomEnrollmentForm form;
-	form.type = 0; // request
-	user->getuuid(form.useruuid);
-	this->getuuid(form.chatroomuuid);
-
-	// TODO: send public key
-	
-	PacketSetPayload(&p, &form);
+	int error = this->fillOutEnrollmentFormRequest(user, &p);
+	if (error) return error;
 
 	LOG_DEBUG("sending enrollment form: %d", kPayloadTypeChatroomEnrollmentForm);
 	return this->sendPacket(&p);

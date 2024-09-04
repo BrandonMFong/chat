@@ -102,22 +102,16 @@ int ChatroomServer::receiveMessagePacket(const Packet * pkt) {
 
 int ChatroomServer::requestEnrollment(User * user) {
 	Packet p;
-	memset(&p, 0, sizeof(p));
-	PacketSetHeader(&p, kPayloadTypeChatroomEnrollmentForm);
+	int error = this->fillOutEnrollmentFormRequest(user, &p);
+	if (error) return error;
 
-	PayloadChatroomEnrollmentForm form;
-	form.type = 0; // request
-	user->getuuid(form.useruuid);
-	this->getuuid(form.chatroomuuid);
-	// TODO: send public key
-	
 	LOG_DEBUG("manually filling out form");
-	if (this->fillOutEnrollmentForm(&form)) {
+	if (this->fillOutEnrollmentForm(&p.payload.enrollform)) {
 		LOG_DEBUG("for some reason couldn't approve form");
 		return 1;
 	}
 
 	LOG_DEBUG("finalizing enrollment");
-	return this->finalizeEnrollment(&form);
+	return this->finalizeEnrollment(&p.payload.enrollform);
 }
 

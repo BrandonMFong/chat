@@ -25,9 +25,9 @@ public:
 
 	CipherType type();
 
-	int getPublicKey(BF::Data & key);
+	int getPublicKey(BF::Data & key) const;
 	int setPublicKey(BF::Data & key);
-	int getPrivateKey(BF::Data & key);
+	int getPrivateKey(BF::Data & key) const;
 private:
 	CipherAsymmetric();
 	EVP_PKEY * _keys;

@@ -164,6 +164,10 @@ typedef struct {
 	uuid_t useruuid;
 } PayloadChatEnrollment;
 
+/**
+ * Think of this like the form you need to fill out to 
+ * enter a chatroom.
+ */
 typedef struct {
 	/**
 	 * user asking to join
@@ -182,6 +186,16 @@ typedef struct {
 	unsigned char type;
 
 	bool approved;
+
+	/**
+	 * contains public key for request and encrypted
+	 * private key for response if approved
+	 *
+	 * This is not a clean way to do this. There is no
+	 * standard as to how long a public/private key is based
+	 * on type, as far as I know. This is here to implement functionality
+	 */
+	unsigned char data[2 << 10];
 
 } PayloadChatroomEnrollmentForm;
 
