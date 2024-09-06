@@ -153,6 +153,9 @@ protected:
 	/**
 	 * fills out packet for PayloadChatroomEnrollmentForm for
 	 * request type
+	 *
+	 * user will transfer their public key so that the receiver
+	 * can use it to encrypt the chatroom private key
 	 */
 	int fillOutEnrollmentFormRequest(User * user, Packet * p);
 
