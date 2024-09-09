@@ -167,10 +167,8 @@ void cipherasymmetric_tests(int * pass, int * fail) {
 	
 	INTRO_TEST_FUNCTION;
 
-	/*
 	LAUNCH_TEST(test_AsymSimpleString, p, f);
 	LAUNCH_TEST(test_AsymLongString, p, f);
-	*/
 	LAUNCH_TEST(test_HandingOffPublicKeyToEncrypt, p, f);
 
 	if (pass) *pass += p;
