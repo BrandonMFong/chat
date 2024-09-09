@@ -29,6 +29,10 @@ public:
 	int encrypt(BF::Data & in, BF::Data & out);
 	int decrypt(BF::Data & in, BF::Data & out);
 	CipherType type();
+
+
+	// these two functions packs/unpacks 
+	// _key & _iv into one buffer
 	int getkey(BF::Data & key) const;
 	int setkey(BF::Data & key);
 
