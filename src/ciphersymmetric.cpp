@@ -41,6 +41,14 @@ int CipherSymmetric::genkey() {
 	return 0;
 }
 
+int CipherSymmetric::getkey(Data & key) const {
+	return 0;
+}
+
+int CipherSymmetric::setkey(Data & key) const {
+	return 0;
+}
+
 int CipherSymmetric::encrypt(Data & in, Data & out) {
 	return _encrypt(in, this->_key, this->_iv, out);
 }

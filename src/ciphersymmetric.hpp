@@ -29,6 +29,8 @@ public:
 	int encrypt(BF::Data & in, BF::Data & out);
 	int decrypt(BF::Data & in, BF::Data & out);
 	CipherType type();
+	int getkey(BF::Data & key) const;
+	int setkey(BF::Data & key) const;
 
 private:
 	CipherSymmetric();

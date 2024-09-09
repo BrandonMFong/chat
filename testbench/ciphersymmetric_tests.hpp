@@ -9,6 +9,7 @@
 #define ASSERT_PUBLIC_MEMBER_ACCESS
 
 #include "cipher.hpp"
+#include "ciphersymmetric.hpp"
 
 extern "C" {
 #include <bflibc/bflibc.h>
@@ -105,23 +106,30 @@ int test_HandingOffKey() {
 	int max = 2 << 16;
 
 	while (!result && max--) {
-		Cipher * c = Cipher::create(kCipherTypeSymmetric);
-		if (c == 0) {
+		CipherSymmetric * u1 = (CipherSymmetric *) Cipher::create(kCipherTypeSymmetric);
+		CipherSymmetric * u2 = (CipherSymmetric *) Cipher::create(kCipherTypeSymmetric);
+		Data key;
+		if (u1 == 0) {
+		} else if (u2 == 0) {
 			result = 1;
-		} else if (c->genkey()) {
+		} else if (u1->genkey()) {
 			result = 2;
+		} else if (u1->getkey(key)) {
+			result = 3;
+		} else if (u2->setkey(key)) {
+			result = 4;
 		}
 
 		String str = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
 		Data plain(str);
 		Data enc;
 		if (!result) {
-			result = c->encrypt(plain, enc);
+			result = u1->encrypt(plain, enc);
 		}
 
 		Data dec;
 		if (!result) {
-			result = c->decrypt(enc, dec);
+			result = u2->decrypt(enc, dec);
 		}
 
 		if (!result) {
@@ -134,7 +142,8 @@ int test_HandingOffKey() {
 			}
 		}
 
-		BFDelete(c);
+		BFDelete(u1);
+		BFDelete(u2);
 	}
 
 	UNIT_TEST_END(!result, result);
