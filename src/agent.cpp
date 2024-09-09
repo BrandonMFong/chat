@@ -229,15 +229,6 @@ void Agent::receivedPayloadTypeChatroomEnrollmentForm(const Packet * pkt) {
 	if (pkt->payload.enrollform.type == 1) { // response
 		LOG_DEBUG("received response enrollment form");
 
-		/*
-		if (!this->representsUserWithUUID(pkt->payload.enrollform.useruuid)) {
-			LOG_DEBUG("%s", __func__);
-			LOG_DEBUG("couldn't find user: %s",
-				pkt->payload.enrollform.useruuid);
-			return;
-		}
-		*/
-
 		LOG_DEBUG("finalizing enrollment");
 		chatroom->finalizeEnrollment(&pkt->payload.enrollform);
 	} else if (pkt->payload.enrollform.type == 0) { // request

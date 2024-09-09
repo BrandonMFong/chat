@@ -282,6 +282,10 @@ int Chatroom::fillOutEnrollmentFormRequest(User * user, Packet * p) {
 	return 0;
 }
 
+int _encryptPrivateKey() {
+	return 0;
+}
+
 int Chatroom::fillOutEnrollmentForm(PayloadChatroomEnrollmentForm * form) {
 	if (!form) {
 		return 1;
@@ -290,11 +294,17 @@ int Chatroom::fillOutEnrollmentForm(PayloadChatroomEnrollmentForm * form) {
 		return 2;
 	}
 
+	// encrypt private key
+	int err = _encryptPrivateKey();
+	if (err) {
+		return err;
+	}
+	
 	// modify form to reflect response type
 	form->type = 1; // response
 	form->approved = true;
 
-	return 0;
+	return err;
 }
 
 int Chatroom::resign(User * user) {
