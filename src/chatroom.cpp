@@ -31,6 +31,8 @@ Chatroom::Chatroom() : Object() {
 	this->conversation.get().setReleaseCallback(_ChatroomMessageFree);
 	this->_users.get().setReleaseCallback(_ChatroomReleaseUser);
 	this->_agents.get().setReleaseCallback(_ChatroomReleaseAgent);
+
+	this->_cipher = NULL;
 }
 
 Chatroom::Chatroom(const uuid_t uuid) : Object() {
@@ -39,9 +41,13 @@ Chatroom::Chatroom(const uuid_t uuid) : Object() {
 
 	// setup conversation thread
 	this->conversation.get().setReleaseCallback(_ChatroomMessageFree);
+	
+	this->_cipher = NULL;
 }
 
-Chatroom::~Chatroom() { }
+Chatroom::~Chatroom() { 
+	BFRelease(this->_cipher);
+}
 
 int Chatroom::getChatroomsCount() {
 	return chatrooms.get().count();
