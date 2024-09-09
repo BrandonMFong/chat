@@ -42,10 +42,28 @@ int CipherSymmetric::genkey() {
 }
 
 int CipherSymmetric::getkey(Data & key) const {
-	return 0;
+	const size_t s = CIPHER_SYMMETRIC_KEY_SIZE + CIPHER_SYMMETRIC_IV_SIZE;
+	unsigned char buf[s];
+	memcpy(buf, this->_key, CIPHER_SYMMETRIC_KEY_SIZE);
+	memcpy(buf + CIPHER_SYMMETRIC_KEY_SIZE, this->_iv, CIPHER_SYMMETRIC_IV_SIZE);
+	return key.alloc(s, buf); 
 }
 
-int CipherSymmetric::setkey(Data & key) const {
+int CipherSymmetric::setkey(Data & key) {
+	const size_t s = CIPHER_SYMMETRIC_KEY_SIZE + CIPHER_SYMMETRIC_IV_SIZE;
+	if (key.size() != s) {
+		LOG_DEBUG("size %ld != %ld", key.size(), s);
+		return 10;
+	} else if (key.buffer() == NULL) {
+		LOG_DEBUG("key is null!");
+		return 11;
+	}
+
+	unsigned char * buf = (unsigned char *) key.buffer();
+	
+	memcpy(this->_key, buf, CIPHER_SYMMETRIC_KEY_SIZE);
+	memcpy(this->_iv, buf + CIPHER_SYMMETRIC_KEY_SIZE, CIPHER_SYMMETRIC_IV_SIZE);
+
 	return 0;
 }
 

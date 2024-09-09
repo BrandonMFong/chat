@@ -116,7 +116,7 @@ int test_HandingOffPublicKeyToEncrypt() {
 		if (!result) {
 			CipherAsymmetric * c = (CipherAsymmetric *) user1;
 			result = c->getPublicKey(pub);
-			printf("\npub key size: %ld\n", pub.size());
+			//printf("\npub key size: %ld\n", pub.size());
 		}
 
 		// now this is where we should hand off the public key
