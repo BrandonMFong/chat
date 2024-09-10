@@ -197,6 +197,9 @@ typedef struct {
 	 */
 	unsigned char data[2 << 10];
 
+	// size of data above
+	size_t datasize;
+
 } PayloadChatroomEnrollmentForm;
 
 typedef struct {

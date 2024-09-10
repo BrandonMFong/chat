@@ -20,8 +20,8 @@ public:
 	~Cipher();
 
 	virtual int genkey() = 0;
-	virtual int encrypt(BF::Data & in, BF::Data & out) = 0;
-	virtual int decrypt(BF::Data & in, BF::Data & out) = 0;
+	virtual int encrypt(BF::Data & in, BF::Data & out) const = 0;
+	virtual int decrypt(BF::Data & in, BF::Data & out) const = 0;
 
 	virtual CipherType type() = 0;
 protected:	

@@ -28,9 +28,12 @@ void _ChatroomReleaseUser(User * u) { BFRelease(u); }
 void _ChatroomReleaseAgent(Agent * a) { BFRelease(a); }
 
 Chatroom::Chatroom() : Object() {
+#ifndef TESTING
 	if (Chat::SocketGetMode() != SOCKET_MODE_SERVER) {
-		throw Exception("Can only create a raw chatroom from server mode");
+		String msg("Can only create a raw chatroom from server mode (current mode '%c')", Chat::SocketGetMode());
+		throw Exception(msg);
 	}
+#endif
 
 	uuid_generate_random(this->_uuid);
 	memset(this->_name, 0, sizeof(this->_name));
@@ -41,7 +44,7 @@ Chatroom::Chatroom() : Object() {
 
 	// create our private key for encrypting
 	// messages
-	this->_cipher = Cipher::create(kCipherTypeSymmetric);
+	this->_cipher = (CipherSymmetric *) Cipher::create(kCipherTypeSymmetric);
 	this->_cipher->genkey();
 }
 
@@ -52,7 +55,7 @@ Chatroom::Chatroom(const uuid_t uuid) : Object() {
 	// setup conversation thread
 	this->conversation.get().setReleaseCallback(_ChatroomMessageFree);
 	
-	this->_cipher = Cipher::create(kCipherTypeSymmetric);
+	this->_cipher = (CipherSymmetric *) Cipher::create(kCipherTypeSymmetric);
 }
 
 Chatroom::~Chatroom() { 
@@ -239,14 +242,28 @@ int Chatroom::finalizeEnrollment(const PayloadChatroomEnrollmentForm * form) {
 	}
 
 	// get user with the uuid I got from the packet
+	//
+	// we need this user to decrypt the encrypted 
+	// chatroom key
 	User * user = User::getuser(form->useruuid);
 	if (!user) {
 		LOG_DEBUG("no user with %s", form->useruuid);
 		LOG_FLUSH;
-		return 1;
+		return 2;
 	}
 
-	// TODO: capture private key for chatroom
+	// capture private key for chatroom
+	Data enckey(form->datasize, form->data);
+	Data deckey;
+	if (user->cipher()->decrypt(enckey, deckey)) {
+		LOG_DEBUG("couldn't decrypt the encrypted data");
+		return 3;
+	}
+
+	if (this->_cipher->setkey(deckey)) {
+		LOG_DEBUG("couldn't save key");
+		return 4;
+	}
 
 	int error = this->notifyAllServerUsersOfEnrollment(user);
 
@@ -292,13 +309,42 @@ int Chatroom::fillOutEnrollmentFormRequest(User * user, Packet * p) {
 
 	// transfer the public key
 	memcpy(form.data, pub.buffer(), pub.size());
+	form.datasize = pub.size();
 	
 	PacketSetPayload(p, &form);
 
 	return 0;
 }
 
-int _encryptPrivateKey() {
+int _encryptPrivateKey(PayloadChatroomEnrollmentForm * form, CipherSymmetric * c, Data & res) {
+	if (!form || !c)
+		return 1;
+
+	// get private key	
+	Data key;
+	if (c->getkey(key)) {
+		LOG_DEBUG("could not get private key");
+		return 2;
+	}
+
+	// create asym cipher
+	CipherAsymmetric * ac = (CipherAsymmetric *) Cipher::create(kCipherTypeAsymmetric);
+	if (!ac) {
+		return 3;
+	}
+
+	Data pubkey(form->datasize, form->data);
+	if (ac->setPublicKey(pubkey)) {
+		return 4;
+	}
+
+	// encrypt our private key
+	if (ac->encrypt(key, res)) {
+		return 5;
+	}
+
+	BFDelete(ac);
+	
 	return 0;
 }
 
@@ -311,10 +357,15 @@ int Chatroom::fillOutEnrollmentForm(PayloadChatroomEnrollmentForm * form) {
 	}
 
 	// encrypt private key
-	int err = _encryptPrivateKey();
+	Data enckey;
+	int err = _encryptPrivateKey(form, this->_cipher, enckey);
 	if (err) {
 		return err;
 	}
+
+	// transfer the encrypted private key
+	memcpy(form->data, enckey.buffer(), enckey.size());
+	form->datasize = enckey.size();
 	
 	// modify form to reflect response type
 	form->type = 1; // response

@@ -174,7 +174,7 @@ cleanup:
     return ret;
 }
 
-int CipherAsymmetric::encrypt(Data & in, Data & out) {
+int CipherAsymmetric::encrypt(Data & in, Data & out) const {
     size_t encrypted_len = 0;
     unsigned char * encrypted = NULL;
 	int result = do_encrypt(
@@ -191,7 +191,7 @@ int CipherAsymmetric::encrypt(Data & in, Data & out) {
 	return result;
 }
 
-int CipherAsymmetric::decrypt(Data & in, Data & out) {
+int CipherAsymmetric::decrypt(Data & in, Data & out) const {
     size_t decrypted_len = 0;
     unsigned char * decrypted = NULL;
 	int result = do_decrypt(

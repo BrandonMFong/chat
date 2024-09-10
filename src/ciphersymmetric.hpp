@@ -26,8 +26,8 @@ public:
 	 * generates symm key
 	 */
 	int genkey();
-	int encrypt(BF::Data & in, BF::Data & out);
-	int decrypt(BF::Data & in, BF::Data & out);
+	int encrypt(BF::Data & in, BF::Data & out) const;
+	int decrypt(BF::Data & in, BF::Data & out) const;
 	CipherType type();
 
 

@@ -12,10 +12,10 @@
 
 using namespace BF;
 
-int _encrypt(Data & in, unsigned char *key,
-            unsigned char *iv, Data & out);
-int _decrypt(Data & in, unsigned char *key,
-            unsigned char *iv, Data & out);
+int _encrypt(Data & in, const unsigned char *key,
+            const unsigned char *iv, Data & out);
+int _decrypt(Data & in, const unsigned char *key,
+            const unsigned char *iv, Data & out);
 
 CipherSymmetric::CipherSymmetric() : Cipher() {
 
@@ -67,12 +67,12 @@ int CipherSymmetric::setkey(Data & key) {
 	return 0;
 }
 
-int CipherSymmetric::encrypt(Data & in, Data & out) {
+int CipherSymmetric::encrypt(Data & in, Data & out) const {
 	return _encrypt(in, this->_key, this->_iv, out);
 }
 
-int _encrypt(Data & in, unsigned char *key,
-            unsigned char *iv, Data & out) {
+int _encrypt(Data & in, const unsigned char *key,
+            const unsigned char *iv, Data & out) {
 	int result = 0;
     EVP_CIPHER_CTX *ctx;
     int len;
@@ -143,12 +143,12 @@ int _encrypt(Data & in, unsigned char *key,
     return result;
 }
 
-int CipherSymmetric::decrypt(Data & in, Data & out) {
+int CipherSymmetric::decrypt(Data & in, Data & out) const {
 	return _decrypt(in, this->_key, this->_iv, out);
 }
 
-int _decrypt(Data & in, unsigned char *key,
-            unsigned char *iv, Data & out) {
+int _decrypt(Data & in, const unsigned char *key,
+            const unsigned char *iv, Data & out) {
 	int result = 0;
     EVP_CIPHER_CTX *ctx;
     int len;

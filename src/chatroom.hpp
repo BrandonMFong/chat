@@ -19,7 +19,7 @@ extern "C" {
 class Message;
 class User;
 class Agent;
-class Cipher;
+class CipherSymmetric;
 
 /**
  * In charge of creating message
@@ -181,7 +181,7 @@ protected:
 	/**
 	 * helps encrypting messages
 	 */
-	Cipher * _cipher;
+	CipherSymmetric * _cipher;
 
 private:
 

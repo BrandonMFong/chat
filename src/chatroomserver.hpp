@@ -42,7 +42,7 @@ public:
 private:
 	ChatroomServer();
 	int sendPacket(const Packet * pkt);
-	int initCipher();
+	//int initCipher();
 	int requestEnrollment(User * user);
 };
 
