@@ -12,3 +12,7 @@ const BF::String & Exception::msg() const throw() {
 	return this->_msg;
 }
 
+const char * Exception::what() const throw() {
+	return this->_msg.cString();
+}
+
