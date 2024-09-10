@@ -13,7 +13,10 @@
 #include "packet.hpp"
 #include <string.h>
 #include <bflibcpp/bflibcpp.hpp>
+#include "ciphersymmetric.hpp"
 #include "cipherasymmetric.hpp"
+#include "chat.hpp"
+#include "exception.hpp"
 
 using namespace BF;
 
@@ -25,6 +28,10 @@ void _ChatroomReleaseUser(User * u) { BFRelease(u); }
 void _ChatroomReleaseAgent(Agent * a) { BFRelease(a); }
 
 Chatroom::Chatroom() : Object() {
+	if (Chat::SocketGetMode() != SOCKET_MODE_SERVER) {
+		throw Exception("Can only create a raw chatroom from server mode");
+	}
+
 	uuid_generate_random(this->_uuid);
 	memset(this->_name, 0, sizeof(this->_name));
 
@@ -32,7 +39,10 @@ Chatroom::Chatroom() : Object() {
 	this->_users.get().setReleaseCallback(_ChatroomReleaseUser);
 	this->_agents.get().setReleaseCallback(_ChatroomReleaseAgent);
 
-	this->_cipher = NULL;
+	// create our private key for encrypting
+	// messages
+	this->_cipher = Cipher::create(kCipherTypeSymmetric);
+	this->_cipher->genkey();
 }
 
 Chatroom::Chatroom(const uuid_t uuid) : Object() {
@@ -42,7 +52,7 @@ Chatroom::Chatroom(const uuid_t uuid) : Object() {
 	// setup conversation thread
 	this->conversation.get().setReleaseCallback(_ChatroomMessageFree);
 	
-	this->_cipher = NULL;
+	this->_cipher = Cipher::create(kCipherTypeSymmetric);
 }
 
 Chatroom::~Chatroom() { 

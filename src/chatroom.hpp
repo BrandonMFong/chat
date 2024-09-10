@@ -134,11 +134,16 @@ protected:
 	/**
 	 * inits chatroom with uuid
 	 * uuid : gets copied
+	 *
+	 * this should be used on the client side. A private key is
+	 * not generated
 	 */
 	Chatroom(const uuid_t uuid);
 
 	/**
 	 * creates chatroom and sets random uuid
+	 *
+	 * creates a private key on the server side
 	 */
 	Chatroom();
 
