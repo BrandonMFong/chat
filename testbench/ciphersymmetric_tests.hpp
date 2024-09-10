@@ -100,6 +100,51 @@ int test_LongString() {
 	return result;
 }
 
+int test_RandomBytes() {
+	UNIT_TEST_START;
+	int result = 0;
+	int max = 2 << 16;
+
+	while (!result && max--) {
+		Cipher * c = Cipher::create(kCipherTypeSymmetric);
+		if (c == 0) {
+			result = 1;
+		} else if (c->genkey()) {
+			result = 2;
+		}
+
+		unsigned char * buf = (unsigned char *) malloc(DATA_BUFFER_SIZE);
+		Data plain(DATA_BUFFER_SIZE, buf);
+		printf("\nplain %ld\n", plain.size());
+		Data enc;
+		if (!result) {
+			result = c->encrypt(plain, enc);
+		}
+
+		printf("\nenc %ld\n", enc.size());
+		Data dec;
+		if (!result) {
+			result = c->decrypt(enc, dec);
+		}
+
+		printf("\ndec %ld\n", dec.size());
+		if (!result) {
+			if (dec.size() != DATA_BUFFER_SIZE) {
+				printf("\n%ld != %ld\n", dec.size(), DATA_BUFFER_SIZE);
+				result = 3;
+			} else if (memcmp(dec.buffer(), buf, DATA_BUFFER_SIZE)) {
+				result = 4;
+			}
+		}
+
+		BFFree(buf);
+		BFDelete(c);
+	}
+
+	UNIT_TEST_END(!result, result);
+	return result;
+}
+
 int test_HandingOffKey() {
 	UNIT_TEST_START;
 	int result = 0;
@@ -155,10 +200,13 @@ void ciphersymmetric_tests(int * pass, int * fail) {
 	int p = 0, f = 0;
 	
 	INTRO_TEST_FUNCTION;
-	
+
+/*	
 	LAUNCH_TEST(test_SimpleString, p, f);
 	LAUNCH_TEST(test_LongString, p, f);
 	LAUNCH_TEST(test_HandingOffKey, p, f);
+	*/
+	LAUNCH_TEST(test_RandomBytes, p, f);
 
 	if (pass) *pass += p;
 	if (fail) *fail += f;

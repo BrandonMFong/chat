@@ -10,7 +10,11 @@
 
 /**
  * handles encryption and serialization of the
- * data being sent
+ * data
+ *
+ * TODO: the data here will be encrypted with a session key that
+ * should get determined once the server creates the 
+ * service
  */
 class SealedPacket : public BF::Object {
 public:
