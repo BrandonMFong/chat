@@ -260,6 +260,7 @@ int Chatroom::finalizeEnrollment(const PayloadChatroomEnrollmentForm * form) {
 		return 3;
 	}
 
+	// save the chatroom key
 	if (this->_cipher->setkey(deckey)) {
 		LOG_DEBUG("couldn't save key");
 		return 4;
