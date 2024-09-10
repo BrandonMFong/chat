@@ -113,26 +113,21 @@ int test_RandomBytes() {
 			result = 2;
 		}
 
-		unsigned char * buf = (unsigned char *) malloc(DATA_BUFFER_SIZE);
-		Data plain(DATA_BUFFER_SIZE, buf);
-		printf("\nplain %ld\n", plain.size());
+		size_t size = DATA_BUFFER_SIZE;
+		unsigned char * buf = (unsigned char *) malloc(size);
+		Data plain(size, buf);
 		Data enc;
 		if (!result) {
 			result = c->encrypt(plain, enc);
 		}
 
-		printf("\nenc %ld\n", enc.size());
 		Data dec;
 		if (!result) {
 			result = c->decrypt(enc, dec);
 		}
 
-		printf("\ndec %ld\n", dec.size());
 		if (!result) {
-			if (dec.size() != DATA_BUFFER_SIZE) {
-				printf("\n%ld != %ld\n", dec.size(), DATA_BUFFER_SIZE);
-				result = 3;
-			} else if (memcmp(dec.buffer(), buf, DATA_BUFFER_SIZE)) {
+			if (memcmp(dec.buffer(), buf, size)) {
 				result = 4;
 			}
 		}
@@ -201,11 +196,9 @@ void ciphersymmetric_tests(int * pass, int * fail) {
 	
 	INTRO_TEST_FUNCTION;
 
-/*	
 	LAUNCH_TEST(test_SimpleString, p, f);
 	LAUNCH_TEST(test_LongString, p, f);
 	LAUNCH_TEST(test_HandingOffKey, p, f);
-	*/
 	LAUNCH_TEST(test_RandomBytes, p, f);
 
 	if (pass) *pass += p;
