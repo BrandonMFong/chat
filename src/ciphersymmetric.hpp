@@ -27,7 +27,12 @@ public:
 	 */
 	int genkey();
 	int encrypt(BF::Data & in, BF::Data & out) const;
+
+	/**
+	 * output may not be the same length as original plain text
+	 */
 	int decrypt(BF::Data & in, BF::Data & out) const;
+
 	CipherType type();
 
 
