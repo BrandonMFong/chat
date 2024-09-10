@@ -178,12 +178,12 @@ protected:
 
 	BF::Atomic<BF::List<Agent *>> _agents;
 
+private:
+
 	/**
 	 * helps encrypting messages
 	 */
 	CipherSymmetric * _cipher;
-
-private:
 
 	/**
 	 * sends out a broadcast that user is in chatroom

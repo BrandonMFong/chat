@@ -317,6 +317,9 @@ int Chatroom::fillOutEnrollmentFormRequest(User * user, Packet * p) {
 	return 0;
 }
 
+/**
+ * this will use the public key in the form to encrypt the symmetric key
+ */
 int _encryptPrivateKey(PayloadChatroomEnrollmentForm * form, CipherSymmetric * c, Data & res) {
 	if (!form || !c)
 		return 1;
