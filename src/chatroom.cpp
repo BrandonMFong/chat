@@ -148,7 +148,27 @@ void Chatroom::getuuid(uuid_t uuid) {
 	uuid_copy(uuid, this->_uuid);
 }
 
+int Chatroom::receiveMessagePacket(const Packet * pkt) {
+	// chatroom will own this memory
+	Message * m = new Message(pkt);
+	if (!m) {
+		LOG_DEBUG("couldn't create message object");
+		return 1;
+	}
+
+	int err = this->addMessage(m);
+	if (err) {
+		LOG_DEBUG("error adding message to chatroom: %d", err);
+		return 2;
+	}
+
+	return 0;
+}
+
 int Chatroom::sendBuffer(PayloadMessageType type, User * user, const InputBuffer & buf) {
+	if (!user)
+		return 1;
+
 	Packet p;
 	memset(&p, 0, sizeof(p));
 
@@ -452,23 +472,6 @@ int Chatroom::removeAgent(Agent * a) {
 
 int Chatroom::removeUser(User * u) {
 	return this->userAddRemove('r', u);
-}
-
-int Chatroom::receiveMessagePacket(const Packet * pkt) {
-	// chatroom will own this memory
-	Message * m = new Message(pkt);
-	if (!m) {
-		LOG_DEBUG("couldn't create message object");
-		return 1;
-	}
-
-	int err = this->addMessage(m);
-	if (err) {
-		LOG_DEBUG("error adding message to chatroom: %d", err);
-		return 2;
-	}
-
-	return 0;
 }
 
 Chatroom * Chatroom::getChatroom(const uuid_t chatroomuuid) {
