@@ -9,6 +9,8 @@
 #include <bflibcpp/object.hpp>
 #include "typepacket.h"
 
+class Cipher;
+
 class Message : public BF::Object {
 public:
 	/**
@@ -22,6 +24,8 @@ public:
 	void getuuidchatroom(uuid_t uuid) const;
 	void getuuiduser(uuid_t uuid) const;
 	PayloadMessageType type() const;
+
+	int decryptData(const Cipher * cipher);
 private:
 	
 	/**

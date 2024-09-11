@@ -149,10 +149,6 @@ void Chatroom::getuuid(uuid_t uuid) {
 }
 
 int Chatroom::receiveMessagePacket(const Packet * pkt) {
-	// decrypt the message
-	Data enc(sizeof(pkt->payload.message.data), pkt->payload.message.data);
-	Data dec;
-	if (this->_cipher->decrypt(
 	// chatroom will own this memory
 	Message * m = new Message(pkt);
 	if (!m) {
@@ -160,10 +156,20 @@ int Chatroom::receiveMessagePacket(const Packet * pkt) {
 		return 1;
 	}
 
-	int err = this->addMessage(m);
+	int err = m->decryptData(this->_cipher);
 	if (err) {
-		LOG_DEBUG("error adding message to chatroom: %d", err);
-		return 2;
+		LOG_DEBUG("couldn't decrypt message");
+	}
+
+	if (!err) {
+		err = this->addMessage(m);
+		if (err) {
+			LOG_DEBUG("error adding message to chatroom: %d", err);
+		}
+	}
+
+	if (err) {
+		BFRelease(m);
 	}
 
 	return 0;
@@ -175,15 +181,17 @@ int Chatroom::sendBuffer(PayloadMessageType type, User * user, const InputBuffer
 
 	Packet p;
 	memset(&p, 0, sizeof(p));
+	PacketSetHeader(&p, kPayloadTypeMessage);
 
-	p.payload.message.type = type;
+	// encrypt message
+	Data dec(sizeof(p.payload.message.data), (unsigned char *) buf.cString());
+	Data enc;
+	if (this->_cipher->encrypt(dec, enc)) {
+		return 2;
+	}
 
-	// load buffer 
-	strncpy(
-		p.payload.message.data,
-		buf.cString(),
-		sizeof(p.payload.message.data)
-	);
+	// load encrypted message data
+	memcpy(p.payload.message.data, enc.buffer(), enc.size());
 
 	// username
 	strncpy(
@@ -198,17 +206,24 @@ int Chatroom::sendBuffer(PayloadMessageType type, User * user, const InputBuffer
 	// chatroom uuid
 	uuid_copy(p.payload.message.chatuuid, this->_uuid);
 
-	// time
-	p.header.time = BFTimeGetCurrentTime();
+	// message type
+	p.payload.message.type = type;
 
-	// set payload type
-	p.header.type = kPayloadTypeMessage;
+	if (this->sendPacket(&p)) {
+		LOG_DEBUG("couldn't send packet");
+		return 3;
+	}
+
+	// reset the payload to plain text for us to use
+	strncpy(p.payload.message.data, buf.cString(), sizeof(p.payload.message.data));
 
 	// give chatroom this message to add to 
 	// its list
-	this->addMessage(new Message(&p));
+	if (this->addMessage(new Message(&p))) {
+		return 4;
+	}
 
-	return this->sendPacket(&p);
+	return 0;
 }
 
 int Chatroom::sendBuffer(const InputBuffer & buf) {

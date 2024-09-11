@@ -4,6 +4,8 @@
  */
 
 #include "message.hpp"
+#include "cipher.hpp"
+#include "log.hpp"
 #include <string.h>
 
 using namespace BF;
@@ -16,6 +18,28 @@ Message::Message(const Packet * pkt) : Object() {
 
 Message::~Message() {
 
+}
+
+int Message::decryptData(const Cipher * cipher) {
+	if (!cipher) {
+		return 1;
+	}
+	
+	// decrypt the message
+	Data enc(sizeof(this->_packet.payload.message.data),
+			(unsigned char *) this->_packet.payload.message.data);
+	Data dec;
+	int err = cipher->decrypt(enc, dec);
+	if (err) {
+		LOG_DEBUG("couldn't decrypt message: %d", err);
+		return err;
+	}
+
+	strncpy(this->_packet.payload.message.data,
+			(char *) dec.buffer(),
+			sizeof(this->_packet.payload.message.data));
+
+	return 0;
 }
 
 const char * Message::username() const {

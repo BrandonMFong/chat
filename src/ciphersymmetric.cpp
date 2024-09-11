@@ -182,7 +182,7 @@ int _decrypt(Data & in, const unsigned char *key,
 	}
 
 	if (!result) {
-		//EVP_CIPHER_CTX_set_padding(ctx, 0);
+		EVP_CIPHER_CTX_set_padding(ctx, 0);
 		/*
 		 * Provide the message to be decrypted, and obtain the plaintext output.
 		 * EVP_DecryptUpdate can be called multiple times if necessary.
@@ -201,6 +201,7 @@ int _decrypt(Data & in, const unsigned char *key,
 		 * this stage.
 		 */
 		if(1 != EVP_DecryptFinal_ex(ctx, (unsigned char *) out.buffer() + len, &len)) {
+			LOG_DEBUG("current decrypted buffer: %s", (char *) out.buffer());
 			LOG_DEBUG("%s:%d", __FILE__, __LINE__);
 			result = -1;
 		} else {
