@@ -149,6 +149,10 @@ void Chatroom::getuuid(uuid_t uuid) {
 }
 
 int Chatroom::receiveMessagePacket(const Packet * pkt) {
+	// decrypt the message
+	Data enc(sizeof(pkt->payload.message.data), pkt->payload.message.data);
+	Data dec;
+	if (this->_cipher->decrypt(
 	// chatroom will own this memory
 	Message * m = new Message(pkt);
 	if (!m) {
