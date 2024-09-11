@@ -28,6 +28,8 @@ public:
 	int getPublicKey(BF::Data & key) const;
 	int setPublicKey(BF::Data & key);
 	int getPrivateKey(BF::Data & key) const;
+	
+	bool isReady() const;
 private:
 	CipherAsymmetric();
 	EVP_PKEY * _keys;

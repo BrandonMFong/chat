@@ -24,6 +24,8 @@ public:
 	virtual int decrypt(BF::Data & in, BF::Data & out) const = 0;
 
 	virtual CipherType type() = 0;
+
+	virtual bool isReady() const = 0;
 protected:	
 	Cipher();
 };

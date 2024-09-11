@@ -41,6 +41,8 @@ public:
 	int getkey(BF::Data & key) const;
 	int setkey(BF::Data & key);
 
+	bool isReady() const;
+
 private:
 	CipherSymmetric();
 

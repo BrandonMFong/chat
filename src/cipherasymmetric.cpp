@@ -60,7 +60,11 @@ static EVP_PKEY * generate_rsa_key_short(OSSL_LIB_CTX * libctx, unsigned int bit
 
 int CipherAsymmetric::genkey() {
 	this->_keys = generate_rsa_key_short(this->_libctx, 4096);
-	return 0;
+	return this->_keys != NULL ? 0 : 1;
+}
+
+bool CipherAsymmetric::isReady() const {
+	return (this->_keys != NULL);
 }
 
 /*

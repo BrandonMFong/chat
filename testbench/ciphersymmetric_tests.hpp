@@ -18,6 +18,51 @@ extern "C" {
 
 using namespace BF;
 
+int test_SymCheckReady() {
+	UNIT_TEST_START;
+	int result = 0;
+	int max = 2 << 2;
+
+	while (!result && max--) {
+		Cipher * c = Cipher::create(kCipherTypeSymmetric);
+		if (c == 0) {
+			result = 1;
+		} else if (c->isReady()) {
+			result = 5;
+		} else if (c->genkey()) {
+			result = 2;
+		} else if (!c->isReady()) {
+			result = 4;
+		}
+
+		const char * str = "Hello world!";
+		Data plain(strlen(str)+1, (unsigned char *) str);
+		Data enc;
+		if (!result) {
+			result = c->encrypt(plain, enc);
+		}
+		
+		Data dec;
+		if (!result) {
+			result = c->decrypt(enc, dec);
+		}
+
+		if (!result) {
+			const char * res = (char *) dec.buffer();
+			if (strcmp(res, str)) {
+				printf("%s != %s\n", res, str);
+				result = 3;
+			}
+		}
+
+		BFDelete(c);
+	}
+
+	UNIT_TEST_END(!result, result);
+	return result;
+}
+
+
 int test_SimpleString() {
 	UNIT_TEST_START;
 	int result = 0;
@@ -242,6 +287,7 @@ void ciphersymmetric_tests(int * pass, int * fail) {
 	LAUNCH_TEST(test_HandingOffKey, p, f);
 	LAUNCH_TEST(test_RandomBytes, p, f);
 	LAUNCH_TEST(test_EmptyString, p, f);
+	LAUNCH_TEST(test_SymCheckReady, p, f);
 
 	if (pass) *pass += p;
 	if (fail) *fail += f;

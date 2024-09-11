@@ -18,7 +18,8 @@ int _decrypt(Data & in, const unsigned char *key,
             const unsigned char *iv, Data & out);
 
 CipherSymmetric::CipherSymmetric() : Cipher() {
-
+	memset(_key, 0, CIPHER_SYMMETRIC_KEY_SIZE);
+	memset(_iv, 0, CIPHER_SYMMETRIC_IV_SIZE);
 }
 
 CipherSymmetric::~CipherSymmetric() {
@@ -27,6 +28,24 @@ CipherSymmetric::~CipherSymmetric() {
 
 CipherType CipherSymmetric::type() {
 	return kCipherTypeSymmetric;
+}
+
+bool CipherSymmetric::isReady() const {
+	int size = CIPHER_SYMMETRIC_KEY_SIZE > CIPHER_SYMMETRIC_IV_SIZE ? CIPHER_SYMMETRIC_KEY_SIZE : CIPHER_SYMMETRIC_IV_SIZE;
+	bool keyisgood = false;
+	bool ivisgood = false;
+
+	for (int i = 0; i < size; i++) {
+		if (!keyisgood && i < CIPHER_SYMMETRIC_KEY_SIZE) {
+			keyisgood = this->_key[i] != 0;
+		}
+
+		if (!ivisgood && i < CIPHER_SYMMETRIC_IV_SIZE) {
+			ivisgood = this->_iv[i] != 0;
+		}
+	}
+
+	return keyisgood && ivisgood;
 }
 
 int CipherSymmetric::genkey() {
