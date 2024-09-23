@@ -156,6 +156,11 @@ int Chatroom::receiveMessagePacket(const Packet * pkt) {
 		return 1;
 	}
 
+	if (!this->_cipher->isReady()) {
+		LOG_DEBUG("the chatroom cipher is not ready");
+		return 1;
+	}
+
 	int err = m->decryptData(this->_cipher);
 	if (err) {
 		LOG_DEBUG("couldn't decrypt message");
@@ -176,8 +181,12 @@ int Chatroom::receiveMessagePacket(const Packet * pkt) {
 }
 
 int Chatroom::sendBuffer(PayloadMessageType type, User * user, const InputBuffer & buf) {
-	if (!user)
+	if (!user) {
 		return 1;
+	} else if (!this->_cipher->isReady()) {
+		LOG_DEBUG("the chatroom cipher is not ready");
+		return 1;
+	}
 
 	Packet p;
 	memset(&p, 0, sizeof(p));
