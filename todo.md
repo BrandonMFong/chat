@@ -12,6 +12,7 @@
 		[x] create a step before joining a chatroom. Use it to ask for permission and grant chat key
 		[x] add logging to the enrollment logging
 		[x] fix issue with packet size
+		[] there is an issue with using the chatroom key to decrypt
 [] make git submodules
 [] ability to change user name
 [] user data window editor
