@@ -7,6 +7,7 @@
 #define CIPHER_SYMMETRIC_HPP
 
 #include "cipher.hpp"
+#include <bflibcpp/data.hpp>
 
 /// in bytes
 #define CIPHER_SYMMETRIC_KEY_SIZE 32
@@ -46,8 +47,10 @@ public:
 private:
 	CipherSymmetric();
 
-	unsigned char _key[CIPHER_SYMMETRIC_KEY_SIZE];
-	unsigned char _iv[CIPHER_SYMMETRIC_IV_SIZE];
+	//unsigned char _key[CIPHER_SYMMETRIC_KEY_SIZE];
+	//unsigned char _iv[CIPHER_SYMMETRIC_IV_SIZE];
+	BF::Data _key;
+	BF::Data _iv;
 };
 
 #endif // CIPHER_SYMMETRIC_HPP

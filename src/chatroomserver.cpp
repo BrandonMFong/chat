@@ -108,7 +108,7 @@ int ChatroomServer::requestEnrollment(User * user) {
 	if (error) return error;
 
 	LOG_DEBUG("manually filling out form");
-	if (this->fillOutEnrollmentForm(&p.payload.enrollform)) {
+	if (this->fillOutEnrollmentFormResponse(&p.payload.enrollform)) {
 		LOG_DEBUG("for some reason couldn't approve form");
 		return 1;
 	}

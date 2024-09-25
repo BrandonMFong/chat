@@ -243,7 +243,7 @@ void Agent::receivedPayloadTypeChatroomEnrollmentForm(const Packet * pkt) {
 		// here we should receive the public key. we will use the public
 		// key to encrypt the chatroom's private key
 		LOG_DEBUG("filling out enrollment");
-		if (chatroom->fillOutEnrollmentForm(&form)) {
+		if (chatroom->fillOutEnrollmentFormResponse(&form)) {
 			LOG_DEBUG("couldn't fill out enrollment form");
 			return;
 		}

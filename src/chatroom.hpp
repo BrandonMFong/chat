@@ -113,7 +113,7 @@ public:
 	 *
 	 * form : we expect the form with the request information
 	 */
-	int fillOutEnrollmentForm(PayloadChatroomEnrollmentForm * form);
+	int fillOutEnrollmentFormResponse(PayloadChatroomEnrollmentForm * form);
 
 	/**
 	 * chat room name

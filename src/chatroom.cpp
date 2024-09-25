@@ -309,6 +309,7 @@ int Chatroom::finalizeEnrollment(const PayloadChatroomEnrollmentForm * form) {
 	}
 
 	// save the chatroom key
+	LOG_DEBUG("chatroom key: %s", deckey.hex().cString());
 	if (this->_cipher->setkey(deckey)) {
 		LOG_DEBUG("couldn't save key");
 		return 4;
@@ -378,6 +379,7 @@ int _encryptPrivateKey(PayloadChatroomEnrollmentForm * form, CipherSymmetric * c
 		LOG_DEBUG("could not get private key");
 		return 2;
 	}
+	LOG_DEBUG("chatroom key: %s", key.hex().cString());
 
 	// create asym cipher
 	CipherAsymmetric * ac = (CipherAsymmetric *) Cipher::create(kCipherTypeAsymmetric);
@@ -400,7 +402,7 @@ int _encryptPrivateKey(PayloadChatroomEnrollmentForm * form, CipherSymmetric * c
 	return 0;
 }
 
-int Chatroom::fillOutEnrollmentForm(PayloadChatroomEnrollmentForm * form) {
+int Chatroom::fillOutEnrollmentFormResponse(PayloadChatroomEnrollmentForm * form) {
 	if (!form) {
 		return 1;
 	} else if (form->type != 0) {

@@ -9,6 +9,7 @@
 #include "log.hpp"
 #include <openssl/rand.h>
 #include <openssl/evp.h>
+#include <bflibcpp/bflibcpp.hpp>
 
 using namespace BF;
 
@@ -18,8 +19,8 @@ int _decrypt(Data & in, const unsigned char *key,
             const unsigned char *iv, Data & out);
 
 CipherSymmetric::CipherSymmetric() : Cipher() {
-	memset(_key, 0, CIPHER_SYMMETRIC_KEY_SIZE);
-	memset(_iv, 0, CIPHER_SYMMETRIC_IV_SIZE);
+	this->_key.clear();
+	this->_iv.clear();
 }
 
 CipherSymmetric::~CipherSymmetric() {
@@ -31,17 +32,22 @@ CipherType CipherSymmetric::type() {
 }
 
 bool CipherSymmetric::isReady() const {
-	int size = CIPHER_SYMMETRIC_KEY_SIZE > CIPHER_SYMMETRIC_IV_SIZE ? CIPHER_SYMMETRIC_KEY_SIZE : CIPHER_SYMMETRIC_IV_SIZE;
 	bool keyisgood = false;
 	bool ivisgood = false;
+	unsigned char * key = (unsigned char *) this->_key.buffer();
+	unsigned char * iv = (unsigned char *) this->_iv.buffer();
 
-	for (int i = 0; i < size; i++) {
-		if (!keyisgood && i < CIPHER_SYMMETRIC_KEY_SIZE) {
-			keyisgood = this->_key[i] != 0;
+	for (int i = 0; i < this->_key.size(); i++) {
+		keyisgood = key[i] != 0;
+		if (keyisgood) {
+			break;
 		}
+	}
 
-		if (!ivisgood && i < CIPHER_SYMMETRIC_IV_SIZE) {
-			ivisgood = this->_iv[i] != 0;
+	for (int i = 0; i < this->_iv.size(); i++) {
+		ivisgood = iv[i] != 0;
+		if (ivisgood) {
+			break;
 		}
 	}
 
@@ -49,13 +55,19 @@ bool CipherSymmetric::isReady() const {
 }
 
 int CipherSymmetric::genkey() {
-	if (RAND_bytes(this->_key, CIPHER_SYMMETRIC_KEY_SIZE) != 1) {
+	unsigned char key[CIPHER_SYMMETRIC_KEY_SIZE];
+	unsigned char iv[CIPHER_SYMMETRIC_IV_SIZE];
+
+	if (RAND_bytes(key, CIPHER_SYMMETRIC_KEY_SIZE) != 1) {
 		LOG_DEBUG("couldn't generate key");
 		return 1;
-	} else if (RAND_bytes(this->_iv, CIPHER_SYMMETRIC_IV_SIZE) != 1) {
+	} else if (RAND_bytes(iv, CIPHER_SYMMETRIC_IV_SIZE) != 1) {
 		LOG_DEBUG("couldn't generate iv");
 		return 2;
 	}
+
+	this->_key.alloc(CIPHER_SYMMETRIC_KEY_SIZE, key);
+	this->_iv.alloc(CIPHER_SYMMETRIC_IV_SIZE, iv);
 
 	return 0;
 }
@@ -63,8 +75,10 @@ int CipherSymmetric::genkey() {
 int CipherSymmetric::getkey(Data & key) const {
 	const size_t s = CIPHER_SYMMETRIC_KEY_SIZE + CIPHER_SYMMETRIC_IV_SIZE;
 	unsigned char buf[s];
-	memcpy(buf, this->_key, CIPHER_SYMMETRIC_KEY_SIZE);
-	memcpy(buf + CIPHER_SYMMETRIC_KEY_SIZE, this->_iv, CIPHER_SYMMETRIC_IV_SIZE);
+	memcpy(buf, this->_key.buffer(), CIPHER_SYMMETRIC_KEY_SIZE);
+	memcpy(buf + CIPHER_SYMMETRIC_KEY_SIZE, this->_iv.buffer(), CIPHER_SYMMETRIC_IV_SIZE);
+	LOG_DEBUG("getkey key: %s", this->_key.hex().cString());
+	LOG_DEBUG("getkey iv: %s", this->_iv.hex().cString());
 	return key.alloc(s, buf); 
 }
 
@@ -80,14 +94,17 @@ int CipherSymmetric::setkey(Data & key) {
 
 	unsigned char * buf = (unsigned char *) key.buffer();
 	
-	memcpy(this->_key, buf, CIPHER_SYMMETRIC_KEY_SIZE);
-	memcpy(this->_iv, buf + CIPHER_SYMMETRIC_KEY_SIZE, CIPHER_SYMMETRIC_IV_SIZE);
+	this->_key.alloc(CIPHER_SYMMETRIC_KEY_SIZE, buf);
+	this->_iv.alloc(CIPHER_SYMMETRIC_IV_SIZE, buf + CIPHER_SYMMETRIC_KEY_SIZE);
+
+	LOG_DEBUG("setkey key: %s", this->_key.hex().cString());
+	LOG_DEBUG("setkey iv: %s", this->_iv.hex().cString());
 
 	return 0;
 }
 
 int CipherSymmetric::encrypt(Data & in, Data & out) const {
-	return _encrypt(in, this->_key, this->_iv, out);
+	return _encrypt(in, (unsigned char *) this->_key.buffer(), (unsigned char *) this->_iv.buffer(), out);
 }
 
 int _encrypt(Data & in, const unsigned char *key,
@@ -163,7 +180,7 @@ int _encrypt(Data & in, const unsigned char *key,
 }
 
 int CipherSymmetric::decrypt(Data & in, Data & out) const {
-	return _decrypt(in, this->_key, this->_iv, out);
+	return _decrypt(in, (unsigned char *) this->_key.buffer(), (unsigned char *) this->_iv.buffer(), out);
 }
 
 int _decrypt(Data & in, const unsigned char *key,
