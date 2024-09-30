@@ -10,8 +10,10 @@
 #include <openssl/rand.h>
 #include <openssl/evp.h>
 #include <bflibcpp/bflibcpp.hpp>
+#include <openssl/err.h>
 
 using namespace BF;
+const size_t kCipherBlocksize = 16;
 
 int _encrypt(Data & in, const unsigned char *key,
             const unsigned char *iv, Data & out);
@@ -113,7 +115,7 @@ int _encrypt(Data & in, const unsigned char *key,
     EVP_CIPHER_CTX *ctx;
     int len;
     int ciphertext_len;
-	const size_t blocksize = 16;
+	const size_t blocksize = kCipherBlocksize;
 	
 	/* 
 	 * figure out cipher buffer length
@@ -137,6 +139,7 @@ int _encrypt(Data & in, const unsigned char *key,
      * is 128 bits
      */
 	if (!result) {
+		//EVP_CIPHER_CTX_set_padding(ctx, 0);
 		if(1 != EVP_EncryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, key, iv)) {
 			LOG_DEBUG("%s:%d", __FILE__, __LINE__);
 			result = -1;
@@ -189,11 +192,14 @@ int _decrypt(Data & in, const unsigned char *key,
     EVP_CIPHER_CTX *ctx;
     int len;
     int plaintext_len;
+	const size_t blocksize = kCipherBlocksize;
 	
-	/*
+	/* 
+	 * figure out cipher buffer length
 	 * out text should be as long as in text
 	 */
-	out.alloc(in.size());
+	size_t newsize = ((in.size() / blocksize) + 1) * blocksize;
+	out.alloc(newsize);
 
     /* Create and initialise the context */
 	if (!result) {
@@ -211,6 +217,7 @@ int _decrypt(Data & in, const unsigned char *key,
      * is 128 bits
      */
 	if (!result) {
+		EVP_CIPHER_CTX_set_padding(ctx, 0);
 		if(1 != EVP_DecryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, key, iv)) {
 			LOG_DEBUG("%s:%d", __FILE__, __LINE__);
 			result = -1;
@@ -218,7 +225,6 @@ int _decrypt(Data & in, const unsigned char *key,
 	}
 
 	if (!result) {
-		EVP_CIPHER_CTX_set_padding(ctx, 0);
 		/*
 		 * Provide the message to be decrypted, and obtain the plaintext output.
 		 * EVP_DecryptUpdate can be called multiple times if necessary.
@@ -239,6 +245,7 @@ int _decrypt(Data & in, const unsigned char *key,
 		if(1 != EVP_DecryptFinal_ex(ctx, (unsigned char *) out.buffer() + len, &len)) {
 			LOG_DEBUG("current decrypted buffer: %s", (char *) out.buffer());
 			LOG_DEBUG("%s:%d", __FILE__, __LINE__);
+			LOG_DEBUG("openssl error: %s", ERR_error_string(ERR_get_error(), NULL));
 			result = -1;
 		} else {
 			plaintext_len += len;
