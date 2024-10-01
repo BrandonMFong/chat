@@ -9,6 +9,7 @@
 #define ASSERT_PUBLIC_MEMBER_ACCESS
 
 #include "cipher.hpp"
+#include "log.hpp"
 #include "ciphersymmetric.hpp"
 
 extern "C" {
@@ -281,6 +282,8 @@ void ciphersymmetric_tests(int * pass, int * fail) {
 	int p = 0, f = 0;
 	
 	INTRO_TEST_FUNCTION;
+	
+	LOG_OPEN;
 
 	LAUNCH_TEST(test_SimpleString, p, f);
 	LAUNCH_TEST(test_LongString, p, f);
@@ -288,6 +291,9 @@ void ciphersymmetric_tests(int * pass, int * fail) {
 	LAUNCH_TEST(test_RandomBytes, p, f);
 	LAUNCH_TEST(test_EmptyString, p, f);
 	LAUNCH_TEST(test_SymCheckReady, p, f);
+	
+	LOG_FLUSH;
+	LOG_CLOSE;
 
 	if (pass) *pass += p;
 	if (fail) *fail += f;

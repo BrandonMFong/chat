@@ -169,6 +169,7 @@ int _encrypt(Data & in, const unsigned char *key,
 			result = -1;
 		} else {
 			ciphertext_len += len;
+			//ciphertext_len = ((ciphertext_len / blocksize) + 1) * blocksize;
 			out.resize(ciphertext_len);
 			if (out.size() % blocksize) {
 				result = 1;

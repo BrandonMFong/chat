@@ -13,6 +13,7 @@
 		[x] add logging to the enrollment logging
 		[x] fix issue with packet size
 		[] there is an issue with using the chatroom key to decrypt
+			- https://github.com/openssl/openssl/discussions/24924
 [] make git submodules
 [] ability to change user name
 [] user data window editor
