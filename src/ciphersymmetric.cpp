@@ -109,18 +109,27 @@ int CipherSymmetric::encrypt(Data & in, Data & out) const {
 	return _encrypt(in, (unsigned char *) this->_key.buffer(), (unsigned char *) this->_iv.buffer(), out);
 }
 
-int _encrypt(Data & in, const unsigned char *key,
+int _encrypt(Data & _in, const unsigned char *key,
             const unsigned char *iv, Data & out) {
 	int result = 0;
     EVP_CIPHER_CTX *ctx;
     int len;
     int ciphertext_len;
 	const size_t blocksize = kCipherBlocksize;
-	
-	/* 
-	 * figure out cipher buffer length
-	 */
+
+	// keeping a copy
+	Data in = _in;
+
+	// make sure the input buffer length is a multiple of the blocksize
+	// 
+	// we need this since we are turning off padding	
 	size_t newsize = ((in.size() / blocksize) + 1) * blocksize;
+	in.alloc(newsize);
+	
+	// figure out cipher buffer length
+	//
+	// making sure it's a little bit more than the input size
+	newsize = ((in.size() / blocksize) + 1) * (2 * blocksize);
 	out.alloc(newsize);
 
     /* Create and initialise the context */
@@ -139,7 +148,7 @@ int _encrypt(Data & in, const unsigned char *key,
      * is 128 bits
      */
 	if (!result) {
-		//EVP_CIPHER_CTX_set_padding(ctx, 0);
+		EVP_CIPHER_CTX_set_padding(ctx, 0);
 		if(1 != EVP_EncryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, key, iv)) {
 			LOG_DEBUG("%s:%d", __FILE__, __LINE__);
 			result = -1;

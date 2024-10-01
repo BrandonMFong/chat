@@ -49,8 +49,8 @@ int test_SymCheckReady() {
 		}
 
 		if (!result) {
-			const char * res = (char *) dec.buffer();
-			if (strcmp(res, str)) {
+			String res = dec;
+			if (strcmp(res.cString(), str)) {
 				printf("%s != %s\n", res, str);
 				result = 3;
 			}
@@ -90,9 +90,9 @@ int test_SimpleString() {
 		}
 
 		if (!result) {
-			const char * res = (char *) dec.buffer();
-			if (strcmp(res, str)) {
-				printf("%s != %s\n", res, str);
+			String res = dec;
+			if (strcmp(res.cString(), str)) {
+				printf("%s != %s\n", res.cString(), str);
 				result = 2;
 			}
 		}
@@ -130,11 +130,9 @@ int test_EmptyString() {
 		}
 
 		if (!result) {
-			const char * res = (char *) dec.buffer();
-			if (strlen(res) != str.length()) {
-				result = 3;
-			} else if (str.compareString(res)) {
-				printf("%s != %s\n", res, str);
+			String res = dec;
+			if (strcmp(res.cString(), str)) {
+				printf("%s != %s\n", res.cString(), str);
 				result = 2;
 			}
 		}
@@ -171,11 +169,9 @@ int test_LongString() {
 		}
 
 		if (!result) {
-			const char * res = (char *) dec.buffer();
-			if (strlen(res) != str.length()) {
-				result = 3;
-			} else if (str.compareString(res)) {
-				printf("%s != %s\n", res, str);
+			String res = dec;
+			if (strcmp(res.cString(), str)) {
+				printf("%s != %s\n", res.cString(), str);
 				result = 2;
 			}
 		}
@@ -261,10 +257,8 @@ int test_HandingOffKey() {
 		}
 
 		if (!result) {
-			const char * res = (char *) dec.buffer();
-			if (strlen(res) != str.length()) {
-				result = 3;
-			} else if (str.compareString(res)) {
+			String res = dec;
+			if (str != res) {
 				printf("%s != %s\n", res, str);
 				result = 2;
 			}
