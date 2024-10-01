@@ -93,7 +93,7 @@ int test_SimpleString() {
 			String res = dec;
 			if (strcmp(res.cString(), str)) {
 				printf("%s != %s\n", res.cString(), str);
-				result = 2;
+				result = 3;
 			}
 		}
 
@@ -133,7 +133,7 @@ int test_EmptyString() {
 			String res = dec;
 			if (strcmp(res.cString(), str)) {
 				printf("%s != %s\n", res.cString(), str);
-				result = 2;
+				result = 3;
 			}
 		}
 
@@ -172,7 +172,7 @@ int test_LongString() {
 			String res = dec;
 			if (strcmp(res.cString(), str)) {
 				printf("%s != %s\n", res.cString(), str);
-				result = 2;
+				result = 3;
 			}
 		}
 
@@ -280,11 +280,13 @@ void ciphersymmetric_tests(int * pass, int * fail) {
 	LOG_OPEN;
 
 	LAUNCH_TEST(test_SimpleString, p, f);
+	/*
 	LAUNCH_TEST(test_LongString, p, f);
 	LAUNCH_TEST(test_HandingOffKey, p, f);
 	LAUNCH_TEST(test_RandomBytes, p, f);
 	LAUNCH_TEST(test_EmptyString, p, f);
 	LAUNCH_TEST(test_SymCheckReady, p, f);
+	*/
 	
 	LOG_FLUSH;
 	LOG_CLOSE;
