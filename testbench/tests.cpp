@@ -21,7 +21,7 @@ int main() {
 	LAUNCH_TEST_SET(inputbuffer_tests);
 	LAUNCH_TEST_SET(chatroom_tests);
 	*/
-	//LAUNCH_TEST_SET(message_tests);
+	LAUNCH_TEST_SET(message_tests);
 	LAUNCH_TEST_SET(packet_tests);
 
 	/*

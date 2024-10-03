@@ -7,6 +7,7 @@
 #include "cipher.hpp"
 #include "log.hpp"
 #include <string.h>
+#include <bflibcpp/bflibcpp.hpp>
 
 using namespace BF;
 
@@ -16,9 +17,7 @@ Message::Message(const Packet * pkt) : Object() {
 	}
 }
 
-Message::~Message() {
-
-}
+Message::~Message() { }
 
 int Message::decryptData(const Cipher * cipher) {
 	if (!cipher) {
@@ -42,6 +41,8 @@ int Message::decryptData(const Cipher * cipher) {
 			(char *) dec.buffer(),
 			sizeof(this->_packet.payload.message.data));
 
+	this->_packet.payload.message.datasize = dec.size();
+
 	return 0;
 }
 
@@ -52,10 +53,10 @@ int Message::encryptData(const Cipher * cipher) {
 		LOG_DEBUG("cipher is not ready to be used for encryption");
 		return 1;
 	}
-	
+
 	// encrypt the message
-	Data plain(sizeof(this->_packet.payload.message.data),
-			(unsigned char *) this->_packet.payload.message.data);
+	String msg = (const char *) this->_packet.payload.message.data;
+	Data plain = msg;
 	Data enc;
 	int err = cipher->encrypt(plain, enc);
 	if (err) {
@@ -63,9 +64,8 @@ int Message::encryptData(const Cipher * cipher) {
 		return err;
 	}
 
-	strncpy(this->_packet.payload.message.data,
-			(char *) enc.buffer(),
-			sizeof(this->_packet.payload.message.data));
+	memcpy(this->_packet.payload.message.data,
+		enc.buffer(), enc.size());
 
 	this->_packet.payload.message.datasize = enc.size();
 

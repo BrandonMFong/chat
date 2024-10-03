@@ -15,7 +15,8 @@ extern "C" {
 
 #define USER_NAME_SIZE 255
 #define CHAT_ROOM_NAME_SIZE 255
-#define DATA_BUFFER_SIZE 255
+#define PAYLOAD_MESSAGE_DATA_BUFFER_SIZE 1024
+#define PAYLOAD_MESSAGE_LIMIT_MESSAGE 255
 
 typedef enum {
 	kPayloadTypeUnknown = 0,
@@ -112,7 +113,7 @@ typedef struct {
 	/**
 	 * raw message
 	 */
-	char data[DATA_BUFFER_SIZE];
+	char data[PAYLOAD_MESSAGE_DATA_BUFFER_SIZE];
 
 	size_t datasize;
 

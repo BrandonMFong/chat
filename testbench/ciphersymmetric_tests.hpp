@@ -199,7 +199,7 @@ int test_RandomBytes() {
 			result = 2;
 		}
 
-		size_t size = DATA_BUFFER_SIZE;
+		size_t size = PAYLOAD_MESSAGE_LIMIT_MESSAGE;
 		unsigned char * buf = (unsigned char *) malloc(size);
 		srand(time(0));
 		for (int i = 0; i < size; i++) {

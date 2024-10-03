@@ -9,6 +9,7 @@
 #define ASSERT_PUBLIC_MEMBER_ACCESS
 
 #include "message.hpp"
+#include "packet.hpp"
 #include "cipher.hpp"
 
 extern "C" {
@@ -37,12 +38,11 @@ void _test_messagesLoadRandomDataToMessagePayload(Packet * p, const char * messa
 	uuid_generate_random(uuidu);
 	uuid_generate_random(uuidc);
 
-	p->payload.message.type = kPayloadMessageTypeData;
-	strncpy(p->payload.message.data, message, sizeof(p->payload.message.data));
-	strncpy(p->payload.message.username, "username", sizeof(p->payload.message.username));
-	uuid_copy(p->payload.message.useruuid, uuidu);
-	uuid_copy(p->payload.message.chatuuid, uuidc);
-	p->header.time = BFTimeGetCurrentTime();
+	PacketPayloadSetPayloadMessage(
+		&p->payload.message,
+		kPayloadMessageTypeData,
+		uuidc, "username", uuidu,
+		message);
 }
 
 int test_packet2message() {
