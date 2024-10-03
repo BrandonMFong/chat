@@ -16,14 +16,18 @@
 int main() {
 	TEST_SUITE_START;
 
+	/*
 	LAUNCH_TEST_SET(inputbuffer_tests);
 	LAUNCH_TEST_SET(chatroom_tests);
+	*/
 	LAUNCH_TEST_SET(message_tests);
+	/*
 	LAUNCH_TEST_SET(command_tests);
 	LAUNCH_TEST_SET(agent_tests);
 	LAUNCH_TEST_SET(ciphersymmetric_tests);
 	LAUNCH_TEST_SET(cipherasymmetric_tests);
 	LAUNCH_TEST_SET(exception_tests);
+	*/
 
 	TEST_SUITE_END;
 

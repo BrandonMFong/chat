@@ -220,59 +220,26 @@ int Chatroom::sendBuffer(PayloadMessageType type, User * user, const InputBuffer
 		return 1;
 	}
 
+	// Load packet
 	Packet p;
 	if (_LoadPayloadTypeMessage(&p, type, this->_uuid, user, buf)) {
 		LOG_DEBUG("could not load the message payload");
 		return 1;
 	}
 
-	/*
-	memset(&p, 0, sizeof(p));
-	PacketSetHeader(&p, kPayloadTypeMessage);
-
-	// encrypt message
-	Data dec(sizeof(p.payload.message.data), (unsigned char *) buf.cString());
-	Data enc;
-	if (this->_cipher->encrypt(dec, enc)) {
-		return 2;
-	}
-
-	// load encrypted message data
-	memcpy(p.payload.message.data, enc.buffer(), enc.size());
-
-	// username
-	strncpy(
-		p.payload.message.username,
-		user->username(),
-		sizeof(p.payload.message.username)
-	);
-
-	// user uuid
-	user->getuuid(p.payload.message.useruuid);	
-
-	// chatroom uuid
-	uuid_copy(p.payload.message.chatuuid, this->_uuid);
-
-	// message type
-	p.payload.message.type = type;
-	*/
-
+	// encrypt data
 	Message outbound(&p);
 	if (outbound.encryptData(this->_cipher)) {
 		LOG_DEBUG("could not encrypt data");
 		return 1;
 	}
 
+	// send out packet
 	if (this->sendPacket(outbound.packet())) {
 		LOG_DEBUG("couldn't send packet");
 		return 3;
 	}
-
-	/*
-	// reset the payload to plain text for us to use
-	strncpy(p.payload.message.data, buf.cString(), sizeof(p.payload.message.data));
-	*/
-
+	
 	// give chatroom this message to add to 
 	// its list
 	if (this->addMessage(new Message(&p))) {

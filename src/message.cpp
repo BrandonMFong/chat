@@ -23,6 +23,9 @@ Message::~Message() {
 int Message::decryptData(const Cipher * cipher) {
 	if (!cipher) {
 		return 1;
+	} else if (!cipher->isReady()) {
+		LOG_DEBUG("cipher is not ready to be used for encryption");
+		return 1;
 	}
 	
 	// decrypt the message
@@ -44,6 +47,9 @@ int Message::decryptData(const Cipher * cipher) {
 
 int Message::encryptData(const Cipher * cipher) {
 	if (!cipher) {
+		return 1;
+	} else if (!cipher->isReady()) {
+		LOG_DEBUG("cipher is not ready to be used for encryption");
 		return 1;
 	}
 	

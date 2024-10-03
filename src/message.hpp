@@ -24,11 +24,19 @@ public:
 	void getuuidchatroom(uuid_t uuid) const;
 	void getuuiduser(uuid_t uuid) const;
 	PayloadMessageType type() const;
+	const Packet * packet() const;
+
+	/**
+	 * Note about decryptData and encryptData:
+	 *
+	 * Message does not keep track if data is 
+	 * encrypted or not. It is up the the caller
+	 * to determine the state of the data
+	 */
 
 	int decryptData(const Cipher * cipher);
 	int encryptData(const Cipher * cipher);
 
-	const Packet * packet() const;
 private:
 	
 	/**
