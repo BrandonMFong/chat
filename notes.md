@@ -8,4 +8,5 @@
 * I am looking for a way to implement asymmetric cryptography. Seeing this geeksforgeeks post: https://www.geeksforgeeks.org/rsa-algorithm-cryptography/. Could I use openssl?
 * Found demo code on the openssl source code https://github.com/openssl/openssl/blob/master/demos/encrypt/rsa_encrypt.c
 * Took me a while to get the encryption code to work. Had some simple math errors when trying to calculate the correct buffer size of cipher/plain text. Implementing the asymmetric code was straightforward. Openssl has good examples on their github.
+* I had an issue with encryption using the app. The implementation was correct, according to the unit tests. I found that my integration of the cipher classes and how the data is being held had issues. I was not retaining the cipher buffer sizes and wasn't giving enough workspace for the encrypted data. I moved a lot of logic around to make compartmentalizationa easier
  

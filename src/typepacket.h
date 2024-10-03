@@ -15,7 +15,8 @@ extern "C" {
 
 #define USER_NAME_SIZE 255
 #define CHAT_ROOM_NAME_SIZE 255
-#define DATA_BUFFER_SIZE 255
+#define PAYLOAD_MESSAGE_DATA_BUFFER_SIZE 1024
+#define PAYLOAD_MESSAGE_LIMIT_MESSAGE 255
 
 typedef enum {
 	kPayloadTypeUnknown = 0,
@@ -79,6 +80,12 @@ typedef enum {
 	 * uses PayloadUserInfo payload
 	 */
 	kPayloadTypeNotifyQuitApp = 9,
+
+	/**
+	 * a form that bundles requests/responses 
+	 * for enrollment
+	 */
+	kPayloadTypeChatroomEnrollmentForm = 10,
 } PayloadType;
 
 typedef enum {
@@ -106,7 +113,9 @@ typedef struct {
 	/**
 	 * raw message
 	 */
-	char data[DATA_BUFFER_SIZE];
+	char data[PAYLOAD_MESSAGE_DATA_BUFFER_SIZE];
+
+	size_t datasize;
 
 	PayloadMessageType type;
 } PayloadMessage;
@@ -158,6 +167,43 @@ typedef struct {
 	uuid_t useruuid;
 } PayloadChatEnrollment;
 
+/**
+ * Think of this like the form you need to fill out to 
+ * enter a chatroom.
+ */
+typedef struct {
+	/**
+	 * user asking to join
+	 */
+	uuid_t useruuid;
+
+	/**
+	 * chatroom requested to join
+	 */
+	uuid_t chatroomuuid;
+
+	/**
+	 * 0 : request
+	 * 1 : response
+	 */
+	unsigned char type;
+
+	bool approved;
+
+	/**
+	 * contains public key for request and encrypted
+	 * private key for response if approved
+	 *
+	 * This is not a clean way to do this. There is no
+	 * standard as to how long a public/private key is based
+	 * on type, as far as I know. This is here to implement functionality
+	 */
+	unsigned char data[2 << 10];
+
+	// size of data above
+	size_t datasize;
+} PayloadChatroomEnrollmentForm;
+
 typedef struct {
 	struct {
 		// struct version
@@ -172,6 +218,15 @@ typedef struct {
 		 * determines the payload
 		 */
 		PayloadType type;
+
+		/**
+		 * default 0xff to signify this
+		 * packet is not part of a series of
+		 * frames
+		 *
+		 * 0xfe will signify the last frame
+		 */
+		unsigned char frameno;
 	} header;
 
 	union {
@@ -179,6 +234,7 @@ typedef struct {
 		PayloadUserInfo userinfo;
 		PayloadChatInfo chatinfo;
 		PayloadChatEnrollment enrollment;
+		PayloadChatroomEnrollmentForm enrollform;
 	} payload;
 } Packet;
 

@@ -17,6 +17,8 @@
 #include <bflibcpp/bflibcpp.hpp>
 #include <bfnet/bfnet.hpp>
 #include "sealedpacket.hpp"
+#include "chat.hpp"
+#include "exception.hpp"
 
 using namespace BF;
 using namespace BF::Net;
@@ -164,7 +166,9 @@ void Agent::receivedPayloadTypeUserInfo(const Packet * pkt) {
 		// because the user class and this object owns it. We
 		// will own this object and release it in our destructor.
 		User * user = User::create(&pkt->payload.userinfo);
-		this->setremoteuser(user);
+		if (user) {
+			this->setremoteuser(user);
+		}
 	}
 }
 
@@ -202,6 +206,61 @@ void Agent::receivedPayloadTypeRequestAvailableChatrooms(const Packet * pkt) {
 	BFFree(info);
 }
 
+void Agent::receivedPayloadTypeChatroomEnrollmentForm(const Packet * pkt) {
+	if (!pkt) {
+		return;
+	}
+
+	LOG_DEBUG("> %s", __func__);
+
+	// get chatroom
+	LOG_DEBUG("getting chatroom");
+	Chatroom * chatroom = Chatroom::getChatroom(
+		pkt->payload.enrollform.chatroomuuid
+	);
+
+	if (!chatroom) {
+		LOG_DEBUG("couldn't find chatroom: %s",
+			pkt->payload.enrollform.chatroomuuid);
+		return;
+	}
+
+	BFRetain(chatroom);
+	if (pkt->payload.enrollform.type == 1) { // response
+		LOG_DEBUG("received response enrollment form");
+
+		LOG_DEBUG("finalizing enrollment");
+		chatroom->finalizeEnrollment(&pkt->payload.enrollform);
+	} else if (pkt->payload.enrollform.type == 0) { // request
+		LOG_DEBUG("received request enrollment form");
+
+		// copy form from requestee
+		PayloadChatroomEnrollmentForm form;
+		memcpy(&form, &pkt->payload.enrollform, sizeof(PayloadChatroomEnrollmentForm));
+
+		// have the chatroom fill out the form
+		//
+		// here we should receive the public key. we will use the public
+		// key to encrypt the chatroom's private key
+		LOG_DEBUG("filling out enrollment");
+		if (chatroom->fillOutEnrollmentFormResponse(&form)) {
+			LOG_DEBUG("couldn't fill out enrollment form");
+			return;
+		}
+		
+		Packet p;
+		PacketSetHeader(&p, kPayloadTypeChatroomEnrollmentForm);
+		PacketSetPayload(&p, &form);
+
+		LOG_DEBUG("sending back enrollment form after receiving a request");
+		this->sendPacket(&p);
+	}
+
+	BFRelease(chatroom);
+	
+	LOG_DEBUG("< %s", __func__);
+}
+
 void Agent::receivedPayloadTypeChatroomInfo(const Packet * pkt) {
 	if (!pkt)
 		return;
@@ -215,8 +274,10 @@ void Agent::receivedPayloadTypeChatroomEnrollment(const Packet * pkt) {
 
 	if (!this->representsUserWithUUID(pkt->payload.enrollment.useruuid)) {
 		LOG_DEBUG("%s", __func__);
+		char buf[UUID_STR_LEN];
+		uuid_unparse(pkt->payload.enrollment.useruuid, buf);
 		LOG_DEBUG("couldn't find user: %s",
-			pkt->payload.enrollment.useruuid);
+			buf);
 		return;
 	}
 
@@ -246,8 +307,10 @@ void Agent::receivedPayloadTypeChatroomResignation(const Packet * pkt) {
 
 	if (!this->representsUserWithUUID(pkt->payload.enrollment.useruuid)) {
 		LOG_DEBUG("%s", __func__);
+		char buf[UUID_STR_LEN];
+		uuid_unparse(pkt->payload.enrollment.useruuid, buf);
 		LOG_DEBUG("couldn't find user: %s",
-			pkt->payload.enrollment.useruuid);
+			buf);
 		return;
 	}
 
@@ -291,11 +354,15 @@ void Agent::packetReceive(SocketEnvelope * envelope) {
 
 	if (!sc || !p) 
 		return;
-	else if (size != sizeof(Packet)) {
-		LOG_WRITE("size of incoming data does not meet expectations: %ld != %ld", size, sizeof(Packet));
+	else if (size != CHAT_SOCKET_BUFFER_SIZE) {
+		LOG_WRITE("size of incoming data does not meet expectations: %ld != %ld", size, CHAT_SOCKET_BUFFER_SIZE);
 		return;
 	}
 
+	// this agent represents the recipient on the other end
+	//
+	// you are allowed to send packets using this agent's
+	// sendPacket() method to communicate to end user
 	Agent * agent = Agent::getAgentForConnection(sc);
 	if (!agent)
 		return;
@@ -329,6 +396,9 @@ void Agent::packetReceive(SocketEnvelope * envelope) {
 		break;
 	case kPayloadTypeNotifyQuitApp:
 		agent->receivedPayloadTypeNotifyQuitApp(p);
+		break;
+	case kPayloadTypeChatroomEnrollmentForm:
+		agent->receivedPayloadTypeChatroomEnrollmentForm(p);
 		break;
 	default:
 		break;

@@ -18,7 +18,8 @@ log user inputbuffer office \
 chatroom message chatroomserver packet \
 agent agentclient agentserver sealedpacket \
 chatroomclient interfaceserver interfaceclient command \
-permissions chat
+permissions exception \
+chat 
 
 ### Release settings
 R_CPPFLAGS += $(CPPFLAGS) -Isrc/ \
@@ -46,6 +47,7 @@ T_CPPFLAGS = $(D_CPPFLAGS) -DTESTING
 T_BIN_NAME = $(R_BIN_NAME)-test
 T_BUILD_PATH = $(BUILD_PATH)/test
 T_MAIN_FILE = testbench/tests.cpp
+T_MAIN_OBJECT = $(T_BUILD_PATH)/tests.o
 T_LIBRARIES = $(D_LIBRARIES)
 T_OBJECTS = $(patsubst %, $(T_BUILD_PATH)/%.o, $(FILES))
 
@@ -94,8 +96,11 @@ test-setup:
 	@mkdir -p $(T_BUILD_PATH)
 	@mkdir -p bin
 
-bin/$(T_BIN_NAME): $(T_MAIN_FILE) $(T_OBJECTS) $(T_LIBRARIES)
+bin/$(T_BIN_NAME): $(T_MAIN_OBJECT) $(T_OBJECTS) $(T_LIBRARIES)
 	g++ -o $@ $^ $(T_CPPFLAGS) $(CPPLINKS) 
+
+$(T_MAIN_OBJECT): $(T_MAIN_FILE) testbench/*.hpp
+	g++ -c $< -o $@ $(T_CPPFLAGS)
 
 $(T_BUILD_PATH)/%.o: src/%.cpp src/%.hpp src/*.h
 	g++ -c $< -o $@ $(T_CPPFLAGS)

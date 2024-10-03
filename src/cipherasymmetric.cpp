@@ -60,7 +60,11 @@ static EVP_PKEY * generate_rsa_key_short(OSSL_LIB_CTX * libctx, unsigned int bit
 
 int CipherAsymmetric::genkey() {
 	this->_keys = generate_rsa_key_short(this->_libctx, 4096);
-	return 0;
+	return this->_keys != NULL ? 0 : 1;
+}
+
+bool CipherAsymmetric::isReady() const {
+	return (this->_keys != NULL);
 }
 
 /*
@@ -174,7 +178,7 @@ cleanup:
     return ret;
 }
 
-int CipherAsymmetric::encrypt(Data & in, Data & out) {
+int CipherAsymmetric::encrypt(Data & in, Data & out) const {
     size_t encrypted_len = 0;
     unsigned char * encrypted = NULL;
 	int result = do_encrypt(
@@ -191,7 +195,7 @@ int CipherAsymmetric::encrypt(Data & in, Data & out) {
 	return result;
 }
 
-int CipherAsymmetric::decrypt(Data & in, Data & out) {
+int CipherAsymmetric::decrypt(Data & in, Data & out) const {
     size_t decrypted_len = 0;
     unsigned char * decrypted = NULL;
 	int result = do_decrypt(
@@ -254,7 +258,7 @@ int _EVPKeyGetData(EVP_PKEY * pkey, const char * pass, Data & data) {
 	return 0;
 }
 
-int CipherAsymmetric::getPublicKey(Data & key) {
+int CipherAsymmetric::getPublicKey(Data & key) const {
 	return _EVPKeyGetData(this->_keys, NULL, key);
 }
 
@@ -284,7 +288,7 @@ int CipherAsymmetric::setPublicKey(Data & key) {
 	return 0;
 }
 
-int CipherAsymmetric::getPrivateKey(Data & key) {
+int CipherAsymmetric::getPrivateKey(Data & key) const {
 	return _EVPKeyGetData(this->_keys, "", key);
 }
 

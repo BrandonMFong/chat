@@ -9,6 +9,8 @@
 #include <bflibcpp/object.hpp>
 #include "typepacket.h"
 
+class Cipher;
+
 class Message : public BF::Object {
 public:
 	/**
@@ -22,6 +24,21 @@ public:
 	void getuuidchatroom(uuid_t uuid) const;
 	void getuuiduser(uuid_t uuid) const;
 	PayloadMessageType type() const;
+	const Packet * packet() const;
+
+	/**
+	 * Note about decryptData and encryptData:
+	 *
+	 * Message does not keep track if data is 
+	 * encrypted or not. It is up the the caller
+	 * to determine the state of the data
+	 *
+	 * Each function checks Cipher::isReady()
+	 */
+
+	int decryptData(const Cipher * cipher);
+	int encryptData(const Cipher * cipher);
+
 private:
 	
 	/**

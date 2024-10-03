@@ -11,25 +11,27 @@
 #include "packet.hpp"
 #include "interface.hpp"
 #include <bflibcpp/bflibcpp.hpp>
-#include "cipher.hpp"
+#include "ciphersymmetric.hpp"
 
 using namespace BF;
 
 ChatroomServer::ChatroomServer() : Chatroom() {
-	this->_cipher = NULL;
+	//this->_cipher = NULL;
 }
 
 ChatroomServer::~ChatroomServer() {
-	BFDelete(this->_cipher);
+	//BFRelease(this->_cipher);
 }
 
 ChatroomServer * ChatroomServer::create(const char * name) {
 	ChatroomServer * cr = new ChatroomServer;
 	strncpy(cr->_name, name, sizeof(cr->_name));
 
+	/*
 	if (cr->initCipher()) {
 		LOG_WRITE("could not establish encrypted chatroom");
 	}
+	*/
 
 #ifdef DEBUG
 	char uuidstr[UUID_STR_LEN];
@@ -52,7 +54,7 @@ ChatroomServer * ChatroomServer::create(const char * name) {
 
 	return cr;
 }
-
+/*
 int ChatroomServer::initCipher() {
 	this->_cipher = Cipher::create(kCipherTypeSymmetric);
 	if (!this->_cipher)
@@ -65,7 +67,7 @@ int ChatroomServer::initCipher() {
 
 	return 0;
 }
-
+*/
 int ChatroomServer::sendPacket(const Packet * pkt) {
 	this->_agents.lock();
 	List<Agent *>::Node * n = this->_agents.unsafeget().first();
@@ -98,5 +100,20 @@ int ChatroomServer::receiveMessagePacket(const Packet * pkt) {
 	this->_agents.unlock();
 
 	return 0;
+}
+
+int ChatroomServer::requestEnrollment(User * user) {
+	Packet p;
+	int error = this->fillOutEnrollmentFormRequest(user, &p);
+	if (error) return error;
+
+	LOG_DEBUG("manually filling out form");
+	if (this->fillOutEnrollmentFormResponse(&p.payload.enrollform)) {
+		LOG_DEBUG("for some reason couldn't approve form");
+		return 1;
+	}
+
+	LOG_DEBUG("finalizing enrollment");
+	return this->finalizeEnrollment(&p.payload.enrollform);
 }
 

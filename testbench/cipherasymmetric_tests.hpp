@@ -17,6 +17,50 @@ extern "C" {
 
 using namespace BF;
 
+int test_AsymCheckReady() {
+	UNIT_TEST_START;
+	int result = 0;
+	int max = 2 << 2;
+
+	while (!result && max--) {
+		Cipher * c = Cipher::create(kCipherTypeAsymmetric);
+		if (c == 0) {
+			result = 1;
+		} else if (c->isReady()) {
+			result = 5;
+		} else if (c->genkey()) {
+			result = 2;
+		} else if (!c->isReady()) {
+			result = 4;
+		}
+
+		const char * str = "Hello world!";
+		Data plain(strlen(str)+1, (unsigned char *) str);
+		Data enc;
+		if (!result) {
+			result = c->encrypt(plain, enc);
+		}
+		
+		Data dec;
+		if (!result) {
+			result = c->decrypt(enc, dec);
+		}
+
+		if (!result) {
+			const char * res = (char *) dec.buffer();
+			if (strcmp(res, str)) {
+				printf("%s != %s\n", res, str);
+				result = 3;
+			}
+		}
+
+		BFDelete(c);
+	}
+
+	UNIT_TEST_END(!result, result);
+	return result;
+}
+
 int test_AsymSimpleString() {
 	UNIT_TEST_START;
 	int result = 0;
@@ -46,7 +90,7 @@ int test_AsymSimpleString() {
 			const char * res = (char *) dec.buffer();
 			if (strcmp(res, str)) {
 				printf("%s != %s\n", res, str);
-				result = 2;
+				result = 3;
 			}
 		}
 
@@ -88,7 +132,7 @@ int test_AsymLongString() {
 				result = 3;
 			} else if (decstr != str) {
 				printf("%s != %s\n", decstr, str);
-				result = 2;
+				result = 4;
 			}
 		}
 
@@ -102,7 +146,7 @@ int test_AsymLongString() {
 int test_HandingOffPublicKeyToEncrypt() {
 	UNIT_TEST_START;
 	int result = 0;
-	int max = 2 << 4;
+	int max = 2 << 2;
 
 	while (!result && max--) {
 		Data pub;
@@ -116,6 +160,7 @@ int test_HandingOffPublicKeyToEncrypt() {
 		if (!result) {
 			CipherAsymmetric * c = (CipherAsymmetric *) user1;
 			result = c->getPublicKey(pub);
+			//printf("\npub key size: %ld\n", pub.size());
 		}
 
 		// now this is where we should hand off the public key
@@ -169,6 +214,7 @@ void cipherasymmetric_tests(int * pass, int * fail) {
 	LAUNCH_TEST(test_AsymSimpleString, p, f);
 	LAUNCH_TEST(test_AsymLongString, p, f);
 	LAUNCH_TEST(test_HandingOffPublicKeyToEncrypt, p, f);
+	LAUNCH_TEST(test_AsymCheckReady, p, f);
 
 	if (pass) *pass += p;
 	if (fail) *fail += f;

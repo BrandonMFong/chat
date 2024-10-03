@@ -40,9 +40,11 @@ void _UserRelease(User * user) {
 User::User(const char * username, const uuid_t uuid) {
 	strncpy(this->_username, username, sizeof(this->_username));
 	uuid_copy(this->_uuid, uuid);
+	this->_cipher = NULL;
 }
 
 User::~User() {
+	BFDelete(this->_cipher);
 }
 
 void _UserAddUserToUsers(User * user) {
@@ -142,6 +144,10 @@ int User::destroy(User * user) {
 		return 0;
 	}
 	return 1;
+}
+
+const Cipher * User::cipher() {
+	return this->_cipher;
 }
 
 const char * User::username() const {

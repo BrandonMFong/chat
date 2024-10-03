@@ -23,8 +23,8 @@
 
 using namespace BF;
 
-const size_t kInterfaceConversationLineLength = DATA_BUFFER_SIZE + USER_NAME_SIZE + (2 << 4);
-const size_t kInterfaceMessageLengthLimit = DATA_BUFFER_SIZE;
+const size_t kInterfaceConversationLineLength = PAYLOAD_MESSAGE_LIMIT_MESSAGE + USER_NAME_SIZE + (2 << 4);
+const size_t kInterfaceMessageLengthLimit = PAYLOAD_MESSAGE_LIMIT_MESSAGE;
 Interface * interface = NULL;
 
 Interface * Interface::current() {

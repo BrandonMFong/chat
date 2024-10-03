@@ -25,7 +25,13 @@ public:
 private:
 	AgentClient * agent();
 	ChatroomClient(const uuid_t chatroomuuid, AgentClient * agent);
+
+	/**
+	 * we carry one agent that represents the server and it 
+	 * helps us send packets in this function
+	 */
 	int sendPacket(const Packet * pkt);
+	int requestEnrollment(User * user);
 };
 
 #endif // CHATROOM_CLIENT_HPP

@@ -19,13 +19,13 @@ public:
 	static Cipher * create(CipherType type);
 	~Cipher();
 
-	//virtual int init() = 0;
 	virtual int genkey() = 0;
-	//virtual int deinit() = 0;
-	virtual int encrypt(BF::Data & in, BF::Data & out) = 0;
-	virtual int decrypt(BF::Data & in, BF::Data & out) = 0;
+	virtual int encrypt(BF::Data & in, BF::Data & out) const = 0;
+	virtual int decrypt(BF::Data & in, BF::Data & out) const = 0;
 
 	virtual CipherType type() = 0;
+
+	virtual bool isReady() const = 0;
 protected:	
 	Cipher();
 };
