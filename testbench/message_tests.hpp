@@ -88,7 +88,7 @@ int test_packet2message() {
 int test_messageEncryptAndDecrypt() {
 	UNIT_TEST_START;
 	int result = 0;
-	int max = 1;
+	int max = 2 << 15;
 
 	while (!result && max--) {
 		Packet p;
