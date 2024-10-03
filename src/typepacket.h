@@ -199,7 +199,6 @@ typedef struct {
 
 	// size of data above
 	size_t datasize;
-
 } PayloadChatroomEnrollmentForm;
 
 typedef struct {

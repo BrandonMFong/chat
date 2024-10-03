@@ -79,8 +79,6 @@ int CipherSymmetric::getkey(Data & key) const {
 	unsigned char buf[s];
 	memcpy(buf, this->_key.buffer(), CIPHER_SYMMETRIC_KEY_SIZE);
 	memcpy(buf + CIPHER_SYMMETRIC_KEY_SIZE, this->_iv.buffer(), CIPHER_SYMMETRIC_IV_SIZE);
-	LOG_DEBUG("getkey key: %s", this->_key.hex().cString());
-	LOG_DEBUG("getkey iv: %s", this->_iv.hex().cString());
 	return key.alloc(s, buf); 
 }
 
@@ -98,9 +96,6 @@ int CipherSymmetric::setkey(Data & key) {
 	
 	this->_key.alloc(CIPHER_SYMMETRIC_KEY_SIZE, buf);
 	this->_iv.alloc(CIPHER_SYMMETRIC_IV_SIZE, buf + CIPHER_SYMMETRIC_KEY_SIZE);
-
-	LOG_DEBUG("setkey key: %s", this->_key.hex().cString());
-	LOG_DEBUG("setkey iv: %s", this->_iv.hex().cString());
 
 	return 0;
 }
@@ -172,6 +167,7 @@ int _encrypt(Data & in, const unsigned char *key,
 			ciphertext_len += len;
 			out.resize(ciphertext_len);
 		}
+		LOG_DEBUG("out enc size %ld", out.size());
 	}
 
     /* Clean up */
@@ -250,6 +246,7 @@ int _decrypt(Data & in, const unsigned char *key,
 			plaintext_len += len;
 			out.resize(plaintext_len);
 		}
+		LOG_DEBUG("out dec size %ld", out.size());
 	}
 
     /* Clean up */
