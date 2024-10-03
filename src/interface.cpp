@@ -219,9 +219,12 @@ int Interface::windowWriteConversation() {
 }
 
 int Interface::windowWriteContentLobby() {
+	LOG_DEBUG("> %s", __func__);
 	BFLockLock(&this->_winlock);
 	this->_updatelobby.lock();
 	if (this->_updatelobby.unsafeget()) {
+		LOG_DEBUG("update lobby");
+
 		this->drawDisplayWindowLobby();
 
 		this->windowWriteChatroomList();
@@ -229,9 +232,13 @@ int Interface::windowWriteContentLobby() {
 
 		wrefresh(this->_displayWin);
 		this->_updatelobby.unsafeset(false);
+
+		LOG_DEBUG("finished updating lobby");
 	}
 	this->_updatelobby.unlock();
 	BFLockUnlock(&this->_winlock);
+	
+	LOG_DEBUG("< %s", __func__);
 
 	return 0;
 }
