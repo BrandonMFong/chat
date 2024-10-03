@@ -1,9 +1,16 @@
 ```
-0.2
+x.x
+[] improved controls (replicate nano commands)
+[] user data window editor
+[] ability to change user name
 [] window dynamic resizing
-[] user typing
 [] list of users in lobby
 [] get list of users in chatroom
+[] user typing
+
+0.2
+[] installer script
+[] configure a local openssl usage in this repo
 [x] chatroom encryption
 	[x] make chatroom symmetric key
 	[x] make user assymetic keys
@@ -14,11 +21,6 @@
 		[x] fix issue with packet size
 		[x] there is an issue with using the chatroom key to decrypt
 			- https://github.com/openssl/openssl/discussions/24924
-[] make git submodules
-[] ability to change user name
-[] user data window editor
-[] installer script
-[] configure a local openssl usage in this repo
 [x] separate sources for libs
 
 0.1
