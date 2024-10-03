@@ -8,11 +8,11 @@
 	[x] make chatroom symmetric key
 	[x] make user assymetic keys
 	[x] symmetric key for chatroom exchange
-	[] encrypt chatroom message
+	[x] encrypt chatroom message
 		[x] create a step before joining a chatroom. Use it to ask for permission and grant chat key
 		[x] add logging to the enrollment logging
 		[x] fix issue with packet size
-		[] there is an issue with using the chatroom key to decrypt
+		[x] there is an issue with using the chatroom key to decrypt
 			- https://github.com/openssl/openssl/discussions/24924
 [] make git submodules
 [] ability to change user name
