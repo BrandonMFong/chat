@@ -10,11 +10,17 @@ extern "C" {
 #include <bflibc/filewriter.h>
 }
 
+/**
+ * will revisit this when I work on the testing framework in libs
+ *
 #ifdef TESTING
 #define CHAT_LOG_PATH "/tmp/chat-test.log"
 #else
 #define CHAT_LOG_PATH "/tmp/chat.log"
 #endif
+*/
+
+#define CHAT_LOG_PATH "/tmp/chat.log"
 
 extern BFFileWriter gFileWriter;
 

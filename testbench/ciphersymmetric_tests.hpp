@@ -284,8 +284,6 @@ void ciphersymmetric_tests(int * pass, int * fail) {
 	
 	INTRO_TEST_FUNCTION;
 	
-	LOG_OPEN;
-
 	LAUNCH_TEST(test_SimpleString, p, f);
 	LAUNCH_TEST(test_HandingOffKey, p, f);
 	LAUNCH_TEST(test_RandomBytes, p, f);
@@ -293,9 +291,6 @@ void ciphersymmetric_tests(int * pass, int * fail) {
 	LAUNCH_TEST(test_EmptyString, p, f);
 	LAUNCH_TEST(test_SymCheckReady, p, f);
 	
-	LOG_FLUSH;
-	LOG_CLOSE;
-
 	if (pass) *pass += p;
 	if (fail) *fail += f;
 }
