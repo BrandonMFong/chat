@@ -4,7 +4,7 @@
 [] user typing
 [] list of users in lobby
 [] get list of users in chatroom
-[x] encryption
+[x] chatroom encryption
 	[x] make chatroom symmetric key
 	[x] make user assymetic keys
 	[x] symmetric key for chatroom exchange
