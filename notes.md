@@ -3,4 +3,10 @@
 * Each socket connection will have their own dedicated thread that polls the `recv` call.  This allows us to concurrently handle incoming data from multiple correspondents
 * Each socket connection will have an agent representing the remote user on the other end. Having an agent seems to be the best way to id a user by the socket connection. I view an agent like a lawyer representing a client.
 * I was using while loops to poll events like ui changes, incoming packets, etc. However, I make it efficient. The loops would constantly loop without any sort of waiting on an event. This made my computer overheat put the cpu usage up to 300% percent. To overcome this, I used my BFLock objects to do a wait/release on the loops/events. This reduced the cpu usage to 5% lol
-
+* Encryption is an interesting task. After implementating encryption I think I can be proud of this project. There are different ways according to gemini: symmetric keys using secure key exchange or ratchet tree. I have never heard of ratchet tree. Sounds interesting
+* Working forward with encryption, I will be doing the hybrid encryption from this post: https://security.stackexchange.com/a/204300
+* I am looking for a way to implement asymmetric cryptography. Seeing this geeksforgeeks post: https://www.geeksforgeeks.org/rsa-algorithm-cryptography/. Could I use openssl?
+* Found demo code on the openssl source code https://github.com/openssl/openssl/blob/master/demos/encrypt/rsa_encrypt.c
+* Took me a while to get the encryption code to work. Had some simple math errors when trying to calculate the correct buffer size of cipher/plain text. Implementing the asymmetric code was straightforward. Openssl has good examples on their github.
+* I had an issue with encryption using the app. The implementation was correct, according to the unit tests. I found that my integration of the cipher classes and how the data is being held had issues. I was not retaining the cipher buffer sizes and wasn't giving enough workspace for the encrypted data. I moved a lot of logic around to make compartmentalizationa easier
+ 

@@ -8,6 +8,10 @@
 #include "log.hpp"
 #include "interface.hpp"
 #include "agentclient.hpp"
+#include "packet.hpp"
+#include "user.hpp"
+
+using namespace BF;
 
 ChatroomClient::ChatroomClient(const uuid_t chatroomuuid, AgentClient * agent) : Chatroom(chatroomuuid) {
 	this->addAgent(agent);
@@ -43,5 +47,13 @@ int ChatroomClient::recordChatroom(const PayloadChatInfo * info, Agent * agent) 
 
 int ChatroomClient::sendPacket(const Packet * pkt) {
 	return this->agent()->sendPacket(pkt);
+}
+
+int ChatroomClient::requestEnrollment(User * user) {
+	Packet p;
+	int error = this->fillOutEnrollmentFormRequest(user, &p);
+	if (error) return error;
+
+	return this->sendPacket(&p);
 }
 

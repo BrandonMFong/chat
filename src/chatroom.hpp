@@ -19,6 +19,7 @@ extern "C" {
 class Message;
 class User;
 class Agent;
+class CipherSymmetric;
 
 /**
  * In charge of creating message
@@ -99,6 +100,22 @@ public:
 	int removeUser(User * u);
 
 	/**
+	 * Notifies all users of this user's enrollment to this
+	 * chatroom. As well as  sends out a joined message
+	 */
+	int finalizeEnrollment(const PayloadChatroomEnrollmentForm * form);
+
+	/**
+	 * Upon request, we must fill out the enrollment form
+	 *
+	 * This function determines whether or not the requestee is allowed
+	 * to be in our chatroom. If allowed, we will return our private key
+	 *
+	 * form : we expect the form with the request information
+	 */
+	int fillOutEnrollmentFormResponse(PayloadChatroomEnrollmentForm * form);
+
+	/**
 	 * chat room name
 	 */
 	const char * name();
@@ -117,11 +134,16 @@ protected:
 	/**
 	 * inits chatroom with uuid
 	 * uuid : gets copied
+	 *
+	 * this should be used on the client side. A private key is
+	 * not generated
 	 */
 	Chatroom(const uuid_t uuid);
 
 	/**
 	 * creates chatroom and sets random uuid
+	 *
+	 * creates a private key on the server side
 	 */
 	Chatroom();
 
@@ -132,6 +154,15 @@ protected:
 	 * this is defined to give access to sub classes
 	 */
 	static void addRoomToChatrooms(Chatroom * cr);
+
+	/**
+	 * fills out packet for PayloadChatroomEnrollmentForm for
+	 * request type
+	 *
+	 * user will transfer their public key so that the receiver
+	 * can use it to encrypt the chatroom private key
+	 */
+	int fillOutEnrollmentFormRequest(User * user, Packet * p);
 
 	/**
 	 * the two subclasses have different amount of
@@ -150,11 +181,18 @@ protected:
 private:
 
 	/**
+	 * helps encrypting messages
+	 */
+	CipherSymmetric * _cipher;
+
+	/**
 	 * sends out a broadcast that user is in chatroom
 	 */
 	int notifyAllServerUsersOfEnrollment(User * user);
 
 	int notifyAllServerUsersOfResignation(User * user);
+
+	virtual int requestEnrollment(User * user) = 0;
 
 	/**
 	 * sends out a message to all users that this

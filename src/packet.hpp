@@ -8,6 +8,9 @@
 
 #include "typepacket.h"
 
+class User;
+class InputBuffer;
+
 /**
  * Sets some packet values like the header
  *
@@ -23,6 +26,18 @@ int PacketSetHeader(Packet * pkt, PayloadType type);
  * buf is copied
  */
 int PacketSetPayload(Packet * pkt, const void * buf);
+
+/**
+ * Loads PayloadMessage with the parameters
+ */
+int PacketPayloadSetPayloadMessage(
+	PayloadMessage * payload,
+	PayloadMessageType type,
+	uuid_t chatuuid,
+	const char * username,
+	uuid_t useruuid,
+	const InputBuffer & buf
+);
 
 #endif // PACKET_HPP
 

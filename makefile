@@ -8,16 +8,18 @@ include external/libs/bflibc/makefiles/uuid.mk
 
 ### Global
 BUILD_PATH = build
-CPPLINKS = -lpthread -lncurses $(BF_LIB_C_UUID_FLAGS)
+CPPLINKS = -lpthread -lncurses $(BF_LIB_C_UUID_FLAGS) -ldl
 CPPSTD = -std=c++20
+LIBRARIES = /usr/local/lib64/libssl.a /usr/local/lib64/libcrypto.a 
 
 FILES = \
-interface \
+interface cipher cipherasymmetric ciphersymmetric \
 log user inputbuffer office \
 chatroom message chatroomserver packet \
-agent agentclient agentserver \
+agent agentclient agentserver sealedpacket \
 chatroomclient interfaceserver interfaceclient command \
-permissions chat
+permissions exception \
+chat 
 
 ### Release settings
 R_CPPFLAGS += $(CPPFLAGS) -Isrc/ \
@@ -26,7 +28,7 @@ R_CPPFLAGS += $(CPPFLAGS) -Isrc/ \
 R_BIN_NAME = chat
 R_BUILD_PATH = $(BUILD_PATH)/release
 R_MAIN_FILE = src/main.cpp
-R_LIBRARIES = external/libs/$(BF_LIB_RPATH_RELEASE_CPP) external/libs/$(BF_LIB_RPATH_RELEASE_NET)
+R_LIBRARIES = external/libs/$(BF_LIB_RPATH_RELEASE_CPP) external/libs/$(BF_LIB_RPATH_RELEASE_NET) $(LIBRARIES)
 R_OBJECTS = $(patsubst %, $(R_BUILD_PATH)/%.o, $(FILES))
 
 ### Debug settings
@@ -37,7 +39,7 @@ D_CPPFLAGS = $(CPPFLAGS) -DDEBUG -g -Isrc/ \
 D_BIN_NAME = $(R_BIN_NAME)-debug
 D_BUILD_PATH = $(BUILD_PATH)/debug
 D_MAIN_FILE = $(R_MAIN_FILE)
-D_LIBRARIES = external/libs/$(BF_LIB_RPATH_DEBUG_CPP) external/libs/$(BF_LIB_RPATH_DEBUG_NET)
+D_LIBRARIES = external/libs/$(BF_LIB_RPATH_DEBUG_CPP) external/libs/$(BF_LIB_RPATH_DEBUG_NET) $(LIBRARIES)
 D_OBJECTS = $(patsubst %, $(D_BUILD_PATH)/%.o, $(FILES))
 
 ### Test settings
@@ -45,6 +47,7 @@ T_CPPFLAGS = $(D_CPPFLAGS) -DTESTING
 T_BIN_NAME = $(R_BIN_NAME)-test
 T_BUILD_PATH = $(BUILD_PATH)/test
 T_MAIN_FILE = testbench/tests.cpp
+T_MAIN_OBJECT = $(T_BUILD_PATH)/tests.o
 T_LIBRARIES = $(D_LIBRARIES)
 T_OBJECTS = $(patsubst %, $(T_BUILD_PATH)/%.o, $(FILES))
 
@@ -93,8 +96,11 @@ test-setup:
 	@mkdir -p $(T_BUILD_PATH)
 	@mkdir -p bin
 
-bin/$(T_BIN_NAME): $(T_MAIN_FILE) $(T_OBJECTS) $(T_LIBRARIES)
+bin/$(T_BIN_NAME): $(T_MAIN_OBJECT) $(T_OBJECTS) $(T_LIBRARIES)
 	g++ -o $@ $^ $(T_CPPFLAGS) $(CPPLINKS) 
+
+$(T_MAIN_OBJECT): $(T_MAIN_FILE) testbench/*.hpp
+	g++ -c $< -o $@ $(T_CPPFLAGS)
 
 $(T_BUILD_PATH)/%.o: src/%.cpp src/%.hpp src/*.h
 	g++ -c $< -o $@ $(T_CPPFLAGS)

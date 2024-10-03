@@ -1,12 +1,26 @@
-0.2
+```
+x.x
+[] improved controls (replicate nano commands)
+[] user data window editor
+[] ability to change user name
 [] window dynamic resizing
-[] user typing
 [] list of users in lobby
 [] get list of users in chatroom
-[] encryption
-[] ability to change user name
-[] user data window editor
+[] user typing
+
+0.2
 [] installer script
+[] configure a local openssl usage in this repo
+[x] chatroom encryption
+	[x] make chatroom symmetric key
+	[x] make user assymetic keys
+	[x] symmetric key for chatroom exchange
+	[x] encrypt chatroom message
+		[x] create a step before joining a chatroom. Use it to ask for permission and grant chat key
+		[x] add logging to the enrollment logging
+		[x] fix issue with packet size
+		[x] there is an issue with using the chatroom key to decrypt
+			- https://github.com/openssl/openssl/discussions/24924
 [x] separate sources for libs
 
 0.1
@@ -38,4 +52,5 @@
 [x] review for any leaks
 [x] make instream packet queue be application specific
 [x] backspace does not work on macos machines
+```
 
