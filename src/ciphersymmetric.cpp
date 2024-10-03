@@ -117,18 +117,10 @@ int _encrypt(Data & in, const unsigned char *key,
     int ciphertext_len;
 	const size_t blocksize = kCipherBlocksize;
 
-	// keeping a copy
-	//Data in = _in;
 
-	// make sure the input buffer length is a multiple of the blocksize
-	// 
-	// we need this since we are turning off padding	
-	//in.alloc(newsize);
-	
 	// figure out cipher buffer length
 	//
-	// size should be at least 1024 bytes or twice the size of 
-	// the input
+	// we need to be at least blocksize
 	size_t newsize = ((in.size() / blocksize) + 1) * blocksize;
 	out.alloc(newsize);
 	out.clear();
@@ -149,7 +141,6 @@ int _encrypt(Data & in, const unsigned char *key,
      * is 128 bits
      */
 	if (!result) {
-		//EVP_CIPHER_CTX_set_padding(ctx, 0);
 		if(1 != EVP_EncryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, key, iv)) {
 			LOG_DEBUG("%s:%d", __FILE__, __LINE__);
 			result = 11;
@@ -179,13 +170,7 @@ int _encrypt(Data & in, const unsigned char *key,
 			result = 13;
 		} else {
 			ciphertext_len += len;
-			//ciphertext_len = ((ciphertext_len / blocksize) + 1) * blocksize;
 			out.resize(ciphertext_len);
-			/*
-			if (out.size() % blocksize) {
-				result = 14;
-			}
-			*/
 		}
 	}
 
@@ -231,7 +216,6 @@ int _decrypt(Data & in, const unsigned char *key,
      * is 128 bits
      */
 	if (!result) {
-		//EVP_CIPHER_CTX_set_padding(ctx, 0);
 		if(1 != EVP_DecryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, key, iv)) {
 			LOG_DEBUG("%s:%d", __FILE__, __LINE__);
 			result = 21;

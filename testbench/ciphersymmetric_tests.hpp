@@ -201,6 +201,10 @@ int test_RandomBytes() {
 
 		size_t size = DATA_BUFFER_SIZE;
 		unsigned char * buf = (unsigned char *) malloc(size);
+		srand(time(0));
+		for (int i = 0; i < size; i++) {
+			buf[i] = rand() % (2 << 7);
+		}
 		Data plain(size, buf);
 		Data enc;
 		if (!result) {
