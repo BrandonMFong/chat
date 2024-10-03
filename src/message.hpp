@@ -32,6 +32,8 @@ public:
 	 * Message does not keep track if data is 
 	 * encrypted or not. It is up the the caller
 	 * to determine the state of the data
+	 *
+	 * Each function checks Cipher::isReady()
 	 */
 
 	int decryptData(const Cipher * cipher);

@@ -114,6 +114,8 @@ typedef struct {
 	 */
 	char data[DATA_BUFFER_SIZE];
 
+	size_t datasize;
+
 	PayloadMessageType type;
 } PayloadMessage;
 

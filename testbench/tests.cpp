@@ -6,6 +6,7 @@
 #include "inputbuffer_tests.hpp"
 #include "chatroom_tests.hpp"
 #include "message_tests.hpp"
+#include "packet_tests.hpp"
 #include "command_tests.hpp"
 #include "agent_tests.hpp"
 #include "ciphersymmetric_tests.hpp"
@@ -20,7 +21,9 @@ int main() {
 	LAUNCH_TEST_SET(inputbuffer_tests);
 	LAUNCH_TEST_SET(chatroom_tests);
 	*/
-	LAUNCH_TEST_SET(message_tests);
+	//LAUNCH_TEST_SET(message_tests);
+	LAUNCH_TEST_SET(packet_tests);
+
 	/*
 	LAUNCH_TEST_SET(command_tests);
 	LAUNCH_TEST_SET(agent_tests);

@@ -180,14 +180,30 @@ int Chatroom::receiveMessagePacket(const Packet * pkt) {
 	return 0;
 }
 
-int _LoadPayloadTypeMessage(Packet * p, PayloadMessageType type, uuid_t uuid, User * user, const InputBuffer & buf) {
+int _LoadPayloadTypeMessage(
+	Packet * p, PayloadMessageType type, uuid_t chatuuid, 
+	User * user, const InputBuffer & buf
+) {
 	if (!p || !user) {
 		return 1;
 	}
 
 	memset(p, 0, sizeof(Packet));
-	PacketSetHeader(p, kPayloadTypeMessage);
+	if (PacketSetHeader(p, kPayloadTypeMessage)) {
+		return 1;
+	}
 
+	uuid_t useruuid;
+	user->getuuid(useruuid);	
+	if (PacketPayloadSetPayloadMessage(
+			&p->payload.message,
+			type, chatuuid, 
+			user->username(), useruuid, buf)) {
+		return 1;
+	}
+
+	
+	/*
 	// load encrypted message data
 	memcpy(p->payload.message.data, (unsigned char *) buf.cString(), sizeof(p->payload.message.data));
 
@@ -206,6 +222,7 @@ int _LoadPayloadTypeMessage(Packet * p, PayloadMessageType type, uuid_t uuid, Us
 
 	// message type
 	p->payload.message.type = type;
+	*/
 
 	return 0;
 }

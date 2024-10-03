@@ -29,7 +29,7 @@ int Message::decryptData(const Cipher * cipher) {
 	}
 	
 	// decrypt the message
-	Data enc(sizeof(this->_packet.payload.message.data),
+	Data enc(this->_packet.payload.message.datasize,
 			(unsigned char *) this->_packet.payload.message.data);
 	Data dec;
 	int err = cipher->decrypt(enc, dec);
@@ -67,6 +67,7 @@ int Message::encryptData(const Cipher * cipher) {
 			(char *) enc.buffer(),
 			sizeof(this->_packet.payload.message.data));
 
+	this->_packet.payload.message.datasize = enc.size();
 
 	return 0;
 }

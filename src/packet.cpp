@@ -4,12 +4,17 @@
  */
 
 #include "packet.hpp"
+#include "inputbuffer.hpp"
+#include "user.hpp"
 #include "typepacket.h"
 #include <string.h>
+#include <bflibcpp/bflibcpp.hpp>
 
 extern "C" {
 #include <bflibc/bflibc.h>
 }
+
+using namespace BF;
 
 int PacketSetHeader(Packet * pkt, PayloadType type) {
 	if (!pkt)
@@ -62,5 +67,38 @@ int PacketSetPayload(Packet * pkt, const void * buf) {
 	default:
 		return 3;
 	}
+}
+
+int PacketPayloadSetPayloadMessage(
+	PayloadMessage * payload,
+	PayloadMessageType type,
+	uuid_t chatuuid,
+	const char * username,
+	uuid_t useruuid,
+	const InputBuffer & buf
+) {
+	// load encrypted message data
+	Data data = buf;
+	memcpy(payload->data, data.buffer(), data.size());
+
+	// username
+	strncpy(
+		payload->username,
+		username,
+		sizeof(payload->username)
+	);
+
+	// user uuid
+	//user->getuuid(payload->useruuid);	
+	uuid_copy(payload->useruuid, useruuid);
+
+	// chatroom uuid
+	uuid_copy(payload->chatuuid, chatuuid);
+
+	// message type
+	payload->type = type;
+
+
+	return 0;
 }
 
