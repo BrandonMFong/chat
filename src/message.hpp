@@ -26,6 +26,9 @@ public:
 	PayloadMessageType type() const;
 
 	int decryptData(const Cipher * cipher);
+	int encryptData(const Cipher * cipher);
+
+	const Packet * packet() const;
 private:
 	
 	/**

@@ -180,6 +180,38 @@ int Chatroom::receiveMessagePacket(const Packet * pkt) {
 	return 0;
 }
 
+int _LoadPayloadTypeMessage(Packet * p, PayloadMessageType type, uuid_t uuid, User * user, const InputBuffer & buf) {
+	if (!p || !user) {
+		return 1;
+	}
+
+	memset(p, 0, sizeof(Packet));
+	PacketSetHeader(p, kPayloadTypeMessage);
+
+	// load encrypted message data
+	memcpy(p->payload.message.data, (unsigned char *) buf.cString(), sizeof(p->payload.message.data));
+
+	// username
+	strncpy(
+		p->payload.message.username,
+		user->username(),
+		sizeof(p->payload.message.username)
+	);
+
+	// user uuid
+	user->getuuid(p->payload.message.useruuid);	
+
+	// chatroom uuid
+	uuid_copy(p->payload.message.chatuuid, uuid);
+
+	// message type
+	p->payload.message.type = type;
+
+	return 0;
+}
+
+// i believe the messages aren't being encrypted correctly because I am not accounting for
+// the size of the encrypted data.
 int Chatroom::sendBuffer(PayloadMessageType type, User * user, const InputBuffer & buf) {
 	if (!user) {
 		return 1;
@@ -189,6 +221,12 @@ int Chatroom::sendBuffer(PayloadMessageType type, User * user, const InputBuffer
 	}
 
 	Packet p;
+	if (_LoadPayloadTypeMessage(&p, type, this->_uuid, user, buf)) {
+		LOG_DEBUG("could not load the message payload");
+		return 1;
+	}
+
+	/*
 	memset(&p, 0, sizeof(p));
 	PacketSetHeader(&p, kPayloadTypeMessage);
 
@@ -217,14 +255,23 @@ int Chatroom::sendBuffer(PayloadMessageType type, User * user, const InputBuffer
 
 	// message type
 	p.payload.message.type = type;
+	*/
 
-	if (this->sendPacket(&p)) {
+	Message outbound(&p);
+	if (outbound.encryptData(this->_cipher)) {
+		LOG_DEBUG("could not encrypt data");
+		return 1;
+	}
+
+	if (this->sendPacket(outbound.packet())) {
 		LOG_DEBUG("couldn't send packet");
 		return 3;
 	}
 
+	/*
 	// reset the payload to plain text for us to use
 	strncpy(p.payload.message.data, buf.cString(), sizeof(p.payload.message.data));
+	*/
 
 	// give chatroom this message to add to 
 	// its list

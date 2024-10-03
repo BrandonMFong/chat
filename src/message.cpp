@@ -42,6 +42,33 @@ int Message::decryptData(const Cipher * cipher) {
 	return 0;
 }
 
+int Message::encryptData(const Cipher * cipher) {
+	if (!cipher) {
+		return 1;
+	}
+	
+	// encrypt the message
+	Data plain(sizeof(this->_packet.payload.message.data),
+			(unsigned char *) this->_packet.payload.message.data);
+	Data enc;
+	int err = cipher->encrypt(plain, enc);
+	if (err) {
+		LOG_DEBUG("couldn't encrypt message: %d", err);
+		return err;
+	}
+
+	strncpy(this->_packet.payload.message.data,
+			(char *) enc.buffer(),
+			sizeof(this->_packet.payload.message.data));
+
+
+	return 0;
+}
+
+const Packet * Message::packet() const {
+	return &this->_packet;
+}
+
 const char * Message::username() const {
 	return this->_packet.payload.message.username;
 }
