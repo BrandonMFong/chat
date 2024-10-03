@@ -13,6 +13,7 @@
 #include "user.hpp"
 #include "office.hpp"
 #include "agent.hpp"
+#include "exception.hpp"
 #include "version.hpp"
 #include <bflibcpp/bflibcpp.hpp>
 #include <bfnet/bfnet.hpp>
@@ -120,7 +121,7 @@ int _ChatRun(char mode, const char * ipaddr) {
 		if (skt) {
 			skt->setInStreamCallback(Office::packetReceive);
 			skt->setNewConnectionCallback(Agent::newConnection);
-			skt->setBufferSize(sizeof(Packet));
+			skt->setBufferSize(CHAT_SOCKET_BUFFER_SIZE);
 		}
 	}
 
@@ -128,6 +129,7 @@ int _ChatRun(char mode, const char * ipaddr) {
 		result = skt->start();
 	}
 
+	// this will start user interaction
 	if (!result) {
 		result = interface->run();
 	}
@@ -152,37 +154,41 @@ void _ChatShowVersion(const char * toolname) {
 
 int Chat::Main(int argc, char * argv[]) {
 	int result = 0;
-	char mode = SOCKET_MODE_CLIENT;
-	bool showversion = false;
-	bool showhelp = false;
-	Interface * interface = NULL;
-	char ipaddr[SOCKET_IP4_ADDR_STRLEN];
+	try {
+		char mode = SOCKET_MODE_CLIENT;
+		bool showversion = false;
+		bool showhelp = false;
+		Interface * interface = NULL;
+		char ipaddr[SOCKET_IP4_ADDR_STRLEN];
 
-	// default ip addr is localhost
-	strncpy(ipaddr, "0.0.0.0", SOCKET_IP4_ADDR_STRLEN);
+		// default ip addr is localhost
+		strncpy(ipaddr, "0.0.0.0", SOCKET_IP4_ADDR_STRLEN);
 
-	result = ArgumentsRead(argc, argv, &mode, ipaddr, &showversion, &showhelp);
+		result = ArgumentsRead(argc, argv, &mode, ipaddr, &showversion, &showhelp);
 
-	LOG_OPEN;
+		LOG_OPEN;
 
-	LOG_DEBUG("============ App started ============");
+		LOG_DEBUG("============ App started ============");
 
-	if (showversion) {
-		_ChatShowVersion(argv[0]);
-	} else if (showhelp) {
-		Help(argv[0]);
-	} else {
-		if (!result) {
-			result = _ChatRun(mode, ipaddr);
-		}
-
-		if (result) {
+		if (showversion) {
+			_ChatShowVersion(argv[0]);
+		} else if (showhelp) {
 			Help(argv[0]);
-		}
-	}
+		} else {
+			if (!result) {
+				result = _ChatRun(mode, ipaddr);
+			}
 
-	LOG_DEBUG("============ App ended ============");
-	LOG_CLOSE;
+			if (result) {
+				Help(argv[0]);
+			}
+		}
+
+		LOG_DEBUG("============ App ended ============");
+		LOG_CLOSE;
+	} catch (Exception & e) {
+		std::cout << e.msg().cString() << '\n';
+	}
 
 	return result;
 }

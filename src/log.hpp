@@ -10,6 +10,16 @@ extern "C" {
 #include <bflibc/filewriter.h>
 }
 
+/**
+ * will revisit this when I work on the testing framework in libs
+ *
+#ifdef TESTING
+#define CHAT_LOG_PATH "/tmp/chat-test.log"
+#else
+#define CHAT_LOG_PATH "/tmp/chat.log"
+#endif
+*/
+
 #define CHAT_LOG_PATH "/tmp/chat.log"
 
 extern BFFileWriter gFileWriter;
@@ -28,6 +38,13 @@ extern BFFileWriter gFileWriter;
  * `mode`: 'd' for debug, 'e' for error, or 0 for normal
  */
 void _LogWriteEntry(BFFileWriter * filewriter, int mode, ...);
+
+/**
+ * LOG_WRITE vs LOG_DEBUG vs LOG_ERROR
+ *
+ * - each writes a line into the same log file
+ * - each log entry will explicitly tell you what type of log entry it is
+ */
 
 /**
  * writes ent (line) to log file

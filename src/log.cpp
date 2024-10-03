@@ -61,6 +61,6 @@ void _LogWriteEntry(BFFileWriter * filewriter, int mode, ...) {
 	va_end(arg1);
 
 	BFFree(logstr);
-#endif 
+#endif
 }
 

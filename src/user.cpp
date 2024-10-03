@@ -1,11 +1,14 @@
 /**
  * author: brando
  * date: 2/13/24
+ *
+ * https://medium.com/@amit.kulkarni/encrypting-decrypting-a-file-using-openssl-evp-b26e0e4d28d4
  */
 
 #include "user.hpp"
 #include "log.hpp"
 #include "interface.hpp"
+#include "cipher.hpp"
 #include <string.h>
 #include <unistd.h>
 #include <bflibcpp/bflibcpp.hpp>
@@ -37,9 +40,11 @@ void _UserRelease(User * user) {
 User::User(const char * username, const uuid_t uuid) {
 	strncpy(this->_username, username, sizeof(this->_username));
 	uuid_copy(this->_uuid, uuid);
+	this->_cipher = NULL;
 }
 
 User::~User() {
+	BFDelete(this->_cipher);
 }
 
 void _UserAddUserToUsers(User * user) {
@@ -91,9 +96,29 @@ User * User::create(const char * username) {
 		uuid
 	);
 	_UserAddUserToUsers(user);
+
+	if (user->initCipher()) {
+		LOG_DEBUG("couldn't init cipher");
+	}
+
 	Interface::current()->userListHasChanged();
 
 	return user;
+}
+
+int User::initCipher() {
+	this->_cipher = Cipher::create(kCipherTypeAsymmetric);
+	if (!this->_cipher) {
+		LOG_DEBUG("cipher is null");
+		return 1;
+	}
+
+	if (this->_cipher->genkey()) {
+		LOG_DEBUG("couldn't initiate cipher");
+		return 1;
+	}
+
+	return 0;
 }
 
 User * User::create(const PayloadUserInfo * ui) {
@@ -105,6 +130,7 @@ User * User::create(const PayloadUserInfo * ui) {
 		ui->useruuid
 	);
 	_UserAddUserToUsers(user);
+
 	Interface::current()->userListHasChanged();
 
 	return user;
@@ -118,6 +144,10 @@ int User::destroy(User * user) {
 		return 0;
 	}
 	return 1;
+}
+
+const Cipher * User::cipher() {
+	return this->_cipher;
 }
 
 const char * User::username() const {

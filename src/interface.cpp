@@ -23,8 +23,8 @@
 
 using namespace BF;
 
-const size_t kInterfaceConversationLineLength = DATA_BUFFER_SIZE + USER_NAME_SIZE + (2 << 4);
-const size_t kInterfaceMessageLengthLimit = DATA_BUFFER_SIZE;
+const size_t kInterfaceConversationLineLength = PAYLOAD_MESSAGE_LIMIT_MESSAGE + USER_NAME_SIZE + (2 << 4);
+const size_t kInterfaceMessageLengthLimit = PAYLOAD_MESSAGE_LIMIT_MESSAGE;
 Interface * interface = NULL;
 
 Interface * Interface::current() {
@@ -182,7 +182,6 @@ void _InterfaceDrawMessage(
 
 // this will write conversation from the bottom to the top
 int Interface::windowWriteConversation() {
-	LOG_DEBUG("%s", __func__);
 	BFLockLock(&this->_winlock);
 	this->_updateconversation.lock();
 	if (this->_updateconversation.unsafeget() && this->_chatroom.get()) {
@@ -220,9 +219,12 @@ int Interface::windowWriteConversation() {
 }
 
 int Interface::windowWriteContentLobby() {
+	LOG_DEBUG("> %s", __func__);
 	BFLockLock(&this->_winlock);
 	this->_updatelobby.lock();
 	if (this->_updatelobby.unsafeget()) {
+		LOG_DEBUG("update lobby");
+
 		this->drawDisplayWindowLobby();
 
 		this->windowWriteChatroomList();
@@ -230,9 +232,13 @@ int Interface::windowWriteContentLobby() {
 
 		wrefresh(this->_displayWin);
 		this->_updatelobby.unsafeset(false);
+
+		LOG_DEBUG("finished updating lobby");
 	}
 	this->_updatelobby.unlock();
 	BFLockUnlock(&this->_winlock);
+	
+	LOG_DEBUG("< %s", __func__);
 
 	return 0;
 }
@@ -399,7 +405,6 @@ int Interface::windowCreateModeLobby() {
 }
 
 int Interface::windowCreateStateChatroom() {
-	LOG_DEBUG("%s", __func__);
 	// change to normal mode
 	BFLockLock(&this->_winlock);
 

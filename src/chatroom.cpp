@@ -13,34 +13,39 @@
 #include "packet.hpp"
 #include <string.h>
 #include <bflibcpp/bflibcpp.hpp>
+#include "ciphersymmetric.hpp"
+#include "cipherasymmetric.hpp"
+#include "chat.hpp"
+#include "exception.hpp"
 
 using namespace BF;
 
 Atomic<List<Chatroom *>> chatrooms;
 
-void _ChatroomMessageFree(Message * m) {
-	BFRelease(m);
-}
-
-void _ChatroomRelease(Chatroom * cr) {
-	BFRelease(cr);
-}
-
-void _ChatroomReleaseUser(User * u) {
-	BFRelease(u);
-}
-
-void _ChatroomReleaseAgent(Agent * a) {
-	BFRelease(a);
-}
+void _ChatroomMessageFree(Message * m) { BFRelease(m); }
+void _ChatroomRelease(Chatroom * cr) { BFRelease(cr); }
+void _ChatroomReleaseUser(User * u) { BFRelease(u); }
+void _ChatroomReleaseAgent(Agent * a) { BFRelease(a); }
 
 Chatroom::Chatroom() : Object() {
+#ifndef TESTING
+	if (Chat::SocketGetMode() != SOCKET_MODE_SERVER) {
+		String msg("Can only create a raw chatroom from server mode (current mode '%c')", Chat::SocketGetMode());
+		throw Exception(msg);
+	}
+#endif
+
 	uuid_generate_random(this->_uuid);
 	memset(this->_name, 0, sizeof(this->_name));
 
 	this->conversation.get().setReleaseCallback(_ChatroomMessageFree);
 	this->_users.get().setReleaseCallback(_ChatroomReleaseUser);
 	this->_agents.get().setReleaseCallback(_ChatroomReleaseAgent);
+
+	// create our private key for encrypting
+	// messages
+	this->_cipher = (CipherSymmetric *) Cipher::create(kCipherTypeSymmetric);
+	this->_cipher->genkey();
 }
 
 Chatroom::Chatroom(const uuid_t uuid) : Object() {
@@ -49,10 +54,12 @@ Chatroom::Chatroom(const uuid_t uuid) : Object() {
 
 	// setup conversation thread
 	this->conversation.get().setReleaseCallback(_ChatroomMessageFree);
+	
+	this->_cipher = (CipherSymmetric *) Cipher::create(kCipherTypeSymmetric);
 }
 
-Chatroom::~Chatroom() {
-
+Chatroom::~Chatroom() { 
+	BFRelease(this->_cipher);
 }
 
 int Chatroom::getChatroomsCount() {
@@ -128,7 +135,6 @@ void Chatroom::addRoomToChatrooms(Chatroom * cr) {
 int Chatroom::addMessage(Message * msg) {
 	if (!msg) return 2;
 
-	LOG_DEBUG("adding message: %s", msg->data());
 	// msg count should have a retain count of 1 
 	// so we don't need to retain	
 	this->conversation.get().add(msg);
@@ -141,47 +147,110 @@ void Chatroom::getuuid(uuid_t uuid) {
 	uuid_copy(uuid, this->_uuid);
 }
 
+int Chatroom::receiveMessagePacket(const Packet * pkt) {
+	// chatroom will own this memory
+	Message * m = new Message(pkt);
+	if (!m) {
+		LOG_DEBUG("couldn't create message object");
+		return 1;
+	}
+
+	int err = 0;
+	if (!this->_cipher->isReady()) {
+		LOG_DEBUG("the chatroom cipher is not ready");
+		err = 1;
+	}
+
+	if (!err) {
+		if ((m->type() == kPayloadMessageTypeData) && m->decryptData(this->_cipher)) {
+			LOG_DEBUG("couldn't decrypt message");
+			err = 1;
+		}
+	}
+
+	if (err) {
+		BFRelease(m);
+	} else {
+		err = this->addMessage(m);
+		if (err) {
+			LOG_DEBUG("error adding message to chatroom: %d", err);
+			return 1;
+		}
+	}
+
+	return 0;
+}
+
+int _LoadPayloadTypeMessage(
+	Packet * p, PayloadMessageType type, uuid_t chatuuid, 
+	User * user, const InputBuffer & buf
+) {
+	if (!p || !user) {
+		return 1;
+	}
+
+	memset(p, 0, sizeof(Packet));
+	if (PacketSetHeader(p, kPayloadTypeMessage)) {
+		return 1;
+	}
+
+	uuid_t useruuid;
+	user->getuuid(useruuid);	
+	if (PacketPayloadSetPayloadMessage(
+			&p->payload.message,
+			type, chatuuid, 
+			user->username(), useruuid, buf)) {
+		return 1;
+	}
+
+	return 0;
+}
+
+// i believe the messages aren't being encrypted correctly because I am not accounting for
+// the size of the encrypted data.
 int Chatroom::sendBuffer(PayloadMessageType type, User * user, const InputBuffer & buf) {
+	if (!user) {
+		return 1;
+	} else if (!this->_cipher->isReady()) {
+		LOG_DEBUG("the chatroom cipher is not ready");
+		return 1;
+	}
+
+	// Load packet
 	Packet p;
-	memset(&p, 0, sizeof(p));
+	if (_LoadPayloadTypeMessage(&p, type, this->_uuid, user, buf)) {
+		LOG_DEBUG("could not load the message payload");
+		return 1;
+	}
 
-	p.payload.message.type = type;
+	// encrypt data
+	Message outbound(&p);
+	if ((type == kPayloadMessageTypeData) && outbound.encryptData(this->_cipher)) {
+		LOG_DEBUG("could not encrypt data");
+		return 1;
+	}
 
-	// load buffer 
-	strncpy(
-		p.payload.message.data,
-		buf.cString(),
-		sizeof(p.payload.message.data)
-	);
-
-	// username
-	strncpy(
-		p.payload.message.username,
-		user->username(),
-		sizeof(p.payload.message.username)
-	);
-
-	// user uuid
-	user->getuuid(p.payload.message.useruuid);	
-
-	// chatroom uuid
-	uuid_copy(p.payload.message.chatuuid, this->_uuid);
-
-	// time
-	p.header.time = BFTimeGetCurrentTime();
-
-	// set payload type
-	p.header.type = kPayloadTypeMessage;
-
+	// send out packet
+	if (this->sendPacket(outbound.packet())) {
+		LOG_DEBUG("couldn't send packet");
+		return 3;
+	}
+	
 	// give chatroom this message to add to 
 	// its list
-	this->addMessage(new Message(&p));
+	if (this->addMessage(new Message(&p))) {
+		return 4;
+	}
 
-	return this->sendPacket(&p);
+	return 0;
 }
 
 int Chatroom::sendBuffer(const InputBuffer & buf) {
-	return this->sendBuffer(kPayloadMessageTypeData, Interface::current()->getuser(), buf);
+	return this->sendBuffer(
+		kPayloadMessageTypeData,
+		Interface::current()->getuser(),
+		buf
+	);
 }
 
 int Chatroom::notifyAllChatroomUsersOfEnrollment(User * user) {
@@ -221,6 +290,39 @@ int Chatroom::notifyAllServerUsersOfResignation(User * user) {
 }
 
 int Chatroom::enroll(User * user) {
+	return this->requestEnrollment(user);
+}
+
+int Chatroom::finalizeEnrollment(const PayloadChatroomEnrollmentForm * form) {
+	if (!form) {
+		return 1;
+	}
+
+	// get user with the uuid I got from the packet
+	//
+	// we need this user to decrypt the encrypted 
+	// chatroom key
+	User * user = User::getuser(form->useruuid);
+	if (!user) {
+		LOG_DEBUG("no user with %s", form->useruuid);
+		LOG_FLUSH;
+		return 2;
+	}
+
+	// capture private key for chatroom
+	Data enckey(form->datasize, form->data);
+	Data deckey;
+	if (user->cipher()->decrypt(enckey, deckey)) {
+		LOG_DEBUG("couldn't decrypt the encrypted data");
+		return 3;
+	}
+
+	// save the chatroom key
+	if (this->_cipher->setkey(deckey)) {
+		LOG_DEBUG("couldn't save key");
+		return 4;
+	}
+
 	int error = this->notifyAllServerUsersOfEnrollment(user);
 
 	if (!error) {
@@ -236,8 +338,101 @@ int Chatroom::enroll(User * user) {
 		}
 		this->_users.unlock();
 	}
+	
+	LOG_FLUSH;
 
 	return error;
+}
+
+int Chatroom::fillOutEnrollmentFormRequest(User * user, Packet * p) {
+	if (!user || !p) return 2;
+
+	memset(p, 0, sizeof(Packet));
+	PacketSetHeader(p, kPayloadTypeChatroomEnrollmentForm);
+
+	PayloadChatroomEnrollmentForm form;
+	form.type = 0; // request
+	user->getuuid(form.useruuid);
+	this->getuuid(form.chatroomuuid);
+
+	Data pub;
+	const CipherAsymmetric * c = (const CipherAsymmetric *) user->cipher();
+	c->getPublicKey(pub);
+
+	// i am afraid of this
+	if (pub.size() > sizeof(form.data)) {
+		LOG_WRITE("pub key size vs available buffer size in packet, %ld != %ld", pub.size(), sizeof(form.data));
+		return 1;
+	}
+
+	// transfer the public key
+	memcpy(form.data, pub.buffer(), pub.size());
+	form.datasize = pub.size();
+	
+	PacketSetPayload(p, &form);
+
+	return 0;
+}
+
+/**
+ * this will use the public key in the form to encrypt the symmetric key
+ */
+int _encryptPrivateKey(PayloadChatroomEnrollmentForm * form, CipherSymmetric * c, Data & res) {
+	if (!form || !c)
+		return 1;
+
+	// get private key	
+	Data key;
+	if (c->getkey(key)) {
+		LOG_DEBUG("could not get private key");
+		return 2;
+	}
+
+	// create asym cipher
+	CipherAsymmetric * ac = (CipherAsymmetric *) Cipher::create(kCipherTypeAsymmetric);
+	if (!ac) {
+		return 3;
+	}
+
+	Data pubkey(form->datasize, form->data);
+	if (ac->setPublicKey(pubkey)) {
+		return 4;
+	}
+
+	// encrypt our private key
+	if (ac->encrypt(key, res)) {
+		return 5;
+	}
+
+	BFDelete(ac);
+	
+	return 0;
+}
+
+int Chatroom::fillOutEnrollmentFormResponse(PayloadChatroomEnrollmentForm * form) {
+	if (!form) {
+		return 1;
+	} else if (form->type != 0) {
+		// we should only receive a request type form
+		return 2;
+	}
+
+	// encrypt private key
+	Data enckey;
+	int err = _encryptPrivateKey(form, this->_cipher, enckey);
+	if (err) {
+		return err;
+	}
+
+	// transfer the encrypted private key
+	memcpy(form->data, enckey.buffer(), enckey.size());
+	form->datasize = enckey.size();
+	
+	// modify form to reflect response type
+	form->type = 1; // response
+	form->approved = true;
+
+	return err;
 }
 
 int Chatroom::resign(User * user) {
@@ -250,8 +445,10 @@ int Chatroom::resign(User * user) {
 	if (!error) {
 		// add user to list
 		this->_users.lock();
-		this->_users.unsafeget().pluckObject(user);
-		BFRelease(user);
+		if (this->_users.unsafeget().contains(user)) {
+			this->_users.unsafeget().pluckObject(user);
+			BFRelease(user);
+		}
 		this->_users.unlock();
 	}
 
@@ -312,23 +509,6 @@ int Chatroom::removeAgent(Agent * a) {
 
 int Chatroom::removeUser(User * u) {
 	return this->userAddRemove('r', u);
-}
-
-int Chatroom::receiveMessagePacket(const Packet * pkt) {
-	// chatroom will own this memory
-	Message * m = new Message(pkt);
-	if (!m) {
-		LOG_DEBUG("couldn't create message object");
-		return 1;
-	}
-
-	int err = this->addMessage(m);
-	if (err) {
-		LOG_DEBUG("error adding message to chatroom: %d", err);
-		return 2;
-	}
-
-	return 0;
 }
 
 Chatroom * Chatroom::getChatroom(const uuid_t chatroomuuid) {
