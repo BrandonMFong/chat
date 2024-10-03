@@ -182,7 +182,6 @@ void _InterfaceDrawMessage(
 
 // this will write conversation from the bottom to the top
 int Interface::windowWriteConversation() {
-	LOG_DEBUG("%s", __func__);
 	BFLockLock(&this->_winlock);
 	this->_updateconversation.lock();
 	if (this->_updateconversation.unsafeget() && this->_chatroom.get()) {

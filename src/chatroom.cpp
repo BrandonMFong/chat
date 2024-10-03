@@ -156,25 +156,27 @@ int Chatroom::receiveMessagePacket(const Packet * pkt) {
 		return 1;
 	}
 
+	int err = 0;
 	if (!this->_cipher->isReady()) {
 		LOG_DEBUG("the chatroom cipher is not ready");
-		return 1;
-	}
-
-	int err = m->decryptData(this->_cipher);
-	if (err) {
-		LOG_DEBUG("couldn't decrypt message");
+		err = 1;
 	}
 
 	if (!err) {
-		err = this->addMessage(m);
-		if (err) {
-			LOG_DEBUG("error adding message to chatroom: %d", err);
+		if ((m->type() == kPayloadMessageTypeData) && m->decryptData(this->_cipher)) {
+			LOG_DEBUG("couldn't decrypt message");
+			err = 1;
 		}
 	}
 
 	if (err) {
 		BFRelease(m);
+	} else {
+		err = this->addMessage(m);
+		if (err) {
+			LOG_DEBUG("error adding message to chatroom: %d", err);
+			return 1;
+		}
 	}
 
 	return 0;
@@ -202,28 +204,6 @@ int _LoadPayloadTypeMessage(
 		return 1;
 	}
 
-	
-	/*
-	// load encrypted message data
-	memcpy(p->payload.message.data, (unsigned char *) buf.cString(), sizeof(p->payload.message.data));
-
-	// username
-	strncpy(
-		p->payload.message.username,
-		user->username(),
-		sizeof(p->payload.message.username)
-	);
-
-	// user uuid
-	user->getuuid(p->payload.message.useruuid);	
-
-	// chatroom uuid
-	uuid_copy(p->payload.message.chatuuid, uuid);
-
-	// message type
-	p->payload.message.type = type;
-	*/
-
 	return 0;
 }
 
@@ -246,7 +226,7 @@ int Chatroom::sendBuffer(PayloadMessageType type, User * user, const InputBuffer
 
 	// encrypt data
 	Message outbound(&p);
-	if (outbound.encryptData(this->_cipher)) {
+	if ((type == kPayloadMessageTypeData) && outbound.encryptData(this->_cipher)) {
 		LOG_DEBUG("could not encrypt data");
 		return 1;
 	}
