@@ -123,21 +123,21 @@ int _encrypt(Data & in, const unsigned char *key,
 	// make sure the input buffer length is a multiple of the blocksize
 	// 
 	// we need this since we are turning off padding	
-	//size_t newsize = ((in.size() / blocksize) + 1) * blocksize;
 	//in.alloc(newsize);
 	
 	// figure out cipher buffer length
 	//
-	// making sure it's a little bit more than the input size
-	//newsize += blocksize;
-	out.alloc(in.size() * 2);
+	// size should be at least 1024 bytes or twice the size of 
+	// the input
+	size_t newsize = ((in.size() / blocksize) + 1) * blocksize;
+	out.alloc(newsize);
 	out.clear();
 
     /* Create and initialise the context */
 	if (!result) {
 		if(!(ctx = EVP_CIPHER_CTX_new())) {
 			LOG_DEBUG("%s:%d", __FILE__, __LINE__);
-			result = -1;
+			result = 10;
 		}
 	}
 
@@ -152,7 +152,7 @@ int _encrypt(Data & in, const unsigned char *key,
 		//EVP_CIPHER_CTX_set_padding(ctx, 0);
 		if(1 != EVP_EncryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, key, iv)) {
 			LOG_DEBUG("%s:%d", __FILE__, __LINE__);
-			result = -1;
+			result = 11;
 		}
 	}
 
@@ -163,7 +163,7 @@ int _encrypt(Data & in, const unsigned char *key,
 		 */
 		if(1 != EVP_EncryptUpdate(ctx, (unsigned char *) out.buffer(), &len, (unsigned char *) in.buffer(), in.size())) {
 			LOG_DEBUG("%s:%d", __FILE__, __LINE__);
-			result = -1;
+			result = 12;
 		}
 	}
     
@@ -176,14 +176,16 @@ int _encrypt(Data & in, const unsigned char *key,
 		 */
 		if(1 != EVP_EncryptFinal_ex(ctx, (unsigned char *) out.buffer() + len, &len)) {
 			LOG_DEBUG("%s:%d", __FILE__, __LINE__);
-			result = -1;
+			result = 13;
 		} else {
 			ciphertext_len += len;
 			//ciphertext_len = ((ciphertext_len / blocksize) + 1) * blocksize;
 			out.resize(ciphertext_len);
+			/*
 			if (out.size() % blocksize) {
-				result = 1;
+				result = 14;
 			}
+			*/
 		}
 	}
 
@@ -209,15 +211,15 @@ int _decrypt(Data & in, const unsigned char *key,
 	 * figure out cipher buffer length
 	 * out text should be as long as in text
 	 */
-	//size_t newsize = ((in.size() / blocksize) + 1) * blocksize;
-	out.alloc(in.size());
+	size_t newsize = ((in.size() / blocksize) + 1) * blocksize;
+	out.alloc(newsize);
 	out.clear();
 
     /* Create and initialise the context */
 	if (!result) {
 		if(!(ctx = EVP_CIPHER_CTX_new())) {
 			LOG_DEBUG("%s:%d", __FILE__, __LINE__);
-			result = -1;
+			result = 20;
 		}
 	}
 
@@ -229,10 +231,10 @@ int _decrypt(Data & in, const unsigned char *key,
      * is 128 bits
      */
 	if (!result) {
-		EVP_CIPHER_CTX_set_padding(ctx, 0);
+		//EVP_CIPHER_CTX_set_padding(ctx, 0);
 		if(1 != EVP_DecryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, key, iv)) {
 			LOG_DEBUG("%s:%d", __FILE__, __LINE__);
-			result = -1;
+			result = 21;
 		}
 	}
 
@@ -243,24 +245,26 @@ int _decrypt(Data & in, const unsigned char *key,
 		 */
 		if(1 != EVP_DecryptUpdate(ctx, (unsigned char *) out.buffer(), &len, (unsigned char *) in.buffer(), in.size())) {
 			LOG_DEBUG("%s:%d", __FILE__, __LINE__);
-			result = -1;
+			result = 22;
 		}
 	}
 
 	if (!result) {
 		plaintext_len = len;
+		LOG_DEBUG("plain text length: %ld", len);
 
 		/*
 		 * Finalise the decryption. Further plaintext bytes may be written at
 		 * this stage.
 		 */
 		if(1 != EVP_DecryptFinal_ex(ctx, (unsigned char *) out.buffer() + len, &len)) {
-			LOG_DEBUG("current decrypted buffer: %s", (char *) out.buffer());
+			LOG_DEBUG("current decrypted buffer: '%s'", (char *) out.buffer());
 			LOG_DEBUG("%s:%d", __FILE__, __LINE__);
 			LOG_DEBUG("openssl error: %s", ERR_error_string(ERR_get_error(), NULL));
-			result = -1;
+			result = 23;
 		} else {
 			plaintext_len += len;
+			out.resize(plaintext_len);
 		}
 	}
 

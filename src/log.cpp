@@ -11,7 +11,7 @@
 #include <unistd.h>
 
 void _LogWriteEntry(BFFileWriter * filewriter, int mode, ...) {
-#ifndef TESTING
+//#ifndef TESTING
 	if (!filewriter) return;
 
 	va_list arg0, arg1;
@@ -61,6 +61,6 @@ void _LogWriteEntry(BFFileWriter * filewriter, int mode, ...) {
 	va_end(arg1);
 
 	BFFree(logstr);
-#endif 
+//#endif 
 }
 
