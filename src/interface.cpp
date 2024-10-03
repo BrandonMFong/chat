@@ -398,7 +398,6 @@ int Interface::windowCreateModeLobby() {
 }
 
 int Interface::windowCreateStateChatroom() {
-	LOG_DEBUG("%s", __func__);
 	// change to normal mode
 	BFLockLock(&this->_winlock);
 

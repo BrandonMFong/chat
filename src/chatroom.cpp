@@ -135,7 +135,6 @@ void Chatroom::addRoomToChatrooms(Chatroom * cr) {
 int Chatroom::addMessage(Message * msg) {
 	if (!msg) return 2;
 
-	LOG_DEBUG("adding message: %s", msg->data());
 	// msg count should have a retain count of 1 
 	// so we don't need to retain	
 	this->conversation.get().add(msg);
@@ -291,7 +290,6 @@ int Chatroom::notifyAllServerUsersOfResignation(User * user) {
 }
 
 int Chatroom::enroll(User * user) {
-	LOG_DEBUG("making subclasses request enrollment");
 	return this->requestEnrollment(user);
 }
 
@@ -320,7 +318,6 @@ int Chatroom::finalizeEnrollment(const PayloadChatroomEnrollmentForm * form) {
 	}
 
 	// save the chatroom key
-	LOG_DEBUG("chatroom key: %s", deckey.hex().cString());
 	if (this->_cipher->setkey(deckey)) {
 		LOG_DEBUG("couldn't save key");
 		return 4;
@@ -390,7 +387,6 @@ int _encryptPrivateKey(PayloadChatroomEnrollmentForm * form, CipherSymmetric * c
 		LOG_DEBUG("could not get private key");
 		return 2;
 	}
-	LOG_DEBUG("chatroom key: %s", key.hex().cString());
 
 	// create asym cipher
 	CipherAsymmetric * ac = (CipherAsymmetric *) Cipher::create(kCipherTypeAsymmetric);

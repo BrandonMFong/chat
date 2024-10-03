@@ -54,7 +54,6 @@ int ChatroomClient::requestEnrollment(User * user) {
 	int error = this->fillOutEnrollmentFormRequest(user, &p);
 	if (error) return error;
 
-	LOG_DEBUG("sending enrollment form: %d", kPayloadTypeChatroomEnrollmentForm);
 	return this->sendPacket(&p);
 }
 

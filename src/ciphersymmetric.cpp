@@ -167,7 +167,6 @@ int _encrypt(Data & in, const unsigned char *key,
 			ciphertext_len += len;
 			out.resize(ciphertext_len);
 		}
-		LOG_DEBUG("out enc size %ld", out.size());
 	}
 
     /* Clean up */
@@ -231,7 +230,6 @@ int _decrypt(Data & in, const unsigned char *key,
 
 	if (!result) {
 		plaintext_len = len;
-		LOG_DEBUG("plain text length: %ld", len);
 
 		/*
 		 * Finalise the decryption. Further plaintext bytes may be written at
@@ -246,7 +244,6 @@ int _decrypt(Data & in, const unsigned char *key,
 			plaintext_len += len;
 			out.resize(plaintext_len);
 		}
-		LOG_DEBUG("out dec size %ld", out.size());
 	}
 
     /* Clean up */

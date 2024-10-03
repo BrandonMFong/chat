@@ -27,12 +27,6 @@ ChatroomServer * ChatroomServer::create(const char * name) {
 	ChatroomServer * cr = new ChatroomServer;
 	strncpy(cr->_name, name, sizeof(cr->_name));
 
-	/*
-	if (cr->initCipher()) {
-		LOG_WRITE("could not establish encrypted chatroom");
-	}
-	*/
-
 #ifdef DEBUG
 	char uuidstr[UUID_STR_LEN];
 	uuid_unparse(cr->_uuid, uuidstr);
@@ -54,26 +48,12 @@ ChatroomServer * ChatroomServer::create(const char * name) {
 
 	return cr;
 }
-/*
-int ChatroomServer::initCipher() {
-	this->_cipher = Cipher::create(kCipherTypeSymmetric);
-	if (!this->_cipher)
-		return 1;
 
-	if (this->_cipher->genkey()) {
-		LOG_DEBUG("couldn't initialize cipher");
-		return 1;
-	}
-
-	return 0;
-}
-*/
 int ChatroomServer::sendPacket(const Packet * pkt) {
 	this->_agents.lock();
 	List<Agent *>::Node * n = this->_agents.unsafeget().first();
 	for (; n; n = n->next()) {
 		Agent * a = n->object();
-		LOG_DEBUG("sending packet to agent");
 		a->sendPacket(pkt);
 	}
 	this->_agents.unlock();
@@ -107,13 +87,11 @@ int ChatroomServer::requestEnrollment(User * user) {
 	int error = this->fillOutEnrollmentFormRequest(user, &p);
 	if (error) return error;
 
-	LOG_DEBUG("manually filling out form");
 	if (this->fillOutEnrollmentFormResponse(&p.payload.enrollform)) {
 		LOG_DEBUG("for some reason couldn't approve form");
 		return 1;
 	}
 
-	LOG_DEBUG("finalizing enrollment");
 	return this->finalizeEnrollment(&p.payload.enrollform);
 }
 
