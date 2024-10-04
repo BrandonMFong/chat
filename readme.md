@@ -30,6 +30,8 @@ Chatroom:
 - Dependencies
     - create an `external` folder at the base of the repo and clone these repos
         - https://github.com/BrandonMFong/libs
+		-
+			
 - Environment
 	- `make` - build tool
 	- `g++` - compiler

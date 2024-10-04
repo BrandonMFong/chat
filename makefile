@@ -10,7 +10,7 @@ include external/libs/bflibc/makefiles/uuid.mk
 BUILD_PATH = build
 CPPLINKS = -lpthread -lncurses $(BF_LIB_C_UUID_FLAGS) -ldl
 CPPSTD = -std=c++20
-LIBRARIES = /usr/local/lib64/libssl.a /usr/local/lib64/libcrypto.a 
+LIBRARIES = external/openssl/libssl.a external/openssl/libcrypto.a 
 
 FILES = \
 interface cipher cipherasymmetric ciphersymmetric \
