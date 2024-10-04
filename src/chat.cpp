@@ -25,6 +25,12 @@
 #define ARGUMENT_VERSION "--version"
 #define ARGUMENT_HELP "--help"
 
+#ifdef DEBUG
+#define ARGUMENT_DEBUG_STRUCTS "debug-structs"
+#else
+#define ARGUMENT_DEBUG_STRUCTS ""
+#endif
+
 #define PRINTF_ERR(...) printf("ERROR - " __VA_ARGS__)
 
 using namespace BF;
@@ -52,10 +58,12 @@ void Help(const char * toolname) {
 int ArgumentsRead(
 	int argc, char * argv[],
 	char * mode, char * ipaddr,
-	bool * showvers, bool * showhelp
+	bool * showvers, bool * showhelp,
+	bool * debugstructs
 ) {
 	if (!argv || !mode || !ipaddr 
-		|| !showvers || !showhelp) return 2;
+		|| !showvers || !showhelp
+		|| !debugstructs) return 2;
 	else if (argc < 1) return 3;
 
 	bool modereqclient = false;
@@ -73,10 +81,14 @@ int ArgumentsRead(
 			*showvers = true;
 		} else if (!strcmp(argv[i], ARGUMENT_HELP)) {
 			*showhelp = true;
+#ifdef DEBUG
+		} else if (!strcmp(argv[i], ARGUMENT_DEBUG_STRUCTS)) {
+			*debugstructs = true;
+#endif
 		}
 	}
 
-	if (!(*showvers) && !(*showhelp)) {
+	if (!(*showvers) && !(*showhelp) && !(*debugstructs)) {
 		// make sure server/client aren't both passed
 		if (modereqclient && modereqserver) {
 			PRINTF_ERR("cannot request to be both server and client\n");
@@ -100,7 +112,7 @@ int ArgumentsRead(
 
 const char Chat::SocketGetMode() {
 	if (skt) return skt->mode();
-	return ' ';
+	return '?';
 }
 
 int _ChatRun(char mode, const char * ipaddr) {
@@ -152,6 +164,10 @@ void _ChatShowVersion(const char * toolname) {
 	printf("%s version %s\n", toolname, VERSION_WHOLE_STRING);
 }
 
+void _DegugStructs() {
+	printf("Packet size: %ld\n", sizeof(Packet));
+}
+
 int Chat::Main(int argc, char * argv[]) {
 	int result = 0;
 	try {
@@ -160,11 +176,14 @@ int Chat::Main(int argc, char * argv[]) {
 		bool showhelp = false;
 		Interface * interface = NULL;
 		char ipaddr[SOCKET_IP4_ADDR_STRLEN];
+		bool debugstructs = false;
 
 		// default ip addr is localhost
 		strncpy(ipaddr, "0.0.0.0", SOCKET_IP4_ADDR_STRLEN);
 
-		result = ArgumentsRead(argc, argv, &mode, ipaddr, &showversion, &showhelp);
+		result = ArgumentsRead(
+			argc, argv, &mode, ipaddr,
+			&showversion, &showhelp, &debugstructs);
 
 		LOG_OPEN;
 
@@ -174,6 +193,10 @@ int Chat::Main(int argc, char * argv[]) {
 			_ChatShowVersion(argv[0]);
 		} else if (showhelp) {
 			Help(argv[0]);
+#ifdef DEBUG
+		} else if (debugstructs) {
+			_DegugStructs();
+#endif
 		} else {
 			if (!result) {
 				result = _ChatRun(mode, ipaddr);
