@@ -9,8 +9,8 @@ x.x
 [] user typing
 
 0.2
-[] installer script
-[] configure a local openssl usage in this repo
+[] cross platform
+[x] configure a local openssl usage in this repo
 [x] chatroom encryption
 	[x] make chatroom symmetric key
 	[x] make user assymetic keys
