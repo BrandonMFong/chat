@@ -51,7 +51,7 @@ int test_SymCheckReady() {
 		if (!result) {
 			String res = dec;
 			if (strcmp(res.cString(), str)) {
-				printf("%s != %s\n", res, str);
+				printf("%s != %s\n", res.cString(), str);
 				result = 3;
 			}
 		}
@@ -174,7 +174,7 @@ int test_LongString() {
 		if (!result) {
 			String res = dec;
 			if (strcmp(res.cString(), str)) {
-				printf("%s != %s\n", res.cString(), str);
+				printf("%s != %s\n", res.cString(), str.cString());
 				result = 3;
 			}
 		}
@@ -266,7 +266,7 @@ int test_HandingOffKey() {
 		if (!result) {
 			String res = dec;
 			if (str != res) {
-				printf("%s != %s\n", res, str);
+				printf("%s != %s\n", res.cString(), str.cString());
 				result = 2;
 			}
 		}

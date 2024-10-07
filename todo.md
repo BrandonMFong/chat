@@ -9,7 +9,7 @@ x.x
 [] user typing
 
 0.2
-[] cross platform
+[x] cross platform
 [x] configure a local openssl usage in this repo
 [x] chatroom encryption
 	[x] make chatroom symmetric key

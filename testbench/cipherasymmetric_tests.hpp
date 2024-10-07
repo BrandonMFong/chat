@@ -131,7 +131,7 @@ int test_AsymLongString() {
 			if (decstr.length() != str.length()) {
 				result = 3;
 			} else if (decstr != str) {
-				printf("%s != %s\n", decstr, str);
+				printf("%s != %s\n", decstr.cString(), str.cString());
 				result = 4;
 			}
 		}
@@ -160,7 +160,6 @@ int test_HandingOffPublicKeyToEncrypt() {
 		if (!result) {
 			CipherAsymmetric * c = (CipherAsymmetric *) user1;
 			result = c->getPublicKey(pub);
-			//printf("\npub key size: %ld\n", pub.size());
 		}
 
 		// now this is where we should hand off the public key
