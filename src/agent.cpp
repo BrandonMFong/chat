@@ -340,10 +340,16 @@ void Agent::packetReceive(SocketEnvelope * envelope) {
 	const Packet * p = (const Packet *) c.data();
 	size_t size = c.size();
 
-	if (!sc || !p) 
+	if (!sc || !p) {
+		BFRelease(envelope);
 		return;
-	else if (size != CHAT_SOCKET_BUFFER_SIZE) {
-		LOG_WRITE("size of incoming data does not meet expectations: %ld != %ld", size, CHAT_SOCKET_BUFFER_SIZE);
+	} else if (size != CHAT_SOCKET_BUFFER_SIZE) {
+		LOG_WRITE(
+			"(packet type = %d) size of incoming data does not meet expectations: %ld != %ld",
+			p->header.type, size, CHAT_SOCKET_BUFFER_SIZE
+		);
+		LOG_FLUSH;
+		BFRelease(envelope);
 		return;
 	}
 
@@ -352,8 +358,10 @@ void Agent::packetReceive(SocketEnvelope * envelope) {
 	// you are allowed to send packets using this agent's
 	// sendPacket() method to communicate to end user
 	Agent * agent = Agent::getAgentForConnection(sc);
-	if (!agent)
+	if (!agent) {
+		BFRelease(envelope);
 		return;
+	}
 
 	BFRetain(agent);
 

@@ -1,8 +1,8 @@
 # Chat Server
 
 ## Supports
-- Linux (debian 11)
-- macOS (13.6.1)
+- Linux
+- macOS
 
 ## Description
 I always wanted to make a chat server. I want to make the experience easy such that people that want to chat can just use nc or telnet
