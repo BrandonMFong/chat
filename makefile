@@ -6,6 +6,14 @@ include external/libs/makefiles/libpaths.mk
 include external/libs/makefiles/platforms.mk 
 include external/libs/bflibc/makefiles/uuid.mk 
 
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S),Linux)
+PLATFORM = linux
+endif
+ifeq ($(UNAME_S),Darwin)
+PLATFORM = macos
+endif
+
 ### Global
 BIN_PATH = bin
 BUILD_PATH = build
@@ -108,8 +116,8 @@ $(T_BUILD_PATH)/%.o: src/%.cpp src/%.hpp src/*.h
 	g++ -c $< -o $@ $(T_CPPFLAGS)
 
 package: $(PACKAGE_NAME) $(PACKAGE_NAME)/$(R_BIN_NAME)
-	zip -r $(BIN_PATH)/$(PACKAGE_NAME).zip $(PACKAGE_NAME)
-	tar vczf $(BIN_PATH)/$(PACKAGE_NAME).tar.gz $(PACKAGE_NAME)
+	zip -r $(BIN_PATH)/$(PACKAGE_NAME)-$(PLATFORM).zip $(PACKAGE_NAME)
+	tar vczf $(BIN_PATH)/$(PACKAGE_NAME)-$(PLATFORM).tar.gz $(PACKAGE_NAME)
 
 $(PACKAGE_NAME):
 	mkdir -p $@
