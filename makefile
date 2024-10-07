@@ -7,10 +7,12 @@ include external/libs/makefiles/platforms.mk
 include external/libs/bflibc/makefiles/uuid.mk 
 
 ### Global
+BIN_PATH = bin
 BUILD_PATH = build
 CPPLINKS = -lpthread -lncurses $(BF_LIB_C_UUID_FLAGS) -ldl
 CPPSTD = -std=c++20
 LIBRARIES = external/openssl/libssl.a external/openssl/libcrypto.a 
+PACKAGE_NAME = chat
 
 FILES = \
 interface cipher cipherasymmetric ciphersymmetric \
@@ -63,40 +65,40 @@ clean:
 	rm -rfv bin
 
 ## Release build instructions
-release: release-setup bin/$(R_BIN_NAME)
+release: release-setup $(BIN_PATH)/$(R_BIN_NAME)
 
 release-setup:
 	@mkdir -p $(R_BUILD_PATH)
 	@mkdir -p bin
 
-bin/$(R_BIN_NAME): $(R_MAIN_FILE) $(R_OBJECTS) $(R_LIBRARIES)
+$(BIN_PATH)/$(R_BIN_NAME): $(R_MAIN_FILE) $(R_OBJECTS) $(R_LIBRARIES)
 	g++ -o $@ $^ $(R_CPPFLAGS) $(CPPLINKS) 
 
 $(R_BUILD_PATH)/%.o: src/%.cpp src/%.hpp src/*.h
 	g++ -c $< -o $@ $(R_CPPFLAGS)
 
 ## Debug build instructions
-debug: debug-setup bin/$(D_BIN_NAME)
+debug: debug-setup $(BIN_PATH)/$(D_BIN_NAME)
 
 debug-setup:
 	@mkdir -p $(D_BUILD_PATH)
 	@mkdir -p bin
 
-bin/$(D_BIN_NAME): $(D_MAIN_FILE) $(D_OBJECTS) $(D_LIBRARIES)
+$(BIN_PATH)/$(D_BIN_NAME): $(D_MAIN_FILE) $(D_OBJECTS) $(D_LIBRARIES)
 	g++ -o $@ $^ $(D_CPPFLAGS) $(CPPLINKS) 
 
 $(D_BUILD_PATH)/%.o: src/%.cpp src/%.hpp src/*.h
 	g++ -c $< -o $@ $(D_CPPFLAGS)
 
 ## Test build instructions
-test: test-setup bin/$(T_BIN_NAME)
-	./bin/$(T_BIN_NAME)
+test: test-setup $(BIN_PATH)/$(T_BIN_NAME)
+	./$(BIN_PATH)/$(T_BIN_NAME)
 
 test-setup:
 	@mkdir -p $(T_BUILD_PATH)
 	@mkdir -p bin
 
-bin/$(T_BIN_NAME): $(T_MAIN_OBJECT) $(T_OBJECTS) $(T_LIBRARIES)
+$(BIN_PATH)/$(T_BIN_NAME): $(T_MAIN_OBJECT) $(T_OBJECTS) $(T_LIBRARIES)
 	g++ -o $@ $^ $(T_CPPFLAGS) $(CPPLINKS) 
 
 $(T_MAIN_OBJECT): $(T_MAIN_FILE) testbench/*.hpp
@@ -104,4 +106,14 @@ $(T_MAIN_OBJECT): $(T_MAIN_FILE) testbench/*.hpp
 
 $(T_BUILD_PATH)/%.o: src/%.cpp src/%.hpp src/*.h
 	g++ -c $< -o $@ $(T_CPPFLAGS)
+
+package: $(PACKAGE_NAME) $(PACKAGE_NAME)/$(R_BIN_NAME)
+	zip -r $(BIN_PATH)/$(PACKAGE_NAME).zip $(PACKAGE_NAME)
+	tar vczf $(BIN_PATH)/$(PACKAGE_NAME).tar.gz $(PACKAGE_NAME)
+
+$(PACKAGE_NAME):
+	mkdir -p $@
+
+$(PACKAGE_NAME)/$(R_BIN_NAME): $(BIN_PATH)/$(R_BIN_NAME)
+	@cp -afv $< $(PACKAGE_NAME)
 
