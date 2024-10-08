@@ -25,10 +25,10 @@ LIBRARIES = external/openssl/libssl.a external/openssl/libcrypto.a
 PACKAGE_NAME = chat
 
 ### macOS Variables
-IDENTITY = 
+IDENTITY =
 TEAMID = 
 EMAIL =
-PWi =
+PW =
 
 FILES = \
 interface cipher cipherasymmetric ciphersymmetric \
@@ -74,7 +74,25 @@ T_OBJECTS = $(patsubst %, $(T_BUILD_PATH)/%.o, $(FILES))
 # Default
 build: release
 
-all: release debug
+help:
+	@echo "Usage:"
+	@echo "	make [target] variables"
+	@echo ""
+	@echo "Target(s):"
+	@echo "	clean		cleans build and bin folder"
+	@echo "	release		builds release version"
+	@echo "	debug		builds debug version"
+	@echo "	package		compresses build"
+	@echo ""
+	@echo "Variable(s):"
+	@echo "	IDENTITY	(macos only) Developer ID common name"
+	@echo "	TEAMID 		(macos only) Developer Team ID"
+	@echo "	EMAIL 		(macos only) Developer account email"
+	@echo "	PW		(macos only) Developer account password"
+	@echo ""
+	@echo "Example(s):"
+	@echo "	Build for release for macOS distribution"
+	@echo "		make clean build codesign package notarize staple IDENTITY=\"\" TEAMID=\"\" EMAIL=\"\" PW=\"\""
 
 clean:
 	rm -rfv build

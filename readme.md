@@ -21,15 +21,15 @@ Chatroom:
 
 ## Development
 - Dependencies
-	- in `external/libs` run `make clean all`
-	- in `external/openssl` run `./Configure;make;`
+	- `external/libs`: manual build is required
+	- in `external/openssl`: manual build is required
 			
 - Environment
 	- `make` - build tool
 	- `g++` - compiler
 	- `vim` - file editor
-- Debugging
-	- run `make clean debug` and point your debugger to the product
+- Build
+	- run `make help` for help
 - Supported OS
 	- Linux (debian)
 	- macOS (arm64)
