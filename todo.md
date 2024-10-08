@@ -1,13 +1,18 @@
 ```
 x.x
-[] improved controls (replicate nano commands)
 [] user data window editor
 [] ability to change user name
 [] window dynamic resizing
-[] list of users in lobby
 [] get list of users in chatroom
-[] user typing
 [] add to homebrew package manager
+
+0.3
+[] improved controls (replicate nano commands)
+[] chat configuration implemented in ncurses
+[] user typing
+
+0.2.1
+[] issue with sending messages between two machines that are on macos and linux
 [] build a macos universal binary
 
 0.2
