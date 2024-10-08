@@ -7,6 +7,7 @@ x.x
 [] list of users in lobby
 [] get list of users in chatroom
 [] user typing
+[] add to homebrew package manager
 
 0.2
 [x] cross platform
