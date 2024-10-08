@@ -80,6 +80,7 @@ help:
 	@echo ""
 	@echo "Target(s):"
 	@echo "	clean		cleans build and bin folder"
+	@echo "	build 		builds release verions"
 	@echo "	release		builds release version"
 	@echo "	debug		builds debug version"
 	@echo "	package		compresses build"
@@ -93,6 +94,8 @@ help:
 	@echo "Example(s):"
 	@echo "	Build for release for macOS distribution"
 	@echo "		make clean build codesign package notarize staple IDENTITY=\"\" TEAMID=\"\" EMAIL=\"\" PW=\"\""
+	@echo "	Build for release for Linux distribution"
+	@echo "		make clean build package"
 
 clean:
 	rm -rfv build
