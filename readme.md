@@ -19,25 +19,17 @@ Chatroom:
 	- as client: `chat -ip4 <server's ip address>`
 - for help, enter `help` command
 
-## Protocol
-- Handshake
-    - Server and Client exchange information
-- Message exchange
-- Termination
-    - User intending to leave will notify all users on server that they are leaving
-
 ## Development
 - Dependencies
-    - create an `external` folder at the base of the repo and clone these repos
-        - https://github.com/BrandonMFong/libs
-		-
+	- `external/libs`: manual build is required
+	- in `external/openssl`: manual build is required
 			
 - Environment
 	- `make` - build tool
 	- `g++` - compiler
 	- `vim` - file editor
-- Debugging
-	- run `make clean debug` and point your debugger to the product
+- Build
+	- run `make help` for help
 - Supported OS
 	- Linux (debian)
 	- macOS (arm64)
