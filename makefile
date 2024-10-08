@@ -98,8 +98,9 @@ help:
 	@echo "		make clean build package"
 
 clean:
-	rm -rfv build
-	rm -rfv bin
+	rm -rfv $(BUILD_PATH)
+	rm -rfv $(BIN_PATH)
+	rm -rfv $(PACKAGE_NAME)
 
 ## Release build instructions
 release: release-setup $(BIN_PATH)/$(R_BIN_NAME)
