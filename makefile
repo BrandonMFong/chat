@@ -9,9 +9,11 @@ include external/libs/bflibc/makefiles/uuid.mk
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Linux)
 PLATFORM = linux
+PACKAGE_MODE = package-linux
 endif
 ifeq ($(UNAME_S),Darwin)
 PLATFORM = macos
+PACKAGE_MODE = package-macos
 endif
 
 ### Global
@@ -115,9 +117,14 @@ $(T_MAIN_OBJECT): $(T_MAIN_FILE) testbench/*.hpp
 $(T_BUILD_PATH)/%.o: src/%.cpp src/%.hpp src/*.h
 	g++ -c $< -o $@ $(T_CPPFLAGS)
 
-package: $(PACKAGE_NAME) $(PACKAGE_NAME)/$(R_BIN_NAME)
+package: $(PACKAGE_MODE)
+
+package-linux: $(PACKAGE_NAME) $(PACKAGE_NAME)/$(R_BIN_NAME)
 	zip -r $(BIN_PATH)/$(PACKAGE_NAME)-$(PLATFORM).zip $(PACKAGE_NAME)
 	tar vczf $(BIN_PATH)/$(PACKAGE_NAME)-$(PLATFORM).tar.gz $(PACKAGE_NAME)
+
+package-macos: $(PACKAGE_NAME) $(PACKAGE_NAME)/$(R_BIN_NAME)
+	hdiutil create -fs HFS+ -volname Chat -srcfolder $(PACKAGE_NAME) $(BIN_PATH)/$(PACKAGE_NAME)-$(PLATFORM).dmg
 
 $(PACKAGE_NAME):
 	mkdir -p $@
