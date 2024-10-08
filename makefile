@@ -24,6 +24,12 @@ CPPSTD = -std=c++20
 LIBRARIES = external/openssl/libssl.a external/openssl/libcrypto.a 
 PACKAGE_NAME = chat
 
+### macOS Variables
+IDENTITY = 
+TEAMID = 
+EMAIL =
+PWi =
+
 FILES = \
 interface cipher cipherasymmetric ciphersymmetric \
 log user inputbuffer office \
@@ -131,4 +137,13 @@ $(PACKAGE_NAME):
 
 $(PACKAGE_NAME)/$(R_BIN_NAME): $(BIN_PATH)/$(R_BIN_NAME)
 	@cp -afv $< $(PACKAGE_NAME)
+
+codesign:
+	codesign -s "$(IDENTITY)" --options=runtime $(BIN_PATH)/$(R_BIN_NAME)
+
+notarize:
+	xcrun notarytool submit --apple-id "$(EMAIL)" --password "$(PW)" --team-id "$(TEAMID)" --wait $(BIN_PATH)/$(PACKAGE_NAME)-$(PLATFORM).dmg
+
+staple:
+	xcrun stapler staple $(BIN_PATH)/$(PACKAGE_NAME)-$(PLATFORM).dmg
 
