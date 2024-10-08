@@ -8,6 +8,7 @@ x.x
 [] get list of users in chatroom
 [] user typing
 [] add to homebrew package manager
+[] build a macos universal binary
 
 0.2
 [x] cross platform
