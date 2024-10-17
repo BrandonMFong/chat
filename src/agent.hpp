@@ -49,7 +49,7 @@ public:
 	 * Once created, the agent will get to know the user on ther
 	 * other end and get them ready to join a conversation.
 	 */
-	static int newConnection(BF::Net::SocketConnection * sc);
+	static void newConnection(BF::Net::SocketConnection * sc);
 
 	/**
 	 * creates new agent	

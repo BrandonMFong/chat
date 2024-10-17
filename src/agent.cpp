@@ -416,16 +416,12 @@ int Agent::broadcast(const Packet * pkt) {
 	return 0;
 }
 
-int Agent::newConnection(SocketConnection * sc) {
+void Agent::newConnection(SocketConnection * sc) {
 	Agent * a = Agent::create(sc);
 
-	if (!a) {
-		return 1;
-	} else {
+	if (a) {
 		a->start();
-
 		BFRelease(a);
-		return 0;
 	}
 }
 
