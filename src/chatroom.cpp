@@ -147,6 +147,13 @@ void Chatroom::getuuid(uuid_t uuid) {
 	uuid_copy(uuid, this->_uuid);
 }
 
+#ifdef DEBUG
+#define __CHATROOM_MESSAGE_DEBUG(m) \
+	LOG_DEBUG("%s: {type=%d, data='%s'}", __FUNCTION__, m.type(), m.data())
+#else
+#define __CHATROOM_MESSAGE_DEBUG(m)
+#endif
+
 int Chatroom::receiveMessagePacket(const Packet * pkt) {
 	// chatroom will own this memory
 	Message * m = new Message(pkt);
@@ -166,6 +173,7 @@ int Chatroom::receiveMessagePacket(const Packet * pkt) {
 			LOG_DEBUG("couldn't decrypt message");
 			err = 1;
 		}
+		__CHATROOM_MESSAGE_DEBUG((*m));
 	}
 
 	if (err) {
@@ -205,13 +213,6 @@ int _LoadPayloadTypeMessage(
 
 	return 0;
 }
-
-#ifdef DEBUG
-#define __CHATROOM_MESSAGE_DEBUG(m) \
-	LOG_DEBUG("sending {type=%d, data='%s'}", m.type(), m.data())
-#else
-#define __CHATROOM_MESSAGE_DEBUG(m)
-#endif
 
 // i believe the messages aren't being encrypted correctly because I am not accounting for
 // the size of the encrypted data.
