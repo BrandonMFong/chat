@@ -30,7 +30,7 @@ extern BFFileWriter gFileWriter;
 #define LOG_INIT \
 BFFileWriter gFileWriter = 0; \
 void __LogCallbackBFNet(const char * buf) { \
-	LOG_DEBUG(buf); \
+	LOG_DEBUG("bfnet: %s", buf); \
 }
 
 /**
