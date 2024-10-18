@@ -27,12 +27,20 @@ extern BFFileWriter gFileWriter;
 /**
  * must define in a source file
  */
-#define LOG_INIT BFFileWriter gFileWriter = 0;
+#define LOG_INIT \
+BFFileWriter gFileWriter = 0; \
+void __LogCallbackBFNet(const char * buf) { \
+	LOG_DEBUG(buf); \
+}
 
 /**
- * initializes log
+ * initializes logs for:
+ *	- chat
+ *	- bfnet
  */
-#define LOG_OPEN BFFileWriterCreate(&gFileWriter, CHAT_LOG_PATH)
+#define LOG_OPEN \
+BFFileWriterCreate(&gFileWriter, CHAT_LOG_PATH); \
+BF::Net::Log::SetCallback(__LogCallbackBFNet);
 
 /**
  * `mode`: 'd' for debug, 'e' for error, or 0 for normal
