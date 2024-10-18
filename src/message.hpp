@@ -24,6 +24,10 @@ public:
 	void getuuidchatroom(uuid_t uuid) const;
 	void getuuiduser(uuid_t uuid) const;
 	PayloadMessageType type() const;
+
+	/**
+	 * returns the current state of the packet
+	 */
 	const Packet * packet() const;
 
 	/**

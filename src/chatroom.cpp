@@ -206,6 +206,13 @@ int _LoadPayloadTypeMessage(
 	return 0;
 }
 
+#ifdef DEBUG
+#define __CHATROOM_MESSAGE_DEBUG(m) \
+	LOG_DEBUG("sending {type=%d, data='%s'}", m.type(), m.data())
+#else
+#define __CHATROOM_MESSAGE_DEBUG(m)
+#endif
+
 // i believe the messages aren't being encrypted correctly because I am not accounting for
 // the size of the encrypted data.
 int Chatroom::sendBuffer(PayloadMessageType type, User * user, const InputBuffer & buf) {
@@ -223,8 +230,9 @@ int Chatroom::sendBuffer(PayloadMessageType type, User * user, const InputBuffer
 		return 1;
 	}
 
-	// encrypt data
+	// encrypt data IIF it is a packet with some message data
 	Message outbound(&p);
+	__CHATROOM_MESSAGE_DEBUG(outbound);
 	if ((type == kPayloadMessageTypeData) && outbound.encryptData(this->_cipher)) {
 		LOG_DEBUG("could not encrypt data");
 		return 1;
