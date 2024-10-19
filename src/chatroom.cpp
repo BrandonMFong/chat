@@ -147,6 +147,13 @@ void Chatroom::getuuid(uuid_t uuid) {
 	uuid_copy(uuid, this->_uuid);
 }
 
+#ifdef DEBUG
+#define __CHATROOM_MESSAGE_DEBUG(m) \
+	LOG_DEBUG("%s: {type=%d, data='%s'}", __FUNCTION__, m.type(), m.data())
+#else
+#define __CHATROOM_MESSAGE_DEBUG(m)
+#endif
+
 int Chatroom::receiveMessagePacket(const Packet * pkt) {
 	// chatroom will own this memory
 	Message * m = new Message(pkt);
@@ -166,6 +173,7 @@ int Chatroom::receiveMessagePacket(const Packet * pkt) {
 			LOG_DEBUG("couldn't decrypt message");
 			err = 1;
 		}
+		__CHATROOM_MESSAGE_DEBUG((*m));
 	}
 
 	if (err) {
@@ -223,8 +231,9 @@ int Chatroom::sendBuffer(PayloadMessageType type, User * user, const InputBuffer
 		return 1;
 	}
 
-	// encrypt data
+	// encrypt data IIF it is a packet with some message data
 	Message outbound(&p);
+	__CHATROOM_MESSAGE_DEBUG(outbound);
 	if ((type == kPayloadMessageTypeData) && outbound.encryptData(this->_cipher)) {
 		LOG_DEBUG("could not encrypt data");
 		return 1;

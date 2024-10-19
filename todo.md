@@ -12,8 +12,10 @@ x.x
 [] user typing
 
 0.2.1
-[] issue with sending messages between two machines that are on macos and linux
+[x] issue with sending messages between two machines that are on macos and linux
+	[x] test on two macs
 [] build a macos universal binary
+[x] properly quit to make sure the receiver isn't overworking
 
 0.2
 [x] cross platform
