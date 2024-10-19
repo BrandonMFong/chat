@@ -13,7 +13,7 @@ x.x
 
 0.2.1
 [x] issue with sending messages between two machines that are on macos and linux
-	[] test on two macs
+	[x] test on two macs
 [] build a macos universal binary
 [] properly quit to make sure the receiver isn't overworking
 

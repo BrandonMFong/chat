@@ -43,7 +43,6 @@ public:
 	 */
 	static int destroy(User * user);
 	
-	virtual ~User();
 	const char * username() const;
 	void getuuid(uuid_t uuid) const;
 
@@ -52,6 +51,13 @@ public:
 	const Cipher * cipher();
 
 private:
+	/**
+	 * to free memory, use destroy
+	 *
+	 * destroy handles a lot of the other dependencies
+	 */
+	virtual ~User();
+
 	User(const char * username, const uuid_t uuid);
 	char _username[USER_NAME_SIZE];
 	uuid_t _uuid;
