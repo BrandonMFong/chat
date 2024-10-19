@@ -15,7 +15,7 @@ x.x
 [x] issue with sending messages between two machines that are on macos and linux
 	[x] test on two macs
 [] build a macos universal binary
-[] properly quit to make sure the receiver isn't overworking
+[x] properly quit to make sure the receiver isn't overworking
 
 0.2
 [x] cross platform
