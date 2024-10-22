@@ -24,6 +24,10 @@ CPPSTD = -std=c++20
 LIBRARIES = external/openssl/libssl.a external/openssl/libcrypto.a 
 PACKAGE_NAME = chat
 
+# used to make universal binaries
+MACOS_TARGET_X86_64 = x86_64-apple-macos10.12
+MACOS_TARGET_ARM64 = arm64-apple-macos11
+
 ### macOS Variables
 IDENTITY =
 TEAMID = 
@@ -69,6 +73,11 @@ T_MAIN_OBJECT = $(T_BUILD_PATH)/tests.o
 T_LIBRARIES = $(D_LIBRARIES)
 T_OBJECTS = $(patsubst %, $(T_BUILD_PATH)/%.o, $(FILES))
 
+.PRECIOUS: \
+	$(R_BUILD_PATH)/%.$(MACOS_TARGET_X86_64) $(R_BUILD_PATH)/%.$(MACOS_TARGET_ARM64) \
+	$(D_BUILD_PATH)/%.$(MACOS_TARGET_X86_64) $(D_BUILD_PATH)/%.$(MACOS_TARGET_ARM64) \
+	$(T_BUILD_PATH)/%.$(MACOS_TARGET_X86_64) $(T_BUILD_PATH)/%.$(MACOS_TARGET_ARM64)
+
 ### Instructions
 
 # Default
@@ -112,8 +121,19 @@ release-setup:
 $(BIN_PATH)/$(R_BIN_NAME): $(R_MAIN_FILE) $(R_OBJECTS) $(R_LIBRARIES)
 	g++ -o $@ $^ $(R_CPPFLAGS) $(CPPLINKS) 
 
+ifeq ($(UNAME_S),Darwin)
+$(R_BUILD_PATH)/%.o: $(R_BUILD_PATH)/%.$(MACOS_TARGET_X86_64) $(R_BUILD_PATH)/%.$(MACOS_TARGET_ARM64)
+	lipo -create -output $@ $^
+else
 $(R_BUILD_PATH)/%.o: src/%.cpp src/%.hpp src/*.h
 	g++ -c $< -o $@ $(R_CPPFLAGS)
+endif
+
+$(R_BUILD_PATH)/%.$(MACOS_TARGET_X86_64): src/%.cpp src/%.hpp src/*.h
+	g++ -c -o $@ $< $(R_CPPFLAGS) -target $(MACOS_TARGET_X86_64)
+
+$(R_BUILD_PATH)/%.$(MACOS_TARGET_ARM64): src/%.cpp src/%.hpp src/*.h
+	g++ -c -o $@ $< $(R_CPPFLAGS) -target $(MACOS_TARGET_ARM64)
 
 ## Debug build instructions
 debug: debug-setup $(BIN_PATH)/$(D_BIN_NAME)
@@ -125,8 +145,19 @@ debug-setup:
 $(BIN_PATH)/$(D_BIN_NAME): $(D_MAIN_FILE) $(D_OBJECTS) $(D_LIBRARIES)
 	g++ -o $@ $^ $(D_CPPFLAGS) $(CPPLINKS) 
 
+ifeq ($(UNAME_S),Darwin)
+$(D_BUILD_PATH)/%.o: $(D_BUILD_PATH)/%.$(MACOS_TARGET_X86_64) $(D_BUILD_PATH)/%.$(MACOS_TARGET_ARM64)
+	lipo -create -output $@ $^
+else
 $(D_BUILD_PATH)/%.o: src/%.cpp src/%.hpp src/*.h
 	g++ -c $< -o $@ $(D_CPPFLAGS)
+endif
+
+$(D_BUILD_PATH)/%.$(MACOS_TARGET_X86_64): src/%.cpp src/%.hpp src/*.h
+	g++ -c -o $@ $< $(D_CPPFLAGS) -target $(MACOS_TARGET_X86_64)
+
+$(D_BUILD_PATH)/%.$(MACOS_TARGET_ARM64): src/%.cpp src/%.hpp src/*.h
+	g++ -c -o $@ $< $(D_CPPFLAGS) -target $(MACOS_TARGET_ARM64)
 
 ## Test build instructions
 test: test-setup $(BIN_PATH)/$(T_BIN_NAME)
@@ -142,8 +173,19 @@ $(BIN_PATH)/$(T_BIN_NAME): $(T_MAIN_OBJECT) $(T_OBJECTS) $(T_LIBRARIES)
 $(T_MAIN_OBJECT): $(T_MAIN_FILE) testbench/*.hpp
 	g++ -c $< -o $@ $(T_CPPFLAGS)
 
+ifeq ($(UNAME_S),Darwin)
+$(T_BUILD_PATH)/%.o: $(T_BUILD_PATH)/%.$(MACOS_TARGET_X86_64) $(T_BUILD_PATH)/%.$(MACOS_TARGET_ARM64)
+	lipo -create -output $@ $^
+else
 $(T_BUILD_PATH)/%.o: src/%.cpp src/%.hpp src/*.h
 	g++ -c $< -o $@ $(T_CPPFLAGS)
+endif
+
+$(T_BUILD_PATH)/%.$(MACOS_TARGET_X86_64): src/%.cpp src/%.hpp src/*.h
+	g++ -c -o $@ $< $(T_CPPFLAGS) -target $(MACOS_TARGET_X86_64)
+
+$(T_BUILD_PATH)/%.$(MACOS_TARGET_ARM64): src/%.cpp src/%.hpp src/*.h
+	g++ -c -o $@ $< $(T_CPPFLAGS) -target $(MACOS_TARGET_ARM64)
 
 package: $(PACKAGE_MODE)
 
