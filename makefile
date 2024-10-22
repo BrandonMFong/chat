@@ -112,6 +112,8 @@ help:
 	@echo "	Build for release for Linux distribution"
 	@echo "		make clean build package"
 
+clean-all: clean clean-dependencies
+
 clean:
 	rm -rfv $(BUILD_PATH)
 	rm -rfv $(BIN_PATH)
