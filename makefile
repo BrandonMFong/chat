@@ -21,7 +21,7 @@ BIN_PATH = bin
 BUILD_PATH = build
 CPPLINKS = -lpthread -lncurses $(BF_LIB_C_UUID_FLAGS) -ldl
 CPPSTD = -std=c++20
-LIBRARIES = external/openssl/libssl.a external/openssl/libcrypto.a 
+LIBRARIES = external/bin/openssl-uni/libssl.a external/bin/openssl-uni/libcrypto.a 
 PACKAGE_NAME = chat
 
 # used to make universal binaries
@@ -51,7 +51,13 @@ R_BIN_NAME = chat
 R_BUILD_PATH = $(BUILD_PATH)/release
 R_MAIN_FILE = src/main.cpp
 R_LIBRARIES = external/libs/$(BF_LIB_RPATH_RELEASE_NET) $(LIBRARIES)
+#R_OBJECTS = $(patsubst %, $(R_BUILD_PATH)/%.o, $(FILES))
+ifeq ($(UNAME_S),Darwin)
+R_OBJECTS_MACOS_TARGET_X86_64 = $(patsubst %, $(R_BUILD_PATH)/%.$(MACOS_TARGET_X86_64), $(FILES))
+R_OBJECTS_MACOS_TARGET_ARM64 = $(patsubst %, $(R_BUILD_PATH)/%.$(MACOS_TARGET_ARM64), $(FILES))
+else
 R_OBJECTS = $(patsubst %, $(R_BUILD_PATH)/%.o, $(FILES))
+endif
 
 ### Debug settings
 D_ADDR_SANITIZER = -fsanitize=address
@@ -118,22 +124,31 @@ release-setup:
 	@mkdir -p $(R_BUILD_PATH)
 	@mkdir -p bin
 
-$(BIN_PATH)/$(R_BIN_NAME): $(R_MAIN_FILE) $(R_OBJECTS) $(R_LIBRARIES)
-	g++ -o $@ $^ $(R_CPPFLAGS) $(CPPLINKS) 
-
 ifeq ($(UNAME_S),Darwin)
+$(BIN_PATH)/$(R_BIN_NAME): $(BIN_PATH)/$(R_BIN_NAME).$(MACOS_TARGET_X86_64) $(BIN_PATH)/$(R_BIN_NAME).$(MACOS_TARGET_ARM64)
+	lipo -create -output $@ $^
+
+$(BIN_PATH)/$(R_BIN_NAME).$(MACOS_TARGET_X86_64): $(R_MAIN_FILE) $(R_OBJECTS_MACOS_TARGET_X86_64) $(R_LIBRARIES)
+	g++ -o $@ $^ $(R_CPPFLAGS) $(CPPLINKS) -target $(MACOS_TARGET_X86_64)
+
+$(BIN_PATH)/$(R_BIN_NAME).$(MACOS_TARGET_ARM64): $(R_MAIN_FILE) $(R_OBJECTS_MACOS_TARGET_ARM64) $(R_LIBRARIES)
+	g++ -o $@ $^ $(R_CPPFLAGS) $(CPPLINKS) -target $(MACOS_TARGET_ARM64)
+
 $(R_BUILD_PATH)/%.o: $(R_BUILD_PATH)/%.$(MACOS_TARGET_X86_64) $(R_BUILD_PATH)/%.$(MACOS_TARGET_ARM64)
 	lipo -create -output $@ $^
-else
-$(R_BUILD_PATH)/%.o: src/%.cpp src/%.hpp src/*.h
-	g++ -c $< -o $@ $(R_CPPFLAGS)
-endif
 
 $(R_BUILD_PATH)/%.$(MACOS_TARGET_X86_64): src/%.cpp src/%.hpp src/*.h
 	g++ -c -o $@ $< $(R_CPPFLAGS) -target $(MACOS_TARGET_X86_64)
 
 $(R_BUILD_PATH)/%.$(MACOS_TARGET_ARM64): src/%.cpp src/%.hpp src/*.h
 	g++ -c -o $@ $< $(R_CPPFLAGS) -target $(MACOS_TARGET_ARM64)
+else
+$(BIN_PATH)/$(R_BIN_NAME): $(R_MAIN_FILE) $(R_OBJECTS) $(R_LIBRARIES)
+	g++ -o $@ $^ $(R_CPPFLAGS) $(CPPLINKS)
+
+$(R_BUILD_PATH)/%.o: src/%.cpp src/%.hpp src/*.h
+	g++ -c $< -o $@ $(R_CPPFLAGS)
+endif
 
 ## Debug build instructions
 debug: debug-setup $(BIN_PATH)/$(D_BIN_NAME)
