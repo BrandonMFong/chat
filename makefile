@@ -79,12 +79,14 @@ T_CPPFLAGS = $(D_CPPFLAGS) -DTESTING
 T_BIN_NAME = $(R_BIN_NAME)-test
 T_BUILD_PATH = $(BUILD_PATH)/test
 T_MAIN_FILE = testbench/tests.cpp
-T_MAIN_OBJECT = $(T_BUILD_PATH)/tests.o
 T_LIBRARIES = $(D_LIBRARIES)
 ifeq ($(UNAME_S),Darwin)
+T_MAIN_OBJECT_MACOS_TARGET_X86_64 = $(T_BUILD_PATH)/tests.$(MACOS_TARGET_X86_64)
+T_MAIN_OBJECT_MACOS_TARGET_ARM64 = $(T_BUILD_PATH)/tests.$(MACOS_TARGET_ARM64)
 T_OBJECTS_MACOS_TARGET_X86_64 = $(patsubst %, $(T_BUILD_PATH)/%.$(MACOS_TARGET_X86_64), $(FILES))
 T_OBJECTS_MACOS_TARGET_ARM64 = $(patsubst %, $(T_BUILD_PATH)/%.$(MACOS_TARGET_ARM64), $(FILES))
 else
+T_MAIN_OBJECT = $(T_BUILD_PATH)/tests.o
 T_OBJECTS = $(patsubst %, $(T_BUILD_PATH)/%.o, $(FILES))
 endif
 
@@ -205,25 +207,37 @@ test-setup:
 	@mkdir -p $(T_BUILD_PATH)
 	@mkdir -p bin
 
-$(BIN_PATH)/$(T_BIN_NAME): $(T_MAIN_OBJECT) $(T_OBJECTS) $(T_LIBRARIES)
-	g++ -o $@ $^ $(T_CPPFLAGS) $(CPPLINKS) 
-
-$(T_MAIN_OBJECT): $(T_MAIN_FILE) testbench/*.hpp
-	g++ -c $< -o $@ $(T_CPPFLAGS)
-
 ifeq ($(UNAME_S),Darwin)
+$(BIN_PATH)/$(T_BIN_NAME): $(BIN_PATH)/$(T_BIN_NAME).$(MACOS_TARGET_X86_64) $(BIN_PATH)/$(T_BIN_NAME).$(MACOS_TARGET_ARM64)
+	lipo -create -output $@ $^
+
+$(BIN_PATH)/$(T_BIN_NAME).$(MACOS_TARGET_X86_64): $(T_MAIN_OBJECT_MACOS_TARGET_X86_64) $(T_OBJECTS_MACOS_TARGET_X86_64) $(T_LIBRARIES)
+	g++ -o $@ $^ $(T_CPPFLAGS) $(CPPLINKS) -target $(MACOS_TARGET_X86_64)
+
+$(BIN_PATH)/$(T_BIN_NAME).$(MACOS_TARGET_ARM64): $(T_MAIN_OBJECT_MACOS_TARGET_ARM64) $(T_OBJECTS_MACOS_TARGET_ARM64) $(T_LIBRARIES)
+	g++ -o $@ $^ $(T_CPPFLAGS) $(CPPLINKS) -target $(MACOS_TARGET_ARM64)
+
+$(T_MAIN_OBJECT_MACOS_TARGET_X86_64): $(T_MAIN_FILE) testbench/*.hpp
+	g++ -c $< -o $@ $(T_CPPFLAGS) -target $(MACOS_TARGET_X86_64)
+
+$(T_MAIN_OBJECT_MACOS_TARGET_ARM64): $(T_MAIN_FILE) testbench/*.hpp
+	g++ -c $< -o $@ $(T_CPPFLAGS) -target $(MACOS_TARGET_ARM64)
+
 $(T_BUILD_PATH)/%.o: $(T_BUILD_PATH)/%.$(MACOS_TARGET_X86_64) $(T_BUILD_PATH)/%.$(MACOS_TARGET_ARM64)
 	lipo -create -output $@ $^
-else
-$(T_BUILD_PATH)/%.o: src/%.cpp src/%.hpp src/*.h
-	g++ -c $< -o $@ $(T_CPPFLAGS)
-endif
 
 $(T_BUILD_PATH)/%.$(MACOS_TARGET_X86_64): src/%.cpp src/%.hpp src/*.h
 	g++ -c -o $@ $< $(T_CPPFLAGS) -target $(MACOS_TARGET_X86_64)
 
 $(T_BUILD_PATH)/%.$(MACOS_TARGET_ARM64): src/%.cpp src/%.hpp src/*.h
 	g++ -c -o $@ $< $(T_CPPFLAGS) -target $(MACOS_TARGET_ARM64)
+else
+$(BIN_PATH)/$(T_BIN_NAME): $(T_MAIN_FILE) $(T_OBJECTS) $(T_LIBRARIES)
+	g++ -o $@ $^ $(T_CPPFLAGS) $(CPPLINKS)
+
+$(T_BUILD_PATH)/%.o: src/%.cpp src/%.hpp src/*.h
+	g++ -c $< -o $@ $(T_CPPFLAGS)
+endif
 
 package: $(PACKAGE_MODE)
 
