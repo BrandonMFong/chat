@@ -56,6 +56,7 @@ ifeq ($(UNAME_S),Darwin)
 R_OBJECTS_MACOS_TARGET_X86_64 = $(patsubst %, $(R_BUILD_PATH)/%.$(MACOS_TARGET_X86_64), $(FILES))
 R_OBJECTS_MACOS_TARGET_ARM64 = $(patsubst %, $(R_BUILD_PATH)/%.$(MACOS_TARGET_ARM64), $(FILES))
 R_OBJECTS_MACOS_TARGETS = $(R_OBJECTS_MACOS_TARGET_X86_64) $(R_OBJECTS_MACOS_TARGET_ARM64)
+R_BIN_MACOS_TARGETS = $(BIN_PATH)/$(R_BIN_NAME).$(MACOS_TARGET_X86_64) $(BIN_PATH)/$(R_BIN_NAME).$(MACOS_TARGET_ARM64)
 else
 R_OBJECTS = $(patsubst %, $(R_BUILD_PATH)/%.o, $(FILES))
 endif
@@ -96,6 +97,8 @@ endif
 	$(R_BUILD_PATH)/%.$(MACOS_TARGET_X86_64) $(R_BUILD_PATH)/%.$(MACOS_TARGET_ARM64) \
 	$(D_BUILD_PATH)/%.$(MACOS_TARGET_X86_64) $(D_BUILD_PATH)/%.$(MACOS_TARGET_ARM64) \
 	$(T_BUILD_PATH)/%.$(MACOS_TARGET_X86_64) $(T_BUILD_PATH)/%.$(MACOS_TARGET_ARM64)
+
+.SECONDEXPANSION:
 
 ### Instructions
 
@@ -143,27 +146,17 @@ release-setup:
 	@mkdir -p bin
 
 ifeq ($(UNAME_S),Darwin)
-$(BIN_PATH)/$(R_BIN_NAME): $(BIN_PATH)/$(R_BIN_NAME).$(MACOS_TARGET_X86_64) $(BIN_PATH)/$(R_BIN_NAME).$(MACOS_TARGET_ARM64)
+$(BIN_PATH)/$(R_BIN_NAME): $(R_BIN_MACOS_TARGETS)
 	lipo -create -output $@ $^
 
-$(BIN_PATH)/$(R_BIN_NAME).$(MACOS_TARGET_X86_64): $(R_MAIN_FILE) $(R_OBJECTS_MACOS_TARGET_X86_64) $(R_LIBRARIES)
-	g++ -o $@ $^ $(R_CPPFLAGS) $(CPPLINKS) -target $(subst --,., $(subst .,, $(suffix $@)))
-
-$(BIN_PATH)/$(R_BIN_NAME).$(MACOS_TARGET_ARM64): $(R_MAIN_FILE) $(R_OBJECTS_MACOS_TARGET_ARM64) $(R_LIBRARIES)
-	g++ -o $@ $^ $(R_CPPFLAGS) $(CPPLINKS) -target $(subst --,., $(subst .,, $(suffix $@)))
+$(R_BIN_MACOS_TARGETS): $(R_MAIN_FILE) $(R_OBJECTS_MACOS_TARGETS)
+	g++ -o $@ $< $(wildcard $(R_BUILD_PATH)/*$(suffix $@)) $(R_CPPFLAGS) $(CPPLINKS) $(R_LIBRARIES) -target $(subst --,., $(subst .,, $(suffix $@)))
 
 $(R_BUILD_PATH)/%.o: $(R_BUILD_PATH)/%.$(MACOS_TARGET_X86_64) $(R_BUILD_PATH)/%.$(MACOS_TARGET_ARM64)
 	lipo -create -output $@ $^
 
-#$(R_BUILD_PATH)/%.$(MACOS_TARGET_X86_64): src/%.cpp src/%.hpp src/*.h
-#	g++ -c -o $@ $< $(R_CPPFLAGS) -target $(MACOS_TARGET_X86_64)
-
-#$(R_BUILD_PATH)/%.$(MACOS_TARGET_ARM64): src/%.cpp src/%.hpp src/*.h
-#	g++ -c -o $@ $< $(R_CPPFLAGS) -target $(MACOS_TARGET_ARM64)
-
-.SECONDEXPANSION:
 $(R_OBJECTS_MACOS_TARGETS): $$(subst $(R_BUILD_PATH), src, $$(subst $$(suffix $$@),, $$@)).cpp  $$(subst $(R_BUILD_PATH), src, $$(subst $$(suffix $$@),, $$@)).hpp src/*.h
-	g++ -c -o $@ $< $(R_CPPFLAGS) -target $(subst --,., $(subst .,, $(suffix $@)))
+	g++ -c -o $@ $< $(R_CPPFLAGS) -target $(subst --,.,$(subst .,,$(suffix $@)))
 
 else
 $(BIN_PATH)/$(R_BIN_NAME): $(R_MAIN_FILE) $(R_OBJECTS) $(R_LIBRARIES)
