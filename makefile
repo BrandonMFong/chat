@@ -51,7 +51,6 @@ R_BIN_NAME = chat
 R_BUILD_PATH = $(BUILD_PATH)/release
 R_MAIN_FILE = src/main.cpp
 R_LIBRARIES = external/libs/$(BF_LIB_RPATH_RELEASE_NET) $(LIBRARIES)
-#R_OBJECTS = $(patsubst %, $(R_BUILD_PATH)/%.o, $(FILES))
 ifeq ($(UNAME_S),Darwin)
 R_OBJECTS_MACOS_TARGET_X86_64 = $(patsubst %, $(R_BUILD_PATH)/%.$(MACOS_TARGET_X86_64), $(FILES))
 R_OBJECTS_MACOS_TARGET_ARM64 = $(patsubst %, $(R_BUILD_PATH)/%.$(MACOS_TARGET_ARM64), $(FILES))
@@ -68,7 +67,12 @@ D_BIN_NAME = $(R_BIN_NAME)-debug
 D_BUILD_PATH = $(BUILD_PATH)/debug
 D_MAIN_FILE = $(R_MAIN_FILE)
 D_LIBRARIES = external/libs/$(BF_LIB_RPATH_DEBUG_NET) $(LIBRARIES)
+ifeq ($(UNAME_S),Darwin)
+D_OBJECTS_MACOS_TARGET_X86_64 = $(patsubst %, $(D_BUILD_PATH)/%.$(MACOS_TARGET_X86_64), $(FILES))
+D_OBJECTS_MACOS_TARGET_ARM64 = $(patsubst %, $(D_BUILD_PATH)/%.$(MACOS_TARGET_ARM64), $(FILES))
+else
 D_OBJECTS = $(patsubst %, $(D_BUILD_PATH)/%.o, $(FILES))
+endif
 
 ### Test settings
 T_CPPFLAGS = $(D_CPPFLAGS) -DTESTING
@@ -77,7 +81,12 @@ T_BUILD_PATH = $(BUILD_PATH)/test
 T_MAIN_FILE = testbench/tests.cpp
 T_MAIN_OBJECT = $(T_BUILD_PATH)/tests.o
 T_LIBRARIES = $(D_LIBRARIES)
+ifeq ($(UNAME_S),Darwin)
+T_OBJECTS_MACOS_TARGET_X86_64 = $(patsubst %, $(T_BUILD_PATH)/%.$(MACOS_TARGET_X86_64), $(FILES))
+T_OBJECTS_MACOS_TARGET_ARM64 = $(patsubst %, $(T_BUILD_PATH)/%.$(MACOS_TARGET_ARM64), $(FILES))
+else
 T_OBJECTS = $(patsubst %, $(T_BUILD_PATH)/%.o, $(FILES))
+endif
 
 .PRECIOUS: \
 	$(R_BUILD_PATH)/%.$(MACOS_TARGET_X86_64) $(R_BUILD_PATH)/%.$(MACOS_TARGET_ARM64) \
@@ -162,22 +171,31 @@ debug-setup:
 	@mkdir -p $(D_BUILD_PATH)
 	@mkdir -p bin
 
-$(BIN_PATH)/$(D_BIN_NAME): $(D_MAIN_FILE) $(D_OBJECTS) $(D_LIBRARIES)
-	g++ -o $@ $^ $(D_CPPFLAGS) $(CPPLINKS) 
-
 ifeq ($(UNAME_S),Darwin)
+$(BIN_PATH)/$(D_BIN_NAME): $(BIN_PATH)/$(D_BIN_NAME).$(MACOS_TARGET_X86_64) $(BIN_PATH)/$(D_BIN_NAME).$(MACOS_TARGET_ARM64)
+	lipo -create -output $@ $^
+
+$(BIN_PATH)/$(D_BIN_NAME).$(MACOS_TARGET_X86_64): $(D_MAIN_FILE) $(D_OBJECTS_MACOS_TARGET_X86_64) $(D_LIBRARIES)
+	g++ -o $@ $^ $(D_CPPFLAGS) $(CPPLINKS) -target $(MACOS_TARGET_X86_64)
+
+$(BIN_PATH)/$(D_BIN_NAME).$(MACOS_TARGET_ARM64): $(D_MAIN_FILE) $(D_OBJECTS_MACOS_TARGET_ARM64) $(D_LIBRARIES)
+	g++ -o $@ $^ $(D_CPPFLAGS) $(CPPLINKS) -target $(MACOS_TARGET_ARM64)
+
 $(D_BUILD_PATH)/%.o: $(D_BUILD_PATH)/%.$(MACOS_TARGET_X86_64) $(D_BUILD_PATH)/%.$(MACOS_TARGET_ARM64)
 	lipo -create -output $@ $^
-else
-$(D_BUILD_PATH)/%.o: src/%.cpp src/%.hpp src/*.h
-	g++ -c $< -o $@ $(D_CPPFLAGS)
-endif
 
 $(D_BUILD_PATH)/%.$(MACOS_TARGET_X86_64): src/%.cpp src/%.hpp src/*.h
 	g++ -c -o $@ $< $(D_CPPFLAGS) -target $(MACOS_TARGET_X86_64)
 
 $(D_BUILD_PATH)/%.$(MACOS_TARGET_ARM64): src/%.cpp src/%.hpp src/*.h
 	g++ -c -o $@ $< $(D_CPPFLAGS) -target $(MACOS_TARGET_ARM64)
+else
+$(BIN_PATH)/$(D_BIN_NAME): $(D_MAIN_FILE) $(D_OBJECTS) $(D_LIBRARIES)
+	g++ -o $@ $^ $(D_CPPFLAGS) $(CPPLINKS)
+
+$(D_BUILD_PATH)/%.o: src/%.cpp src/%.hpp src/*.h
+	g++ -c $< -o $@ $(D_CPPFLAGS)
+endif
 
 ## Test build instructions
 test: test-setup dependencies $(BIN_PATH)/$(T_BIN_NAME)
