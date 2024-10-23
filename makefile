@@ -88,6 +88,7 @@ BIN_NAME = chat-test
 BUILD_PATH = build/test
 MAIN_FILE = testbench/tests.cpp
 LIBRARIES += external/libs/$(BF_LIB_RPATH_DEBUG_NET)
+BIN_PREREQS := $(wildcard testbench/*.hpp)
 ifeq ($(UNAME_S),Darwin)
 MAIN_OBJECT_MACOS_TARGET_X86_64 = $(BUILD_PATH)/tests.$(MACOS_TARGET_X86_64)
 MAIN_OBJECT_MACOS_TARGET_ARM64 = $(BUILD_PATH)/tests.$(MACOS_TARGET_ARM64)
@@ -120,7 +121,7 @@ ifeq ($(UNAME_S),Darwin)
 $(BIN_PATH)/$(BIN_NAME): $(BIN_MACOS_TARGETS)
 	lipo -create -output $@ $^
 
-$(BIN_MACOS_TARGETS): $(MAIN_FILE) $(OBJECTS_MACOS_TARGETS)
+$(BIN_MACOS_TARGETS): $(MAIN_FILE) $(OBJECTS_MACOS_TARGETS) $(BIN_PREREQS)
 	g++ -o $@ $< $(wildcard $(BUILD_PATH)/*$(suffix $@)) $(CPPFLAGS) $(CPPLINKS) $(LIBRARIES) -target $(subst --,., $(subst .,, $(suffix $@)))
 
 $(BUILD_PATH)/%.o: $(BUILD_PATH)/%.$(MACOS_TARGET_X86_64) $(BUILD_PATH)/%.$(MACOS_TARGET_ARM64)
@@ -130,8 +131,8 @@ $(OBJECTS_MACOS_TARGETS): $$(subst $(BUILD_PATH), src, $$(subst $$(suffix $$@),,
 	g++ -c -o $@ $< $(CPPFLAGS) -target $(subst --,.,$(subst .,,$(suffix $@)))
 
 else
-$(BIN_PATH)/$(BIN_NAME): $(MAIN_FILE) $(OBJECTS) $(LIBRARIES)
-	g++ -o $@ $^ $(CPPFLAGS) $(CPPLINKS)
+$(BIN_PATH)/$(BIN_NAME): $(MAIN_FILE) $(OBJECTS)
+	g++ -o $@ $^ $(LIBRARIES) $(CPPFLAGS) $(CPPLINKS)
 
 $(BUILD_PATH)/%.o: src/%.cpp src/%.hpp src/*.h
 	g++ -c $< -o $@ $(CPPFLAGS)
