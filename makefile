@@ -73,6 +73,8 @@ D_LIBRARIES = external/libs/$(BF_LIB_RPATH_DEBUG_NET) $(LIBRARIES)
 ifeq ($(UNAME_S),Darwin)
 D_OBJECTS_MACOS_TARGET_X86_64 = $(patsubst %, $(D_BUILD_PATH)/%.$(MACOS_TARGET_X86_64), $(FILES))
 D_OBJECTS_MACOS_TARGET_ARM64 = $(patsubst %, $(D_BUILD_PATH)/%.$(MACOS_TARGET_ARM64), $(FILES))
+D_OBJECTS_MACOS_TARGETS = $(D_OBJECTS_MACOS_TARGET_X86_64) $(D_OBJECTS_MACOS_TARGET_ARM64)
+D_BIN_MACOS_TARGETS = $(BIN_PATH)/$(D_BIN_NAME).$(MACOS_TARGET_X86_64) $(BIN_PATH)/$(D_BIN_NAME).$(MACOS_TARGET_ARM64)
 else
 D_OBJECTS = $(patsubst %, $(D_BUILD_PATH)/%.o, $(FILES))
 endif
@@ -174,23 +176,18 @@ debug-setup:
 	@mkdir -p bin
 
 ifeq ($(UNAME_S),Darwin)
-$(BIN_PATH)/$(D_BIN_NAME): $(BIN_PATH)/$(D_BIN_NAME).$(MACOS_TARGET_X86_64) $(BIN_PATH)/$(D_BIN_NAME).$(MACOS_TARGET_ARM64)
+$(BIN_PATH)/$(D_BIN_NAME): $(D_BIN_MACOS_TARGETS)
 	lipo -create -output $@ $^
 
-$(BIN_PATH)/$(D_BIN_NAME).$(MACOS_TARGET_X86_64): $(D_MAIN_FILE) $(D_OBJECTS_MACOS_TARGET_X86_64) $(D_LIBRARIES)
-	g++ -o $@ $^ $(D_CPPFLAGS) $(CPPLINKS) -target $(MACOS_TARGET_X86_64)
-
-$(BIN_PATH)/$(D_BIN_NAME).$(MACOS_TARGET_ARM64): $(D_MAIN_FILE) $(D_OBJECTS_MACOS_TARGET_ARM64) $(D_LIBRARIES)
-	g++ -o $@ $^ $(D_CPPFLAGS) $(CPPLINKS) -target $(MACOS_TARGET_ARM64)
+$(D_BIN_MACOS_TARGETS): $(D_MAIN_FILE) $(D_OBJECTS_MACOS_TARGETS)
+	g++ -o $@ $< $(wildcard $(D_BUILD_PATH)/*$(suffix $@)) $(D_CPPFLAGS) $(CPPLINKS) $(D_LIBRARIES) -target $(subst --,.,$(subst .,,$(suffix $@)))
 
 $(D_BUILD_PATH)/%.o: $(D_BUILD_PATH)/%.$(MACOS_TARGET_X86_64) $(D_BUILD_PATH)/%.$(MACOS_TARGET_ARM64)
 	lipo -create -output $@ $^
 
-$(D_BUILD_PATH)/%.$(MACOS_TARGET_X86_64): src/%.cpp src/%.hpp src/*.h
-	g++ -c -o $@ $< $(D_CPPFLAGS) -target $(MACOS_TARGET_X86_64)
+$(D_OBJECTS_MACOS_TARGETS): $$(subst $(D_BUILD_PATH), src, $$(subst $$(suffix $$@),, $$@)).cpp  $$(subst $(D_BUILD_PATH), src, $$(subst $$(suffix $$@),, $$@)).hpp src/*.h
+	g++ -c -o $@ $< $(D_CPPFLAGS) -target $(subst --,.,$(subst .,,$(suffix $@)))
 
-$(D_BUILD_PATH)/%.$(MACOS_TARGET_ARM64): src/%.cpp src/%.hpp src/*.h
-	g++ -c -o $@ $< $(D_CPPFLAGS) -target $(MACOS_TARGET_ARM64)
 else
 $(BIN_PATH)/$(D_BIN_NAME): $(D_MAIN_FILE) $(D_OBJECTS) $(D_LIBRARIES)
 	g++ -o $@ $^ $(D_CPPFLAGS) $(CPPLINKS)
