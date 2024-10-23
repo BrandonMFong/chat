@@ -79,6 +79,27 @@ BIN_MACOS_TARGETS = $(BIN_PATH)/$(BIN_NAME).$(MACOS_TARGET_X86_64) $(BIN_PATH)/$
 else # ($(UNAME_S),Darwin)
 D_OBJECTS = $(patsubst %, $(BUILD_PATH)/%.o, $(FILES))
 endif # ($(UNAME_S),Darwin)
+else ifeq ($(CONFIG), test) # ($(CONFIG), ???)
+ADDR_SANITIZER = -fsanitize=address
+CPPFLAGS += -DDEBUG -DTESTING -g -Isrc/ \
+	-Iexternal/libs/$(BF_LIB_RPATH_DEBUG) \
+	$(ADDR_SANITIZER) $(CPPSTD)
+BIN_NAME = chat-test
+BUILD_PATH = build/test
+MAIN_FILE = testbench/tests.cpp
+LIBRARIES += external/libs/$(BF_LIB_RPATH_DEBUG_NET)
+ifeq ($(UNAME_S),Darwin)
+MAIN_OBJECT_MACOS_TARGET_X86_64 = $(BUILD_PATH)/tests.$(MACOS_TARGET_X86_64)
+MAIN_OBJECT_MACOS_TARGET_ARM64 = $(BUILD_PATH)/tests.$(MACOS_TARGET_ARM64)
+MAIN_OBJECT_MACOS_TARGETS = $(MAIN_OBJECT_MACOS_TARGET_X86_64) $(MAIN_OBJECT_MACOS_TARGET_ARM64)
+OBJECTS_MACOS_TARGET_X86_64 = $(patsubst %, $(BUILD_PATH)/%.$(MACOS_TARGET_X86_64), $(FILES))
+OBJECTS_MACOS_TARGET_ARM64 = $(patsubst %, $(BUILD_PATH)/%.$(MACOS_TARGET_ARM64), $(FILES))
+OBJECTS_MACOS_TARGETS = $(OBJECTS_MACOS_TARGET_X86_64) $(OBJECTS_MACOS_TARGET_ARM64)
+BIN_MACOS_TARGETS = $(BIN_PATH)/$(BIN_NAME).$(MACOS_TARGET_X86_64) $(BIN_PATH)/$(BIN_NAME).$(MACOS_TARGET_ARM64)
+else
+MAIN_OBJECT = $(BUILD_PATH)/tests.o
+OBJECTS = $(patsubst %, $(BUILD_PATH)/%.o, $(FILES))
+endif
 endif # ($(CONFIG), ???)
 
 build: setup dependencies $(BIN_PATH)/$(BIN_NAME)
@@ -115,7 +136,6 @@ $(BIN_PATH)/$(BIN_NAME): $(MAIN_FILE) $(OBJECTS) $(LIBRARIES)
 $(BUILD_PATH)/%.o: src/%.cpp src/%.hpp src/*.h
 	g++ -c $< -o $@ $(CPPFLAGS)
 endif
-
 
 ### Test settings
 T_CPPFLAGS = $(D_CPPFLAGS) -DTESTING
