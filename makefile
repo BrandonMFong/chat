@@ -79,6 +79,7 @@ BIN_MACOS_TARGETS = $(BIN_PATH)/$(BIN_NAME).$(MACOS_TARGET_X86_64) $(BIN_PATH)/$
 else # ($(UNAME_S),Darwin)
 D_OBJECTS = $(patsubst %, $(BUILD_PATH)/%.o, $(FILES))
 endif # ($(UNAME_S),Darwin)
+### Test settings
 else ifeq ($(CONFIG), test) # ($(CONFIG), ???)
 ADDR_SANITIZER = -fsanitize=address
 CPPFLAGS += -DDEBUG -DTESTING -g -Isrc/ \
@@ -104,6 +105,36 @@ endif
 endif # ($(CONFIG), ???)
 
 build: setup dependencies $(BIN_PATH)/$(BIN_NAME)
+
+.PRECIOUS: \
+	$(R_BUILD_PATH)/%.$(MACOS_TARGET_X86_64) $(R_BUILD_PATH)/%.$(MACOS_TARGET_ARM64) \
+	$(D_BUILD_PATH)/%.$(MACOS_TARGET_X86_64) $(D_BUILD_PATH)/%.$(MACOS_TARGET_ARM64) \
+	$(T_BUILD_PATH)/%.$(MACOS_TARGET_X86_64) $(T_BUILD_PATH)/%.$(MACOS_TARGET_ARM64)
+
+help:
+	@echo "Usage:"
+	@echo "	make [target] variables"
+	@echo ""
+	@echo "Target(s):"
+	@echo "	clean			cleans build and bin folder"
+	@echo "	build 			builds release verions"
+	@echo "	package			compresses build"
+	@echo "	dependecies		builds all dependencies in the external directory"
+	@echo "	clean-dependecies	builds all dependencies in the external directory"
+	@echo "	clean-all		cleans local and dependency builds"
+	@echo ""
+	@echo "Variable(s):"
+	@echo "	CONFIG		use this to change the build config. Accepts \"release\" (default), \"debug\", or \"test\""
+	@echo "	IDENTITY	(macos only) Developer ID common name"
+	@echo "	TEAMID 		(macos only) Developer Team ID"
+	@echo "	EMAIL 		(macos only) Developer account email"
+	@echo "	PW		(macos only) Developer account password"
+	@echo ""
+	@echo "Example(s):"
+	@echo "	Build for release for macOS distribution"
+	@echo "		make clean build codesign package notarize staple IDENTITY=\"\" TEAMID=\"\" EMAIL=\"\" PW=\"\""
+	@echo "	Build for release for Linux distribution"
+	@echo "		make clean build package"
 
 SETUP_DIRS = $(BIN_PATH) $(BUILD_PATH)
 setup: $(SETUP_DIRS)
@@ -136,92 +167,6 @@ $(BIN_PATH)/$(BIN_NAME): $(MAIN_FILE) $(OBJECTS)
 
 $(BUILD_PATH)/%.o: src/%.cpp src/%.hpp src/*.h
 	g++ -c $< -o $@ $(CPPFLAGS)
-endif
-
-### Test settings
-T_CPPFLAGS = $(D_CPPFLAGS) -DTESTING
-T_BIN_NAME = $(R_BIN_NAME)-test
-T_BUILD_PATH = $(BUILD_PATH)/test
-T_MAIN_FILE = testbench/tests.cpp
-T_LIBRARIES = $(D_LIBRARIES)
-ifeq ($(UNAME_S),Darwin)
-T_MAIN_OBJECT_MACOS_TARGET_X86_64 = $(T_BUILD_PATH)/tests.$(MACOS_TARGET_X86_64)
-T_MAIN_OBJECT_MACOS_TARGET_ARM64 = $(T_BUILD_PATH)/tests.$(MACOS_TARGET_ARM64)
-T_MAIN_OBJECT_MACOS_TARGETS = $(T_MAIN_OBJECT_MACOS_TARGET_X86_64) $(T_MAIN_OBJECT_MACOS_TARGET_ARM64)
-T_OBJECTS_MACOS_TARGET_X86_64 = $(patsubst %, $(T_BUILD_PATH)/%.$(MACOS_TARGET_X86_64), $(FILES))
-T_OBJECTS_MACOS_TARGET_ARM64 = $(patsubst %, $(T_BUILD_PATH)/%.$(MACOS_TARGET_ARM64), $(FILES))
-T_OBJECTS_MACOS_TARGETS = $(T_OBJECTS_MACOS_TARGET_X86_64) $(T_OBJECTS_MACOS_TARGET_ARM64)
-T_BIN_MACOS_TARGETS = $(BIN_PATH)/$(T_BIN_NAME).$(MACOS_TARGET_X86_64) $(BIN_PATH)/$(T_BIN_NAME).$(MACOS_TARGET_ARM64)
-else
-T_MAIN_OBJECT = $(T_BUILD_PATH)/tests.o
-T_OBJECTS = $(patsubst %, $(T_BUILD_PATH)/%.o, $(FILES))
-endif
-
-.PRECIOUS: \
-	$(R_BUILD_PATH)/%.$(MACOS_TARGET_X86_64) $(R_BUILD_PATH)/%.$(MACOS_TARGET_ARM64) \
-	$(D_BUILD_PATH)/%.$(MACOS_TARGET_X86_64) $(D_BUILD_PATH)/%.$(MACOS_TARGET_ARM64) \
-	$(T_BUILD_PATH)/%.$(MACOS_TARGET_X86_64) $(T_BUILD_PATH)/%.$(MACOS_TARGET_ARM64)
-
-### Instructions
-
-# Default
-#build: release
-
-help:
-	@echo "Usage:"
-	@echo "	make [target] variables"
-	@echo ""
-	@echo "Target(s):"
-	@echo "	clean			cleans build and bin folder"
-	@echo "	build 			builds release verions"
-	@echo "	release			builds release version"
-	@echo "	debug			builds debug version"
-	@echo "	package			compresses build"
-	@echo "	dependecies		builds all dependencies in the external directory"
-	@echo "	clean-dependecies	builds all dependencies in the external directory"
-	@echo "	clean-all		cleans local and dependency builds"
-	@echo ""
-	@echo "Variable(s):"
-	@echo "	IDENTITY	(macos only) Developer ID common name"
-	@echo "	TEAMID 		(macos only) Developer Team ID"
-	@echo "	EMAIL 		(macos only) Developer account email"
-	@echo "	PW		(macos only) Developer account password"
-	@echo ""
-	@echo "Example(s):"
-	@echo "	Build for release for macOS distribution"
-	@echo "		make clean build codesign package notarize staple IDENTITY=\"\" TEAMID=\"\" EMAIL=\"\" PW=\"\""
-	@echo "	Build for release for Linux distribution"
-	@echo "		make clean build package"
-
-## Test build instructions
-test: test-setup dependencies $(BIN_PATH)/$(T_BIN_NAME)
-	./$(BIN_PATH)/$(T_BIN_NAME)
-
-test-setup:
-	@mkdir -p $(T_BUILD_PATH)
-	@mkdir -p bin
-
-ifeq ($(UNAME_S),Darwin)
-$(BIN_PATH)/$(T_BIN_NAME): $(T_BIN_MACOS_TARGETS)
-	lipo -create -output $@ $^
-
-$(T_BIN_MACOS_TARGETS): $(T_MAIN_FILE) $(T_OBJECTS_MACOS_TARGETS)
-	g++ -o $@ $< $(wildcard $(T_BUILD_PATH)/*$(suffix $@)) $(T_CPPFLAGS) $(CPPLINKS) $(T_LIBRARIES) -target $(subst --,.,$(subst .,,$(suffix $@)))
-
-$(T_MAIN_OBJECT_MACOS_TARGETS): $(T_MAIN_FILE) testbench/*.hpp
-	g++ -c $< -o $@ $(T_CPPFLAGS) -target $(subst --,.,$(subst .,,$(suffix $@)))
-
-$(T_BUILD_PATH)/%.o: $(T_BUILD_PATH)/%.$(MACOS_TARGET_X86_64) $(T_BUILD_PATH)/%.$(MACOS_TARGET_ARM64)
-	lipo -create -output $@ $^
-
-$(T_OBJECTS_MACOS_TARGETS): $$(subst $(T_BUILD_PATH), src, $$(subst $$(suffix $$@),, $$@)).cpp  $$(subst $(T_BUILD_PATH), src, $$(subst $$(suffix $$@),, $$@)).hpp src/*.h
-	g++ -c -o $@ $< $(T_CPPFLAGS) -target $(subst --,.,$(subst .,,$(suffix $@)))
-else
-$(BIN_PATH)/$(T_BIN_NAME): $(T_MAIN_FILE) $(T_OBJECTS) $(T_LIBRARIES)
-	g++ -o $@ $^ $(T_CPPFLAGS) $(CPPLINKS)
-
-$(T_BUILD_PATH)/%.o: src/%.cpp src/%.hpp src/*.h
-	g++ -c $< -o $@ $(T_CPPFLAGS)
 endif
 
 package: $(PACKAGE_MODE)
