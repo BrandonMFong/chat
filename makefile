@@ -19,7 +19,7 @@ PACKAGE_MODE = package-macos
 endif
 
 ### Global
-config = release
+CONFIG = release
 BIN_PATH = bin
 CPPLINKS = -lpthread -lncurses $(BF_LIB_C_UUID_FLAGS) -ldl
 CPPSTD = -std=c++20
@@ -47,7 +47,7 @@ permissions exception \
 chat 
 
 ### Release settings
-ifeq ($(config), release) # ($(config), ???)
+ifeq ($(CONFIG), release) # ($(CONFIG), ???)
 CPPFLAGS += -Isrc/ \
 	-Iexternal/libs/$(BF_LIB_RPATH_RELEASE) \
 	$(CPPSTD)
@@ -63,7 +63,7 @@ else # ($(UNAME_S),Darwin)
 OBJECTS = $(patsubst %, $(BUILD_PATH)/%.o, $(FILES))
 endif # ($(UNAME_S),Darwin)
 ### Debug settings
-else ifeq ($(config), debug) # ($(config), ???)
+else ifeq ($(CONFIG), debug) # ($(CONFIG), ???)
 ADDR_SANITIZER = -fsanitize=address
 CPPFLAGS += -DDEBUG -g -Isrc/ \
 	-Iexternal/libs/$(BF_LIB_RPATH_DEBUG) \
@@ -79,7 +79,7 @@ BIN_MACOS_TARGETS = $(BIN_PATH)/$(BIN_NAME).$(MACOS_TARGET_X86_64) $(BIN_PATH)/$
 else # ($(UNAME_S),Darwin)
 D_OBJECTS = $(patsubst %, $(BUILD_PATH)/%.o, $(FILES))
 endif # ($(UNAME_S),Darwin)
-endif # ($(config), ???)
+endif # ($(CONFIG), ???)
 
 build: setup dependencies $(BIN_PATH)/$(BIN_NAME)
 
