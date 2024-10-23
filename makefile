@@ -148,12 +148,14 @@ clean:
 	rm -rfv $(BIN_PATH)
 	rm -rfv $(PACKAGE_NAME)
 
+### Main build
+
 ifeq ($(UNAME_S),Darwin)
 $(BIN_PATH)/$(BIN_NAME): $(BIN_MACOS_TARGETS)
 	lipo -create -output $@ $^
 
 $(BIN_MACOS_TARGETS): $(MAIN_FILE) $(OBJECTS_MACOS_TARGETS) $(BIN_PREREQS)
-	g++ -o $@ $< $(wildcard $(BUILD_PATH)/*$(suffix $@)) $(CPPFLAGS) $(CPPLINKS) $(LIBRARIES) -target $(subst --,., $(subst .,, $(suffix $@)))
+	g++ -o $@ $< $(wildcard $(BUILD_PATH)/*$(suffix $@)) $(CPPFLAGS) $(CPPLINKS) $(LIBRARIES) -target $(subst --,.,$(subst .,,$(suffix $@)))
 
 $(BUILD_PATH)/%.o: $(BUILD_PATH)/%.$(MACOS_TARGET_X86_64) $(BUILD_PATH)/%.$(MACOS_TARGET_ARM64)
 	lipo -create -output $@ $^
@@ -161,7 +163,7 @@ $(BUILD_PATH)/%.o: $(BUILD_PATH)/%.$(MACOS_TARGET_X86_64) $(BUILD_PATH)/%.$(MACO
 $(OBJECTS_MACOS_TARGETS): $$(subst $(BUILD_PATH), src, $$(subst $$(suffix $$@),, $$@)).cpp  $$(subst $(BUILD_PATH), src, $$(subst $$(suffix $$@),, $$@)).hpp src/*.h
 	g++ -c -o $@ $< $(CPPFLAGS) -target $(subst --,.,$(subst .,,$(suffix $@)))
 
-else
+else # ($(UNAME_S),Darwin)
 $(BIN_PATH)/$(BIN_NAME): $(MAIN_FILE) $(OBJECTS)
 	g++ -o $@ $^ $(LIBRARIES) $(CPPFLAGS) $(CPPLINKS)
 
@@ -169,13 +171,15 @@ $(BUILD_PATH)/%.o: src/%.cpp src/%.hpp src/*.h
 	g++ -c $< -o $@ $(CPPFLAGS)
 endif
 
+### Packaging
+
 package: $(PACKAGE_MODE)
 
-package-linux: $(PACKAGE_NAME) $(PACKAGE_NAME)/$(R_BIN_NAME)
+package-linux: $(PACKAGE_NAME) $(PACKAGE_NAME)/$(BIN_NAME)
 	zip -r $(BIN_PATH)/$(PACKAGE_NAME)-$(PLATFORM).zip $(PACKAGE_NAME)
 	tar vczf $(BIN_PATH)/$(PACKAGE_NAME)-$(PLATFORM).tar.gz $(PACKAGE_NAME)
 
-package-macos: $(PACKAGE_NAME) $(PACKAGE_NAME)/$(R_BIN_NAME)
+package-macos: $(PACKAGE_NAME) $(PACKAGE_NAME)/$(BIN_NAME)
 	hdiutil create -fs HFS+ -volname Chat -srcfolder $(PACKAGE_NAME) $(BIN_PATH)/$(PACKAGE_NAME)-$(PLATFORM).dmg
 
 $(PACKAGE_NAME):
@@ -185,15 +189,16 @@ $(PACKAGE_NAME)/$(BIN_NAME): $(BIN_PATH)/$(BIN_NAME)
 	@cp -afv $< $(PACKAGE_NAME)
 
 codesign:
-	codesign -s "$(IDENTITY)" --options=runtime $(BIN_PATH)/$(R_BIN_NAME)
+	codesign -s "$(IDENTITY)" --options=runtime --timestamp $(BIN_PATH)/$(BIN_NAME)
 
 notarize:
 	xcrun notarytool submit --apple-id "$(EMAIL)" --password "$(PW)" --team-id "$(TEAMID)" --wait $(BIN_PATH)/$(PACKAGE_NAME)-$(PLATFORM).dmg
 
 staple:
-	xcrun stapler staple $(BIN_PATH)/$(PACKAGE_NAME)-$(PLATFORM).dmg
+	xcrun stapler staple -v $(BIN_PATH)/$(PACKAGE_NAME)-$(PLATFORM).dmg
 
-## Dependencies
+### Dependencies
+
 dependencies: libs openssl
 
 clean-dependencies:
