@@ -27,7 +27,6 @@ PACKAGE_NAME = chat
 # used to make universal binaries
 MACOS_TARGET_X86_64 = x86_64-apple-macos10--12
 MACOS_TARGET_ARM64 = arm64-apple-macos11
-MACOS_TARGETS = $(MACOS_TARGET_X86_64) $(MACOS_TARGET_ARM64)
 
 ### macOS Variables
 IDENTITY =
