@@ -125,8 +125,8 @@ help:
 	@echo ""
 	@echo "Variable(s):"
 	@echo "	CONFIG		use this to change the build config. Accepts \"release\" (default), \"debug\", or \"test\""
-	@echo "	IDENTITY	(macos only) Developer ID common name"
-	@echo "	TEAMID 		(macos only) Developer Team ID"
+	@echo "	IDENTITY	(macos only) \"Developer ID Application\" common name"
+	@echo "	TEAMID 		(macos only) Organizational Unit"
 	@echo "	EMAIL 		(macos only) Developer account email"
 	@echo "	PW		(macos only) Developer account password"
 	@echo ""
@@ -156,10 +156,6 @@ $(BIN_PATH)/$(BIN_NAME): $(BIN_MACOS_TARGETS)
 
 $(BIN_MACOS_TARGETS): $(MAIN_FILE) $(OBJECTS_MACOS_TARGETS) $(BIN_PREREQS)
 	g++ -o $@ $< $(wildcard $(BUILD_PATH)/*$(suffix $@)) $(CPPFLAGS) $(CPPLINKS) $(LIBRARIES) -target $(subst --,.,$(subst .,,$(suffix $@)))
-ifneq ($(IDENTITY),)
-	strip $@
-	codesign -s "$(IDENTITY)" --options=runtime --timestamp $@
-endif
 
 $(BUILD_PATH)/%.o: $(BUILD_PATH)/%.$(MACOS_TARGET_X86_64) $(BUILD_PATH)/%.$(MACOS_TARGET_ARM64)
 	lipo -create -output $@ $^
@@ -185,9 +181,6 @@ package-linux: $(PACKAGE_NAME) $(PACKAGE_NAME)/$(BIN_NAME)
 
 package-macos: $(PACKAGE_NAME) $(PACKAGE_NAME)/$(BIN_NAME)
 	hdiutil create -fs HFS+ -volname Chat -srcfolder $(PACKAGE_NAME) $(BIN_PATH)/$(PACKAGE_NAME)-$(PLATFORM).dmg
-ifneq ($(IDENTITY),)
-	codesign -s "$(IDENTITY)" --options=runtime --timestamp $(BIN_PATH)/$(PACKAGE_NAME)-$(PLATFORM).dmg
-endif
 
 $(PACKAGE_NAME):
 	mkdir -p $@
@@ -195,14 +188,14 @@ $(PACKAGE_NAME):
 $(PACKAGE_NAME)/$(BIN_NAME): $(BIN_PATH)/$(BIN_NAME)
 	@cp -afv $< $(PACKAGE_NAME)
 
-#codesign:
-#	codesign -s "$(IDENTITY)" --options=runtime --timestamp $(BIN_PATH)/$(BIN_NAME)
+codesign:
+	codesign -s "$(IDENTITY)" --options=runtime --timestamp $(BIN_PATH)/$(BIN_NAME)
 
 notarize:
 	xcrun notarytool submit --apple-id "$(EMAIL)" --password "$(PW)" --team-id "$(TEAMID)" --wait $(BIN_PATH)/$(PACKAGE_NAME)-$(PLATFORM).dmg
 
 staple:
-	xcrun stapler staple -v $(BIN_PATH)/$(PACKAGE_NAME)-$(PLATFORM).dmg
+	xcrun stapler staple $(BIN_PATH)/$(PACKAGE_NAME)-$(PLATFORM).dmg
 
 ### Dependencies
 
