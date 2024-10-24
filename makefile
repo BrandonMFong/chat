@@ -18,14 +18,18 @@ PLATFORM = macos
 PACKAGE_MODE = package-macos
 endif
 
-### Global
 CONFIG = release
 BIN_PATH = bin
 CPPLINKS = -lpthread -lncurses $(BF_LIB_C_UUID_FLAGS) -ldl
 CPPSTD = -std=c++20
-LIBRARIES = external/bin/openssl-uni/libssl.a external/bin/openssl-uni/libcrypto.a 
 PACKAGE_NAME = chat
 MAIN_FILE = src/main.cpp
+
+ifeq ($(UNAME_S),Darwin)
+LIBRARIES = external/bin/openssl-uni/libssl.a external/bin/openssl-uni/libcrypto.a 
+else
+LIBRARIES = external/openssl/libssl.a external/openssl/libcrypto.a 
+endif
 
 # used to make universal binaries
 MACOS_TARGET_X86_64 = x86_64-apple-macos10--12
@@ -203,6 +207,7 @@ dependencies: libs openssl
 
 clean-dependencies:
 	cd external/libs && make clean
+	cd external/openssl && make clean
 	rm -rfv external/bin
 
 libs: external/libs/$(BF_LIB_RPATH_RELEASE_NET) external/libs/$(BF_LIB_RPATH_DEBUG_NET)
@@ -211,6 +216,7 @@ external/libs/$(BF_LIB_RPATH_RELEASE_NET):
 external/libs/$(BF_LIB_RPATH_DEBUG_NET):
 	cd external/libs && make clean all
 
+ifeq ($(UNAME_S),Darwin)
 SETUP_OPENSSL_DIRS = external/bin/openssl-arm external/bin/openssl-intel external/bin/openssl-uni
 setup-openssl: $(SETUP_OPENSSL_DIRS)
 $(SETUP_OPENSSL_DIRS):
@@ -233,4 +239,12 @@ external/bin/openssl-intel/libssl.a:
 	cd external/bin/openssl-intel && ../../openssl/Configure darwin64-x86_64 CPPFLAGS="-target x86_64-apple-macos10.12" && make
 external/bin/openssl-intel/libcrypto.a:
 	cd external/bin/openssl-intel && ../../openssl/Configure darwin64-x86_64 CPPFLAGS="-target x86_64-apple-macos10.12" && make
+else # ($(UNAME_S),???)
+openssl: external/openssl/libssl.a external/openssl/libcrypto.a
+external/openssl/libssl.a:
+	cd external/openssl && ./Configure && make
+external/openssl/libcrypto.a:
+	cd external/openssl && ./Configure && make
+endif # ($(UNAME_S),???)
+
 
