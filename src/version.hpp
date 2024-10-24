@@ -7,7 +7,7 @@
 #ifndef VERSION_HPP
 #define VERSION_HPP
 
-#define VERSION_WHOLE_STRING "0.2"
+#define VERSION_WHOLE_STRING "0.2.1"
 
 #endif // VERSION_HPP
 

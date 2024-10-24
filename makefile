@@ -108,12 +108,15 @@ OBJECTS = $(patsubst %, $(BUILD_PATH)/%.o, $(FILES))
 endif
 endif # ($(CONFIG), ???)
 
-build: setup dependencies $(BIN_PATH)/$(BIN_NAME)
-
 .PRECIOUS: \
 	$(R_BUILD_PATH)/%.$(MACOS_TARGET_X86_64) $(R_BUILD_PATH)/%.$(MACOS_TARGET_ARM64) \
 	$(D_BUILD_PATH)/%.$(MACOS_TARGET_X86_64) $(D_BUILD_PATH)/%.$(MACOS_TARGET_ARM64) \
 	$(T_BUILD_PATH)/%.$(MACOS_TARGET_X86_64) $(T_BUILD_PATH)/%.$(MACOS_TARGET_ARM64)
+
+build: setup dependencies $(BIN_PATH)/$(BIN_NAME)
+
+run:
+	./$(BIN_PATH)/$(BIN_NAME)
 
 help:
 	@echo "Usage:"
