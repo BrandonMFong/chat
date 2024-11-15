@@ -62,7 +62,7 @@ LINKS = -lpthread -lncurses $(BF_LIB_C_UUID_FLAGS) -ldl
 else ifeq ($(CONFIG),debug) # debug
 MAIN_FILE = src/main.cpp
 BIN_NAME = chat
-ADDR_SANITIZER = -fsanitize=address
+#ADDR_SANITIZER = -fsanitize=address
 FLAGS = $(CPPFLAGS) -DDEBUG -g -Isrc/ $(ADDR_SANITIZER) $(CPPSTD) -Iexternal/libs/bflibc/bin/debug -Iexternal/libs/bflibcpp/bin/debug -Iexternal/libs/bfnet/bin/debug
 LIBRARIES += external/libs/bflibc/bin/debug/bflibc/libbfc-debug.a external/libs/bflibcpp/bin/debug/bflibcpp/libbfcpp-debug.a external/libs/bfnet/bin/debug/bfnet/libbfnet-debug.a
 LINKS = -lpthread -lncurses $(BF_LIB_C_UUID_FLAGS) -ldl

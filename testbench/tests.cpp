@@ -11,24 +11,16 @@
 #include "agent_tests.hpp"
 #include "ciphersymmetric_tests.hpp"
 #include "cipherasymmetric_tests.hpp"
-#include "exception_tests.hpp"
 #include "log.hpp"
 
-int main() {
-	TEST_SUITE_START;
-
-	LAUNCH_TEST_SET(inputbuffer_tests);
-	LAUNCH_TEST_SET(chatroom_tests);
-	LAUNCH_TEST_SET(message_tests);
-	LAUNCH_TEST_SET(packet_tests);
-	LAUNCH_TEST_SET(command_tests);
-	LAUNCH_TEST_SET(agent_tests);
-	LAUNCH_TEST_SET(ciphersymmetric_tests);
-	LAUNCH_TEST_SET(cipherasymmetric_tests);
-	LAUNCH_TEST_SET(exception_tests);
-
-	TEST_SUITE_END;
-
-	return 0;
-}
+BFTEST_SUITE_FUNC({
+	BFTEST_SUITE_LAUNCH(inputbuffer_tests);
+	BFTEST_SUITE_LAUNCH(chatroom_tests);
+	BFTEST_SUITE_LAUNCH(message_tests);
+	BFTEST_SUITE_LAUNCH(packet_tests);
+	BFTEST_SUITE_LAUNCH(command_tests);
+	BFTEST_SUITE_LAUNCH(agent_tests);
+	BFTEST_SUITE_LAUNCH(ciphersymmetric_tests);
+	BFTEST_SUITE_LAUNCH(cipherasymmetric_tests);
+})
 

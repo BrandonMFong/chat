@@ -8,6 +8,7 @@
 
 #define ASSERT_PUBLIC_MEMBER_ACCESS
 
+#include <bflibcpp/bflibcpp.hpp>
 #include "agent.hpp"
 #include "agentclient.hpp"
 #include "agentserver.hpp"
@@ -20,64 +21,43 @@ extern "C" {
 
 using namespace BF;
 
-int test_agents() {
-	UNIT_TEST_START;
-	int result = 0;
+BFTEST_UNIT_FUNC(test_agents, 1, {
 	AgentClient ac;
 	AgentServer as;
-	
-	UNIT_TEST_END(!result, result);
-	return result;
-}
+})
 
-int test_agentuserrepresenationclient() {
-	UNIT_TEST_START;
-	int result = 0;
+BFTEST_UNIT_FUNC(test_agentuserrepresenationclient, 2<<8, {
+	AgentClient ac;
+	List<User *> users;
 
-	int max = 2 << 8;
-	while (!result && max--) {
-		AgentClient ac;
-		List<User *> users;
-
-		// create users
-		int size = 50;
-		for (int i = 0; i < size; i++) {
-			uuid_t uuid;
-			uuid_generate_random(uuid);
-			User * user = new User("name", uuid);
-			ac.setremoteuser(user);
-			users.add(user);
-		}
-
+	// create users
+	int size = 50;
+	for (int i = 0; i < size; i++) {
 		uuid_t uuid;
 		uuid_generate_random(uuid);
-		if (ac.representsUserWithUUID(uuid)) {
+		User * user = new User("name", uuid);
+		ac.setremoteuser(user);
+		users.add(user);
+	}
+
+	uuid_t uuid;
+	uuid_generate_random(uuid);
+	if (ac.representsUserWithUUID(uuid)) {
+		result = max;
+	}
+
+	if (!result) {
+		users.first()->object()->getuuid(uuid);
+		if (!ac.representsUserWithUUID(uuid)) {
 			result = max;
 		}
+	}
+})
 
-		if (!result) {
-			users.first()->object()->getuuid(uuid);
-			if (!ac.representsUserWithUUID(uuid)) {
-				result = max;
-			}
-		}
-	}	
-	
-	UNIT_TEST_END(!result, result);
-	return result;
-}
-
-void agent_tests(int * pass, int * fail) {
-	int p = 0, f = 0;
-	
-	INTRO_TEST_FUNCTION;
-
-	LAUNCH_TEST(test_agents, p, f);
-	LAUNCH_TEST(test_agentuserrepresenationclient, p, f);
-
-	if (pass) *pass += p;
-	if (fail) *fail += f;
-}
+BFTEST_COVERAGE_FUNC(agent_tests, {
+	BFTEST_LAUNCH(test_agents);
+	BFTEST_LAUNCH(test_agentuserrepresenationclient);
+})
 
 #endif // AGENT_TESTS_HPP
 

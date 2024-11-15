@@ -8,6 +8,7 @@
 
 #define ASSERT_PUBLIC_MEMBER_ACCESS
 
+#include <bflibcpp/bflibcpp.hpp>
 #include "message.hpp"
 #include "packet.hpp"
 #include "cipher.hpp"
@@ -19,17 +20,11 @@ extern "C" {
 
 using namespace BF;
 
-int test_messageinit() {
-	UNIT_TEST_START;
-	int result = 0;
-
+BFTEST_UNIT_FUNC(test_messageinit, 1, {
 	Packet p;
 	Message * m = new Message(&p);
-	Delete(m);
-
-	UNIT_TEST_END(!result, result);
-	return result;
-}
+	BFRelease(m);
+})
 
 void _test_messagesLoadRandomDataToMessagePayload(Packet * p, const char * message) {
 	memset(p, 0, sizeof(Packet));
@@ -45,100 +40,72 @@ void _test_messagesLoadRandomDataToMessagePayload(Packet * p, const char * messa
 		message);
 }
 
-int test_packet2message() {
-	UNIT_TEST_START;
-	int result = 0;
+BFTEST_UNIT_FUNC(test_packet2message, 2<<10, {
+	Packet p;
+	_test_messagesLoadRandomDataToMessagePayload(&p, "hello world");
 
-	int max = 2 << 8;
-	while (!result && max) {
-		Packet p;
-		_test_messagesLoadRandomDataToMessagePayload(&p, "hello world");
+	Message * m = new Message(&p);
+	if (!m)
+		result = max;
 
-		Message * m = new Message(&p);
-		if (!m)
+	if (!result) {
+		uuid_t u0, u1;
+		m->getuuidchatroom(u0);
+		m->getuuiduser(u1);
+		if (strcmp(m->data(), p.payload.message.data)) {
 			result = max;
-
-		if (!result) {
-			uuid_t u0, u1;
-			m->getuuidchatroom(u0);
-			m->getuuiduser(u1);
-			if (strcmp(m->data(), p.payload.message.data)) {
-				result = max;
-			} else if (strcmp(m->username(), p.payload.message.username)) {
-				result = max;
-			} else if (uuid_compare(u0, p.payload.message.chatuuid)) {
-				result = max;
-			} else if (uuid_compare(u1, p.payload.message.useruuid)) {
-				result = max;
-			} else if (m->type() != kPayloadMessageTypeData) {
-				result = max;
-			}
+		} else if (strcmp(m->username(), p.payload.message.username)) {
+			result = max;
+		} else if (uuid_compare(u0, p.payload.message.chatuuid)) {
+			result = max;
+		} else if (uuid_compare(u1, p.payload.message.useruuid)) {
+			result = max;
+		} else if (m->type() != kPayloadMessageTypeData) {
+			result = max;
 		}
-
-		Delete(m);
-
-		max--;
 	}
 
-	UNIT_TEST_END(!result, result);
-	return result;
+	BFRelease(m);
+})
 
-}
-
-int test_messageEncryptAndDecrypt() {
-	UNIT_TEST_START;
-	int result = 0;
-	int max = 2 << 15;
-
-	while (!result && max--) {
-		Packet p;
-		String str = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
-		_test_messagesLoadRandomDataToMessagePayload(&p, str.cString());
-		Message * m = new Message(&p);
-		if (!m) {
-			result = 1;
-			break;
-		}
-
-		Cipher * cipher = Cipher::create(kCipherTypeSymmetric);
-		if (!cipher) {
-			result = 2;
-			break;
-		} else if (cipher->genkey()) {
-			result = 3;
-			break;
-		}
-
-		if (m->encryptData(cipher)) {
-			result = 3;
-			break;
-		}
-
-		if (m->decryptData(cipher)) {
-			result = 4;
-			break;
-		}
-
-		Delete(m);
-		Delete(cipher);
+BFTEST_UNIT_FUNC(test_messageEncryptAndDecrypt, 2<<10, {
+	Packet p;
+	String str = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
+	_test_messagesLoadRandomDataToMessagePayload(&p, str.cString());
+	Message * m = new Message(&p);
+	if (!m) {
+		result = 1;
+		break;
 	}
 
-	UNIT_TEST_END(!result, result);
-	return result;
-}
+	Cipher * cipher = Cipher::create(kCipherTypeSymmetric);
+	if (!cipher) {
+		result = 2;
+		break;
+	} else if (cipher->genkey()) {
+		result = 3;
+		break;
+	}
 
-void message_tests(int * pass, int * fail) {
-	int p = 0, f = 0;
-	
-	INTRO_TEST_FUNCTION;
+	if (m->encryptData(cipher)) {
+		result = 3;
+		break;
+	}
 
-	LAUNCH_TEST(test_messageinit, p, f);
-	LAUNCH_TEST(test_packet2message, p, f);
-	LAUNCH_TEST(test_messageEncryptAndDecrypt, p, f);
+	if (m->decryptData(cipher)) {
+		result = 4;
+		break;
+	}
 
-	if (pass) *pass += p;
-	if (fail) *fail += f;
-}
+	BFRelease(m);
+	BFRelease(cipher);
+})
+
+BFTEST_COVERAGE_FUNC(message_tests, {
+	BFTEST_LAUNCH(test_messageinit);
+	BFTEST_LAUNCH(test_packet2message);
+	BFTEST_LAUNCH(test_messageEncryptAndDecrypt);
+})
 
 #endif // MESSAGE_TESTS_HPP
 
