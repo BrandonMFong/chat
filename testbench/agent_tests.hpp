@@ -15,7 +15,7 @@
 
 extern "C" {
 #include <bflibc/bflibc.h>
-#include <bflibc/bftests.h>
+#include <bftest/bftest.h>
 }
 
 using namespace BF;
