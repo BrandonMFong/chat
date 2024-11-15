@@ -108,49 +108,4 @@ notarize:
 staple:
 	xcrun stapler staple $(BIN_PATH)/$(PACKAGE_NAME)-$(PLATFORM).dmg
 
-### Dependencies
-
-DEP_CLIBS = bflibc bflibcpp bfnet bftest
-
-dependencies: $(DEP_CLIBS) openssl
-
-clean-dependencies:
-	cd external/libs && make clean
-	cd external/openssl && make clean
-	rm -rfv external/bin
-
-$(DEP_CLIBS):
-	cd external/libs && make build $@
-
-ifeq ($(UNAME_S),Darwin)
-SETUP_OPENSSL_DIRS = external/bin/openssl-arm external/bin/openssl-intel external/bin/openssl-uni
-setup-openssl: $(SETUP_OPENSSL_DIRS)
-$(SETUP_OPENSSL_DIRS):
-	mkdir -p $@
-
-openssl: setup-openssl external/bin/openssl-uni/libssl.a external/bin/openssl-uni/libcrypto.a
-
-external/bin/openssl-uni/libssl.a: external/bin/openssl-arm/libssl.a external/bin/openssl-intel/libssl.a
-	lipo -create $^ -output $@
-	
-external/bin/openssl-uni/libcrypto.a: external/bin/openssl-arm/libcrypto.a external/bin/openssl-intel/libcrypto.a
-	lipo -create $^ -output $@
-
-external/bin/openssl-arm/libssl.a:
-	cd external/bin/openssl-arm && ../../openssl/Configure darwin64-arm64 CPPFLAGS="-target arm64-apple-macos11" && make
-external/bin/openssl-arm/libcrypto.a:
-	cd external/bin/openssl-arm && ../../openssl/Configure darwin64-arm64 CPPFLAGS="-target arm64-apple-macos11" && make
-
-external/bin/openssl-intel/libssl.a:
-	cd external/bin/openssl-intel && ../../openssl/Configure darwin64-x86_64 CPPFLAGS="-target x86_64-apple-macos10.12" && make
-external/bin/openssl-intel/libcrypto.a:
-	cd external/bin/openssl-intel && ../../openssl/Configure darwin64-x86_64 CPPFLAGS="-target x86_64-apple-macos10.12" && make
-else # ($(UNAME_S),???)
-openssl: external/openssl/libssl.a external/openssl/libcrypto.a
-external/openssl/libssl.a:
-	cd external/openssl && ./Configure && make
-external/openssl/libcrypto.a:
-	cd external/openssl && ./Configure && make
-endif # ($(UNAME_S),???)
-
 
