@@ -2,8 +2,6 @@
 # date: 7/29/22
 #
 
-#include external/libs/makefiles/libpaths.mk 
-#include external/libs/makefiles/platforms.mk 
 include external/libs/bflibc/makefiles/uuid.mk 
 
 help:
@@ -108,4 +106,13 @@ notarize:
 staple:
 	xcrun stapler staple $(BIN_PATH)/$(PACKAGE_NAME)-$(PLATFORM).dmg
 
+### Dependencies
+
+dependecies:
+	cd external && make build
+
+clean-dependecies:
+	cd external && make clean
+
+clean-all: clean clean-dependecies
 
