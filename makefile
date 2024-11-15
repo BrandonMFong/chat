@@ -110,18 +110,17 @@ staple:
 
 ### Dependencies
 
-dependencies: libs openssl
+DEP_CLIBS = bflibc bflibcpp bfnet bftest
+
+dependencies: $(DEP_CLIBS) openssl
 
 clean-dependencies:
 	cd external/libs && make clean
 	cd external/openssl && make clean
 	rm -rfv external/bin
 
-libs:
-	cd external/libs/bflibc && make clean && make build && make build CONFIG=debug
-	cd external/libs/bflibcpp && make clean && make build && make build CONFIG=debug
-	cd external/libs/bfnet && make clean && make build && make build CONFIG=debug
-	cd external/libs/bftest && make clean && make build && make build CONFIG=debug
+$(DEP_CLIBS):
+	cd external/libs && make build $@
 
 ifeq ($(UNAME_S),Darwin)
 SETUP_OPENSSL_DIRS = external/bin/openssl-arm external/bin/openssl-intel external/bin/openssl-uni
