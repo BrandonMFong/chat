@@ -45,6 +45,7 @@ build-openssl: \
 	setup-openssl build-openssl-arm build-openssl-intel \
 	$(OPENSSL_BIN_PATH)-uni/libssl.a \
 	$(OPENSSL_BIN_PATH)-uni/libcrypto.a
+	cd $(OPENSSL_BIN_PATH)-uni && cp -afv ../../openssl/include .
 
 $(OPENSSL_BIN_PATH)-uni/libssl.a: 
 	lipo -create $(OPENSSL_BIN_PATH)-arm/libssl.a \
@@ -66,6 +67,7 @@ build-openssl-intel:
 else # ($(UNAME_S),???)
 build-openssl: setup-openssl
 	cd $(OPENSSL_BIN_PATH) && ../../openssl/Configure && make
+	cd $(OPENSSL_BIN_PATH) && cp -afv ../../openssl/include .
 endif # ($(UNAME_S),???)
 
 
