@@ -2,7 +2,7 @@ name: Testing
 
 on:
   push:
-    branches: [ "dev" ]
+    branches: [ "patch/dev/brando-updatingLibsAndTesting" ]
     pull_request:
       branches: [ "dev" ]
 
@@ -13,23 +13,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    - name: bftest
+    - name: test
       run: |
-        cd bftest;
-        make clean build CONFIG=test run
-    - name: bflibc
-      run: |
-        cd bflibc;
-        make dependencies 
-        make clean build CONFIG=test run
-    - name: bflibcpp
-      run: |
-        cd bflibcpp;
-        make dependencies 
-        make clean build CONFIG=test run
-    - name: bfnet
-      run: |
-        cd bfnet;
-        make dependencies 
         make clean build CONFIG=test run
 
