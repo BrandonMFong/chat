@@ -50,10 +50,12 @@ else
 LIBRARIES = external/bin/openssl/libssl.a external/bin/openssl/libcrypto.a 
 endif
 
+ifneq ($(CONFIG),test) # test
 LIBRARIES += \
 	external/bin/libs/$(CONFIG)/bflibc/libbfc.a \
 	external/bin/libs/$(CONFIG)/bflibcpp/libbfcpp.a \
 	external/bin/libs/$(CONFIG)/bfnet/libbfnet.a
+endif
 
 LINKS = -lpthread -lncurses $(BF_LIB_C_UUID_FLAGS) -ldl
 
