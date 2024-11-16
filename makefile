@@ -46,8 +46,10 @@ permissions chat
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Darwin)
 LIBRARIES = external/bin/openssl-uni/libssl.a external/bin/openssl-uni/libcrypto.a 
+OPENSSL_INCLUDE_PATH = -Iexternal/bin/openssl-uni/include
 else
 LIBRARIES = external/bin/openssl/libssl.a external/bin/openssl/libcrypto.a 
+OPENSSL_INCLUDE_PATH = -Iexternal/bin/openssl/include
 endif
 
 ifneq ($(CONFIG),test) # test
@@ -63,21 +65,21 @@ LINKS = -lpthread -lncurses $(BF_LIB_C_UUID_FLAGS) -ldl
 ifeq ($(CONFIG),release) # release
 MAIN_FILE = src/main.cpp
 BIN_NAME = chat
-FLAGS = $(CPPFLAGS) -Isrc/ $(CPPSTD) -Iexternal/bin/libs/release -Iexternal/bin/openssl/include
+FLAGS = $(CPPFLAGS) -Isrc/ $(CPPSTD) -Iexternal/bin/libs/release $(OPENSSL_INCLUDE_PATH)
 
 ### Debug settings
 else ifeq ($(CONFIG),debug) # debug
 MAIN_FILE = src/main.cpp
 BIN_NAME = chat
 #ADDR_SANITIZER = -fsanitize=address
-FLAGS = $(CPPFLAGS) -DDEBUG -g -Isrc/ $(ADDR_SANITIZER) $(CPPSTD) -Iexternal/bin/libs/debug -Iexternal/bin/openssl/include
+FLAGS = $(CPPFLAGS) -DDEBUG -g -Isrc/ $(ADDR_SANITIZER) $(CPPSTD) -Iexternal/bin/libs/debug $(OPENSSL_INCLUDE_PATH)
 
 ### Test settings
 else ifeq ($(CONFIG),test) # test
 MAIN_FILE = testbench/tests.cpp
 BIN_NAME = chat-test
 #ADDR_SANITIZER = -fsanitize=address
-FLAGS = $(CPPFLAGS) -DDEBUG -DTESTING -g -Isrc/ $(ADDR_SANITIZER) $(CPPSTD) -Iexternal/bin/libs/debug -Iexternal/bin/openssl/include
+FLAGS = $(CPPFLAGS) -DDEBUG -DTESTING -g -Isrc/ $(ADDR_SANITIZER) $(CPPSTD) -Iexternal/bin/libs/debug $(OPENSSL_INCLUDE_PATH)
 LIBRARIES += \
 	external/bin/libs/debug/bflibc/libbfc-debug.a \
 	external/bin/libs/debug/bflibcpp/libbfcpp-debug.a \
