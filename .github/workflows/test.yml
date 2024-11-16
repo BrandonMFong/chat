@@ -16,8 +16,7 @@ jobs:
       with:
         submodules: recursive
         token: ${{ secrets.PAT_TOKEN }}
-    - name: test
-      run: |
-        make dependencies
-        make build CONFIG=test run
-
+    - name: building dependencies
+      run: make dependencies
+    - name: running tests
+      run: make build CONFIG=test run
