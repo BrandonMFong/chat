@@ -7,16 +7,39 @@ on:
       branches: [ "dev" ]
 
 jobs:
-  unit-tests:
-
+  unit-tests-linux:
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v4
       with:
         submodules: recursive
         token: ${{ secrets.PAT_TOKEN }}
-    - name: building dependencies
-      run: make dependencies
+    - name: building libs
+      run: |
+        cd external;
+        make libs;
+    - name: building openssl 
+      run: |
+        cd external;
+        make openssl;
     - name: running tests
       run: make build CONFIG=test run
+
+  unit-tests-macos:
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: recursive
+        token: ${{ secrets.PAT_TOKEN }}
+    - name: building libs
+      run: |
+        cd external;
+        make libs;
+    - name: building openssl universal binary
+      run: |
+        cd external;
+        make openssl;
+    - name: running tests
+      run: make build CONFIG=test run
+
