@@ -41,23 +41,28 @@ clean-openssl:
 
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Darwin)
-build-openssl: setup-openssl $(OPENSSL_BIN_PATH)-uni/libssl.a $(OPENSSL_BIN_PATH)-uni/libcrypto.a
+build-openssl: \
+	setup-openssl build-openssl-arm build-openssl-intel \
+	$(OPENSSL_BIN_PATH)-uni/libssl.a \
+	$(OPENSSL_BIN_PATH)-uni/libcrypto.a
 
-$(OPENSSL_BIN_PATH)-uni/libssl.a: $(OPENSSL_BIN_PATH)-arm/libssl.a $(OPENSSL_BIN_PATH)-intel/libssl.a
-	lipo -create $^ -output $@
+$(OPENSSL_BIN_PATH)-uni/libssl.a: 
+	lipo -create $(OPENSSL_BIN_PATH)-arm/libssl.a \
+	$(OPENSSL_BIN_PATH)-intel/libssl.a -output $@
 	
-$(OPENSSL_BIN_PATH)-uni/libcrypto.a: $(OPENSSL_BIN_PATH)-arm/libcrypto.a $(OPENSSL_BIN_PATH)-intel/libcrypto.a
-	lipo -create $^ -output $@
+$(OPENSSL_BIN_PATH)-uni/libcrypto.a: 
+	lipo -create $(OPENSSL_BIN_PATH)-arm/libcrypto.a \
+	$(OPENSSL_BIN_PATH)-intel/libcrypto.a -output $@
 
-$(OPENSSL_BIN_PATH)-arm/libssl.a:
-	cd $(OPENSSL_BIN_PATH)-arm && ../../openssl/Configure darwin64-arm64 CPPFLAGS="-target arm64-apple-macos11" && make
-$(OPENSSL_BIN_PATH)-arm/libcrypto.a:
-	cd $(OPENSSL_BIN_PATH)-arm && ../../openssl/Configure darwin64-arm64 CPPFLAGS="-target arm64-apple-macos11" && make
+build-openssl-arm:
+	cd $(OPENSSL_BIN_PATH)-arm \
+	&& ../../openssl/Configure darwin64-arm64 \
+	CPPFLAGS="-target arm64-apple-macos11" && make
+build-openssl-intel:
+	cd $(OPENSSL_BIN_PATH)-intel \
+	&& ../../openssl/Configure darwin64-x86_64 \
+	CPPFLAGS="-target x86_64-apple-macos10.12" && make
 
-$(OPENSSL_BIN_PATH)-intel/libssl.a:
-	cd $(OPENSSL_BIN_PATH)-intel && ../../openssl/Configure darwin64-x86_64 CPPFLAGS="-target x86_64-apple-macos10.12" && make
-$(OPENSSL_BIN_PATH)-intel/libcrypto.a:
-	cd $(OPENSSL_BIN_PATH)-intel && ../../openssl/Configure darwin64-x86_64 CPPFLAGS="-target x86_64-apple-macos10.12" && make
 else # ($(UNAME_S),???)
 build-openssl: setup-openssl
 	cd $(OPENSSL_BIN_PATH) && ../../openssl/Configure && make
