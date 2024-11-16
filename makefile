@@ -12,8 +12,8 @@ help:
 	@echo "	clean			cleans build and bin folder"
 	@echo "	build 			builds release verions"
 	@echo "	package			compresses build"
-	@echo "	dependecies		builds all dependencies in the external directory"
-	@echo "	clean-dependecies	builds all dependencies in the external directory"
+	@echo "	dependencies		builds all dependencies in the external directory"
+	@echo "	clean-dependencies	builds all dependencies in the external directory"
 	@echo "	clean-all		cleans local and dependency builds"
 	@echo ""
 	@echo "Variable(s):"
@@ -108,11 +108,11 @@ staple:
 
 ### Dependencies
 
-dependecies:
+dependencies:
 	cd external && make build
 
-clean-dependecies:
+clean-dependencies:
 	cd external && make clean
 
-clean-all: clean clean-dependecies
+clean-all: clean clean-dependencies
 
