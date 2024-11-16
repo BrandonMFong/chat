@@ -45,10 +45,15 @@ permissions chat
 
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Darwin)
-LIBRARIES = external/bin/openssl-uni/libssl.a external/bin/openssl-uni/libcrypto.a 
-OPENSSL_INCLUDE_PATH = -Iexternal/bin/openssl-uni/include
+LIBRARIES = external/bin/openssl-uni/libssl.a external/bin/openssl-uni/libcrypto.a
+UNAME_P := $(shell uname -p)
+ifeq ($(UNAME_P),x86_64)
+OPENSSL_INCLUDE_PATH = -Iexternal/bin/openssl-intel/include
+else ifneq ($(filter arm%,$(UNAME_P)),)
+OPENSSL_INCLUDE_PATH = -Iexternal/bin/openssl-arm/include
+endif
 else
-LIBRARIES = external/bin/openssl/libssl.a external/bin/openssl/libcrypto.a 
+LIBRARIES = external/bin/openssl/libssl.a external/bin/openssl/libcrypto.a
 OPENSSL_INCLUDE_PATH = -Iexternal/bin/openssl/include
 endif
 

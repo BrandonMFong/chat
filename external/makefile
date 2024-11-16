@@ -31,7 +31,9 @@ $(LIBS):
 
 ## OpenSSL
 
-SETUP_OPENSSL_DIRS = $(OPENSSL_BIN_PATH)-arm $(OPENSSL_BIN_PATH)-intel $(OPENSSL_BIN_PATH)-uni $(OPENSSL_BIN_PATH)
+SETUP_OPENSSL_DIRS = \
+	$(OPENSSL_BIN_PATH)-arm $(OPENSSL_BIN_PATH)-intel \
+	$(OPENSSL_BIN_PATH)-uni $(OPENSSL_BIN_PATH)
 setup-openssl: $(SETUP_OPENSSL_DIRS)
 $(SETUP_OPENSSL_DIRS):
 	mkdir -p $@
@@ -45,7 +47,6 @@ build-openssl: \
 	setup-openssl build-openssl-arm build-openssl-intel \
 	$(OPENSSL_BIN_PATH)-uni/libssl.a \
 	$(OPENSSL_BIN_PATH)-uni/libcrypto.a
-	cd $(OPENSSL_BIN_PATH)-uni && cp -afv ../../openssl/include .
 
 $(OPENSSL_BIN_PATH)-uni/libssl.a: 
 	lipo -create $(OPENSSL_BIN_PATH)-arm/libssl.a \
