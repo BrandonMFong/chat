@@ -17,11 +17,11 @@ jobs:
     - name: building libs
       run: |
         cd external;
-        make libs;
+        make build-libs;
     - name: building openssl 
       run: |
         cd external;
-        make openssl;
+        make build-openssl;
     - name: running tests
       run: make build CONFIG=test run
 
@@ -35,11 +35,11 @@ jobs:
     - name: building libs
       run: |
         cd external;
-        make libs;
+        make build-libs;
     - name: building openssl universal binary
       run: |
         cd external;
-        make openssl;
+        make build-openssl;
     - name: running tests
       run: make build CONFIG=test run
 
