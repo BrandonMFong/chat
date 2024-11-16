@@ -63,21 +63,21 @@ LINKS = -lpthread -lncurses $(BF_LIB_C_UUID_FLAGS) -ldl
 ifeq ($(CONFIG),release) # release
 MAIN_FILE = src/main.cpp
 BIN_NAME = chat
-FLAGS = $(CPPFLAGS) -Isrc/ $(CPPSTD) -Iexternal/bin/libs/release
+FLAGS = $(CPPFLAGS) -Isrc/ $(CPPSTD) -Iexternal/bin/libs/release -Iexternal/bin/openssl/include
 
 ### Debug settings
 else ifeq ($(CONFIG),debug) # debug
 MAIN_FILE = src/main.cpp
 BIN_NAME = chat
 #ADDR_SANITIZER = -fsanitize=address
-FLAGS = $(CPPFLAGS) -DDEBUG -g -Isrc/ $(ADDR_SANITIZER) $(CPPSTD) -Iexternal/bin/libs/debug
+FLAGS = $(CPPFLAGS) -DDEBUG -g -Isrc/ $(ADDR_SANITIZER) $(CPPSTD) -Iexternal/bin/libs/debug -Iexternal/bin/openssl/include
 
 ### Test settings
 else ifeq ($(CONFIG),test) # test
 MAIN_FILE = testbench/tests.cpp
 BIN_NAME = chat-test
 #ADDR_SANITIZER = -fsanitize=address
-FLAGS = $(CPPFLAGS) -DDEBUG -DTESTING -g -Isrc/ $(ADDR_SANITIZER) $(CPPSTD) -Iexternal/bin/libs/debug
+FLAGS = $(CPPFLAGS) -DDEBUG -DTESTING -g -Isrc/ $(ADDR_SANITIZER) $(CPPSTD) -Iexternal/bin/libs/debug -Iexternal/bin/openssl/include
 LIBRARIES += \
 	external/bin/libs/debug/bflibc/libbfc-debug.a \
 	external/bin/libs/debug/bflibcpp/libbfcpp-debug.a \
