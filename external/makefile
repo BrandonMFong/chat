@@ -22,7 +22,7 @@ setup-libs:
 	mkdir -p $(LIBS_BIN_PATH)
 
 LIBS = bflibc bflibcpp bfnet bftest
-LIBS_ASSETS = $(patsubst %, libs/bin/debug/%, $(LIBS)) $(patsubst %, libs/bin/release/%, $(LIBS))
+LIBS_ASSETS = libs/bin/debug libs/bin/release
 build-libs: setup-libs $(LIBS)
 	cp -afv $(LIBS_ASSETS) $(LIBS_BIN_PATH)
 

@@ -6,7 +6,7 @@ include external/libs/bflibc/makefiles/uuid.mk
 
 help:
 	@echo "Usage:"
-	@echo "	make [target] variables"
+	@echo "	make <target> <variables>"
 	@echo ""
 	@echo "Target(s):"
 	@echo "	clean			cleans build and bin folder"
@@ -50,31 +50,37 @@ else
 LIBRARIES = external/bin/openssl/libssl.a external/bin/openssl/libcrypto.a 
 endif
 
+LIBRARIES += \
+	external/bin/libs/$(CONFIG)/bflibc/libbfc.a \
+	external/bin/libs/$(CONFIG)/bflibcpp/libbfcpp.a \
+	external/bin/libs/$(CONFIG)/bfnet/libbfnet.a
+
+LINKS = -lpthread -lncurses $(BF_LIB_C_UUID_FLAGS) -ldl
+
 ### Release settings
 ifeq ($(CONFIG),release) # release
 MAIN_FILE = src/main.cpp
 BIN_NAME = chat
-FLAGS = $(CPPFLAGS) -Isrc/ $(CPPSTD) -Iexternal/libs/bflibc/bin/release -Iexternal/libs/bflibcpp/bin/release -Iexternal/libs/bfnet/bin/release
-LIBRARIES += external/libs/bflibc/bin/release/bflibc/libbfc.a external/libs/bflibcpp/bin/release/bflibcpp/libbfcpp.a external/libs/bfnet/bin/release/bfnet/libbfnet.a
-LINKS = -lpthread -lncurses $(BF_LIB_C_UUID_FLAGS) -ldl
+FLAGS = $(CPPFLAGS) -Isrc/ $(CPPSTD) -Iexternal/bin/libs/release
 
 ### Debug settings
 else ifeq ($(CONFIG),debug) # debug
 MAIN_FILE = src/main.cpp
 BIN_NAME = chat
 #ADDR_SANITIZER = -fsanitize=address
-FLAGS = $(CPPFLAGS) -DDEBUG -g -Isrc/ $(ADDR_SANITIZER) $(CPPSTD) -Iexternal/libs/bflibc/bin/debug -Iexternal/libs/bflibcpp/bin/debug -Iexternal/libs/bfnet/bin/debug
-LIBRARIES += external/libs/bflibc/bin/debug/bflibc/libbfc-debug.a external/libs/bflibcpp/bin/debug/bflibcpp/libbfcpp-debug.a external/libs/bfnet/bin/debug/bfnet/libbfnet-debug.a
-LINKS = -lpthread -lncurses $(BF_LIB_C_UUID_FLAGS) -ldl
+FLAGS = $(CPPFLAGS) -DDEBUG -g -Isrc/ $(ADDR_SANITIZER) $(CPPSTD) -Iexternal/bin/libs/debug
 
 ### Test settings
 else ifeq ($(CONFIG),test) # test
+MAIN_FILE = testbench/tests.cpp
 BIN_NAME = chat-test
 #ADDR_SANITIZER = -fsanitize=address
-FLAGS = $(CPPFLAGS) -DDEBUG -DTESTING -g -Isrc/ $(ADDR_SANITIZER) $(CPPSTD) -Iexternal/libs/bflibc/bin/debug -Iexternal/libs/bflibcpp/bin/debug -Iexternal/libs/bfnet/bin/debug -Iexternal/libs/bftest/bin/debug
-LIBRARIES += external/libs/bflibc/bin/debug/bflibc/libbfc-debug.a external/libs/bflibcpp/bin/debug/bflibcpp/libbfcpp-debug.a external/libs/bfnet/bin/debug/bfnet/libbfnet-debug.a external/libs/bftest/bin/debug/bftest/libbftest-debug.a
-LINKS = -lpthread -lncurses $(BF_LIB_C_UUID_FLAGS) -ldl
-MAIN_FILE = testbench/tests.cpp
+FLAGS = $(CPPFLAGS) -DDEBUG -DTESTING -g -Isrc/ $(ADDR_SANITIZER) $(CPPSTD) -Iexternal/bin/libs/debug
+LIBRARIES += \
+	external/bin/libs/debug/bflibc/libbfc-debug.a \
+	external/bin/libs/debug/bflibcpp/libbfcpp-debug.a \
+	external/bin/libs/debug/bfnet/libbfnet-debug.a \
+	external/bin/libs/debug/bftest/libbftest-debug.a
 endif # ($(CONFIG),...)
 
 LIBS_MAKEFILES_PATH:=$(CURDIR)/external/libs/makefiles
@@ -101,7 +107,13 @@ codesign:
 	codesign -s "$(IDENTITY)" --options=runtime --timestamp $(BIN_PATH)/$(BIN_NAME)
 
 notarize:
-	xcrun notarytool submit --apple-id "$(EMAIL)" --password "$(PW)" --team-id "$(TEAMID)" --wait $(BIN_PATH)/$(PACKAGE_NAME)-$(PLATFORM).dmg
+	xcrun notarytool \
+	submit \
+	--apple-id "$(EMAIL)" \
+	--password "$(PW)" \
+	--team-id "$(TEAMID)" \
+	--wait \
+	$(BIN_PATH)/$(PACKAGE_NAME)-$(PLATFORM).dmg
 
 staple:
 	xcrun stapler staple $(BIN_PATH)/$(PACKAGE_NAME)-$(PLATFORM).dmg
