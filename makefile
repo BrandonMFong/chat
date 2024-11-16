@@ -47,7 +47,7 @@ UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Darwin)
 LIBRARIES = external/bin/openssl-uni/libssl.a external/bin/openssl-uni/libcrypto.a 
 else
-LIBRARIES = external/openssl/libssl.a external/openssl/libcrypto.a 
+LIBRARIES = external/bin/openssl/libssl.a external/bin/openssl/libcrypto.a 
 endif
 
 ### Release settings

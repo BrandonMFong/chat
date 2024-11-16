@@ -5,56 +5,62 @@
 
 ### Dependencies
 
-build: libs openssl
+LIBS_BIN_PATH = bin/libs
+OPENSSL_BIN_PATH = bin/openssl
+
+build: build-libs build-openssl
 
 clean: clean-libs clean-openssl
 	rm -rfv bin
 
-clean-libs:
-	cd libs && make clean
-
-clean-openssl:
-	cd openssl && make clean
-
 ## Libs
 
+clean-libs:
+	rm -rfv $(LIBS_BIN_PATH)
+
+setup-libs:
+	mkdir -p $(LIBS_BIN_PATH)
+
 LIBS = bflibc bflibcpp bfnet bftest
-libs: $(LIBS)
+LIBS_ASSETS = $(patsubst %, libs/bin/debug/%, $(LIBS)) $(patsubst %, libs/bin/release/%, $(LIBS))
+build-libs: setup-libs $(LIBS)
+	cp -afv $(LIBS_ASSETS) $(LIBS_BIN_PATH)
+
 $(LIBS):
-	cd libs && make build $@
+	cd libs && make $@
 
 ## OpenSSL
 
-UNAME_S := $(shell uname -s)
-ifeq ($(UNAME_S),Darwin)
-SETUP_OPENSSL_DIRS = bin/openssl-arm bin/openssl-intel bin/openssl-uni
+SETUP_OPENSSL_DIRS = $(OPENSSL_BIN_PATH)-arm $(OPENSSL_BIN_PATH)-intel $(OPENSSL_BIN_PATH)-uni $(OPENSSL_BIN_PATH)
 setup-openssl: $(SETUP_OPENSSL_DIRS)
 $(SETUP_OPENSSL_DIRS):
 	mkdir -p $@
 
-openssl: setup-openssl bin/openssl-uni/libssl.a bin/openssl-uni/libcrypto.a
+clean-openssl:
+	rm -rfv $(SETUP_OPENSSL_DIRS)
 
-bin/openssl-uni/libssl.a: bin/openssl-arm/libssl.a bin/openssl-intel/libssl.a
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S),Darwin)
+build-openssl: setup-openssl $(OPENSSL_BIN_PATH)-uni/libssl.a $(OPENSSL_BIN_PATH)-uni/libcrypto.a
+
+$(OPENSSL_BIN_PATH)-uni/libssl.a: $(OPENSSL_BIN_PATH)-arm/libssl.a $(OPENSSL_BIN_PATH)-intel/libssl.a
 	lipo -create $^ -output $@
 	
-bin/openssl-uni/libcrypto.a: bin/openssl-arm/libcrypto.a bin/openssl-intel/libcrypto.a
+$(OPENSSL_BIN_PATH)-uni/libcrypto.a: $(OPENSSL_BIN_PATH)-arm/libcrypto.a $(OPENSSL_BIN_PATH)-intel/libcrypto.a
 	lipo -create $^ -output $@
 
-bin/openssl-arm/libssl.a:
-	cd bin/openssl-arm && ../../openssl/Configure darwin64-arm64 CPPFLAGS="-target arm64-apple-macos11" && make
-bin/openssl-arm/libcrypto.a:
-	cd bin/openssl-arm && ../../openssl/Configure darwin64-arm64 CPPFLAGS="-target arm64-apple-macos11" && make
+$(OPENSSL_BIN_PATH)-arm/libssl.a:
+	cd $(OPENSSL_BIN_PATH)-arm && ../../openssl/Configure darwin64-arm64 CPPFLAGS="-target arm64-apple-macos11" && make
+$(OPENSSL_BIN_PATH)-arm/libcrypto.a:
+	cd $(OPENSSL_BIN_PATH)-arm && ../../openssl/Configure darwin64-arm64 CPPFLAGS="-target arm64-apple-macos11" && make
 
-bin/openssl-intel/libssl.a:
-	cd bin/openssl-intel && ../../openssl/Configure darwin64-x86_64 CPPFLAGS="-target x86_64-apple-macos10.12" && make
-bin/openssl-intel/libcrypto.a:
-	cd bin/openssl-intel && ../../openssl/Configure darwin64-x86_64 CPPFLAGS="-target x86_64-apple-macos10.12" && make
+$(OPENSSL_BIN_PATH)-intel/libssl.a:
+	cd $(OPENSSL_BIN_PATH)-intel && ../../openssl/Configure darwin64-x86_64 CPPFLAGS="-target x86_64-apple-macos10.12" && make
+$(OPENSSL_BIN_PATH)-intel/libcrypto.a:
+	cd $(OPENSSL_BIN_PATH)-intel && ../../openssl/Configure darwin64-x86_64 CPPFLAGS="-target x86_64-apple-macos10.12" && make
 else # ($(UNAME_S),???)
-openssl: openssl/libssl.a openssl/libcrypto.a
-openssl/libssl.a:
-	cd openssl && ./Configure && make
-openssl/libcrypto.a:
-	cd openssl && ./Configure && make
+build-openssl: setup-openssl
+	cd $(OPENSSL_BIN_PATH) && ../../openssl/Configure && make
 endif # ($(UNAME_S),???)
 
 
