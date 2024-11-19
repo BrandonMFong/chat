@@ -10,7 +10,7 @@ x.x
 [] improved controls (replicate nano commands)
 [] chat configuration implemented in ncurses
 [] user typing
-[] update build and test process
+[x] update build and test process
 
 0.2.1
 [x] issue with sending messages between two machines that are on macos and linux
