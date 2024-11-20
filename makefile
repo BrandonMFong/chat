@@ -2,7 +2,7 @@
 # date: 7/29/22
 #
 
-include external/libs/bflibc/makefiles/uuid.mk 
+include external/libs/bflibc/makefiles/lib.mk 
 
 help:
 	@echo "Usage:"
@@ -65,7 +65,7 @@ LIBRARIES += \
 	external/bin/libs/$(CONFIG)/bfnet/libbfnet.a
 endif
 
-LINKS = -lpthread -lncurses $(BF_LIB_C_UUID_FLAGS) -ldl
+LINKS = -lpthread -lncurses $(BF_LIB_C_FLAGS) -ldl
 
 ### Release settings
 ifeq ($(CONFIG),release) # release
