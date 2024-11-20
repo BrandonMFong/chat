@@ -2,9 +2,9 @@ name: Testing
 
 on:
   push:
-    branches: [ "patch/dev/brando-updatingLibsAndTesting" ]
-    pull_request:
-      branches: [ "dev" ]
+    branches: [ "dev" ]
+  pull_request:
+    branches: [ "dev" ]
 
 jobs:
   unit-tests-linux:
