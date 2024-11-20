@@ -413,7 +413,7 @@ int _encryptPrivateKey(PayloadChatroomEnrollmentForm * form, CipherSymmetric * c
 		return 5;
 	}
 
-	BFDelete(ac);
+	BFRelease(ac);
 	
 	return 0;
 }

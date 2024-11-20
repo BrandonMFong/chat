@@ -1,0 +1,45 @@
+name: Testing 
+
+on:
+  push:
+    branches: [ "dev" ]
+  pull_request:
+    branches: [ "dev" ]
+
+jobs:
+  unit-tests-linux:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: recursive
+        token: ${{ secrets.PAT_TOKEN }}
+    - name: building libs
+      run: |
+        cd external;
+        make build-libs;
+    - name: building openssl 
+      run: |
+        cd external;
+        make build-openssl;
+    - name: running tests
+      run: make build CONFIG=test run
+
+  unit-tests-macos:
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: recursive
+        token: ${{ secrets.PAT_TOKEN }}
+    - name: building libs
+      run: |
+        cd external;
+        make build-libs;
+    - name: building openssl universal binary
+      run: |
+        cd external;
+        make build-openssl;
+    - name: running tests
+      run: make build CONFIG=test run
+

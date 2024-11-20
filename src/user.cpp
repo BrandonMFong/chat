@@ -44,7 +44,7 @@ User::User(const char * username, const uuid_t uuid) {
 }
 
 User::~User() {
-	BFDelete(this->_cipher);
+	BFRelease(this->_cipher);
 }
 
 void _UserAddUserToUsers(User * user) {

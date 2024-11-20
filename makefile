@@ -2,132 +2,18 @@
 # date: 7/29/22
 #
 
-include external/libs/makefiles/libpaths.mk 
-include external/libs/makefiles/platforms.mk 
-include external/libs/bflibc/makefiles/uuid.mk 
-
-.SECONDEXPANSION:
-
-UNAME_S := $(shell uname -s)
-ifeq ($(UNAME_S),Linux)
-PLATFORM = linux
-PACKAGE_MODE = package-linux
-endif
-ifeq ($(UNAME_S),Darwin)
-PLATFORM = macos
-PACKAGE_MODE = package-macos
-endif
-
-CONFIG = release
-BIN_PATH = bin
-CPPLINKS = -lpthread -lncurses $(BF_LIB_C_UUID_FLAGS) -ldl
-CPPSTD = -std=c++20
-PACKAGE_NAME = chat
-MAIN_FILE = src/main.cpp
-
-ifeq ($(UNAME_S),Darwin)
-LIBRARIES = external/bin/openssl-uni/libssl.a external/bin/openssl-uni/libcrypto.a 
-else
-LIBRARIES = external/openssl/libssl.a external/openssl/libcrypto.a 
-endif
-
-# used to make universal binaries
-MACOS_TARGET_X86_64 = x86_64-apple-macos10--12
-MACOS_TARGET_ARM64 = arm64-apple-macos11
-
-### macOS Variables
-IDENTITY =
-TEAMID = 
-EMAIL =
-PW =
-
-FILES = \
-interface cipher cipherasymmetric ciphersymmetric \
-log user inputbuffer office \
-chatroom message chatroomserver packet \
-agent agentclient agentserver sealedpacket \
-chatroomclient interfaceserver interfaceclient command \
-permissions exception \
-chat 
-
-### Release settings
-ifeq ($(CONFIG), release) # ($(CONFIG), ???)
-CPPFLAGS += -Isrc/ \
-	-Iexternal/libs/$(BF_LIB_RPATH_RELEASE) \
-	$(CPPSTD)
-BIN_NAME = chat
-BUILD_PATH = build/release
-LIBRARIES += external/libs/$(BF_LIB_RPATH_RELEASE_NET)
-ifeq ($(UNAME_S),Darwin)
-OBJECTS_MACOS_TARGET_X86_64 = $(patsubst %, $(BUILD_PATH)/%.$(MACOS_TARGET_X86_64), $(FILES))
-OBJECTS_MACOS_TARGET_ARM64 = $(patsubst %, $(BUILD_PATH)/%.$(MACOS_TARGET_ARM64), $(FILES))
-OBJECTS_MACOS_TARGETS = $(OBJECTS_MACOS_TARGET_X86_64) $(OBJECTS_MACOS_TARGET_ARM64)
-BIN_MACOS_TARGETS = $(BIN_PATH)/$(BIN_NAME).$(MACOS_TARGET_X86_64) $(BIN_PATH)/$(BIN_NAME).$(MACOS_TARGET_ARM64)
-else # ($(UNAME_S),Darwin)
-OBJECTS = $(patsubst %, $(BUILD_PATH)/%.o, $(FILES))
-endif # ($(UNAME_S),Darwin)
-### Debug settings
-else ifeq ($(CONFIG), debug) # ($(CONFIG), ???)
-ADDR_SANITIZER = -fsanitize=address
-CPPFLAGS += -DDEBUG -g -Isrc/ \
-	-Iexternal/libs/$(BF_LIB_RPATH_DEBUG) \
-	$(ADDR_SANITIZER) $(CPPSTD)
-BIN_NAME = chat-debug
-BUILD_PATH = build/debug
-LIBRARIES += external/libs/$(BF_LIB_RPATH_DEBUG_NET)
-ifeq ($(UNAME_S),Darwin)
-OBJECTS_MACOS_TARGET_X86_64 = $(patsubst %, $(BUILD_PATH)/%.$(MACOS_TARGET_X86_64), $(FILES))
-OBJECTS_MACOS_TARGET_ARM64 = $(patsubst %, $(BUILD_PATH)/%.$(MACOS_TARGET_ARM64), $(FILES))
-OBJECTS_MACOS_TARGETS = $(OBJECTS_MACOS_TARGET_X86_64) $(OBJECTS_MACOS_TARGET_ARM64)
-BIN_MACOS_TARGETS = $(BIN_PATH)/$(BIN_NAME).$(MACOS_TARGET_X86_64) $(BIN_PATH)/$(BIN_NAME).$(MACOS_TARGET_ARM64)
-else # ($(UNAME_S),Darwin)
-OBJECTS = $(patsubst %, $(BUILD_PATH)/%.o, $(FILES))
-endif # ($(UNAME_S),Darwin)
-### Test settings
-else ifeq ($(CONFIG), test) # ($(CONFIG), ???)
-ADDR_SANITIZER = -fsanitize=address
-CPPFLAGS += -DDEBUG -DTESTING -g -Isrc/ \
-	-Iexternal/libs/$(BF_LIB_RPATH_DEBUG) \
-	$(ADDR_SANITIZER) $(CPPSTD)
-BIN_NAME = chat-test
-BUILD_PATH = build/test
-MAIN_FILE = testbench/tests.cpp
-LIBRARIES += external/libs/$(BF_LIB_RPATH_DEBUG_NET)
-BIN_PREREQS := $(wildcard testbench/*.hpp)
-ifeq ($(UNAME_S),Darwin)
-MAIN_OBJECT_MACOS_TARGET_X86_64 = $(BUILD_PATH)/tests.$(MACOS_TARGET_X86_64)
-MAIN_OBJECT_MACOS_TARGET_ARM64 = $(BUILD_PATH)/tests.$(MACOS_TARGET_ARM64)
-MAIN_OBJECT_MACOS_TARGETS = $(MAIN_OBJECT_MACOS_TARGET_X86_64) $(MAIN_OBJECT_MACOS_TARGET_ARM64)
-OBJECTS_MACOS_TARGET_X86_64 = $(patsubst %, $(BUILD_PATH)/%.$(MACOS_TARGET_X86_64), $(FILES))
-OBJECTS_MACOS_TARGET_ARM64 = $(patsubst %, $(BUILD_PATH)/%.$(MACOS_TARGET_ARM64), $(FILES))
-OBJECTS_MACOS_TARGETS = $(OBJECTS_MACOS_TARGET_X86_64) $(OBJECTS_MACOS_TARGET_ARM64)
-BIN_MACOS_TARGETS = $(BIN_PATH)/$(BIN_NAME).$(MACOS_TARGET_X86_64) $(BIN_PATH)/$(BIN_NAME).$(MACOS_TARGET_ARM64)
-else
-MAIN_OBJECT = $(BUILD_PATH)/tests.o
-OBJECTS = $(patsubst %, $(BUILD_PATH)/%.o, $(FILES))
-endif
-endif # ($(CONFIG), ???)
-
-.PRECIOUS: \
-	$(R_BUILD_PATH)/%.$(MACOS_TARGET_X86_64) $(R_BUILD_PATH)/%.$(MACOS_TARGET_ARM64) \
-	$(D_BUILD_PATH)/%.$(MACOS_TARGET_X86_64) $(D_BUILD_PATH)/%.$(MACOS_TARGET_ARM64) \
-	$(T_BUILD_PATH)/%.$(MACOS_TARGET_X86_64) $(T_BUILD_PATH)/%.$(MACOS_TARGET_ARM64)
-
-build: setup dependencies $(BIN_PATH)/$(BIN_NAME)
-
-run:
-	./$(BIN_PATH)/$(BIN_NAME)
+include external/libs/bflibc/makefiles/lib.mk 
 
 help:
 	@echo "Usage:"
-	@echo "	make [target] variables"
+	@echo "	make <target> <variables>"
 	@echo ""
 	@echo "Target(s):"
 	@echo "	clean			cleans build and bin folder"
 	@echo "	build 			builds release verions"
 	@echo "	package			compresses build"
-	@echo "	dependecies		builds all dependencies in the external directory"
-	@echo "	clean-dependecies	builds all dependencies in the external directory"
+	@echo "	dependencies		builds all dependencies in the external directory"
+	@echo "	clean-dependencies	builds all dependencies in the external directory"
 	@echo "	clean-all		cleans local and dependency builds"
 	@echo ""
 	@echo "Variable(s):"
@@ -143,37 +29,72 @@ help:
 	@echo "	Build for release for Linux distribution"
 	@echo "		make clean build package"
 
-SETUP_DIRS = $(BIN_PATH) $(BUILD_PATH)
-setup: $(SETUP_DIRS)
-$(SETUP_DIRS):
-	mkdir -p $@
+COMPILER = g++
+CPPSTD = -std=c++20
+CONFIG = release
+BUILD_TYPE = executable
+SOURCE_EXT = cpp
+HEADER_EXT = hpp
+FILES = \
+interface cipher cipherasymmetric ciphersymmetric \
+log user inputbuffer office \
+chatroom message chatroomserver packet \
+agent agentclient agentserver sealedpacket \
+chatroomclient interfaceserver interfaceclient command \
+permissions chat 
 
-clean-all: clean clean-dependencies
-
-clean:
-	rm -rfv $(BUILD_PATH)
-	rm -rfv $(BIN_PATH)
-	rm -rfv $(PACKAGE_NAME)
-
-### Main build
-
+UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Darwin)
-$(BIN_PATH)/$(BIN_NAME): $(BIN_MACOS_TARGETS)
-	lipo -create -output $@ $^
-
-$(BIN_MACOS_TARGETS): $(MAIN_FILE) $(OBJECTS_MACOS_TARGETS) $(BIN_PREREQS)
-	g++ -o $@ $< $(wildcard $(BUILD_PATH)/*$(suffix $@)) $(CPPFLAGS) $(CPPLINKS) $(LIBRARIES) -target $(subst --,.,$(subst .,,$(suffix $@)))
-
-$(OBJECTS_MACOS_TARGETS): $$(subst $(BUILD_PATH), src, $$(subst $$(suffix $$@),, $$@)).cpp  $$(subst $(BUILD_PATH), src, $$(subst $$(suffix $$@),, $$@)).hpp src/*.h
-	g++ -c -o $@ $< $(CPPFLAGS) -target $(subst --,.,$(subst .,,$(suffix $@)))
-
-else # ($(UNAME_S),Darwin)
-$(BIN_PATH)/$(BIN_NAME): $(MAIN_FILE) $(OBJECTS)
-	g++ -o $@ $^ $(LIBRARIES) $(CPPFLAGS) $(CPPLINKS)
-
-$(BUILD_PATH)/%.o: src/%.cpp src/%.hpp src/*.h
-	g++ -c $< -o $@ $(CPPFLAGS)
+LIBRARIES = external/bin/openssl-uni/libssl.a external/bin/openssl-uni/libcrypto.a
+OPENSSL_INCLUDE_PATH = -Iexternal/openssl/include
+UNAME_P := $(shell uname -p)
+ifeq ($(UNAME_P),x86_64)
+OPENSSL_INCLUDE_PATH += -Iexternal/bin/openssl-intel/include
+else ifneq ($(filter arm%,$(UNAME_P)),)
+OPENSSL_INCLUDE_PATH += -Iexternal/bin/openssl-arm/include
 endif
+else # linux
+LIBRARIES = external/bin/openssl/libssl.a external/bin/openssl/libcrypto.a
+OPENSSL_INCLUDE_PATH = -Iexternal/bin/openssl/include
+endif
+
+ifneq ($(CONFIG),test) # test
+LIBRARIES += \
+	external/bin/libs/$(CONFIG)/bflibc/libbfc.a \
+	external/bin/libs/$(CONFIG)/bflibcpp/libbfcpp.a \
+	external/bin/libs/$(CONFIG)/bfnet/libbfnet.a
+endif
+
+LINKS = -lpthread -lncurses $(BF_LIB_C_FLAGS) -ldl
+
+### Release settings
+ifeq ($(CONFIG),release) # release
+MAIN_FILE = src/main.cpp
+BIN_NAME = chat
+FLAGS = $(CPPFLAGS) -Isrc/ $(CPPSTD) -Iexternal/bin/libs/release $(OPENSSL_INCLUDE_PATH)
+
+### Debug settings
+else ifeq ($(CONFIG),debug) # debug
+MAIN_FILE = src/main.cpp
+BIN_NAME = chat
+#ADDR_SANITIZER = -fsanitize=address
+FLAGS = $(CPPFLAGS) -DDEBUG -g -Isrc/ $(ADDR_SANITIZER) $(CPPSTD) -Iexternal/bin/libs/debug $(OPENSSL_INCLUDE_PATH)
+
+### Test settings
+else ifeq ($(CONFIG),test) # test
+MAIN_FILE = testbench/tests.cpp
+BIN_NAME = chat-test
+#ADDR_SANITIZER = -fsanitize=address
+FLAGS = $(CPPFLAGS) -DDEBUG -DTESTING -g -Isrc/ $(ADDR_SANITIZER) $(CPPSTD) -Iexternal/bin/libs/debug $(OPENSSL_INCLUDE_PATH)
+LIBRARIES += \
+	external/bin/libs/debug/bflibc/libbfc-debug.a \
+	external/bin/libs/debug/bflibcpp/libbfcpp-debug.a \
+	external/bin/libs/debug/bfnet/libbfnet-debug.a \
+	external/bin/libs/debug/bftest/libbftest-debug.a
+endif # ($(CONFIG),...)
+
+LIBS_MAKEFILES_PATH:=$(CURDIR)/external/libs/makefiles
+include $(LIBS_MAKEFILES_PATH)/build.mk 
 
 ### Packaging
 
@@ -196,55 +117,24 @@ codesign:
 	codesign -s "$(IDENTITY)" --options=runtime --timestamp $(BIN_PATH)/$(BIN_NAME)
 
 notarize:
-	xcrun notarytool submit --apple-id "$(EMAIL)" --password "$(PW)" --team-id "$(TEAMID)" --wait $(BIN_PATH)/$(PACKAGE_NAME)-$(PLATFORM).dmg
+	xcrun notarytool \
+	submit \
+	--apple-id "$(EMAIL)" \
+	--password "$(PW)" \
+	--team-id "$(TEAMID)" \
+	--wait \
+	$(BIN_PATH)/$(PACKAGE_NAME)-$(PLATFORM).dmg
 
 staple:
 	xcrun stapler staple $(BIN_PATH)/$(PACKAGE_NAME)-$(PLATFORM).dmg
 
 ### Dependencies
 
-dependencies: libs openssl
+dependencies:
+	cd external && make build
 
 clean-dependencies:
-	cd external/libs && make clean
-	cd external/openssl && make clean
-	rm -rfv external/bin
+	cd external && make clean
 
-libs: external/libs/$(BF_LIB_RPATH_RELEASE_NET) external/libs/$(BF_LIB_RPATH_DEBUG_NET)
-external/libs/$(BF_LIB_RPATH_RELEASE_NET):
-	cd external/libs && make clean all
-external/libs/$(BF_LIB_RPATH_DEBUG_NET):
-	cd external/libs && make clean all
-
-ifeq ($(UNAME_S),Darwin)
-SETUP_OPENSSL_DIRS = external/bin/openssl-arm external/bin/openssl-intel external/bin/openssl-uni
-setup-openssl: $(SETUP_OPENSSL_DIRS)
-$(SETUP_OPENSSL_DIRS):
-	mkdir -p $@
-
-openssl: setup-openssl external/bin/openssl-uni/libssl.a external/bin/openssl-uni/libcrypto.a
-
-external/bin/openssl-uni/libssl.a: external/bin/openssl-arm/libssl.a external/bin/openssl-intel/libssl.a
-	lipo -create $^ -output $@
-	
-external/bin/openssl-uni/libcrypto.a: external/bin/openssl-arm/libcrypto.a external/bin/openssl-intel/libcrypto.a
-	lipo -create $^ -output $@
-
-external/bin/openssl-arm/libssl.a:
-	cd external/bin/openssl-arm && ../../openssl/Configure darwin64-arm64 CPPFLAGS="-target arm64-apple-macos11" && make
-external/bin/openssl-arm/libcrypto.a:
-	cd external/bin/openssl-arm && ../../openssl/Configure darwin64-arm64 CPPFLAGS="-target arm64-apple-macos11" && make
-
-external/bin/openssl-intel/libssl.a:
-	cd external/bin/openssl-intel && ../../openssl/Configure darwin64-x86_64 CPPFLAGS="-target x86_64-apple-macos10.12" && make
-external/bin/openssl-intel/libcrypto.a:
-	cd external/bin/openssl-intel && ../../openssl/Configure darwin64-x86_64 CPPFLAGS="-target x86_64-apple-macos10.12" && make
-else # ($(UNAME_S),???)
-openssl: external/openssl/libssl.a external/openssl/libcrypto.a
-external/openssl/libssl.a:
-	cd external/openssl && ./Configure && make
-external/openssl/libcrypto.a:
-	cd external/openssl && ./Configure && make
-endif # ($(UNAME_S),???)
-
+clean-all: clean clean-dependencies
 
