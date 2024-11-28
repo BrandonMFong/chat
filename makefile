@@ -32,6 +32,8 @@ help:
 COMPILER = g++
 CPPSTD = -std=c++20
 CONFIG = release
+BUILD_PATH = build/$(CONFIG)
+BIN_PATH = bin/$(CONFIG)
 BUILD_TYPE = executable
 SOURCE_EXT = cpp
 HEADER_EXT = hpp
