@@ -11,6 +11,7 @@ x.x
 [] chat configuration implemented in ncurses
 [] user typing
 [x] update build and test process
+[] move package logic to libs
 
 0.2.1
 [x] issue with sending messages between two machines that are on macos and linux
