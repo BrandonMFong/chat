@@ -99,6 +99,7 @@ LIBS_MAKEFILES_PATH:=$(CURDIR)/external/libs/makefiles
 include $(LIBS_MAKEFILES_PATH)/build.mk 
 
 ### Packaging
+
 PACKAGE_NAME = chat
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Linux)
@@ -110,23 +111,14 @@ PLATFORM = macos
 PACKAGE_MODE = package-macos
 endif
 
-package: $(PACKAGE_MODE)
+include $(LIBS_MAKEFILES_PATH)/package.mk 
 
-package-linux: $(PACKAGE_NAME) $(PACKAGE_NAME)/$(BIN_NAME)
-	zip -r $(BIN_PATH)/$(PACKAGE_NAME)-$(PLATFORM).zip $(PACKAGE_NAME)
-	tar vczf $(BIN_PATH)/$(PACKAGE_NAME)-$(PLATFORM).tar.gz $(PACKAGE_NAME)
-
-package-macos: $(PACKAGE_NAME) $(PACKAGE_NAME)/$(BIN_NAME)
-	hdiutil create -fs HFS+ -volname Chat -srcfolder $(PACKAGE_NAME) $(BIN_PATH)/$(PACKAGE_NAME)-$(PLATFORM).dmg
-
-$(PACKAGE_NAME):
-	mkdir -p $@
-
-$(PACKAGE_NAME)/$(BIN_NAME): $(BIN_PATH)/$(BIN_NAME)
-	@cp -afv $< $(PACKAGE_NAME)
+### codesigning
 
 codesign:
 	codesign -s "$(IDENTITY)" --options=runtime --timestamp $(BIN_PATH)/$(BIN_NAME)
+
+### notarize
 
 notarize:
 	xcrun notarytool \
