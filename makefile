@@ -103,33 +103,14 @@ include $(LIBS_MAKEFILES_PATH)/build.mk
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Linux)
 PACKAGE_NAME = chat-linux
-PACKAGE_MODE = package-linux
 endif
 ifeq ($(UNAME_S),Darwin)
 PACKAGE_NAME = chat-macos
-PACKAGE_MODE = package-macos
 endif
+PACKAGE_BIN_PATH = $(BIN_PATH)
+PACKAGE_BIN_TARGET = $(BIN_NAME)
 
 include $(LIBS_MAKEFILES_PATH)/package.mk 
-
-### codesigning
-
-codesign:
-	codesign -s "$(IDENTITY)" --options=runtime --timestamp $(BIN_PATH)/$(BIN_NAME)
-
-### notarize
-
-notarize:
-	xcrun notarytool \
-	submit \
-	--apple-id "$(EMAIL)" \
-	--password "$(PW)" \
-	--team-id "$(TEAMID)" \
-	--wait \
-	$(BIN_PATH)/$(PACKAGE_NAME)-$(PLATFORM).dmg
-
-staple:
-	xcrun stapler staple $(BIN_PATH)/$(PACKAGE_NAME)-$(PLATFORM).dmg
 
 ### Dependencies
 
@@ -140,4 +121,7 @@ clean-dependencies:
 	cd external && make clean
 
 clean-all: clean clean-dependencies
+
+clean:
+	rm -rfv build bin $(PACKAGE_NAME)
 
