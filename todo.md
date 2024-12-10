@@ -5,13 +5,16 @@ x.x
 [] window dynamic resizing
 [] get list of users in chatroom
 [] add to homebrew package manager
+[] docker?
+[] ai bot chatroom
 
 0.3
-[] improved controls (replicate nano commands)
+[] improved controls (easier commands or guidance)
 [] chat configuration implemented in ncurses
 [] user typing
 [x] update build and test process
 [] move package logic to libs
+[] host vs server (allow user to run this application as a service)
 
 0.2.1
 [x] issue with sending messages between two machines that are on macos and linux
