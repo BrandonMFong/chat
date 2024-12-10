@@ -100,14 +100,13 @@ include $(LIBS_MAKEFILES_PATH)/build.mk
 
 ### Packaging
 
-PACKAGE_NAME = chat
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Linux)
-PLATFORM = linux
+PACKAGE_NAME = chat-linux
 PACKAGE_MODE = package-linux
 endif
 ifeq ($(UNAME_S),Darwin)
-PLATFORM = macos
+PACKAGE_NAME = chat-macos
 PACKAGE_MODE = package-macos
 endif
 
