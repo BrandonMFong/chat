@@ -21,6 +21,10 @@
 #include "command.hpp"
 #include "permissions.hpp"
 
+extern "C" {
+#include <bflibc/bflibc.h>
+}
+
 using namespace BF;
 
 const size_t kInterfaceConversationLineLength = PAYLOAD_MESSAGE_LIMIT_MESSAGE + USER_NAME_SIZE + (2 << 4);
