@@ -616,7 +616,8 @@ int Interface::processinputStateLobby(InputBuffer & userInput) {
 			if (!Permissions::CanCreateChatroom()) {
 				String * errmsg = String::createWithFormat("not permitted: you are not allowd to create a chatroom");
 				this->setErrorMessage(*errmsg);
-				BFRelease(errmsg);
+				Object * obj = (Object *) errmsg;
+				BFRelease(obj);
 			} else {
 				char chatroomname[CHAT_ROOM_NAME_SIZE];
 				if (cmd.count() > 1) {
@@ -649,7 +650,9 @@ int Interface::processinputStateLobby(InputBuffer & userInput) {
 		} else {
 			String * errmsg = String::createWithFormat("unknown command: %s", cmd.op().cString());
 			this->setErrorMessage(*errmsg);
-			BFRelease(errmsg);
+			//BFRelease(errmsg);
+			Object * obj = (Object *) errmsg;
+			BFRelease(obj);
 		}
 		userInput.reset();
 	}
@@ -677,7 +680,9 @@ int Interface::processinputStateChatroom(InputBuffer & userInput) {
 		} else {
 			String * errmsg = String::createWithFormat("unknown command: %s", cmd.op().cString());
 			this->setErrorMessage(*errmsg);
-			BFRelease(errmsg);
+			//BFRelease(errmsg);
+			Object * obj = (Object *) errmsg;
+			BFRelease(obj);
 		}
 
 		userInput.reset();

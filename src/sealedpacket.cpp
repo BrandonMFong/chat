@@ -8,6 +8,10 @@
 #include <string.h>
 #include <stdlib.h>
 
+extern "C" {
+#include <bflibc/bflibc.h>
+}
+
 SealedPacket::SealedPacket(const void * data, size_t size) {
 	this->_dataPlainSize = size;
 	

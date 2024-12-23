@@ -7,6 +7,10 @@
 #include "inputbuffer.hpp"
 #include <bflibcpp/bflibcpp.hpp>
 
+extern "C" {
+#include <bflibc/bflibc.h>
+}
+
 using namespace BF;
 
 void _CommandReleaseArray(char * s) {
