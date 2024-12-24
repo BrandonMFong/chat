@@ -10,6 +10,10 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+extern "C" {
+#include <bflibc/bflibc.h>
+}
+
 void _LogWriteEntry(BFFileWriter * filewriter, int mode, ...) {
 #ifndef TESTING
 	if (!filewriter) return;

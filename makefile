@@ -100,35 +100,17 @@ include $(LIBS_MAKEFILES_PATH)/build.mk
 
 ### Packaging
 
-package: $(PACKAGE_MODE)
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S),Linux)
+PACKAGE_NAME = chat-linux
+endif
+ifeq ($(UNAME_S),Darwin)
+PACKAGE_NAME = chat-macos
+endif
+PACKAGE_BIN_PATH = $(BIN_PATH)
+PACKAGE_BIN_TARGET = $(BIN_NAME)
 
-package-linux: $(PACKAGE_NAME) $(PACKAGE_NAME)/$(BIN_NAME)
-	zip -r $(BIN_PATH)/$(PACKAGE_NAME)-$(PLATFORM).zip $(PACKAGE_NAME)
-	tar vczf $(BIN_PATH)/$(PACKAGE_NAME)-$(PLATFORM).tar.gz $(PACKAGE_NAME)
-
-package-macos: $(PACKAGE_NAME) $(PACKAGE_NAME)/$(BIN_NAME)
-	hdiutil create -fs HFS+ -volname Chat -srcfolder $(PACKAGE_NAME) $(BIN_PATH)/$(PACKAGE_NAME)-$(PLATFORM).dmg
-
-$(PACKAGE_NAME):
-	mkdir -p $@
-
-$(PACKAGE_NAME)/$(BIN_NAME): $(BIN_PATH)/$(BIN_NAME)
-	@cp -afv $< $(PACKAGE_NAME)
-
-codesign:
-	codesign -s "$(IDENTITY)" --options=runtime --timestamp $(BIN_PATH)/$(BIN_NAME)
-
-notarize:
-	xcrun notarytool \
-	submit \
-	--apple-id "$(EMAIL)" \
-	--password "$(PW)" \
-	--team-id "$(TEAMID)" \
-	--wait \
-	$(BIN_PATH)/$(PACKAGE_NAME)-$(PLATFORM).dmg
-
-staple:
-	xcrun stapler staple $(BIN_PATH)/$(PACKAGE_NAME)-$(PLATFORM).dmg
+include $(LIBS_MAKEFILES_PATH)/package.mk 
 
 ### Dependencies
 
@@ -139,4 +121,7 @@ clean-dependencies:
 	cd external && make clean
 
 clean-all: clean clean-dependencies
+
+clean:
+	rm -rfv build bin $(PACKAGE_NAME)
 

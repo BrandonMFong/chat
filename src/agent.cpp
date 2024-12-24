@@ -20,6 +20,10 @@
 #include "chat.hpp"
 #include "exception.hpp"
 
+extern "C" {
+#include <bflibc/bflibc.h>
+}
+
 using namespace BF;
 using namespace BF::Net;
 
