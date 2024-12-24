@@ -614,10 +614,8 @@ int Interface::processinputStateLobby(InputBuffer & userInput) {
 			this->_state = kInterfaceStateHelp;
 		} else if (!cmd.op().compareString(INTERFACE_COMMAND_CREATE)) { // create
 			if (!Permissions::CanCreateChatroom()) {
-				String * errmsg = String::createWithFormat("not permitted: you are not allowd to create a chatroom");
-				this->setErrorMessage(*errmsg);
-				Object * obj = (Object *) errmsg;
-				BFRelease(obj);
+				String errmsg("not permitted: you are not allowd to create a chatroom");
+				this->setErrorMessage(errmsg);
 			} else {
 				char chatroomname[CHAT_ROOM_NAME_SIZE];
 				if (cmd.count() > 1) {
@@ -648,11 +646,8 @@ int Interface::processinputStateLobby(InputBuffer & userInput) {
 				}
 			}
 		} else {
-			String * errmsg = String::createWithFormat("unknown command: %s", cmd.op().cString());
-			this->setErrorMessage(*errmsg);
-			//BFRelease(errmsg);
-			Object * obj = (Object *) errmsg;
-			BFRelease(obj);
+			String errmsg("unknown command: %s", cmd.op().cString());
+			this->setErrorMessage(errmsg);
 		}
 		userInput.reset();
 	}
@@ -678,11 +673,8 @@ int Interface::processinputStateChatroom(InputBuffer & userInput) {
 			this->_state = kInterfaceStateDraft;
 			this->converstaionHasChanged();
 		} else {
-			String * errmsg = String::createWithFormat("unknown command: %s", cmd.op().cString());
+			String errmsg("unknown command: %s", cmd.op().cString());
 			this->setErrorMessage(*errmsg);
-			//BFRelease(errmsg);
-			Object * obj = (Object *) errmsg;
-			BFRelease(obj);
 		}
 
 		userInput.reset();
