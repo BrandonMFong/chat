@@ -1,3 +1,4 @@
+[![CI](https://github.com/BrandonMFong/chat/actions/workflows/test.yml/badge.svg)](https://github.com/BrandonMFong/chat/actions/workflows/test.yml)
 # Chat Server
 
 ## Supports
