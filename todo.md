@@ -16,6 +16,7 @@ x.x
 - [x] update build and test process
 - [x] move package logic to libs
 - [ ] host vs server (allow user to run this application as a service)
+- [ ] allow "localhost" for `-ip4` argument
 
 0.2.1
 - [x] issue with sending messages between two machines that are on macos and linux
