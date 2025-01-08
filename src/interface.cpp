@@ -20,6 +20,7 @@
 #include "agentclient.hpp"
 #include "command.hpp"
 #include "permissions.hpp"
+#include "utils.hpp"
 
 extern "C" {
 #include <bflibc/bflibc.h>
@@ -604,7 +605,8 @@ Chatroom * _InterfaceGetChatroomAtIndex(int i) {
 }
 
 int Interface::processinputStateLobby(InputBuffer & userInput) {
-	if (userInput.isready()) {
+	//if (userInput.isready()) {
+	if (Utils::inputReady(userInput)) {
 		Command cmd(userInput);
 		if (!cmd.op().compareString(INTERFACE_COMMAND_QUIT)) { // quit
 			Office::quitApplication(this->_user.get());
@@ -656,7 +658,8 @@ int Interface::processinputStateLobby(InputBuffer & userInput) {
 }
 
 int Interface::processinputStateChatroom(InputBuffer & userInput) {
-	if (userInput.isready()) { 
+	//if (userInput.isready()) { 
+	if (Utils::inputReady(userInput)) { 
 		Command cmd(userInput);
 		if (!cmd.op().compareString(INTERFACE_COMMAND_LEAVE)) { // leave
 			// tell chat room we are leaving
@@ -683,8 +686,8 @@ int Interface::processinputStateChatroom(InputBuffer & userInput) {
 }
 
 int Interface::processinputStateDraft(InputBuffer & userInput) {
-	if (userInput.isready()) {
-		// send buf
+	//if (userInput.isready()) { // send buf
+	if (Utils::inputReady(userInput)) { // send buf
 		this->_chatroom.get()->sendBuffer(userInput);
 
 		this->_state = kInterfaceStateChatroom;

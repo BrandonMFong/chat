@@ -43,7 +43,8 @@ log user inputbuffer office \
 chatroom message chatroomserver packet \
 agent agentclient agentserver sealedpacket \
 chatroomclient interfaceserver interfaceclient command \
-permissions chat 
+permissions utils\
+chat 
 
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Darwin)

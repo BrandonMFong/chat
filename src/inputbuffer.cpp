@@ -14,7 +14,7 @@ using namespace BF;
 InputBuffer::InputBuffer() : InputBuffer("") {}
 
 InputBuffer::InputBuffer(const char * str) : String(str) {
-	this->_isready = false;
+	this->_enterPressed = false;
 	this->_cursorpos = 0;
 }
 
@@ -23,7 +23,7 @@ InputBuffer::~InputBuffer() { }
 int InputBuffer::addChar(int ch) {
 	switch (ch) {
 	case '\n':
-		this->_isready = this->starts_with(":");
+		this->_enterPressed = true;
 		break;
 	case KEY_BACKSPACE:
 	case 127:
@@ -53,7 +53,7 @@ int InputBuffer::addChar(int ch) {
 
 int InputBuffer::reset() {
 	this->_cursorpos = 0;
-	this->_isready = false;
+	this->_enterPressed = false;
 	return this->String::clear();
 }
 
@@ -61,7 +61,7 @@ size_t InputBuffer::cursorPosition() {
 	return this->_cursorpos;
 }
 
-bool InputBuffer::isready() {
-	return this->_isready;
+bool InputBuffer::enterPressed() {
+	return this->_enterPressed;
 }
 
