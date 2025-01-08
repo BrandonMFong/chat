@@ -18,14 +18,12 @@ InputBuffer::InputBuffer(const char * str) : String(str) {
 	this->_cursorpos = 0;
 }
 
-InputBuffer::~InputBuffer() {
-
-}
+InputBuffer::~InputBuffer() { }
 
 int InputBuffer::addChar(int ch) {
 	switch (ch) {
 	case '\n':
-		this->_isready = true;
+		this->_isready = this->starts_with(":");
 		break;
 	case KEY_BACKSPACE:
 	case 127:

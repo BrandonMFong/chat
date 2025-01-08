@@ -33,7 +33,9 @@ Command::~Command() {
 }
 
 String Command::op() const {
-	return this->argumentAtIndex(0);
+	String res = this->argumentAtIndex(0);
+	res.remCharAtIndex(0);
+	return res;
 }
 
 String Command::operator[](int i) const {
