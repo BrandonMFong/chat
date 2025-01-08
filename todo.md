@@ -9,6 +9,8 @@ x.x
 
 0.3
 - [ ] improved controls (easier commands or guidance)
+	- [x] use of ":" for long commands
+	- [ ] single key commands
 - [ ] chat configuration implemented in ncurses
 - [ ] user typing
 - [x] update build and test process
