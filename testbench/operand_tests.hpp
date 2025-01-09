@@ -19,7 +19,8 @@ extern "C" {
 using namespace BF;
 
 BFTEST_UNIT_FUNC(test_operandinit, 2<<10, {
-	Operand op("draft", 'i');
+	Operand op0("draft", 'i');
+	Operand op1("help", '?');
 })
 
 BFTEST_COVERAGE_FUNC(operand_tests, {
