@@ -605,7 +605,6 @@ Chatroom * _InterfaceGetChatroomAtIndex(int i) {
 }
 
 int Interface::processinputStateLobby(InputBuffer & userInput) {
-	//if (userInput.isready()) {
 	if (Utils::inputReady(userInput)) {
 		Command cmd(userInput);
 		if (!cmd.op().compareString(INTERFACE_COMMAND_QUIT)) { // quit
@@ -658,7 +657,6 @@ int Interface::processinputStateLobby(InputBuffer & userInput) {
 }
 
 int Interface::processinputStateChatroom(InputBuffer & userInput) {
-	//if (userInput.isready()) { 
 	if (Utils::inputReady(userInput)) { 
 		Command cmd(userInput);
 		if (!cmd.op().compareString(INTERFACE_COMMAND_LEAVE)) { // leave
@@ -686,7 +684,6 @@ int Interface::processinputStateChatroom(InputBuffer & userInput) {
 }
 
 int Interface::processinputStateDraft(InputBuffer & userInput) {
-	//if (userInput.isready()) { // send buf
 	if (Utils::inputReady(userInput)) { // send buf
 		this->_chatroom.get()->sendBuffer(userInput);
 
