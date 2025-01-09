@@ -43,7 +43,7 @@ log user inputbuffer office \
 chatroom message chatroomserver packet \
 agent agentclient agentserver sealedpacket \
 chatroomclient interfaceserver interfaceclient command \
-permissions utils\
+permissions utils operand\
 chat 
 
 UNAME_S := $(shell uname -s)

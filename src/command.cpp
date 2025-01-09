@@ -34,7 +34,9 @@ Command::~Command() {
 
 String Command::op() const {
 	String res = this->argumentAtIndex(0);
-	res.remCharAtIndex(0);
+	if (res.starts_with(":")) {
+		res.remCharAtIndex(0);
+	}
 	return res;
 }
 

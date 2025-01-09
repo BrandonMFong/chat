@@ -66,7 +66,7 @@ BFTEST_UNIT_FUNC(test_commandandarg, 2<<10, {
 	
 	buf.addChar('\n');
 
-	if (!buf.isready()) {
+	if (!buf.enterPressed()) {
 		result = max;
 	}
 })
