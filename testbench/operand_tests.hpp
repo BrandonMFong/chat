@@ -19,20 +19,20 @@ extern "C" {
 using namespace BF;
 
 BFTEST_UNIT_FUNC(test_operandinit, 2<<10, {
-	Operand OP_DRAFT("draft", 'i');
-	Operand OP_HELP("help", '?');
+	Operand op_draft("draft", 'i');
+	Operand op_help("help", '?');
 })
 
 BFTEST_UNIT_FUNC(test_operandcompare, 2<<10, {
-	Operand OP_DRAFT("draft", 'i');
-	Operand OP_HELP("help", '?');
+	Operand op_draft("draft", 'i');
+	Operand op_help("help", '?');
 
 	Operand op_draft_long("draft");
 	Operand op_draft_short('i');
-	BF_ASSERT(op_draft_long == OP_DRAFT);
-	BF_ASSERT(op_draft_short == OP_DRAFT);
-	BF_ASSERT(op_draft_long != OP_HELP);
-	BF_ASSERT(op_draft_short != OP_HELP);
+	BF_ASSERT(op_draft_long == op_draft);
+	BF_ASSERT(op_draft_short == op_draft);
+	BF_ASSERT(op_draft_long != op_help);
+	BF_ASSERT(op_draft_short != op_help);
 })
 
 BFTEST_COVERAGE_FUNC(operand_tests, {

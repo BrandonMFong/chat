@@ -6,6 +6,15 @@
 #include "operand.hpp"
 #include <bflibcpp/bflibcpp.hpp>
 
+using namespace BF;
+
+const Operand OP_HELP("help", '?');
+const Operand OP_CREATE("create");
+const Operand OP_JOIN("join");
+const Operand OP_LEAVE("leave");
+const Operand OP_DRAFT("draft", 'i');
+const Operand OP_QUIT("quit", 'q');
+
 Operand::Operand(const char * vlong, char vshort) {
 	strcpy(this->_long, vlong);
 	this->_short = vshort;
@@ -27,5 +36,9 @@ bool Operand::operator==(const Operand & op) {
 
 bool Operand::operator!=(const Operand & op) {
 	return !this->compare(op);
+}
+
+String Operand::description() const {
+	return String("%s - %c", this->_long, this->_short);
 }
 

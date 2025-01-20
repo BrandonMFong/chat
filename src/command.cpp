@@ -5,6 +5,7 @@
 
 #include "command.hpp"
 #include "inputbuffer.hpp"
+#include "operand.hpp"
 #include <bflibcpp/bflibcpp.hpp>
 
 extern "C" {
@@ -32,12 +33,13 @@ Command::~Command() {
 
 }
 
-String Command::op() const {
-	String res = this->argumentAtIndex(0);
-	if (res.starts_with(":")) {
-		res.remCharAtIndex(0);
+Operand Command::op() const {
+	String arg = this->argumentAtIndex(0);
+	if (arg.starts_with(":")) {
+		arg.remCharAtIndex(0);
 	}
-	return res;
+
+	return Operand(arg);
 }
 
 String Command::operator[](int i) const {
