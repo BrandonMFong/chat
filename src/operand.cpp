@@ -11,7 +11,21 @@ Operand::Operand(const char * vlong, char vshort) {
 	this->_short = vshort;
 }
 
-Operand::~Operand() {
+Operand::Operand(const char * vlong) : Operand(vlong, 0) { }
 
+Operand::Operand(char vshort) : Operand("", vshort) { }
+
+Operand::~Operand() { }
+
+bool Operand::compare(const Operand & op) {
+	return !strcmp(this->_long, op._long) || this->_short == op._short;
+}
+
+bool Operand::operator==(const Operand & op) {
+	return this->compare(op);
+}
+
+bool Operand::operator!=(const Operand & op) {
+	return !this->compare(op);
 }
 

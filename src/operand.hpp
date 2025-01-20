@@ -15,11 +15,19 @@
 class Operand : public BF::Object {
 public:
 	Operand(const char * vlong, char vshort);
+	Operand(const char * vlong);
+	Operand(char vshort);
 	virtual ~Operand();
+
+	bool compare(const Operand & op);
 
 private:
 	char _long[32];
 	char _short;
+
+public:
+	bool operator==(const Operand & op);
+	bool operator!=(const Operand & op);
 };
 
 #endif // OPERAND_HPP
