@@ -27,7 +27,9 @@ Operand::Operand(char vshort) : Operand("", vshort) { }
 Operand::~Operand() { }
 
 bool Operand::compare(const Operand & op) {
-	return !strcmp(this->_long, op._long) || this->_short == op._short;
+	bool long_mask = strlen(this->_long) > 0 && strlen(op._long) > 0 && !strcmp(this->_long, op._long);
+	bool short_mask = this->_short != 0 && op._short != 0 && this->_short == op._short;
+	return long_mask || short_mask;
 }
 
 bool Operand::operator==(const Operand & op) {
