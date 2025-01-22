@@ -61,11 +61,16 @@ LIBRARIES = external/bin/openssl/libssl.a external/bin/openssl/libcrypto.a
 OPENSSL_INCLUDE_PATH = -Iexternal/bin/openssl/include
 endif
 
-ifneq ($(CONFIG),test) # test
+ifeq ($(CONFIG),release) # release
 LIBRARIES += \
-	external/bin/libs/$(CONFIG)/bflibc/libbfc.a \
-	external/bin/libs/$(CONFIG)/bflibcpp/libbfcpp.a \
-	external/bin/libs/$(CONFIG)/bfnet/libbfnet.a
+	external/bin/libs/release/bflibc/libbfc.a \
+	external/bin/libs/release/bflibcpp/libbfcpp.a \
+	external/bin/libs/release/bfnet/libbfnet.a
+else
+LIBRARIES += \
+	external/bin/libs/debug/bflibc/libbfc-debug.a \
+	external/bin/libs/debug/bflibcpp/libbfcpp-debug.a \
+	external/bin/libs/debug/bfnet/libbfnet-debug.a
 endif
 
 LINKS = -lpthread -lncurses $(BF_LIB_C_FLAGS) -ldl
@@ -89,11 +94,7 @@ MAIN_FILE = testbench/tests.cpp
 BIN_NAME = chat-test
 #ADDR_SANITIZER = -fsanitize=address
 FLAGS = $(CPPFLAGS) -DDEBUG -DTESTING -g -Isrc/ $(ADDR_SANITIZER) $(CPPSTD) -Iexternal/bin/libs/debug $(OPENSSL_INCLUDE_PATH)
-LIBRARIES += \
-	external/bin/libs/debug/bflibc/libbfc-debug.a \
-	external/bin/libs/debug/bflibcpp/libbfcpp-debug.a \
-	external/bin/libs/debug/bfnet/libbfnet-debug.a \
-	external/bin/libs/debug/bftest/libbftest-debug.a
+LIBRARIES += external/bin/libs/debug/bftest/libbftest-debug.a
 endif # ($(CONFIG),...)
 
 LIBS_MAKEFILES_PATH:=$(CURDIR)/external/libs/makefiles
