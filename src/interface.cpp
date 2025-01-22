@@ -606,7 +606,7 @@ Chatroom * _InterfaceGetChatroomAtIndex(int i) {
 }
 
 int Interface::processinputStateLobby(InputBuffer & userInput) {
-	if (Utils::inputReady(userInput)) {
+	if (Utils::inputReady(userInput, this->_state)) {
 		Command cmd(userInput);
 		if (cmd.op() == OP_QUIT) { // quit
 			Office::quitApplication(this->_user.get());
@@ -658,7 +658,7 @@ int Interface::processinputStateLobby(InputBuffer & userInput) {
 }
 
 int Interface::processinputStateChatroom(InputBuffer & userInput) {
-	if (Utils::inputReady(userInput)) { 
+	if (Utils::inputReady(userInput, this->_state)) { 
 		Command cmd(userInput);
 		if (cmd.op() == OP_LEAVE) { // leave
 			// tell chat room we are leaving
@@ -685,7 +685,7 @@ int Interface::processinputStateChatroom(InputBuffer & userInput) {
 }
 
 int Interface::processinputStateDraft(InputBuffer & userInput) {
-	if (Utils::inputReady(userInput)) { // send buf
+	if (Utils::inputReady(userInput, this->_state)) { // send buf
 		this->_chatroom.get()->sendBuffer(userInput);
 
 		this->_state = kInterfaceStateChatroom;

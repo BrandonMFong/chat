@@ -11,7 +11,7 @@ x.x
 - [ ] improved controls (easier commands or guidance)
 	- [x] use of ":" for long commands
 	- [ ] single key commands
-		- [ ] make operand constants
+		- [x] make operand constants
 - [ ] chat configuration implemented in ncurses
 - [ ] user typing
 - [x] update build and test process

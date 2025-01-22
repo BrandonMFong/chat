@@ -7,7 +7,10 @@
 #include "inputbuffer.hpp"
 #include "interface.hpp"
 
-bool Utils::inputReady(InputBuffer & buf) {
-	return buf.enterPressed() && (Interface::current()->currstate() == kInterfaceStateDraft || buf.starts_with(":"));
+bool Utils::inputReady(InputBuffer & buf, InterfaceState state) {
+	return (buf.enterPressed() && (state == kInterfaceStateDraft || buf.starts_with(":")))
+		||
+		(buf.length() == 1) && !buf.starts_with(":")
+		;
 }
 
