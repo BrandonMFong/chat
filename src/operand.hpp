@@ -15,9 +15,7 @@
  */
 class Operand : public BF::Object {
 public:
-	Operand(const char * vlong, char vshort);
-	Operand(const char * vlong);
-	Operand(char vshort);
+	Operand(std::initializer_list<const char *> list);
 	virtual ~Operand();
 
 	bool compare(const Operand & op);
@@ -25,8 +23,7 @@ public:
 	BF::String description() const;
 
 private:
-	char _long[32];
-	char _short;
+	BF::Array<char *> _acceptedArgs;
 
 public:
 	bool operator==(const Operand & op);

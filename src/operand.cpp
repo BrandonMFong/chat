@@ -6,30 +6,35 @@
 #include "operand.hpp"
 #include <bflibcpp/bflibcpp.hpp>
 
-using namespace BF;
-
-const Operand OP_HELP("help", '?');
-const Operand OP_CREATE("create");
-const Operand OP_JOIN("join");
-const Operand OP_LEAVE("leave");
-const Operand OP_DRAFT("draft", 'i');
-const Operand OP_QUIT("quit", 'q');
-
-Operand::Operand(const char * vlong, char vshort) {
-	strcpy(this->_long, vlong);
-	this->_short = vshort;
+extern "C" {
+#include <bflibc/bflibc.h>
 }
 
-Operand::Operand(const char * vlong) : Operand(vlong, 0) { }
+using namespace BF;
 
-Operand::Operand(char vshort) : Operand("", vshort) { }
+const Operand OP_HELP({"help", "?"});
+const Operand OP_CREATE({"create"});
+const Operand OP_JOIN({"join"});
+const Operand OP_LEAVE({"leave"});
+const Operand OP_DRAFT({"draft", "i"});
+const Operand OP_QUIT({"quit", "q"});
+
+void _OperandAcceptArgsRelease(char * a) {
+	BFFree(a);
+}
+
+Operand::Operand(std::initializer_list<const char *> list) : Object() {
+	this->_acceptedArgs.setReleaseCallback(_OperandAcceptArgsRelease);
+	for (const char * arg : list) {
+		char * buf = BFStringCopyString(arg);
+		this->_acceptedArgs.add(buf);
+	}
+}
 
 Operand::~Operand() { }
 
 bool Operand::compare(const Operand & op) {
-	bool long_mask = strlen(this->_long) > 0 && strlen(op._long) > 0 && !strcmp(this->_long, op._long);
-	bool short_mask = this->_short != 0 && op._short != 0 && this->_short == op._short;
-	return long_mask || short_mask;
+	return false;
 }
 
 bool Operand::operator==(const Operand & op) {
@@ -41,6 +46,6 @@ bool Operand::operator!=(const Operand & op) {
 }
 
 String Operand::description() const {
-	return String("%s - %c", this->_long, this->_short);
+	return String("unknown");
 }
 

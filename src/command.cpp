@@ -39,7 +39,7 @@ Operand Command::op() const {
 		arg.remCharAtIndex(0);
 	}
 
-	return Operand(arg);
+	return Operand({arg});
 }
 
 String Command::operator[](int i) const {

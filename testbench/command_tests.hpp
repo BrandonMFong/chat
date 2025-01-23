@@ -29,14 +29,14 @@ BFTEST_UNIT_FUNC(test_commandop, 2<<10, {
 	InputBuffer buf("command subcommand arg0 arg1");
 	Command c(buf);
 
-	BF_ASSERT(c.op() == Operand("command"));
+	BF_ASSERT(c.op() == Operand({"command"}));
 })
 
 BFTEST_UNIT_FUNC(test_commandargs, 2<<10, {
 	InputBuffer buf("command subcommand arg0 arg1");
 	Command c(buf);
 
-	BF_ASSERT(c.op() == Operand("command"));
+	BF_ASSERT(c.op() == Operand({"command"}));
 	BF_ASSERT(!strcmp(c[1], "subcommand"));
 	BF_ASSERT(!strcmp(c[2], "arg0"));
 	BF_ASSERT(!strcmp(c[3], "arg1"));
