@@ -18,7 +18,7 @@ jobs:
       run: |
         sudo apt -y update;
         sudo apt -y upgrade;
-        sudo apt -y install uuid-dev;
+        sudo apt -y install uuid-dev; 
     - name: building libs
       run: |
         cd external;
