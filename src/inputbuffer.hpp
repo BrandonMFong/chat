@@ -23,7 +23,7 @@ public:
 	/**
 	 * when the buffer is ready to be sent
 	 */
-	bool isready();
+	bool enterPressed();
 
 	/**
 	 * clears buffer and resets the cursor position
@@ -37,7 +37,7 @@ public:
 
 private:
 
-	bool _isready;
+	bool _enterPressed;
 
 	/**
 	 * current cursor position

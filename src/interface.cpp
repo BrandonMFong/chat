@@ -20,6 +20,8 @@
 #include "agentclient.hpp"
 #include "command.hpp"
 #include "permissions.hpp"
+#include "utils.hpp"
+#include "operand.hpp"
 
 extern "C" {
 #include <bflibc/bflibc.h>
@@ -523,7 +525,11 @@ int Interface::windowUpdateInputWindowText(InputBuffer & userInput) {
 		BFLockLock(&this->_winlock);
 		werase(this->_inputWin);
 		if (this->_errorMessage.length() == 0) {
-			mvwprintw(this->_inputWin, 0, 0, userInput.cString());
+			if (userInput.length() == 0) {
+				mvwprintw(this->_inputWin, 0, 0, "-- '?' for help --");
+			} else {
+				mvwprintw(this->_inputWin, 0, 0, userInput.cString());
+			}
 		} else {
 			mvwprintw(this->_inputWin, 0, 0, this->_errorMessage.cString());
 			this->_errorMessage.clear();
@@ -604,15 +610,15 @@ Chatroom * _InterfaceGetChatroomAtIndex(int i) {
 }
 
 int Interface::processinputStateLobby(InputBuffer & userInput) {
-	if (userInput.isready()) {
+	if (Utils::inputReady(userInput, this->_state)) {
 		Command cmd(userInput);
-		if (!cmd.op().compareString(INTERFACE_COMMAND_QUIT)) { // quit
+		if (cmd.op() == OP_QUIT) { // quit
 			Office::quitApplication(this->_user.get());
 			this->_state = kInterfaceStateQuit;
-		} else if (!cmd.op().compareString(INTERFACE_COMMAND_HELP)) { // help
+		} else if (cmd.op() == OP_HELP) { // help
 			this->_returnfromhelpstate = this->_state;
 			this->_state = kInterfaceStateHelp;
-		} else if (!cmd.op().compareString(INTERFACE_COMMAND_CREATE)) { // create
+		} else if (cmd.op() == OP_CREATE) { // create
 			if (!Permissions::CanCreateChatroom()) {
 				String errmsg("not permitted: you are not allowd to create a chatroom");
 				this->setErrorMessage(errmsg);
@@ -632,7 +638,7 @@ int Interface::processinputStateLobby(InputBuffer & userInput) {
 				Chatroom * cr = ChatroomServer::create(chatroomname);
 				BFRelease(cr);
 			}
-		} else if (!cmd.op().compareString(INTERFACE_COMMAND_JOIN)) { // join
+		} else if (cmd.op() == OP_JOIN) { // join
 			int index = String::toi(cmd[1]) - 1;
 			if ((index >= 0) && (index < Chatroom::getChatroomsCount())) {
 				this->_chatroom = _InterfaceGetChatroomAtIndex(index);
@@ -646,7 +652,7 @@ int Interface::processinputStateLobby(InputBuffer & userInput) {
 				}
 			}
 		} else {
-			String errmsg("unknown command: %s", cmd.op().cString());
+			String errmsg("unknown command: '%s'", cmd.op().description().cString());
 			this->setErrorMessage(errmsg);
 		}
 		userInput.reset();
@@ -656,9 +662,9 @@ int Interface::processinputStateLobby(InputBuffer & userInput) {
 }
 
 int Interface::processinputStateChatroom(InputBuffer & userInput) {
-	if (userInput.isready()) { 
+	if (Utils::inputReady(userInput, this->_state)) { 
 		Command cmd(userInput);
-		if (!cmd.op().compareString(INTERFACE_COMMAND_LEAVE)) { // leave
+		if (cmd.op() == OP_LEAVE) { // leave
 			// tell chat room we are leaving
 			this->_chatroom.get()->resign(this->_user);
 
@@ -666,15 +672,15 @@ int Interface::processinputStateChatroom(InputBuffer & userInput) {
 			this->_chatroom = NULL;
 
 			this->_state = kInterfaceStateLobby;
-		} else if (!cmd.op().compareString(INTERFACE_COMMAND_HELP)) { // help
+		} else if (cmd.op() == OP_HELP) { // help
 			this->_returnfromhelpstate = this->_state;
 			this->_state = kInterfaceStateHelp;
-		} else if (!cmd.op().compareString(INTERFACE_COMMAND_DRAFT)) { // draft
+		} else if (cmd.op() == OP_DRAFT) { // draft
 			this->_state = kInterfaceStateDraft;
 			this->converstaionHasChanged();
 		} else {
-			String errmsg("unknown command: %s", cmd.op().cString());
-			this->setErrorMessage(*errmsg);
+			String errmsg("unknown command: '%s'", cmd.op().description().cString());
+			this->setErrorMessage(errmsg);
 		}
 
 		userInput.reset();
@@ -683,8 +689,7 @@ int Interface::processinputStateChatroom(InputBuffer & userInput) {
 }
 
 int Interface::processinputStateDraft(InputBuffer & userInput) {
-	if (userInput.isready()) {
-		// send buf
+	if (Utils::inputReady(userInput, this->_state)) { // send buf
 		this->_chatroom.get()->sendBuffer(userInput);
 
 		this->_state = kInterfaceStateChatroom;

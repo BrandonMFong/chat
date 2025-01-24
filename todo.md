@@ -8,12 +8,19 @@ x.x
 - [ ] ai bot chatroom
 
 0.3
-- [ ] improved controls (easier commands or guidance)
+- [x] improved controls (easier commands or guidance)
+	- [x] use of ":" for long commands
+	- [x] single key commands
+		- [x] make operand constants
+		- [x] drafting messages crashes
+	- [x] add text at the bottom that says "press '?' or type ":help" to show help"
+- [ ] improve help
 - [ ] chat configuration implemented in ncurses
 - [ ] user typing
 - [x] update build and test process
 - [x] move package logic to libs
 - [ ] host vs server (allow user to run this application as a service)
+- [ ] allow "localhost" for `-ip4` argument
 
 0.2.1
 - [x] issue with sending messages between two machines that are on macos and linux

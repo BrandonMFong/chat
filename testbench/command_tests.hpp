@@ -10,6 +10,7 @@
 
 #include <bflibcpp/bflibcpp.hpp>
 #include "command.hpp"
+#include "operand.hpp"
 #include "inputbuffer.hpp"
 
 extern "C" {
@@ -28,33 +29,24 @@ BFTEST_UNIT_FUNC(test_commandop, 2<<10, {
 	InputBuffer buf("command subcommand arg0 arg1");
 	Command c(buf);
 
-	if (strcmp(c.op(), "command")) {
-		result = 1;
-	}
+	BF_ASSERT(c.op() == Operand({"command"}));
 })
 
 BFTEST_UNIT_FUNC(test_commandargs, 2<<10, {
 	InputBuffer buf("command subcommand arg0 arg1");
 	Command c(buf);
 
-	if (strcmp(c.op(), "command")) {
-		result = 1;
-	} else if (strcmp(c[1], "subcommand")) {
-		result = 2;
-	} else if (strcmp(c[2], "arg0")) {
-		result = 3;
-	} else if (strcmp(c[3], "arg1")) {
-		result = 4;
-	}
+	BF_ASSERT(c.op() == Operand({"command"}));
+	BF_ASSERT(!strcmp(c[1], "subcommand"));
+	BF_ASSERT(!strcmp(c[2], "arg0"));
+	BF_ASSERT(!strcmp(c[3], "arg1"));
 })
 
 BFTEST_UNIT_FUNC(test_commandargscount, 2<<10, {
 	InputBuffer buf("command subcommand arg0 arg1");
 	Command c(buf);
 
-	if (c.count() == 0) {
-		result = max;
-	}
+	BF_ASSERT(c.count() > 0);
 })
 
 BFTEST_COVERAGE_FUNC(command_tests, {

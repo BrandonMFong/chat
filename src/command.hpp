@@ -11,6 +11,7 @@
 #include <bflibcpp/string.hpp>
 
 class InputBuffer;
+class Operand;
 
 class Command : public BF::Object {
 public:
@@ -22,7 +23,7 @@ public:
 	 *
 	 * this is the first word in the buf
 	 */
-	BF::String op() const;
+	Operand op() const;
 
 	BF::String argumentAtIndex(int i) const;
 
