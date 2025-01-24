@@ -34,6 +34,17 @@ Operand::Operand(std::initializer_list<const char *> list) : Object() {
 Operand::~Operand() { }
 
 bool Operand::compare(const Operand & op) {
+	// FIXME:
+	// this is a poor implementation. time efficiency will decrease
+	// as more accepted arguments are implmented. I suggested to use
+	// algorithms as presented here:https://stackoverflow.com/a/245521/12135693
+	//
+	// current implementation for BF::Array doesn't support the scope of those
+	// algorithms
+	for (int i = 0; i < this->_acceptedArgs.count(); i++) {
+		if (op._acceptedArgs.contains(this->_acceptedArgs[i])) 
+			return true;
+	}
 	return false;
 }
 
@@ -46,6 +57,6 @@ bool Operand::operator!=(const Operand & op) {
 }
 
 String Operand::description() const {
-	return String("unknown");
+	return String("%s", this->_acceptedArgs[0]);
 }
 
