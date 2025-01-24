@@ -525,7 +525,11 @@ int Interface::windowUpdateInputWindowText(InputBuffer & userInput) {
 		BFLockLock(&this->_winlock);
 		werase(this->_inputWin);
 		if (this->_errorMessage.length() == 0) {
-			mvwprintw(this->_inputWin, 0, 0, userInput.cString());
+			if (userInput.length() == 0) {
+				mvwprintw(this->_inputWin, 0, 0, "-- '?' for help --");
+			} else {
+				mvwprintw(this->_inputWin, 0, 0, userInput.cString());
+			}
 		} else {
 			mvwprintw(this->_inputWin, 0, 0, this->_errorMessage.cString());
 			this->_errorMessage.clear();
