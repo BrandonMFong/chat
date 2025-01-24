@@ -676,7 +676,7 @@ int Interface::processinputStateChatroom(InputBuffer & userInput) {
 			this->converstaionHasChanged();
 		} else {
 			String errmsg("unknown command: '%s'", cmd.op().description().cString());
-			this->setErrorMessage(*errmsg);
+			this->setErrorMessage(errmsg);
 		}
 
 		userInput.reset();
