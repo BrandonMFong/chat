@@ -8,9 +8,12 @@
 #include "interface.hpp"
 
 bool Utils::inputReady(InputBuffer & buf, InterfaceState state) {
-	return (buf.enterPressed() && (state == kInterfaceStateDraft || buf.starts_with(":")))
+	return
+		buf.starts_with(":") && (buf.length() > 1) && buf.enterPressed()
 		||
-		(buf.length() == 1) && !buf.starts_with(":")
+		!buf.starts_with(":") && (buf.length() == 1) && (state != kInterfaceStateDraft)
+		||
+		(state == kInterfaceStateDraft) && buf.enterPressed();
 		;
 }
 
