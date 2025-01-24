@@ -8,12 +8,12 @@ x.x
 - [ ] ai bot chatroom
 
 0.3
-- [ ] improved controls (easier commands or guidance)
+- [x] improved controls (easier commands or guidance)
 	- [x] use of ":" for long commands
 	- [x] single key commands
 		- [x] make operand constants
 		- [x] drafting messages crashes
-	- [ ] add text at the bottom that says "press '?' or type ":help" to show help"
+	- [x] add text at the bottom that says "press '?' or type ":help" to show help"
 - [ ] chat configuration implemented in ncurses
 - [ ] user typing
 - [x] update build and test process
