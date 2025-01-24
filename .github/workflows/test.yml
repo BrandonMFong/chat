@@ -15,7 +15,10 @@ jobs:
         submodules: recursive
         token: ${{ secrets.PAT_TOKEN }}
     - name: Install uuid-dev
-      run: sudo apt -y install uuid-dev
+      run: |
+        sudo apt -y update;
+        sudo apt -y upgrade;
+        sudo apt -y install uuid-dev;
     - name: building libs
       run: |
         cd external;
