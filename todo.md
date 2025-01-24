@@ -14,6 +14,7 @@ x.x
 		- [x] make operand constants
 		- [x] drafting messages crashes
 	- [x] add text at the bottom that says "press '?' or type ":help" to show help"
+- [ ] improve help
 - [ ] chat configuration implemented in ncurses
 - [ ] user typing
 - [x] update build and test process
