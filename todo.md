@@ -12,6 +12,8 @@ x.x
 	- [x] use of ":" for long commands
 	- [ ] single key commands
 		- [x] make operand constants
+		- [ ] drafting messages crashes
+	- [ ] add text at the bottom that says "press '?' or type ":help" to show help"
 - [ ] chat configuration implemented in ncurses
 - [ ] user typing
 - [x] update build and test process
