@@ -23,12 +23,17 @@ void _OperandAcceptArgsRelease(char * a) {
 	BFFree(a);
 }
 
+int _OperandAcceptArgsCompare(char * a, char * b) {
+	return strcmp(a, b);
+}
+
 Operand::Operand(std::initializer_list<const char *> list) : Object() {
 	this->_acceptedArgs.setReleaseCallback(_OperandAcceptArgsRelease);
 	for (const char * arg : list) {
 		char * buf = BFStringCopyString(arg);
 		this->_acceptedArgs.add(buf);
 	}
+	this->_acceptedArgs.setComparator(_OperandAcceptArgsCompare);
 }
 
 Operand::~Operand() { }

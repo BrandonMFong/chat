@@ -648,7 +648,7 @@ int Interface::processinputStateLobby(InputBuffer & userInput) {
 				}
 			}
 		} else {
-			String errmsg("unknown command: %s", cmd.op().description().cString());
+			String errmsg("unknown command: '%s'", cmd.op().description().cString());
 			this->setErrorMessage(errmsg);
 		}
 		userInput.reset();
@@ -675,7 +675,7 @@ int Interface::processinputStateChatroom(InputBuffer & userInput) {
 			this->_state = kInterfaceStateDraft;
 			this->converstaionHasChanged();
 		} else {
-			String errmsg("unknown command: %s", cmd.op().description().cString());
+			String errmsg("unknown command: '%s'", cmd.op().description().cString());
 			this->setErrorMessage(*errmsg);
 		}
 
