@@ -1,11 +1,14 @@
 x.x
-- [ ] user data window editor
-- [ ] ability to change user name
 - [ ] window dynamic resizing
-- [ ] get list of users in chatroom
 - [ ] add to homebrew package manager
 - [ ] docker?
 - [ ] ai bot chatroom
+
+0.4
+- [ ] wrap entire communication in encryption
+- [ ] user data window editor
+- [ ] ability to change user name
+- [ ] get list of users in chatroom
 
 0.3
 - [x] improved controls (easier commands or guidance)

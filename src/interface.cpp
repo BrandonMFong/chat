@@ -451,7 +451,7 @@ int Interface::windowCreateStateDraft(int inputWinWidth, int inputWinHeight) {
 	box(this->_displayWin, 0, 0); // Add a box around the display window
 
 	char title[COLS];
-	snprintf(title, COLS, "%s - draft", this->_chatroom.get()->name());
+	snprintf(title, COLS, "Username");
 	int y = (COLS - strlen(title)) / 2;
 	mvwprintw(this->_headerWin, 0, y, title);
 
@@ -496,6 +496,38 @@ int Interface::windowCreateModeHelp() {
 	wrefresh(this->_helpWin); // Refresh the help window
 
 	BFLockUnlock(&this->_winlock);
+	return 0;
+}
+
+int Interface::windowCreateStatePromptUsername() {
+	// change to normal mode
+	BFLockLock(&this->_winlock);
+
+	erase();
+	DELETE_WINDOWS;
+	
+	// Create two windows
+	this->_headerWin = newwin(1, COLS, 0, 0);
+	this->_displayWin = newwin(LINES - 2, COLS, 1, 0);
+	this->_inputWin = newwin(1, COLS, LINES - 1, 0);
+
+	box(this->_displayWin, 0, 0); // Add a box around the display window
+
+	char title[COLS];
+	snprintf(title, COLS, "username");
+	int y = (COLS - strlen(title)) / 2;
+	mvwprintw(this->_headerWin, 0, y, title);
+
+	refresh();
+	wrefresh(this->_inputWin);
+	wrefresh(this->_displayWin);
+	wrefresh(this->_headerWin);
+
+	keypad(this->_inputWin, true); // Enable special keys in input window
+	nodelay(this->_inputWin, false); // Set blocking input for input window
+
+	BFLockUnlock(&this->_winlock);
+
 	return 0;
 }
 
@@ -579,6 +611,9 @@ int Interface::draw() {
 			break;
 		case kInterfaceStateHelp:
 			this->windowCreateModeHelp();
+			break;
+		case kInterfaceStatePromptUsername:
+			this->windowCreateStatePromptUsername();
 			break;
 		default:
 			break;
@@ -746,7 +781,7 @@ int Interface::windowLoop() {
 	BFThreadAsyncID tid = BFThreadAsync(Interface::displayWindowUpdateThread, (void *) this);
     InputBuffer userInput;
 	this->_prevstate = kInterfaceStateUnknown;
-	this->_state = kInterfaceStateLobby;
+	this->_state = kInterfaceStatePromptUsername;
 	while (this->_state.get() != kInterfaceStateQuit) {
 		// draw ui based on current state
 		this->draw();

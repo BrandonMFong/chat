@@ -75,7 +75,8 @@ private:
 	int windowCreateModeHelp();
 	int windowCreateStateChatroom();
 	int windowCreateModeLobby();
-	
+	int windowCreateStatePromptUsername();
+
 	static void displayWindowUpdateThread(void * in);
 
 	int processinputStateDraft(InputBuffer & userInput);
