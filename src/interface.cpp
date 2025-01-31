@@ -499,6 +499,10 @@ int Interface::windowCreateModeHelp() {
 	return 0;
 }
 
+/**
+ * TODO:
+ * 	[] figure what the window size should be
+ */
 int Interface::windowCreateStatePromptUsername() {
 	// change to normal mode
 	BFLockLock(&this->_winlock);
@@ -506,9 +510,8 @@ int Interface::windowCreateStatePromptUsername() {
 	erase();
 	DELETE_WINDOWS;
 	
-	// Create two windows
-	this->_headerWin = newwin(1, COLS, 0, 0);
-	this->_displayWin = newwin(LINES - 2, COLS, 1, 0);
+	this->_headerWin = newwin(1, COLS, 24, 0);
+	this->_displayWin = newwin(LINES - 50, COLS - 200, 25, 100);
 	this->_inputWin = newwin(1, COLS, LINES - 1, 0);
 
 	box(this->_displayWin, 0, 0); // Add a box around the display window
