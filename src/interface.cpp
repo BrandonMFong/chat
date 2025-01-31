@@ -515,11 +515,18 @@ int Interface::windowCreateStatePromptUsername() {
 	this->_inputWin = newwin(1, COLS, LINES - 1, 0);
 
 	box(this->_displayWin, 0, 0); // Add a box around the display window
+	
+	char buf[COLS];
 
-	char title[COLS];
-	snprintf(title, COLS, "username");
-	int y = (COLS - strlen(title)) / 2;
-	mvwprintw(this->_headerWin, 0, y, title);
+	// header
+	snprintf(buf, COLS, "configuration");
+	int y = (COLS - strlen(buf)) / 2;
+	mvwprintw(this->_headerWin, 0, y, buf);
+
+	// prompt
+	snprintf(buf, COLS, "please enter a username");
+	y = (COLS - strlen(buf)) / 2;
+	mvwprintw(this->_displayWin, 10, y, buf);
 
 	refresh();
 	wrefresh(this->_inputWin);
