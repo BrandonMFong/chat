@@ -71,7 +71,7 @@ private:
 	int windowUpdateInputWindowText(InputBuffer & userInput);
 
 	int windowCreateStateDraft();
-	int windowCreateStateDraft(int inputWinWidth, int inputWinHeight);
+	int windowCreateInput(int inputWinWidth, int inputWinHeight, const char * title);
 	int windowCreateModeHelp();
 	int windowCreateStateChatroom();
 	int windowCreateModeLobby();

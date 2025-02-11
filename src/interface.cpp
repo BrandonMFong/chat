@@ -437,7 +437,7 @@ int Interface::windowCreateStateChatroom() {
 	return 0;
 }
 
-int Interface::windowCreateStateDraft(int inputWinWidth, int inputWinHeight) {
+int Interface::windowCreateInput(int inputWinWidth, int inputWinHeight, const char * title) {
 	BFLockLock(&this->_winlock);
 
 	DELETE_WINDOWS;
@@ -450,10 +450,10 @@ int Interface::windowCreateStateDraft(int inputWinWidth, int inputWinHeight) {
 	box(this->_inputWin, 0, 0); // Add a box around the input window
 	box(this->_displayWin, 0, 0); // Add a box around the display window
 
-	char title[COLS];
-	snprintf(title, COLS, "Username");
-	int y = (COLS - strlen(title)) / 2;
-	mvwprintw(this->_headerWin, 0, y, title);
+	char buf[COLS];
+	snprintf(buf, COLS, title);
+	int y = (COLS - strlen(buf)) / 2;
+	mvwprintw(this->_headerWin, 0, y, buf);
 
 	refresh();
 	wrefresh(this->_inputWin);
@@ -473,7 +473,7 @@ int Interface::windowCreateStateDraft(int inputWinWidth, int inputWinHeight) {
 int Interface::windowCreateStateDraft() {
 	int inputWinWidth = COLS;
    	int inputWinHeight = 3;
-	return this->windowCreateStateDraft(inputWinWidth, inputWinHeight);
+	return this->windowCreateInput(inputWinWidth, inputWinHeight, "Draft");
 }
 
 int Interface::windowCreateModeHelp() {
@@ -504,41 +504,9 @@ int Interface::windowCreateModeHelp() {
  * 	[] figure what the window size should be
  */
 int Interface::windowCreateStatePromptUsername() {
-	// change to normal mode
-	BFLockLock(&this->_winlock);
-
-	erase();
-	DELETE_WINDOWS;
-	
-	this->_headerWin = newwin(1, COLS, 24, 0);
-	this->_displayWin = newwin(LINES - 50, COLS - 200, 25, 100);
-	this->_inputWin = newwin(1, COLS, LINES - 1, 0);
-
-	box(this->_displayWin, 0, 0); // Add a box around the display window
-	
-	char buf[COLS];
-
-	// header
-	snprintf(buf, COLS, "configuration");
-	int y = (COLS - strlen(buf)) / 2;
-	mvwprintw(this->_headerWin, 0, y, buf);
-
-	// prompt
-	snprintf(buf, COLS, "please enter a username");
-	y = (COLS - strlen(buf)) / 2;
-	mvwprintw(this->_displayWin, 10, y, buf);
-
-	refresh();
-	wrefresh(this->_inputWin);
-	wrefresh(this->_displayWin);
-	wrefresh(this->_headerWin);
-
-	keypad(this->_inputWin, true); // Enable special keys in input window
-	nodelay(this->_inputWin, false); // Set blocking input for input window
-
-	BFLockUnlock(&this->_winlock);
-
-	return 0;
+	int inputWinWidth = COLS;
+   	int inputWinHeight = 3;
+	return this->windowCreateInput(inputWinWidth, inputWinHeight, "Username");
 }
 
 int _InterfaceDrawUserInputDraft(
@@ -591,7 +559,7 @@ int Interface::windowUpdateInputWindowText(InputBuffer & userInput) {
 		// see if we need to expand the height for the input window
 		if (lines > 1) { // change window to fit text
 			const int off = 2;
-			this->windowCreateStateDraft(w, lines + off);
+			this->windowCreateInput(w, lines + off, "Draft");
 		}
 
 		_InterfaceDrawUserInputDraft(&this->_winlock, this->_inputWin, userInput);
@@ -791,7 +759,8 @@ int Interface::windowLoop() {
 	BFThreadAsyncID tid = BFThreadAsync(Interface::displayWindowUpdateThread, (void *) this);
     InputBuffer userInput;
 	this->_prevstate = kInterfaceStateUnknown;
-	this->_state = kInterfaceStatePromptUsername;
+	//this->_state = kInterfaceStatePromptUsername;
+	this->_state = kInterfaceStateLobby;
 	while (this->_state.get() != kInterfaceStateQuit) {
 		// draw ui based on current state
 		this->draw();
@@ -870,6 +839,7 @@ int Interface::windowStop() {
 
 int Interface::run() {
 	int error = this->gatherUserData();
+	//int error = 0;
 
 	this->windowStart();
 
