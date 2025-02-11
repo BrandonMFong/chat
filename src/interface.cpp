@@ -487,10 +487,21 @@ int Interface::windowCreateInput(
 	return 0;
 }
 
+const char * _InterfaceGetInputTitle(InterfaceState state) {
+	switch (state) {
+	case kInterfaceStateDraft:
+		return "Draft";
+	case kInterfaceStatePromptUsername:
+		return "Username";
+	default:
+		return NULL;
+	}
+}
+
 int Interface::windowCreateStateDraft() {
 	int inputWinWidth = COLS;
    	int inputWinHeight = 3;
-	return this->windowCreateInput(inputWinWidth, inputWinHeight, "Draft");
+	return this->windowCreateInput(inputWinWidth, inputWinHeight, _InterfaceGetInputTitle(this->_state.get()));
 }
 
 int Interface::windowCreateModeHelp() {
@@ -523,7 +534,12 @@ int Interface::windowCreateModeHelp() {
 int Interface::windowCreateStatePromptUsername() {
 	int inputWinWidth = COLS;
    	int inputWinHeight = 3;
-	return this->windowCreateInput(inputWinWidth, inputWinHeight, "Username", "Please provide a username");
+	return this->windowCreateInput(
+		inputWinWidth,
+		inputWinHeight,
+		_InterfaceGetInputTitle(this->_state.get()),
+		"Please provide a username"
+	);
 }
 
 int _InterfaceDrawUserInputDraft(
@@ -542,17 +558,6 @@ int _InterfaceDrawUserInputDraft(
 	BFLockUnlock(winlock);
 
 	return 0;
-}
-
-const char * _InterfaceGetInputTitle(InterfaceState state) {
-	switch (state) {
-	case kInterfaceStateDraft:
-		return "Draft";
-	case kInterfaceStatePromptUsername:
-		return "Username";
-	default:
-		return NULL;
-	}
 }
 
 int Interface::windowUpdateInputWindowText(InputBuffer & userInput) {
