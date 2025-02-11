@@ -544,8 +544,20 @@ int _InterfaceDrawUserInputDraft(
 	return 0;
 }
 
+const char * _InterfaceGetInputTitle(InterfaceState state) {
+	switch (state) {
+	case kInterfaceStateDraft:
+		return "Draft";
+	case kInterfaceStatePromptUsername:
+		return "Username";
+	default:
+		return NULL;
+	}
+}
+
 int Interface::windowUpdateInputWindowText(InputBuffer & userInput) {
-	switch (this->_state.get()) {
+	InterfaceState state = this->_state.get();
+	switch (state) {
 	case kInterfaceStateChatroom:
 	case kInterfaceStateLobby:
 	{
@@ -567,6 +579,7 @@ int Interface::windowUpdateInputWindowText(InputBuffer & userInput) {
 		break;
 	}
 	case kInterfaceStateDraft:
+	case kInterfaceStatePromptUsername:
 	{
 		int w, h;
 		getmaxyx(this->_inputWin, h, w);
@@ -576,7 +589,7 @@ int Interface::windowUpdateInputWindowText(InputBuffer & userInput) {
 		// see if we need to expand the height for the input window
 		if (lines > 1) { // change window to fit text
 			const int off = 2;
-			this->windowCreateInput(w, lines + off, "Draft");
+			this->windowCreateInput(w, lines + off, _InterfaceGetInputTitle(state));
 		}
 
 		_InterfaceDrawUserInputDraft(&this->_winlock, this->_inputWin, userInput);
