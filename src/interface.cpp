@@ -437,23 +437,40 @@ int Interface::windowCreateStateChatroom() {
 	return 0;
 }
 
-int Interface::windowCreateInput(int inputWinWidth, int inputWinHeight, const char * title) {
+int Interface::windowCreateInput(
+	int inputWinWidth,
+	int inputWinHeight,
+	const char * title,
+	const char * prompt
+) {
 	BFLockLock(&this->_winlock);
 
 	DELETE_WINDOWS;
-	
+
+	int dispRowCount = LINES - inputWinHeight - 1;
+
 	// Create two windows
 	this->_headerWin = newwin(1, COLS, 0, 0);
-	this->_displayWin = newwin(LINES - inputWinHeight - 1, COLS, 1, 0);
+	this->_displayWin = newwin(dispRowCount, COLS, 1, 0);
 	this->_inputWin = newwin(inputWinHeight, inputWinWidth, LINES - inputWinHeight, 0);
 
 	box(this->_inputWin, 0, 0); // Add a box around the input window
 	box(this->_displayWin, 0, 0); // Add a box around the display window
 
 	char buf[COLS];
+
+	// title
 	snprintf(buf, COLS, title);
 	int y = (COLS - strlen(buf)) / 2;
 	mvwprintw(this->_headerWin, 0, y, buf);
+
+	// prompt, if provided
+	if (prompt) {
+		snprintf(buf, COLS, prompt);
+		y = (COLS - strlen(buf)) / 2;
+		int x = dispRowCount / 2;
+		mvwprintw(this->_displayWin, x, y, buf);
+	}
 
 	refresh();
 	wrefresh(this->_inputWin);
@@ -506,7 +523,7 @@ int Interface::windowCreateModeHelp() {
 int Interface::windowCreateStatePromptUsername() {
 	int inputWinWidth = COLS;
    	int inputWinHeight = 3;
-	return this->windowCreateInput(inputWinWidth, inputWinHeight, "Username");
+	return this->windowCreateInput(inputWinWidth, inputWinHeight, "Username", "Please provide a username");
 }
 
 int _InterfaceDrawUserInputDraft(
@@ -759,8 +776,10 @@ int Interface::windowLoop() {
 	BFThreadAsyncID tid = BFThreadAsync(Interface::displayWindowUpdateThread, (void *) this);
     InputBuffer userInput;
 	this->_prevstate = kInterfaceStateUnknown;
-	//this->_state = kInterfaceStatePromptUsername;
-	this->_state = kInterfaceStateLobby;
+	
+	this->_state = kInterfaceStatePromptUsername;
+	//this->_state = kInterfaceStateLobby;
+	
 	while (this->_state.get() != kInterfaceStateQuit) {
 		// draw ui based on current state
 		this->draw();
@@ -838,8 +857,8 @@ int Interface::windowStop() {
 }
 
 int Interface::run() {
-	int error = this->gatherUserData();
-	//int error = 0;
+	//int error = this->gatherUserData();
+	int error = 0;
 
 	this->windowStart();
 

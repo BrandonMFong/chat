@@ -71,11 +71,16 @@ private:
 	int windowUpdateInputWindowText(InputBuffer & userInput);
 
 	int windowCreateStateDraft();
-	int windowCreateInput(int inputWinWidth, int inputWinHeight, const char * title);
 	int windowCreateModeHelp();
 	int windowCreateStateChatroom();
 	int windowCreateModeLobby();
 	int windowCreateStatePromptUsername();
+	int windowCreateInput(
+		int inputWinWidth,
+		int inputWinHeight,
+		const char * title,
+		const char * prompt = NULL
+	);
 
 	static void displayWindowUpdateThread(void * in);
 
