@@ -18,7 +18,7 @@ x.x
 		- [x] drafting messages crashes
 	- [x] add text at the bottom that says "press '?' or type ":help" to show help"
 - [ ] improve help
-- [ ] chat configuration implemented in ncurses
+- [x] chat username configuration implemented in ncurses
 - [ ] user typing
 - [x] update build and test process
 - [x] move package logic to libs
