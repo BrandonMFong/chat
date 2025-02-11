@@ -66,8 +66,6 @@ private:
 	int windowLoop();
 	int windowStop();
 
-	int gatherUserData();
-
 	int windowUpdateInputWindowText(InputBuffer & userInput);
 
 	int windowCreateStateDraft();

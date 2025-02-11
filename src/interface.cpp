@@ -867,22 +867,6 @@ User * Interface::getuser() {
 	return this->_user.get();
 }
 
-int Interface::gatherUserData() {
-	// set up user
-	char username[USER_NAME_SIZE];
-	printf("username: ");
-	fgets(username, sizeof(username), stdin);
-
-	if (username[strlen(username) - 1] == '\n') {
-		username[strlen(username)- 1] = '\0';
-	}
-
-	this->_user = User::create(username);
-	BFRelease(this->_user.get());
-
-	return 0;
-}
-
 int Interface::windowStart() {
 	initscr(); // Initialize the library
     cbreak();  // Line buffering disabled, pass on everything to me
@@ -899,13 +883,9 @@ int Interface::windowStop() {
 }
 
 int Interface::run() {
-	//int error = this->gatherUserData();
-	int error = 0;
-
 	this->windowStart();
 
-	if (!error)
-		error = this->windowLoop();
+	int error = this->windowLoop();
 
 	this->windowStop();
 
