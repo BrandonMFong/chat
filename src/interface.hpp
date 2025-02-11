@@ -87,6 +87,7 @@ private:
 	int processinputStateDraft(InputBuffer & userInput);
 	int processinputStateChatroom(InputBuffer & userInput);
 	int processinputStateLobby(InputBuffer & userInput);
+	int processinputStatePromptUsername(InputBuffer & userInput);
 
 	/**
 	 * draws lobby ui

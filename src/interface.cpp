@@ -750,6 +750,27 @@ int Interface::processinputStateDraft(InputBuffer & userInput) {
 	return 0;
 }
 
+int Interface::processinputStatePromptUsername(InputBuffer & userInput) {
+	if (Utils::inputReady(userInput, this->_state)) { // send buf
+		// set up user
+		char username[USER_NAME_SIZE];
+		strncpy(username, userInput.cString(), USER_NAME_SIZE);
+
+		if (username[strlen(username) - 1] == '\n') {
+			username[strlen(username)- 1] = '\0';
+		}
+
+		this->_user = User::create(username);
+		BFRelease(this->_user.get());
+
+		this->_state = kInterfaceStateLobby;
+
+		userInput.reset();
+	}
+
+	return 0;
+}
+
 int Interface::processinput(InputBuffer & userInput) {
 	switch (this->_state.get()) {
 	case kInterfaceStateLobby:
@@ -760,6 +781,9 @@ int Interface::processinput(InputBuffer & userInput) {
 		break;
 	case kInterfaceStateDraft:
 		this->processinputStateDraft(userInput);
+		break;
+	case kInterfaceStatePromptUsername:
+		this->processinputStatePromptUsername(userInput);
 		break;
 	case kInterfaceStateHelp:
 		this->_state = this->_returnfromhelpstate;
