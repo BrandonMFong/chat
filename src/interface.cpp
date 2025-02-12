@@ -437,23 +437,40 @@ int Interface::windowCreateStateChatroom() {
 	return 0;
 }
 
-int Interface::windowCreateStateDraft(int inputWinWidth, int inputWinHeight) {
+int Interface::windowCreateInput(
+	int inputWinWidth,
+	int inputWinHeight,
+	const char * title,
+	const char * prompt
+) {
 	BFLockLock(&this->_winlock);
 
 	DELETE_WINDOWS;
-	
+
+	int dispRowCount = LINES - inputWinHeight - 1;
+
 	// Create two windows
 	this->_headerWin = newwin(1, COLS, 0, 0);
-	this->_displayWin = newwin(LINES - inputWinHeight - 1, COLS, 1, 0);
+	this->_displayWin = newwin(dispRowCount, COLS, 1, 0);
 	this->_inputWin = newwin(inputWinHeight, inputWinWidth, LINES - inputWinHeight, 0);
 
 	box(this->_inputWin, 0, 0); // Add a box around the input window
 	box(this->_displayWin, 0, 0); // Add a box around the display window
 
-	char title[COLS];
-	snprintf(title, COLS, "%s - draft", this->_chatroom.get()->name());
-	int y = (COLS - strlen(title)) / 2;
-	mvwprintw(this->_headerWin, 0, y, title);
+	char buf[COLS];
+
+	// title
+	snprintf(buf, COLS, title);
+	int y = (COLS - strlen(buf)) / 2;
+	mvwprintw(this->_headerWin, 0, y, buf);
+
+	// prompt, if provided
+	if (prompt) {
+		snprintf(buf, COLS, prompt);
+		y = (COLS - strlen(buf)) / 2;
+		int x = dispRowCount / 2;
+		mvwprintw(this->_displayWin, x, y, buf);
+	}
 
 	refresh();
 	wrefresh(this->_inputWin);
@@ -470,10 +487,21 @@ int Interface::windowCreateStateDraft(int inputWinWidth, int inputWinHeight) {
 	return 0;
 }
 
+const char * _InterfaceGetInputTitle(InterfaceState state) {
+	switch (state) {
+	case kInterfaceStateDraft:
+		return "Draft";
+	case kInterfaceStatePromptUsername:
+		return "Username";
+	default:
+		return NULL;
+	}
+}
+
 int Interface::windowCreateStateDraft() {
 	int inputWinWidth = COLS;
    	int inputWinHeight = 3;
-	return this->windowCreateStateDraft(inputWinWidth, inputWinHeight);
+	return this->windowCreateInput(inputWinWidth, inputWinHeight, _InterfaceGetInputTitle(this->_state.get()));
 }
 
 int Interface::windowCreateModeHelp() {
@@ -499,6 +527,21 @@ int Interface::windowCreateModeHelp() {
 	return 0;
 }
 
+/**
+ * TODO:
+ * 	[] figure what the window size should be
+ */
+int Interface::windowCreateStatePromptUsername() {
+	int inputWinWidth = COLS;
+   	int inputWinHeight = 3;
+	return this->windowCreateInput(
+		inputWinWidth,
+		inputWinHeight,
+		_InterfaceGetInputTitle(this->_state.get()),
+		"Please provide a username"
+	);
+}
+
 int _InterfaceDrawUserInputDraft(
 	BFLock * winlock,
 	WINDOW * inputwin,
@@ -518,7 +561,8 @@ int _InterfaceDrawUserInputDraft(
 }
 
 int Interface::windowUpdateInputWindowText(InputBuffer & userInput) {
-	switch (this->_state.get()) {
+	InterfaceState state = this->_state.get();
+	switch (state) {
 	case kInterfaceStateChatroom:
 	case kInterfaceStateLobby:
 	{
@@ -540,6 +584,7 @@ int Interface::windowUpdateInputWindowText(InputBuffer & userInput) {
 		break;
 	}
 	case kInterfaceStateDraft:
+	case kInterfaceStatePromptUsername:
 	{
 		int w, h;
 		getmaxyx(this->_inputWin, h, w);
@@ -549,7 +594,7 @@ int Interface::windowUpdateInputWindowText(InputBuffer & userInput) {
 		// see if we need to expand the height for the input window
 		if (lines > 1) { // change window to fit text
 			const int off = 2;
-			this->windowCreateStateDraft(w, lines + off);
+			this->windowCreateInput(w, lines + off, _InterfaceGetInputTitle(state));
 		}
 
 		_InterfaceDrawUserInputDraft(&this->_winlock, this->_inputWin, userInput);
@@ -579,6 +624,9 @@ int Interface::draw() {
 			break;
 		case kInterfaceStateHelp:
 			this->windowCreateModeHelp();
+			break;
+		case kInterfaceStatePromptUsername:
+			this->windowCreateStatePromptUsername();
 			break;
 		default:
 			break;
@@ -702,6 +750,27 @@ int Interface::processinputStateDraft(InputBuffer & userInput) {
 	return 0;
 }
 
+int Interface::processinputStatePromptUsername(InputBuffer & userInput) {
+	if (Utils::inputReady(userInput, this->_state)) { // send buf
+		// set up user
+		char username[USER_NAME_SIZE];
+		strncpy(username, userInput.cString(), USER_NAME_SIZE);
+
+		if (username[strlen(username) - 1] == '\n') {
+			username[strlen(username)- 1] = '\0';
+		}
+
+		this->_user = User::create(username);
+		BFRelease(this->_user.get());
+
+		this->_state = kInterfaceStateLobby;
+
+		userInput.reset();
+	}
+
+	return 0;
+}
+
 int Interface::processinput(InputBuffer & userInput) {
 	switch (this->_state.get()) {
 	case kInterfaceStateLobby:
@@ -712,6 +781,9 @@ int Interface::processinput(InputBuffer & userInput) {
 		break;
 	case kInterfaceStateDraft:
 		this->processinputStateDraft(userInput);
+		break;
+	case kInterfaceStatePromptUsername:
+		this->processinputStatePromptUsername(userInput);
 		break;
 	case kInterfaceStateHelp:
 		this->_state = this->_returnfromhelpstate;
@@ -746,7 +818,10 @@ int Interface::windowLoop() {
 	BFThreadAsyncID tid = BFThreadAsync(Interface::displayWindowUpdateThread, (void *) this);
     InputBuffer userInput;
 	this->_prevstate = kInterfaceStateUnknown;
-	this->_state = kInterfaceStateLobby;
+	
+	this->_state = kInterfaceStatePromptUsername;
+	//this->_state = kInterfaceStateLobby;
+	
 	while (this->_state.get() != kInterfaceStateQuit) {
 		// draw ui based on current state
 		this->draw();
@@ -792,22 +867,6 @@ User * Interface::getuser() {
 	return this->_user.get();
 }
 
-int Interface::gatherUserData() {
-	// set up user
-	char username[USER_NAME_SIZE];
-	printf("username: ");
-	fgets(username, sizeof(username), stdin);
-
-	if (username[strlen(username) - 1] == '\n') {
-		username[strlen(username)- 1] = '\0';
-	}
-
-	this->_user = User::create(username);
-	BFRelease(this->_user.get());
-
-	return 0;
-}
-
 int Interface::windowStart() {
 	initscr(); // Initialize the library
     cbreak();  // Line buffering disabled, pass on everything to me
@@ -824,12 +883,9 @@ int Interface::windowStop() {
 }
 
 int Interface::run() {
-	int error = this->gatherUserData();
-
 	this->windowStart();
 
-	if (!error)
-		error = this->windowLoop();
+	int error = this->windowLoop();
 
 	this->windowStop();
 

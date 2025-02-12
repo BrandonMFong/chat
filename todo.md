@@ -1,11 +1,14 @@
 x.x
-- [ ] user data window editor
-- [ ] ability to change user name
 - [ ] window dynamic resizing
-- [ ] get list of users in chatroom
 - [ ] add to homebrew package manager
 - [ ] docker?
 - [ ] ai bot chatroom
+
+0.4
+- [ ] wrap entire communication in encryption
+- [ ] user data window editor
+- [ ] ability to change user name
+- [ ] get list of users in chatroom
 
 0.3
 - [x] improved controls (easier commands or guidance)
@@ -15,7 +18,7 @@ x.x
 		- [x] drafting messages crashes
 	- [x] add text at the bottom that says "press '?' or type ":help" to show help"
 - [ ] improve help
-- [ ] chat configuration implemented in ncurses
+- [x] chat username configuration implemented in ncurses
 - [ ] user typing
 - [x] update build and test process
 - [x] move package logic to libs

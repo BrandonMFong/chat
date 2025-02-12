@@ -66,21 +66,26 @@ private:
 	int windowLoop();
 	int windowStop();
 
-	int gatherUserData();
-
 	int windowUpdateInputWindowText(InputBuffer & userInput);
 
 	int windowCreateStateDraft();
-	int windowCreateStateDraft(int inputWinWidth, int inputWinHeight);
 	int windowCreateModeHelp();
 	int windowCreateStateChatroom();
 	int windowCreateModeLobby();
-	
+	int windowCreateStatePromptUsername();
+	int windowCreateInput(
+		int inputWinWidth,
+		int inputWinHeight,
+		const char * title,
+		const char * prompt = NULL
+	);
+
 	static void displayWindowUpdateThread(void * in);
 
 	int processinputStateDraft(InputBuffer & userInput);
 	int processinputStateChatroom(InputBuffer & userInput);
 	int processinputStateLobby(InputBuffer & userInput);
+	int processinputStatePromptUsername(InputBuffer & userInput);
 
 	/**
 	 * draws lobby ui

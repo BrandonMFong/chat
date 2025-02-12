@@ -11,9 +11,9 @@ bool Utils::inputReady(InputBuffer & buf, InterfaceState state) {
 	return
 		buf.starts_with(":") && (buf.length() > 1) && buf.enterPressed()
 		||
-		!buf.starts_with(":") && (buf.length() == 1) && (state != kInterfaceStateDraft)
+		!buf.starts_with(":") && (buf.length() == 1) && (state != kInterfaceStateDraft) && (state != kInterfaceStatePromptUsername)
 		||
-		(state == kInterfaceStateDraft) && buf.enterPressed();
+		((state == kInterfaceStateDraft) || (state == kInterfaceStatePromptUsername)) && buf.enterPressed();
 		;
 }
 

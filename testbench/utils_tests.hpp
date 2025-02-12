@@ -21,13 +21,17 @@ using namespace BF;
 
 BFTEST_UNIT_FUNC(test_utilsIsReady, 2<<10, {
 	InputBuffer b0("i");
-	BF_ASSERT(Utils::inputReady(b0, kInterfaceStateDraft));
+	BF_ASSERT(!Utils::inputReady(b0, kInterfaceStateDraft));
+	BF_ASSERT(!Utils::inputReady(b0, kInterfaceStatePromptUsername));
+	BF_ASSERT(Utils::inputReady(b0, kInterfaceStateCreateChatroom));
 	InputBuffer b1("asdf");
 	BF_ASSERT(!Utils::inputReady(b1, kInterfaceStateDraft));
-	InputBuffer b2("asdf");
+	b1.addChar('\n');
+	BF_ASSERT(Utils::inputReady(b1, kInterfaceStateDraft));
+	InputBuffer b2(":asdf");
+	BF_ASSERT(!Utils::inputReady(b1, kInterfaceStateLobby));
 	b2.addChar('\n');
-	BF_ASSERT(Utils::inputReady(b2, kInterfaceStateDraft));
-
+	BF_ASSERT(Utils::inputReady(b2, kInterfaceStateLobby));
 })
 
 BFTEST_COVERAGE_FUNC(utils_tests, {
