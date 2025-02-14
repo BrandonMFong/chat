@@ -24,6 +24,7 @@ x.x
 - [x] move package logic to libs
 - [ ] host vs server (allow user to run this application as a service)
 - [ ] allow "localhost" for `-ip4` argument
+- [ ] detect if users are active. Protect the case when remote users are disconnected unintentionally
 
 0.2.1
 - [x] issue with sending messages between two machines that are on macos and linux
