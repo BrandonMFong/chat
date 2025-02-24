@@ -9,6 +9,13 @@
 #include <bflibcpp/object.hpp>
 #include <bflibcpp/string.hpp>
 
+#define OPERAND_STRING_LONG_DRAFT "draft"
+#define OPERAND_STRING_LONG_QUIT "quit"
+#define OPERAND_STRING_LONG_CREATE "create"
+#define OPERAND_STRING_LONG_JOIN "join"
+#define OPERAND_STRING_LONG_LEAVE "leave"
+#define OPERAND_STRING_LONG_HELP "help"
+
 /**
  * I want the user to be able to pass '?' or ":help" in the
  * command prompt to get the help menu
