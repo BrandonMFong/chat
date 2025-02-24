@@ -25,6 +25,7 @@ x.x
 - [ ] host vs server (allow user to run this application as a service)
 - [ ] detect if users are active. Protect the case when remote users are disconnected unintentionally
 	- [ ] push isalive payload and then return ack if alive
+	- [ ] have each start their own monitoring thread
 - [ ] clean interface.cpp. split some code into categorical source files
 
 0.2.1

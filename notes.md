@@ -9,4 +9,6 @@
 * Found demo code on the openssl source code https://github.com/openssl/openssl/blob/master/demos/encrypt/rsa_encrypt.c
 * Took me a while to get the encryption code to work. Had some simple math errors when trying to calculate the correct buffer size of cipher/plain text. Implementing the asymmetric code was straightforward. Openssl has good examples on their github.
 * I had an issue with encryption using the app. The implementation was correct, according to the unit tests. I found that my integration of the cipher classes and how the data is being held had issues. I was not retaining the cipher buffer sizes and wasn't giving enough workspace for the encrypted data. I moved a lot of logic around to make compartmentalizationa easier
-* Monitoring users if they are still acitve requires a dedicated thread to audit each user on a speicific schedule. I believe this polling thread will need to be in the Office.cpp source code 
+
+* Monitoring users if they are still acitve requires a dedicated thread to audit each user on a speicific schedule. I believe this polling thread will need to be in the Office.cpp source code
+* Actually thinking twice about it, I could instead make each agent monitor its own SocketConnection object to check if it's alive? I think that's all that matters really. That way I wouldn't have to do some sort of timeout to determine if the recipient is still there
