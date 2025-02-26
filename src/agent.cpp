@@ -64,6 +64,7 @@ Agent * Agent::create(SocketConnection * sc) {
 
 	if (result) {
 		result->_sc = sc;
+		BFRetain(result->_sc);
 
 		agents.lock();
 
