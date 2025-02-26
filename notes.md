@@ -12,3 +12,4 @@
 
 * Monitoring users if they are still acitve requires a dedicated thread to audit each user on a speicific schedule. I believe this polling thread will need to be in the Office.cpp source code
 * Actually thinking twice about it, I could instead make each agent monitor its own SocketConnection object to check if it's alive? I think that's all that matters really. That way I wouldn't have to do some sort of timeout to determine if the recipient is still there
+* I added better error handling in the BFNet lib
