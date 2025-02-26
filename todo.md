@@ -3,6 +3,7 @@ x.x
 - [ ] add to homebrew package manager
 - [ ] docker?
 - [ ] ai bot chatroom
+- [ ] clean interface.cpp. split some code into categorical source files
 
 0.4
 - [ ] wrap entire communication in encryption
@@ -24,7 +25,6 @@ x.x
 - [x] move package logic to libs
 - [ ] host vs server (allow user to run this application as a service)
 - [x] detect if users are active. Protect the case when remote users are disconnected unintentionally
-- [ ] clean interface.cpp. split some code into categorical source files
 
 0.2.1
 - [x] issue with sending messages between two machines that are on macos and linux
