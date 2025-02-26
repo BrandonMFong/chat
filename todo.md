@@ -1,4 +1,4 @@
-x.x
+x.x 
 - [ ] window dynamic resizing
 - [ ] add to homebrew package manager
 - [ ] docker?
