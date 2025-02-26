@@ -16,7 +16,7 @@ class User;
 namespace BF {
 	namespace Net {
 		class SocketEnvelope;
-		class SocketConnection;
+		class Connection;
 	}
 }
 
@@ -49,7 +49,7 @@ public:
 	 * Once created, the agent will get to know the user on ther
 	 * other end and get them ready to join a conversation.
 	 */
-	static void newConnection(BF::Net::SocketConnection * sc);
+	static void newConnection(BF::Net::Connection * sc);
 
 	/**
 	 * creates new agent	
@@ -60,7 +60,7 @@ public:
 	 *
 	 * returns NULL if there is an error
 	 */
-	static Agent * create(BF::Net::SocketConnection * sc);
+	static Agent * create(BF::Net::Connection * sc);
 
 	virtual ~Agent();
 
@@ -148,14 +148,14 @@ private:
 	 * the socket descriptor that is wrapped within this object
 	 * represents to user on other end we are representing
 	 */
-	BF::Net::SocketConnection * _sc;
+	BF::Net::Connection * _sc;
 	
 	/**
 	 * returns null if no agent was found for connection
 	 *
 	 * caller does not own memory
 	 */
-	static Agent * getAgentForConnection(BF::Net::SocketConnection * sc);
+	static Agent * getAgentForConnection(BF::Net::Connection * sc);
 };
 
 #endif // AGENT_HPP
