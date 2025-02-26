@@ -47,7 +47,7 @@ Agent::~Agent() {
 	this->_sc = NULL; // we don't own memory
 }
 
-Agent * Agent::create(SocketConnection * sc) {
+Agent * Agent::create(Connection * sc) {
 	if (!sc) return NULL;
 
 	Agent * result = NULL;
@@ -64,6 +64,7 @@ Agent * Agent::create(SocketConnection * sc) {
 
 	if (result) {
 		result->_sc = sc;
+		BFRetain(result->_sc);
 
 		agents.lock();
 
@@ -100,7 +101,7 @@ bool Agent::connectionIsReady() {
 	return this->_sc->isready();
 }
 
-Agent * Agent::getAgentForConnection(SocketConnection * sc) {
+Agent * Agent::getAgentForConnection(Connection * sc) {
 	if (!sc) return NULL;
 
 	agents.lock();
@@ -340,7 +341,7 @@ void Agent::packetReceive(SocketEnvelope * envelope) {
 
 	SealedPacket c(envelope->buf()->data(), envelope->buf()->size());
 
-	SocketConnection * sc = envelope->connection();
+	Connection * sc = envelope->connection();
 	const Packet * p = (const Packet *) c.data();
 	size_t size = c.size();
 
@@ -420,7 +421,7 @@ int Agent::broadcast(const Packet * pkt) {
 	return 0;
 }
 
-void Agent::newConnection(SocketConnection * sc) {
+void Agent::newConnection(Connection * sc) {
 	Agent * a = Agent::create(sc);
 
 	if (a) {

@@ -445,23 +445,25 @@ int Chatroom::fillOutEnrollmentFormResponse(PayloadChatroomEnrollmentForm * form
 }
 
 int Chatroom::resign(User * user) {
-	int error = this->notifyAllServerUsersOfResignation(user);
-
-	if (!error) {
-		error = this->notifyAllChatroomUsersOfResignation(user);
+	if (this->notifyAllServerUsersOfResignation(user)) {
+		LOG_DEBUG("error notifying all users on THE SERVER of the resignation");
+		return -1;
 	}
 
-	if (!error) {
-		// add user to list
-		this->_users.lock();
-		if (this->_users.unsafeget().contains(user)) {
-			this->_users.unsafeget().pluckObject(user);
-			BFRelease(user);
-		}
-		this->_users.unlock();
+	if (this->notifyAllChatroomUsersOfResignation(user)) {
+		LOG_DEBUG("error notifying all users on THE CHATROOM of the resignation");
+		return -1;
 	}
 
-	return error;
+	// add user to list
+	this->_users.lock();
+	if (this->_users.unsafeget().contains(user)) {
+		this->_users.unsafeget().pluckObject(user);
+		BFRelease(user);
+	}
+	this->_users.unlock();
+
+	return 0;
 }
 
 int Chatroom::agentAddRemove(const char action, Agent * a) {

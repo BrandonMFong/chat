@@ -12,12 +12,12 @@ extern "C" {
 
 using namespace BF;
 
-const Operand OP_HELP({"help", "?"});
-const Operand OP_CREATE({"create"});
-const Operand OP_JOIN({"join"});
-const Operand OP_LEAVE({"leave"});
-const Operand OP_DRAFT({"draft", "i"});
-const Operand OP_QUIT({"quit", "q"});
+const Operand OP_HELP({OPERAND_STRING_LONG_HELP, "?"});
+const Operand OP_CREATE({OPERAND_STRING_LONG_CREATE});
+const Operand OP_JOIN({OPERAND_STRING_LONG_JOIN});
+const Operand OP_LEAVE({OPERAND_STRING_LONG_LEAVE});
+const Operand OP_DRAFT({OPERAND_STRING_LONG_DRAFT, "i"});
+const Operand OP_QUIT({OPERAND_STRING_LONG_QUIT, "q"});
 
 void _OperandAcceptArgsRelease(char * a) {
 	BFFree(a);

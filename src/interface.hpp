@@ -14,13 +14,6 @@
 #include <bflibcpp/string.hpp>
 #include <ncurses.h>
 
-#define INTERFACE_COMMAND_DRAFT "draft"
-#define INTERFACE_COMMAND_QUIT "quit"
-#define INTERFACE_COMMAND_CREATE "create"
-#define INTERFACE_COMMAND_JOIN "join"
-#define INTERFACE_COMMAND_LEAVE "leave"
-#define INTERFACE_COMMAND_HELP "help"
-
 class User;
 class InputBuffer;
 class Chatroom;

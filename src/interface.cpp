@@ -513,11 +513,11 @@ int Interface::windowCreateModeHelp() {
 	box(this->_helpWin, 0, 0); // Draw a box around the sub-window
 
 	// dialog
-	mvwprintw(this->_helpWin, 1, 3, " '%s' : Draft message. To send hit enter key.", INTERFACE_COMMAND_DRAFT);
-	mvwprintw(this->_helpWin, 2, 3, " '%s' : Quits application.", INTERFACE_COMMAND_QUIT);
-	mvwprintw(this->_helpWin, 3, 3, " '%s' [ <name> ] : Creates chatroom with <name>.", INTERFACE_COMMAND_CREATE);
-	mvwprintw(this->_helpWin, 4, 3, " '%s' <index> : Joins chatroom at index.", INTERFACE_COMMAND_JOIN);
-	mvwprintw(this->_helpWin, 5, 3, " '%s' : Leaves chatroom.", INTERFACE_COMMAND_LEAVE);
+	mvwprintw(this->_helpWin, 1, 3, " '%s' : Draft message. To send hit enter key.", OPERAND_STRING_LONG_DRAFT);
+	mvwprintw(this->_helpWin, 2, 3, " '%s' : Quits application.", OPERAND_STRING_LONG_QUIT);
+	mvwprintw(this->_helpWin, 3, 3, " '%s' [ <name> ] : Creates chatroom with <name>.", OPERAND_STRING_LONG_CREATE);
+	mvwprintw(this->_helpWin, 4, 3, " '%s' <index> : Joins chatroom at index.", OPERAND_STRING_LONG_JOIN);
+	mvwprintw(this->_helpWin, 5, 3, " '%s' : Leaves chatroom.", OPERAND_STRING_LONG_LEAVE);
 	mvwprintw(this->_helpWin, LINES - 12, 3, "Press any key to close...");
 
 	refresh(); // Refresh the main window to show the boxes

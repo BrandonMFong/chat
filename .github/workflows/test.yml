@@ -3,8 +3,14 @@ name: CI
 on:
   push:
     branches: [ "dev" ]
+    paths-ignore:
+      - '*.md'
+      - 'docs/**'
   pull_request:
     branches: [ "dev" ]
+    paths-ignore:
+      - '*.md'
+      - 'docs/**'
 
 jobs:
   unit-tests-linux:

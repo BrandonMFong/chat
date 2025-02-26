@@ -17,6 +17,7 @@ clean: clean-libs clean-openssl
 
 clean-libs:
 	rm -rfv $(LIBS_BIN_PATH)
+	cd libs && make clean
 
 setup-libs:
 	mkdir -p $(LIBS_BIN_PATH)
