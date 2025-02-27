@@ -18,7 +18,7 @@
 using namespace BF;
 using namespace BF::Net;
 
-Atomic<Queue<SocketEnvelope *>> inbox;
+Atomic<Queue<Envelope *>> inbox;
 BFLock inboxlock;
 BFThreadAsyncID _tid = NULL;
 
@@ -34,7 +34,7 @@ int Office::quitApplication(const User * user) {
 	return Agent::broadcast(&p);
 }
 
-void Office::packetReceive(SocketEnvelope * envelope) {
+void Office::packetReceive(Envelope * envelope) {
 	// push into queue
 	BFRetain(envelope);
 	inbox.get().push(envelope);
@@ -49,7 +49,7 @@ void _OfficeInDataWorkerThread(void * in) {
 			inbox.lock();
 
 			// get first item from the queue
-			SocketEnvelope * envelope = inbox.unsafeget().front();
+			Envelope * envelope = inbox.unsafeget().front();
 
 			// send it over to the agents
 			Agent::packetReceive(envelope);

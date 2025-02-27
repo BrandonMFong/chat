@@ -333,13 +333,13 @@ int Agent::sendPacket(const Packet * pkt) {
 	return this->_sc->queueData(c.data(), c.size());
 }
 
-void Agent::packetReceive(SocketEnvelope * envelope) {
+void Agent::packetReceive(Envelope * envelope) {
 	if (!envelope)
 		return;
 
 	BFRetain(envelope);
 
-	SealedPacket c(envelope->buf()->data(), envelope->buf()->size());
+	SealedPacket c(envelope->data()->buffer(), envelope->data()->size());
 
 	Connection * sc = envelope->connection();
 	const Packet * p = (const Packet *) c.data();
