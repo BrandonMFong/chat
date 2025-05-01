@@ -30,8 +30,7 @@ void _ChatroomReleaseAgent(Agent * a) { BFRelease(a); }
 Chatroom::Chatroom() : Object() {
 #ifndef TESTING
 	if (Chat::SocketGetMode() != SOCKET_MODE_SERVER) {
-		String msg("Can only create a raw chatroom from server mode (current mode '%c')", Chat::SocketGetMode());
-		throw Exception(msg);
+		throw Exception("Can only create a raw chatroom from server mode (current mode '%c')", Chat::SocketGetMode());
 	}
 #endif
 

@@ -330,7 +330,7 @@ void Agent::receivedPayloadTypeChatroomResignation(const Packet * pkt) {
 int Agent::sendPacket(const Packet * pkt) {
 	SealedPacket c(pkt, sizeof(Packet));
 
-	return this->_sc->queueData(c.data(), c.size());
+	return this->_sc->queueData(c.data());
 }
 
 void Agent::packetReceive(Envelope * envelope) {
@@ -343,7 +343,7 @@ void Agent::packetReceive(Envelope * envelope) {
 
 	Connection * sc = envelope->connection();
 	const Packet * p = (const Packet *) c.data();
-	size_t size = c.size();
+	size_t size = c.data()->size();
 
 	if (!sc || !p) {
 		BFRelease(envelope);

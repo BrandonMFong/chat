@@ -7,6 +7,7 @@
 #define SEALED_PACKET_HPP
 
 #include <bflibcpp/object.hpp>
+#include <bflibcpp/data.hpp>
 
 /**
  * handles encryption and serialization of the
@@ -22,12 +23,18 @@ public:
 	~SealedPacket();
 
 	bool isEncrypted();
+	/*
 	const void * data();
 	size_t size();
+	*/
+	const BF::Data * data() const;
 
 private:
+	/*
 	void * _dataPlain;
 	size_t _dataPlainSize;
+	*/
+	BF::Data * _data;
 };
 
 #endif // SEALED_PACKET_HPP

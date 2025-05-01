@@ -22,7 +22,7 @@
  */
 class Operand : public BF::Object {
 public:
-	Operand(std::initializer_list<const char *> list);
+	Operand(std::initializer_list<BF::String> list);
 	virtual ~Operand();
 
 	bool compare(const Operand & op);
