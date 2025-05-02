@@ -370,6 +370,7 @@ void Agent::packetReceive(Envelope * envelope) {
 
 	BFRetain(agent);
 
+	LOG_DEBUG("agent received packet header: %d", p->header.type);
 	switch (p->header.type) {
 	case kPayloadTypeMessage:
 		agent->receivedPayloadTypeMessage(p);
@@ -402,6 +403,7 @@ void Agent::packetReceive(Envelope * envelope) {
 		agent->receivedPayloadTypeChatroomEnrollmentForm(p);
 		break;
 	default:
+		LOG_DEBUG("unknown header type: %d", p->header.type);
 		break;
 	}
 

@@ -188,6 +188,7 @@ int Chat::Main(int argc, char * argv[]) {
 		LOG_OPEN;
 
 		LOG_DEBUG("============ App started ============");
+		LOG_DEBUG("packet size: %d", CHAT_SOCKET_BUFFER_SIZE);
 
 		if (showversion) {
 			_ChatShowVersion(argv[0]);
