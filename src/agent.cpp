@@ -328,6 +328,9 @@ void Agent::receivedPayloadTypeChatroomResignation(const Packet * pkt) {
 }
 
 int Agent::sendPacket(const Packet * pkt) {
+	if (!pkt) return 1;
+
+	LOG_DEBUG("sending package header type=%d", pkt->header.type);
 	SealedPacket c(pkt, sizeof(Packet));
 
 	return this->_sc->queueData(c.data());
@@ -342,7 +345,7 @@ void Agent::packetReceive(Envelope * envelope) {
 	SealedPacket c(envelope->data()->buffer(), envelope->data()->size());
 
 	Connection * sc = envelope->connection();
-	const Packet * p = (const Packet *) c.data();
+	const Packet * p = (const Packet *) c.data()->buffer();
 	size_t size = c.data()->size();
 
 	if (!sc || !p) {
