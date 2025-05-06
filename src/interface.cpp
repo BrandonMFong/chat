@@ -820,7 +820,6 @@ int Interface::windowLoop() {
 	this->_prevstate = kInterfaceStateUnknown;
 	
 	this->_state = kInterfaceStatePromptUsername;
-	//this->_state = kInterfaceStateLobby;
 	
 	while (this->_state.get() != kInterfaceStateQuit) {
 		// draw ui based on current state
