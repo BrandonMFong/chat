@@ -23,17 +23,11 @@ public:
 	~SealedPacket();
 
 	bool isEncrypted();
-	/*
-	const void * data();
-	size_t size();
-	*/
+	
 	const BF::Data * data() const;
 
 private:
-	/*
-	void * _dataPlain;
-	size_t _dataPlainSize;
-	*/
+
 	BF::Data * _data;
 };
 
