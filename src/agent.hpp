@@ -15,7 +15,7 @@ class User;
 
 namespace BF {
 	namespace Net {
-		class SocketEnvelope;
+		class Envelope;
 		class Connection;
 	}
 }
@@ -35,7 +35,7 @@ public:
 	 * sc : each agent should have this
 	 * bub : copy data if you need to use after function returns
 	 */
-	static void packetReceive(BF::Net::SocketEnvelope * envelope);
+	static void packetReceive(BF::Net::Envelope * envelope);
 
 	/**
 	 * this is a callback described by the Socket family

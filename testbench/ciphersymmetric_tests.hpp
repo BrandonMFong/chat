@@ -141,7 +141,7 @@ BFTEST_UNIT_FUNC(test_LongString, 2<<10, {
 
 	if (!result) {
 		String res = dec;
-		if (strcmp(res.cString(), str)) {
+		if (res != str) {
 			printf("%s != %s\n", res.cString(), str.cString());
 			result = 3;
 		}

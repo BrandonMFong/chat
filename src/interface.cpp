@@ -551,7 +551,7 @@ int _InterfaceDrawUserInputDraft(
 	werase(inputwin);
 	box(inputwin, 0, 0);
 
-	_InterfaceFixTextInBoxedWindow(inputwin, userInput, 1);
+	_InterfaceFixTextInBoxedWindow(inputwin, userInput.cString(), 1);
 
 	wrefresh(inputwin);
 
@@ -673,7 +673,7 @@ int Interface::processinputStateLobby(InputBuffer & userInput) {
 			} else {
 				char chatroomname[CHAT_ROOM_NAME_SIZE];
 				if (cmd.count() > 1) {
-					strncpy(chatroomname, cmd[1], CHAT_ROOM_NAME_SIZE);
+					strncpy(chatroomname, cmd[1].cString(), CHAT_ROOM_NAME_SIZE);
 				} else {
 					// set up chat room name
 					//
@@ -820,7 +820,6 @@ int Interface::windowLoop() {
 	this->_prevstate = kInterfaceStateUnknown;
 	
 	this->_state = kInterfaceStatePromptUsername;
-	//this->_state = kInterfaceStateLobby;
 	
 	while (this->_state.get() != kInterfaceStateQuit) {
 		// draw ui based on current state

@@ -37,9 +37,9 @@ BFTEST_UNIT_FUNC(test_commandargs, 2<<10, {
 	Command c(buf);
 
 	BF_ASSERT(c.op() == Operand({"command"}));
-	BF_ASSERT(!strcmp(c[1], "subcommand"));
-	BF_ASSERT(!strcmp(c[2], "arg0"));
-	BF_ASSERT(!strcmp(c[3], "arg1"));
+	BF_ASSERT(!strcmp(c[1].c_str(), "subcommand"));
+	BF_ASSERT(!strcmp(c[2].c_str(), "arg0"));
+	BF_ASSERT(!strcmp(c[3].c_str(), "arg1"));
 })
 
 BFTEST_UNIT_FUNC(test_commandargscount, 2<<10, {

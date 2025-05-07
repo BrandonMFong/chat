@@ -27,11 +27,10 @@ int _OperandAcceptArgsCompare(char * a, char * b) {
 	return strcmp(a, b);
 }
 
-Operand::Operand(std::initializer_list<const char *> list) : Object() {
+Operand::Operand(std::initializer_list<String> list) : Object() {
 	this->_acceptedArgs.setReleaseCallback(_OperandAcceptArgsRelease);
-	for (const char * arg : list) {
-		char * buf = BFStringCopyString(arg);
-		this->_acceptedArgs.add(buf);
+	for (const String & arg : list) {
+		this->_acceptedArgs.add(arg.cStringCopy());
 	}
 	this->_acceptedArgs.setComparator(_OperandAcceptArgsCompare);
 }

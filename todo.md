@@ -1,17 +1,17 @@
-x.x 
+**x.x** 
 - [ ] window dynamic resizing
 - [ ] add to homebrew package manager
 - [ ] docker?
 - [ ] ai bot chatroom
 - [ ] clean interface.cpp. split some code into categorical source files
 
-0.4
+**0.4**
 - [ ] wrap entire communication in encryption
 - [ ] user data window editor
 - [ ] ability to change user name
 - [ ] get list of users in chatroom
 
-0.3
+**0.3**
 - [x] improved controls (easier commands or guidance)
 	- [x] use of ":" for long commands
 	- [x] single key commands
@@ -25,14 +25,15 @@ x.x
 - [x] move package logic to libs
 - [ ] host vs server (allow user to run this application as a service)
 - [x] detect if users are active. Protect the case when remote users are disconnected unintentionally
+- [ ] fix ncurses borders
 
-0.2.1
+**0.2.1**
 - [x] issue with sending messages between two machines that are on macos and linux
 	- [x] test on two macs
 - [x] build a macos universal binary
 - [x] properly quit to make sure the receiver isn't overworking
 
-0.2
+**0.2**
 - [x] cross platform
 - [x] configure a local openssl usage in this repo
 - [x] chatroom encryption
@@ -47,7 +48,7 @@ x.x
 			- https://github.com/openssl/openssl/discussions/24924
 - [x] separate sources for libs
 
-0.1
+**0.1**
 - [x] make linux build
 - [x] make macos build
 - [x] test release builds

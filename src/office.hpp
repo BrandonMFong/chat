@@ -13,7 +13,7 @@ class User;
 
 namespace BF {
 	namespace Net {
-		class SocketEnvelope;
+		class Envelope;
 	}
 }
 
@@ -22,7 +22,7 @@ namespace BF {
  */
 namespace Office {
 
-void packetReceive(BF::Net::SocketEnvelope * envelope);
+void packetReceive(BF::Net::Envelope * envelope);
 
 int start();
 int stop();

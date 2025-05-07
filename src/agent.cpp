@@ -328,22 +328,25 @@ void Agent::receivedPayloadTypeChatroomResignation(const Packet * pkt) {
 }
 
 int Agent::sendPacket(const Packet * pkt) {
+	if (!pkt) return 1;
+
+	LOG_DEBUG("sending package header type=%d", pkt->header.type);
 	SealedPacket c(pkt, sizeof(Packet));
 
-	return this->_sc->queueData(c.data(), c.size());
+	return this->_sc->queueData(c.data());
 }
 
-void Agent::packetReceive(SocketEnvelope * envelope) {
+void Agent::packetReceive(Envelope * envelope) {
 	if (!envelope)
 		return;
 
 	BFRetain(envelope);
 
-	SealedPacket c(envelope->buf()->data(), envelope->buf()->size());
+	SealedPacket c(envelope->data()->buffer(), envelope->data()->size());
 
 	Connection * sc = envelope->connection();
-	const Packet * p = (const Packet *) c.data();
-	size_t size = c.size();
+	const Packet * p = (const Packet *) c.data()->buffer();
+	size_t size = c.data()->size();
 
 	if (!sc || !p) {
 		BFRelease(envelope);
@@ -370,6 +373,7 @@ void Agent::packetReceive(SocketEnvelope * envelope) {
 
 	BFRetain(agent);
 
+	LOG_DEBUG("agent received packet header: %d", p->header.type);
 	switch (p->header.type) {
 	case kPayloadTypeMessage:
 		agent->receivedPayloadTypeMessage(p);
@@ -402,6 +406,7 @@ void Agent::packetReceive(SocketEnvelope * envelope) {
 		agent->receivedPayloadTypeChatroomEnrollmentForm(p);
 		break;
 	default:
+		LOG_DEBUG("unknown header type: %d", p->header.type);
 		break;
 	}
 

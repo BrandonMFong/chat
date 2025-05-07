@@ -63,13 +63,13 @@ endif
 
 ifeq ($(CONFIG),release) # release
 LIBRARIES += \
-	external/bin/libs/release/bflibc/libbfc.a \
 	external/bin/libs/release/bflibcpp/libbfcpp.a \
+	external/bin/libs/release/bflibc/libbfc.a \
 	external/bin/libs/release/bfnet/libbfnet.a
 else
 LIBRARIES += \
-	external/bin/libs/debug/bflibc/libbfc-debug.a \
 	external/bin/libs/debug/bflibcpp/libbfcpp-debug.a \
+	external/bin/libs/debug/bflibc/libbfc-debug.a \
 	external/bin/libs/debug/bfnet/libbfnet-debug.a
 endif
 
